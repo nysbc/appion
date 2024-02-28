@@ -86,34 +86,31 @@ class SlurmHost(processingHost.ProcessingHost):
 		
 	
 	def checkJobStatus(self, procHostJobId):
-		statusCommand = self.getStatusCommand() + " " +	 str(procHostJobId)
+		statusCommand = self.getStatusCommand() + " -h -o '%t' -j " + str(procHostJobId)
 		
 		try:
 			process = subprocess.Popen(statusCommand, 
 										stdout=subprocess.PIPE, 
 										stderr=subprocess.PIPE, 
 										shell=True)
-			returnCode =process.wait()
+			returnCode=process.wait()
 			
 			if returnCode != 0:
 				#return unknown status if check resulted in a error
-				returnStatus = 'U'
+				return 'U'
 			else:
 				rstring = process.communicate()[0]
 				status =  rstring.split('\n')[2].split()[4]
 				#translate torque status codes to appion codes
-				if status == 'C' or status == 'E':
+				if status == 'CG':
 					#Job completed of is exiting
-					returnStatus = 'D'
-				  
+					return 'D'
 				elif status == 'R':
 					#Job is running
-					returnStatus = 'R'
+					return 'R'
 				else:
 					#Interpret everything else as queued
-					returnStatus = 'Q'
+					return 'Q'
 				
 		except Exception:
-			returnStatus = 'U'
-
-		return returnStatus
+			return  'U'
