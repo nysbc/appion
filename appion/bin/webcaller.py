@@ -14,5 +14,5 @@ if __name__ == '__main__':
 		sys.exit(1)
 	cmd = sys.argv[1]
 	outf = sys.argv[2]
-	proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.STDOUT, stderr=subprocess.STDERR)
+	proc = subprocess.Popen(cmd, shell=True)
 	proc.wait()
