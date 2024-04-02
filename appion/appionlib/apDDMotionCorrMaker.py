@@ -2,6 +2,7 @@
 from appionlib import apDDAlignStackMaker
 from appionlib import apDDFrameAligner
 from appionlib import apDisplay
+import os
 
 class MotionCorrAlignStackLoop(apDDAlignStackMaker.AlignStackLoop):
 	'''
