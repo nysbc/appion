@@ -14,20 +14,5 @@ if __name__ == '__main__':
 		sys.exit(1)
 	cmd = sys.argv[1]
 	outf = sys.argv[2]
-	if len(sys.argv) > 3:
-		mode = sys.argv[3]
-	else:
-		mode = 'w'
-
-	## check if directory exists
-	time.sleep(0.5)
-	dirname = os.path.dirname(outf)
-	if not os.path.isdir(dirname):
-		os.makedirs(dirname)
-
-	## run command and write to log file
-	f = open(outf, mode)
-	proc = subprocess.Popen(cmd, shell=True, stdout=f, stderr=subprocess.STDOUT)
+	proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.STDOUT, stderr=subprocess.STDERR)
 	proc.wait()
-
-	f.close()
