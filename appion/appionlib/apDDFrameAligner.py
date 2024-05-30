@@ -395,8 +395,8 @@ class MotionCor2_UCSF(DDFrameAligner):
 			else:
 				self.alignparams['FmDose'] = None
 		# exposure filtering
-        if 'PixSize' not in self.alignparams:
-            self.alignparams['PixSize'] = self.params['apix']
+		if 'PixSize' not in self.alignparams:
+			self.alignparams['PixSize'] = self.params['apix']
 		if self.alignparams['doseweight'] is True and 'FmDose' in self.alignparams and self.alignparams['FmDose']:
 			cmd += ' -FmDose %.3f ' % (self.alignparams['FmDose'])
 			cmd += ' -PixSize %.3f ' % (self.alignparams['PixSize'])
