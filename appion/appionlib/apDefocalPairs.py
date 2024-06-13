@@ -12,7 +12,6 @@ import leginon.leginondata
 from appionlib import appiondata
 from appionlib import apImage
 from appionlib import apDisplay
-from appionlib import apEMAN
 
 ##===================
 ##===================

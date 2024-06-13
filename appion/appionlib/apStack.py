@@ -12,7 +12,6 @@ from pyami import mrc
 from pyami import mem
 from appionlib import apDatabase
 from appionlib import apParticle
-from appionlib import apEMAN
 from appionlib import apDisplay
 from appionlib import appiondata
 from appionlib import apFile
@@ -382,34 +381,6 @@ def getParticleContrastFromMrc(mrcfile):
 		apDisplay.printMsg("Contrast determined as BLACK particles on white background")
 		print "BLACK on white", mrcfile	
 		return "blackOnWhite"
-
-
-#===============
-def centerParticles(stack, mask=None, maxshift=None):
-	apDisplay.printMsg("Centering stack: "+stack)
-
-	stacksize = apFile.stackSize(stack)
-	freemem = mem.free()*1024 #convert memory to bytes
-	apDisplay.printMsg("file is %s, mem is %s"
-		%(apDisplay.bytes(stacksize), apDisplay.bytes(freemem)))
-	### from EMAN FAQ: need to have at least 3x as much ram as the size of the file
-	memsize = freemem/3.0
-	numfrac = int(math.ceil(stacksize/memsize))
-
-	apDisplay.printMsg("file is %s, will be split into %d fractions"
-		%(apDisplay.bytes(stacksize), numfrac))
-
-	for i in range(numfrac):
-		emancmd = "cenalignint "+stack
-		if numfrac > 1:
-			emancmd += " frac="+str(i)+"/"+str(numfrac)
-		if mask is not None:
-			emancmd += " mask="+str(mask)
-		if maxshift is not None:
-			emancmd += " maxshift="+str(maxshift)
-		apEMAN.executeEmanCmd(emancmd, verbose=False, showcmd=True)
-
-	return
 
 #===============
 def commitSubStack(params, newname=False, centered=False, oldstackparts=None, sorted=False, radial_averaged=False, included=None):
