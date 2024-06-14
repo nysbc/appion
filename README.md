@@ -72,6 +72,8 @@ The following web forms are not supported:
 ./manualPickerForm.inc:         $this->setExeFile( 'manualpicker.py' );
 ```
 
+`updateAppionDB.py` is also required for SLURM jobs, as this runs at the end of an Appion job.
+
 ## Required Appion Libraries for Supported Appion Executables
 
 ```
