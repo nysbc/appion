@@ -530,8 +530,53 @@ class MotionCor2_UCSF(DDFrameAligner):
 		for i in range(len(shifts_adjusted)):
 	                f.write("......Add Frame #%.3d with xy shift: %.5f %.5f\n" % (i+self.alignparams['Throw'], shifts_adjusted[i][0], shifts_adjusted[i][1]))
                 f.close()
-		
 
+class MotionCor3(MotionCor2_UCSF):
+	def getValidAlignOptionMappings(self):
+		# the pairs mapped in here can be automated
+		# transferred from the bin makeDDAlign  params.
+		return {
+			'gpuids':'Gpu', 
+			'nrw':'Group', 
+			'flp':'flp', 
+			'bin':'FtBin', 
+			"Bft_global":"Bft_global",
+			"Bft_local":"Bft_local",
+			"apix":"PixSize",
+			"Iter":"Iter",
+			"Patchrows":"Patchrows",
+			"Patchcols":"Patchcols",
+			"MaskCentrow":"MaskCentrow",
+			"MaskCentcol":"MaskCentcol",
+			"MaskSizerows":"MaskSizerows",
+			"MaskSizecols":"MaskSizecols",
+			"kV":"kV",
+			"Tol":"Tol",
+			"kv":"kV",
+			"startframe":"Throw",
+			"Crop":"Crop",
+			"FmRef":"FmRef",
+			"eer_sampling":"EerSampling",
+			"doseweight":"doseweight",
+			"is_eer":"is_eer",
+			"total_raw_frames":"total_raw_frames",
+			"rendered_frame_size":"rendered_frame_size",
+			"inskips" : "InSkips",
+			"cs" : "Cs",
+			"ampcont" : "AmpCont",
+			"extphase": "ExtPhase"
+			}
+
+	def makeFrameAlignmentCommand(self):
+		cmd=super().makeFrameAlignmentCommand()
+		if self.alignparams['InSkips']:
+			cmd += ' -InSkips %s ' % " ".join(self.alignparams['InSkips'])
+		if self.alignparams['Cs']:
+			cmd += ' -Cs %f ' % self.alignparams['Cs']
+		if self.alignparams['AmpCont']:
+			cmd += ' -AmpCont %f ' % self.alignparams['AmpCont']
+		if self.alignparams['ExtPhase']:
+			cmd += ' -ExtPhase %d ' % self.alignparams['ExtPhase']
 
 		
 if __name__ == '__main__':

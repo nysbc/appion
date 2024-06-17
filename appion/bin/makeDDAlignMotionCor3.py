@@ -8,5 +8,5 @@ from appionlib import apDatabase
 from appionlib import apDisplay
 
 if __name__ == '__main__':
-	makeStack = apDDMotionCorrMaker.MotionCor2UCSFAlignStackLoop()
+	makeStack = apDDMotionCorrMaker.MotionCor3AlignStackLoop()
 	makeStack.run()
