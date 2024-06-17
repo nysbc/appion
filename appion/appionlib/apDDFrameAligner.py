@@ -565,23 +565,23 @@ class MotionCor3(MotionCor2_UCSF):
 			"is_eer":"is_eer",
 			"total_raw_frames":"total_raw_frames",
 			"rendered_frame_size":"rendered_frame_size",
-			"inskips" : "InSkips",
+#			"inskips" : "InSkips",
 			"cs" : "Cs",
 			"ampcont" : "AmpCont",
 			"extphase": "ExtPhase"
 			}
 
-	def makeFrameAlignmentCommand(self):
-		cmd=super(MotionCor2_UCSF, self).makeFrameAlignmentCommand()
-		#if self.alignparams['InSkips'] is not None and self.alignparams['InSkips'] != "[]":
-		#	cmd += ' -InSkips %s ' % " ".join(self.alignparams['InSkips'])
-		if self.alignparams['Cs']:
-			cmd += ' -Cs %f ' % self.alignparams['Cs']
-		if self.alignparams['AmpCont']:
-			cmd += ' -AmpCont %f ' % self.alignparams['AmpCont']
-		if self.alignparams['ExtPhase']:
-			cmd += ' -ExtPhase %d ' % self.alignparams['ExtPhase']
-		return cmd
+	# def makeFrameAlignmentCommand(self):
+	# 	cmd=super(MotionCor2_UCSF, self).makeFrameAlignmentCommand()
+	# 	#if self.alignparams['InSkips'] is not None and self.alignparams['InSkips'] != "[]":
+	# 	#	cmd += ' -InSkips %s ' % " ".join(self.alignparams['InSkips'])
+	# 	if self.alignparams['Cs']:
+	# 		cmd += ' -Cs %f ' % self.alignparams['Cs']
+	# 	if self.alignparams['AmpCont']:
+	# 		cmd += ' -AmpCont %f ' % self.alignparams['AmpCont']
+	# 	if self.alignparams['ExtPhase']:
+	# 		cmd += ' -ExtPhase %d ' % self.alignparams['ExtPhase']
+	# 	return cmd
 
 		
 if __name__ == '__main__':
