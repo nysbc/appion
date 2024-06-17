@@ -565,7 +565,7 @@ class MotionCor3(MotionCor2_UCSF):
 			"is_eer":"is_eer",
 			"total_raw_frames":"total_raw_frames",
 			"rendered_frame_size":"rendered_frame_size",
-#			"inskips" : "InSkips",
+			"inskips" : "InSkips",
 			"cs" : "Cs",
 			"ampcont" : "AmpCont",
 			"extphase": "ExtPhase"
