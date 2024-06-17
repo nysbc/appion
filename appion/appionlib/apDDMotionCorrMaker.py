@@ -223,7 +223,7 @@ class MotionCor3AlignStackLoop(MotionCor2UCSFAlignStackLoop):
 		self.parser.add_option("--cs", dest="cs", type="float", default=0.0,
 			help="1. Spherical aberration in mm. The default is set to zero, meaning NO CTF estimation.", metavar="FLOAT")
 		self.parser.add_option("--ampcont", dest="ampcont", type="float", default=0.07,
-			help="1. Amplitude contrast. The default is 0.07., metavar="FLOAT")
+			help="1. Amplitude contrast. The default is 0.07.", metavar="FLOAT")
 		self.parser.add_option("--extphase", dest="extphase",type="int",default=0,
 			help="1. Extra phase shift in degree. The default is 0 degree, meaning NO estimation of extra phase shift. 2. If a positive value is given, extra phase shift will estimated in a range centered at the given value. The range is limited within [0, 180] degrees.", metavar="INT")
 
