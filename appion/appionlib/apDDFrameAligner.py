@@ -532,6 +532,10 @@ class MotionCor2_UCSF(DDFrameAligner):
                 f.close()
 
 class MotionCor3(MotionCor2_UCSF):
+	def __init__(self):
+		self.executable = 'motioncor3'
+		DDFrameAligner.__init__(self)
+
 	def getValidAlignOptionMappings(self):
 		# the pairs mapped in here can be automated
 		# transferred from the bin makeDDAlign  params.
