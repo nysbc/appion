@@ -572,18 +572,7 @@ class MotionCor3(MotionCor2_UCSF):
 			}
 
 	def makeFrameAlignmentCommand(self):
-		cmd=super(MotionCor2_UCSF, self).makeFrameAlignmentCommand()
-		apDisplay.printMsg('DEBUG: %s'% cmd)
-		if self.alignparams['InSkips']:
-			cmd += ' -InSkips %s ' % " ".join(self.alignparams['InSkips'])
-		if self.alignparams['Cs']:
-			cmd += ' -Cs %f ' % self.alignparams['Cs']
-		if self.alignparams['AmpCont']:
-			cmd += ' -AmpCont %f ' % self.alignparams['AmpCont']
-		if self.alignparams['ExtPhase']:
-			cmd += ' -ExtPhase %d ' % self.alignparams['ExtPhase']
-		apDisplay.printMsg('DEBUG: %s'% cmd)
-		return cmd
+		return super(MotionCor2_UCSF, self).makeFrameAlignmentCommand()
 
 		
 if __name__ == '__main__':
