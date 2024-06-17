@@ -581,6 +581,7 @@ class MotionCor3(MotionCor2_UCSF):
 			cmd += ' -AmpCont %f ' % self.alignparams['AmpCont']
 		if self.alignparams['ExtPhase']:
 			cmd += ' -ExtPhase %d ' % self.alignparams['ExtPhase']
+		return cmd
 
 		
 if __name__ == '__main__':
