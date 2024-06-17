@@ -220,7 +220,7 @@ class MotionCor3AlignStackLoop(MotionCor2UCSFAlignStackLoop):
 	def setupParserOptions(self):
 		super(MotionCor3AlignStackLoop,self).setupParserOptions()
 
-		self.parser.add_option("--inskips", dest="inskips", nargs="+", type=str, help="1. Used in combination with -Serial, skip the input files whose names contain the strings specied here.")
+		self.parser.add_option("--inskips", dest="inskips", default=[], nargs="+", type=str, help="1. Used in combination with -Serial, skip the input files whose names contain the strings specied here.")
 		self.parser.add_option("--cs", dest="cs", type="float", default=0.0,
 			help="1. Spherical aberration in mm. The default is set to zero, meaning NO CTF estimation.", metavar="FLOAT")
 		self.parser.add_option("--ampcont", dest="ampcont", type="float", default=0.07,
