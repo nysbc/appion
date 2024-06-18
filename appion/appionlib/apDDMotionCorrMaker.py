@@ -204,7 +204,7 @@ class MotionCor2UCSFAlignStackLoop(MotionCorrAlignStackLoop):
 		'''
 		if os.path.isfile(self.dd.aligned_sumpath):
 			if self.params['doseweight'] is True and self.has_dose:
-				self.params['align_dw_label'] = self.params['alignlabel']+"-DW"
+				self.params['align_dw_label'] = self.params['alignlabel']+"_DW"
 				self.aligned_dw_imagedata = self.dd.makeAlignedDWImageData(alignlabel=self.params['align_dw_label'])
 
 		super(MotionCor2UCSFAlignStackLoop,self).organizeAlignedStack()
