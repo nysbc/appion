@@ -30,6 +30,7 @@ class MotionCorrAlignStackLoop(apDDAlignStackMaker.AlignStackLoop):
 	#=======================
 	def preLoopFunctions(self):
 		self.setFrameAligner()
+		apDisplay.printMsg('DEBUG: %s'% self.params)
 		self.framealigner.setFrameAlignOptions(self.params)
 		super(MotionCorrAlignStackLoop,self).preLoopFunctions()
 		self.dd.setGPUid(self.params['gpuid'])
