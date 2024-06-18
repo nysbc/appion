@@ -115,10 +115,11 @@ class DDFrameAligner(object):
 		return {'fakeparam':'option'}
 
 	def setFrameAlignOptions(self,params):
-		parammaps = self.getValidAlignOptionMappings()
-		for goodkey in parammaps.keys():
-			if goodkey in params.keys():
-				self.alignparams[parammaps[goodkey]] = params[goodkey]
+		# Converts Appion flag to native command flag
+		flagmap = self.getValidAlignOptionMappings()
+		for appionFlag in flagmap.keys():
+			if appionFlag in params.keys():
+				self.alignparams[flagmap[appionFlag]] = params[appionFlag]
 
 	def getFrameAlignOption(self,key):
 		return self.alignparams[key]
@@ -573,6 +574,7 @@ class MotionCor3(MotionCor2_UCSF):
 
 	def makeFrameAlignmentCommand(self):
 		cmd=super(MotionCor3, self).makeFrameAlignmentCommand()
+		apDisplay.printMsg('DEBUG: %s'% self.params)
 		if self.alignparams['InSkips']:
 			cmd += ' -InSkips %s ' % " ".join(self.alignparams['InSkips'])
 		if self.alignparams['Cs']:
