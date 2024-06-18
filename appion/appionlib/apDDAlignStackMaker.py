@@ -74,10 +74,6 @@ class AlignStackLoop(apDDStackMaker.FrameStackLoop):
 		# The alignment is done in tempdir (a local directory to reduce network traffic)
 		bintext = self.getAlignBin()
 		self.temp_logpath = self.dd.tempframestackpath[:-4]+bintext+'_Log.txt'
-		self.temp_aligned_sumpath = 'temp-%d-%s.gpuid_%d_sum.mrc' % (os.getpid(), self.hostname, self.dd.gpuid)
-		self.temp_aligned_stackpath = 'temp-%d-%s.gpuid_%d_aligned_st.mrc' % (os.getpid(), self.hostname, self.dd.gpuid)
-		apDisplay.printDebug( 'temp_aligned_sumpath= %s' % self.temp_aligned_sumpath)
-		apDisplay.printDebug('temp_aligned_stackpath= %s' % self.temp_aligned_stackpath)
 
 	def setOtherProcessImageResultParams(self):
 		'''
@@ -88,8 +84,8 @@ class AlignStackLoop(apDDStackMaker.FrameStackLoop):
 
 		self.log = self.dd.framestackpath[:-4]+'_Log.txt'
 		self.framealigner.setInputFrameStackPath(self.dd.tempframestackpath)
-		self.framealigner.setAlignedSumPath(self.temp_aligned_sumpath)
-		self.framealigner.setAlignedStackPath(self.temp_aligned_stackpath)
+		self.framealigner.setAlignedSumPath(self.dd.aligned_sumpath)
+		self.framealigner.setAlignedStackPath(self.dd.aligned_stackpath)
 		# Log is stream to self.temp_logpath but will be convert or copied to self.log later
 		self.framealigner.setLogPath(self.temp_logpath)
 
@@ -172,27 +168,21 @@ class AlignStackLoop(apDDStackMaker.FrameStackLoop):
 			os.chdir(self.dd.rundir)
 	
 	def organizeAlignedSum(self):
-		'''
-		Move local temp results to rundir in the official names
-		'''
-		temp_aligned_sumpath = self.temp_aligned_sumpath
-		temp_aligned_stackpath = self.temp_aligned_stackpath
-		
-		if not os.path.isfile(temp_aligned_sumpath):
-			apDisplay.printWarning('Frame alignment FAILED: \n%s not created.' % os.path.basename(temp_aligned_sumpath))
+		if not os.path.isfile(self.dd.aligned_sumpath):
+			apDisplay.printWarning('Frame alignment FAILED: \n%s not created.' % os.path.basename(self.dd.aligned_sumpath))
 			return False
 		else:
 			# successful alignment
 			self.convertLogFile()
 			if self.dd.getKeepAlignedStack():
 				# bug in MotionCorr requires this
-				self.dd.updateFrameStackHeaderImageStats(temp_aligned_stackpath)
+				self.dd.updateFrameStackHeaderImageStats(self.dd.aligned_stackpath)
 			if not self.isUseFrameAlignerSum():
 				# replace the sum with one corresponds with framelist
-				self.sumSubStackWithNumpy(temp_aligned_stackpath,temp_aligned_sumpath)
+				self.sumSubStackWithNumpy(self.dd.aligned_stackpath,self.dd.aligned_sumpath)
 
-			# temp_aligned_sumpath should have the right number of frames at this point
-			shutil.move(temp_aligned_sumpath,self.dd.aligned_sumpath)
+			# self.dd.aligned_sumpath should have the right number of frames at this point
+			shutil.move(self.dd.aligned_sumpath,self.dd.aligned_sumpath)
 			return self.dd.aligned_sumpath
 
 	def organizeAlignedStack(self):
@@ -204,19 +194,15 @@ class AlignStackLoop(apDDStackMaker.FrameStackLoop):
 		if os.path.isfile(self.dd.aligned_sumpath):
 			# Save the alignment result
 			self.aligned_imagedata = self.dd.makeAlignedImageData(alignlabel=self.params['alignlabel'])
-			apDisplay.printDebug( 'temp_aligned_stackpath= %s' % self.temp_aligned_stackpath)
 			apDisplay.printDebug('self.dd.aligned_stackpath= %s' % self.dd.aligned_stackpath)
 			apDisplay.printDebug('self.dd.framestackpath= %s' % self.dd.framestackpath)
 
 			if self.params['keepstack']:
-				if not os.path.isfile(self.temp_aligned_stackpath):
-					apDisplay.printWarning('No aligned stack generated as %s' % self.temp_aligned_stackpath)
-				else:
-					apDisplay.printMsg( 'moving temp aligned stack at the host to %s' % self.dd.aligned_stackpath)
-					shutil.move(self.temp_aligned_stackpath,self.dd.aligned_stackpath)
+				if not os.path.isfile(self.dd.aligned_stackpath):
+					apDisplay.printWarning('No aligned stack generated as %s' % self.dd.aligned_stackpath)
 			else:
-				if os.path.isfile(self.temp_aligned_stackpath):
-					apFile.removeFile(self.temp_aligned_stackpath)
+				if os.path.isfile(self.dd.aligned_stackpath):
+					apFile.removeFile(self.dd.aligned_stackpath)
 			
 			# replace the unaligned stack with aligned_stack
 			if os.path.isfile(self.dd.aligned_stackpath):

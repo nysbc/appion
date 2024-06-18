@@ -40,8 +40,6 @@ class MotionCorrAlignStackLoop(apDDAlignStackMaker.AlignStackLoop):
 		# logpth carries the name of the tempframestack
 		bintext = self.getAlignBin()
 		self.temp_logpath = self.dd.tempframestackpath[:-4]+bintext+'_Log.txt'
-		self.temp_aligned_sumpath = 'temp-%d-%s.gpuid_%d_sum.mrc' % (os.getpid(), self.hostname, self.dd.gpuid)
-		self.temp_aligned_stackpath = 'temp-%d-%s.gpuid_%d_aligned_st.mrc' % (os.getpid(), self.hostname, self.dd.gpuid)
 
 class MotionCor2UCSFAlignStackLoop(MotionCorrAlignStackLoop):
 	#=======================
@@ -133,10 +131,8 @@ class MotionCor2UCSFAlignStackLoop(MotionCorrAlignStackLoop):
 	def setOtherProcessImageResultParams(self):
 		# The alignment is done in tempdir (a local directory to reduce network traffic)
 		# include both hostname and gpu to identify the temp output
-		#self.temp_aligned_sumpath = 'temp%s.gpuid_%d_sum.mrc' % (self.hostname, self.gpuid)
+		#self.dd.aligned_sumpath = 'temp%s.gpuid_%d_sum.mrc' % (self.hostname, self.gpuid)
 		super(MotionCor2UCSFAlignStackLoop,self).setOtherProcessImageResultParams()
-		self.temp_aligned_sum_sumpath = 'temp-%d-%s.gpuid_%d_sum_DW.mrc' % (os.getpid(), self.hostname, self.gpuid)
-		#self.temp_aligned_stackpath = 'temp%s.gpuid_%d_aligned_st.mrc' % (self.hostname, self.gpuid)
 		# NOTE: self.params in self.framealigner alignparam mapping are directly transferred.
 		self.framealigner.setKV(self.dd.getKVFromImage(self.dd.image))
 		self.framealigner.setTotalRawFrames(self.dd.getNumberOfFrameSaved())
@@ -156,7 +152,7 @@ class MotionCor2UCSFAlignStackLoop(MotionCorrAlignStackLoop):
 			if totaldose is None:
 				apDisplay.printWarning('Per frame dose of 0.03 e/p is assumed on eer raw frames since no value is entered.')
 
-		self.temp_aligned_dw_sumpath = 'temp-%d-%s.gpuid_%d_sum_DW.mrc' % (os.getpid(), self.hostname, self.gpuid)
+		self.dd.aligned_dw_sumpath = 'temp-%d-%s.gpuid_%d_sum_DW.mrc' % (os.getpid(), self.hostname, self.gpuid)
 		if self.isUseFrameAlignerFlat() and not self.params['force_cpu_flat']:
 			frame_flip, frame_rotate=self.dd.getImageFrameOrientation()
 			self.dd.setUseFrameAlignerYFlip(frame_flip)
@@ -179,8 +175,6 @@ class MotionCor2UCSFAlignStackLoop(MotionCorrAlignStackLoop):
 		'''
 		Move local temp results to rundir in the official names
 		'''
-		temp_aligned_sumpath = self.temp_aligned_sumpath
-		temp_aligned_dw_sumpath = self.temp_aligned_dw_sumpath
 		gain_flip, gain_rotate = self.framealigner.getGainModification()
 		need_flip = False
 		if 'eer' in self.dd.__class__.__name__.lower():
@@ -191,16 +185,16 @@ class MotionCor2UCSFAlignStackLoop(MotionCorrAlignStackLoop):
 			need_flip = not need_flip
 		if need_flip:
 			apDisplay.printMsg('Flipping the aligned sum back')
-			self.imageYFlip(temp_aligned_sumpath)
-			self.imageYFlip(temp_aligned_dw_sumpath)
+			self.imageYFlip(self.dd.aligned_sumpath)
+			self.imageYFlip(self.dd.aligned_dw_sumpath)
 		if gain_rotate:
 			apDisplay.printMsg('Rotating the aligned sum back')
-			self.imageRotate(temp_aligned_sumpath, gain_rotate)
-			self.imageRotate(temp_aligned_dw_sumpath, gain_rotate)
+			self.imageRotate(self.dd.aligned_sumpath, gain_rotate)
+			self.imageRotate(self.dd.aligned_dw_sumpath, gain_rotate)
 		# dose weighted result handled here
-		if os.path.isfile(temp_aligned_sumpath):
-			if self.params['doseweight'] is True and self.has_dose:
-				shutil.move(temp_aligned_dw_sumpath,self.dd.aligned_dw_sumpath)
+		# if os.path.isfile(self.dd.aligned_sumpath):
+		# 	if self.params['doseweight'] is True and self.has_dose:
+		# 		shutil.move(self.dd.aligned_dw_sumpath,self.dd.aligned_dw_sumpath)
 		return super(MotionCor2UCSFAlignStackLoop,self).organizeAlignedSum()
 
 	def organizeAlignedStack(self):
