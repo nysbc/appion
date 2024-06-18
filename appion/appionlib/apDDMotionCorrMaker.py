@@ -30,7 +30,6 @@ class MotionCorrAlignStackLoop(apDDAlignStackMaker.AlignStackLoop):
 	#=======================
 	def preLoopFunctions(self):
 		self.setFrameAligner()
-		apDisplay.printMsg('DEBUG: %s'% self.params)
 		self.framealigner.setFrameAlignOptions(self.params)
 		super(MotionCorrAlignStackLoop,self).preLoopFunctions()
 		self.dd.setGPUid(self.params['gpuid'])
@@ -136,7 +135,7 @@ class MotionCor2UCSFAlignStackLoop(MotionCorrAlignStackLoop):
 		# include both hostname and gpu to identify the temp output
 		#self.temp_aligned_sumpath = 'temp%s.gpuid_%d_sum.mrc' % (self.hostname, self.gpuid)
 		super(MotionCor2UCSFAlignStackLoop,self).setOtherProcessImageResultParams()
-		self.temp_aligned_dw_sumpath = 'temp-%d-%s.gpuid_%d_sum_DW.mrc' % (os.getpid(), self.hostname, self.gpuid)
+		self.temp_aligned_sum_sumpath = 'temp-%d-%s.gpuid_%d_sum_DW.mrc' % (os.getpid(), self.hostname, self.gpuid)
 		#self.temp_aligned_stackpath = 'temp%s.gpuid_%d_aligned_st.mrc' % (self.hostname, self.gpuid)
 		# NOTE: self.params in self.framealigner alignparam mapping are directly transferred.
 		self.framealigner.setKV(self.dd.getKVFromImage(self.dd.image))

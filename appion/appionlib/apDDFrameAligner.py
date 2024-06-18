@@ -574,7 +574,7 @@ class MotionCor3(MotionCor2_UCSF):
 
 	def makeFrameAlignmentCommand(self):
 		cmd=super(MotionCor3, self).makeFrameAlignmentCommand()
-		if 'InSkips' in self.alignparams:
+		if self.alignparams['InSkips']:
 			cmd += ' -InSkips %s ' % " ".join(self.alignparams['InSkips'])
 		if 'Cs' in self.alignparams:
 			cmd += ' -Cs %.3f ' % self.alignparams['Cs']
