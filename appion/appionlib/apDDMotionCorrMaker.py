@@ -191,9 +191,9 @@ class MotionCor2UCSFAlignStackLoop(MotionCorrAlignStackLoop):
 			self.imageRotate(self.dd.aligned_sumpath, gain_rotate)
 			self.imageRotate(self.dd.aligned_dw_sumpath, gain_rotate)
 		# dose weighted result handled here
-		# if os.path.isfile(self.dd.aligned_sumpath):
-		# 	if self.params['doseweight'] is True and self.has_dose:
-		# 		shutil.move(self.dd.aligned_dw_sumpath,self.dd.aligned_dw_sumpath)
+		if os.path.isfile(self.dd.aligned_sumpath):
+			if self.params['doseweight'] is True and self.has_dose:
+				shutil.move(self.dd.aligned_dw_sumpath.replace("-DW.mrc","_DW.mrc"),self.dd.aligned_dw_sumpath)
 		return super(MotionCor2UCSFAlignStackLoop,self).organizeAlignedSum()
 
 	def organizeAlignedStack(self):
@@ -204,7 +204,7 @@ class MotionCor2UCSFAlignStackLoop(MotionCorrAlignStackLoop):
 		'''
 		if os.path.isfile(self.dd.aligned_sumpath):
 			if self.params['doseweight'] is True and self.has_dose:
-				self.params['align_dw_label'] = self.params['alignlabel']+"_DW"
+				self.params['align_dw_label'] = self.params['alignlabel']+"-DW"
 				self.aligned_dw_imagedata = self.dd.makeAlignedDWImageData(alignlabel=self.params['align_dw_label'])
 
 		super(MotionCor2UCSFAlignStackLoop,self).organizeAlignedStack()
