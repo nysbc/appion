@@ -152,7 +152,6 @@ class MotionCor2UCSFAlignStackLoop(MotionCorrAlignStackLoop):
 			if totaldose is None:
 				apDisplay.printWarning('Per frame dose of 0.03 e/p is assumed on eer raw frames since no value is entered.')
 
-		self.dd.aligned_dw_sumpath = 'temp-%d-%s.gpuid_%d_sum_DW.mrc' % (os.getpid(), self.hostname, self.gpuid)
 		if self.isUseFrameAlignerFlat() and not self.params['force_cpu_flat']:
 			frame_flip, frame_rotate=self.dd.getImageFrameOrientation()
 			self.dd.setUseFrameAlignerYFlip(frame_flip)
