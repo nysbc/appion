@@ -36,13 +36,7 @@ logfile=$myamidir/pysetup.log
 packages=(
 	pyami
 	sinedon
-	redux
-	imageviewer
 	leginon
-	pyscope
-	slack
-	myami_test
-	modules/radermacher
 	modules/libcv
 	modules/numextension
 )
