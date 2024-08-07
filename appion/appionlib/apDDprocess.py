@@ -1109,7 +1109,7 @@ class DDFrameProcessing(DirectDetectorProcessing):
 			apDisplay.printColor("flipping the frame up-down",'blue')
 			a = numpy.flipud(a)
 		frameprocess_dir = os.path.dirname(self.tempframestackpath)
-		self.defect_map_path = os.path.join(frameprocess_dir,'defect-%s-%d.mrc' % (self.hostname,self.gpuid))
+		self.defect_map_path = os.path.join(frameprocess_dir,'defect-%s-%d-%d.mrc' % (self.hostname,self.gpuid, os.getpid()))
 		mrc.write(a, self.defect_map_path)
 
 	def getModifiedDefectMrcPath(self):
@@ -1143,7 +1143,7 @@ class DDFrameProcessing(DirectDetectorProcessing):
 
 			# output dark
 			unscaled_darkarray = self.getSingleFrameDarkArray()
-			self.dark_path = os.path.join(frameprocess_dir,'dark-%s-%d.mrc' % (self.hostname,self.gpuid))
+			self.dark_path = os.path.join(frameprocess_dir,'dark-%s-%d-%d.mrc' % (self.hostname,self.gpuid, os.getpid()))
 			mrc.write(unscaled_darkarray,self.dark_path)
 
 			# output norm
@@ -1152,7 +1152,7 @@ class DDFrameProcessing(DirectDetectorProcessing):
 				apDisplay.printWarning('From Bright Reference %s' % (normdata['bright']['filename'],))
 			if self.use_frame_aligner_flat:
 				normarray = normdata['image']
-				self.norm_path = os.path.join(frameprocess_dir,'norm-%s-%d.mrc' % (self.hostname,self.gpuid))
+				self.norm_path = os.path.join(frameprocess_dir,'norm-%s-%d-%d.mrc' % (self.hostname,self.gpuid,os.getpid()))
 				apDisplay.printWarning('Save Norm Reference %s to %s' % (normdata['filename'],self.norm_path))
 				try:
 					mrc.write(normarray,self.norm_path)
