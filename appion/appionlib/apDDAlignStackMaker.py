@@ -253,9 +253,7 @@ class AlignStackLoop(apDDStackMaker.FrameStackLoop):
 		super(AlignStackLoop, self).loopCleanUp(imgdata)
 		if self.aligned_imagedata != None and self.params['commit']:
 			pattern = imgdata['filename']+'_c*.mrc'
-			temp_pattern = 'temp%s.gpuid_%d_sum_*.mrc' % (self.hostname, self.dd.gpuid)
 			mrcs_to_delete = glob.glob(pattern)
-			mrcs_to_delete.extend(glob.glob(temp_pattern))
 			if mrcs_to_delete:
 				apDisplay.printWarning('Deleting temporary results after upload')
 			for filename in mrcs_to_delete:
