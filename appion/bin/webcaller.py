@@ -27,7 +27,7 @@ if __name__ == '__main__':
 
 	## run command and write to log file
 	f = open(outf, mode)
-	proc = subprocess.Popen(cmd, shell=True, stdout=f, stderr=subprocess.STDOUT)
+    proc = subprocess.Popen(cmd, shell=True)
 	proc.wait()
 
 	f.close()
