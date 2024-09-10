@@ -491,7 +491,7 @@ class DDFrameProcessing(DirectDetectorProcessing):
 	def getDefaultImageForReference(self):
 		return self.default_ref_image
 
-	def waitForPathExist(self,newpath,sleep_time=180):
+	def waitForPathExist(self,newpath,sleep_time=180,timeout=30.0):
 		waitmin = 0
 		while not os.path.exists(newpath):
 			if self.waittime < 0.1:
@@ -500,6 +500,8 @@ class DDFrameProcessing(DirectDetectorProcessing):
 			time.sleep(sleep_time)
 			waitmin += sleep_time / 60.0
 			apDisplay.printMsg('Waited for %.1f min so far' % waitmin)
+            if waitmin > timeout:
+                return False
 		return True
 
 	def getCorrectedImageData(self):
