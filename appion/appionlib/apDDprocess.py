@@ -500,8 +500,8 @@ class DDFrameProcessing(DirectDetectorProcessing):
 			time.sleep(sleep_time)
 			waitmin += sleep_time / 60.0
 			apDisplay.printMsg('Waited for %.1f min so far' % waitmin)
-            if waitmin > timeout:
-                return False
+			if waitmin > timeout:
+				return False
 		return True
 
 	def getCorrectedImageData(self):
