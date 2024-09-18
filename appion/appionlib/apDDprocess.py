@@ -491,7 +491,7 @@ class DDFrameProcessing(DirectDetectorProcessing):
 	def getDefaultImageForReference(self):
 		return self.default_ref_image
 
-	def waitForPathExist(self,newpath,sleep_time=180,timeout=30.0):
+	def waitForPathExist(self,newpath,sleep_time=180,timeout=180.0):
 		waitmin = 0
 		while not os.path.exists(newpath):
 			if self.waittime < 0.1:
