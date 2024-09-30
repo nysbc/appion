@@ -71,14 +71,24 @@ class AppionLoop(appionScript.AppionScript):
 		while self.notdone:
 			apDisplay.printColor("\nBeginning Main Loop", "green")
 			imgnum = 0
+            lockTime={}
 			while imgnum < len(self.imgtree) and self.notdone is True:
 				self.stats['startimage'] = time.time()
 				imgdata = self.imgtree[imgnum]
 				imgnum += 1
 
 				### CHECK IF IT IS OKAY TO START PROCESSING IMAGE
-				if not self._startLoop(imgdata):
+                # If the file has been locked for more than 10 minutes worth of evaluations,
+                # we assume failure and remove it.
+                if imgdata.dbid not in lockTime.keys():
+                    lockTime[imgdata.dbid]=0
+				if not self._startLoop(imgdata) and lockTime[imgdata.dbid] < 10*60:
+                    lockTime[imgdata.dbid]+=(time.time() - self.stats['startimage'])
 					continue
+                else:
+                    self.unlockParallel(imgdata.dbid)
+                    lockTime[imgdata.dbid]=0
+
 
 				### set the pixel size
 				self.params['apix'] = apDatabase.getPixelSize(imgdata)
