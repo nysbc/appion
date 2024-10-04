@@ -6,7 +6,7 @@ import sys
 import time
 import math
 import random
-import cPickle
+import etcd3
 #appion
 from appionlib import apDisplay
 from appionlib import apDatabase
@@ -37,6 +37,9 @@ class AppionLoop(appionScript.AppionScript):
 		self.bad_images = []
 		self.sleep_minutes = 6
 		self.process_batch_count = 10
+        self.etcd=etcd3.client("semc-etcd01.semc.nysbc.org")
+        self.donedictlock=None
+        self.imagelock=None
 
 	#=====================
 	def setWaitSleepMin(self,minutes):
@@ -440,22 +443,13 @@ class AppionLoop(appionScript.AppionScript):
 		"""
 		reads or creates a done dictionary
 		"""
-		#Lock DoneDict file
-		self._lockDoneDict()
-
-		self.donedictfile = os.path.join(self.params['rundir'] , self.functionname+".donedict")
-		if os.path.isfile(self.donedictfile) and self.params['continue'] == True:
-			### unpickle previously done dictionary
-			apDisplay.printMsg("Reading old done dictionary: "+os.path.basename(self.donedictfile))
-			f = open(self.donedictfile,'r')
-			self.donedict = cPickle.load(f)
-			f.close()
+        self._reloadDoneDict()
+		if self.donedict() and self.params['continue'] == True:
+			apDisplay.printMsg("Reading old done dictionary: ")
 			try:
 				if self.donedict['commit'] == self.params['commit']:
 					### all is well
 					apDisplay.printMsg("Found "+str(len(self.donedict))+" done dictionary entries")
-					#Unlock DoneDict file
-					self._unlockDoneDict()
 					return
 				elif self.donedict['commit'] is True and self.params['commit'] is not True:
 					### die
@@ -466,53 +460,25 @@ class AppionLoop(appionScript.AppionScript):
 			except KeyError:
 				apDisplay.printMsg("Found "+str(len(self.donedict))+" done dictionary entries")
 
-		### set up fresh dictionary
-		self.donedict = {}
-		self.donedict['commit'] = self.params['commit']
-		apDisplay.printMsg("Creating new done dictionary: "+os.path.basename(self.donedictfile))
-
-		### write donedict to file
-		f = open(self.donedictfile, 'w', 0666)
-		cPickle.dump(self.donedict, f)
-		f.close()
-
-		#Unlock DoneDict file
-		self._unlockDoneDict()
-
 		return
 
 	#=====================
 	def _lockDoneDict(self):
-		#Lock DoneDict file
-		locallock = False
-		totaltime = 0
-		lockfile = '%s%s' % (self.lockname,"donedict")
-		#apDisplay.printWarning('locking %s' % lockfile)
-		while(not locallock):
-			try:
-				fileutil.open_if_not_exists(lockfile).close()
-				locallock = True
-			except OSError:
-				#file is locked
-				if int(totaltime) % 5 == 0 and totaltime - int(totaltime) < 0.1:
-					apDisplay.printMsg("waiting for donedict to become unlocked by another process")
-				totaltime += 0.1
-				time.sleep(0.1)
-				if totaltime > 60:
-					self._unlockDoneDict()
-					apDisplay.printError('Donedict lock failed from 60 sec timeout')
+        if not self.donedictlock:
+            lockname = os.path.join("/lock",self.params['rundir'],"donedict")
+            lockobtained = False
+		    while not lockobtained:
+                self.donedictlock=self.etcd.lock(lockname,600)
+                lockobtained=self.donedictlock.acquire()
 		return
 
 	#=====================
 	def _unlockDoneDict(self):
-		#Unlock DoneDict file
-		lockfile = '%s%s' % (self.lockname,"donedict")
-		#apDisplay.printWarning('unlocking %s' % lockfile)
-		try:
-			os.remove(lockfile)
-		except OSError as e:
-			# Donedict unlock is used as an escape route. Let it pass.
-			apDisplay.printWarning('Donedict %s unlock failed. Allow to pass: %s' % (lockfile,e))
+        if self.donedictlock:
+            lockreleased = False
+            while not lockreleased:
+                lockreleased=self.donedictlock.release()
+            self.donedictlock=None
 		return
 
 	#=====================
@@ -523,9 +489,13 @@ class AppionLoop(appionScript.AppionScript):
 		#Lock DoneDict file
 		self._lockDoneDict()
 
-		f = open(self.donedictfile,'r')
-		self.donedict = cPickle.load(f)
-		f.close()
+        prefixResults=self.etcd.get_prefix(self.params['rundir'])
+        self.donedict={}
+        for v,m in prefixResults:
+            if m.key.decode("utf-8").split("/")[-1] == "commit":
+                self.donedict["commit"]=v==b"True"
+            else:
+                self.donedict[m.key.decode("utf-8").split("/")[-1]]=v==b"True"
 
 		#Unlock DoneDict file
 		self._unlockDoneDict()
@@ -538,20 +508,12 @@ class AppionLoop(appionScript.AppionScript):
 		#Lock DoneDict file
 		self._lockDoneDict()
 
-		### reload donedict from file just in case two runs are running
-		f = open(self.donedictfile,'r')
-		self.donedict = cPickle.load(f)
-		f.close()
-
 		### set new parameters
 		if imgname != None:
 			self.donedict[imgname] = True
+            self.etcd.put(os.path.join(self.params['rundir'],imgname), "True")
 		self.donedict['commit'] = self.params['commit']
-
-		### write donedict to file
-		f = open(self.donedictfile, 'w', 0666)
-		cPickle.dump(self.donedict, f)
-		f.close()
+        self.etcd.put(os.path.join(self.params['rundir'],'commit'), str(self.params['commit']))
 
 		#Unlock DoneDict file
 		self._unlockDoneDict()
