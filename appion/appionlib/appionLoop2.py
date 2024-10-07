@@ -442,7 +442,7 @@ class AppionLoop(appionScript.AppionScript):
 		reads or creates a done dictionary
 		"""
                 self._reloadDoneDict()
-		if self.donedict() and self.params['continue'] == True:
+		if self.donedict and self.params['continue'] == True:
 			apDisplay.printMsg("Reading old done dictionary: ")
 			try:
 				if self.donedict['commit'] == self.params['commit']:
