@@ -717,8 +717,8 @@ class AppionLoop(appionScript.AppionScript):
 		# was last tested will not be called rejected, but done
 		# This speeds up this function when rerun but means past image
 		# status can not be reverted.
-		try:
-			return self._readDoneDict(imgname)
+                if self._readDoneDict(imgname):
+                        return True
 		if self.reprocessImage(imgdata) is False:
 			self._writeDoneDict(imgname)
 			reason = 'reproc'
