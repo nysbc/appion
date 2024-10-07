@@ -552,11 +552,10 @@ class AppionScript(basicScript.BasicScript):
                 return not lockobtained
 
 	def unlockParallel(self,dbid):
-		lockfile = '%s/%d' % (self.lockname,dbid)
-                lockreleased = False
-                while not lockreleased:
-		        apDisplay.printMsg("Releasing lock for %d" % dbid)
-                        lockreleased=self.imagelocks[dbid].release()
+                if dbid in self.imagelocks.keys():
+                        while self.imagelocks[dbid].is_acquired():
+        		        apDisplay.printMsg("Releasing lock for %d" % dbid)
+                                lockreleased=self.imagelocks[dbid].release()
                 return lockreleased
 	#=====================
 
