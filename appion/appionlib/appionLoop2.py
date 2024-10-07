@@ -33,7 +33,6 @@ class AppionLoop(appionScript.AppionScript):
 		self._setRunAndParameters()
 		#self.specialCreateOutputDirs()
                 self.donedictlock = None
-		self._initializeDoneDict()
 		self.result_dirs={}
 		self.bad_images = []
 		self.sleep_minutes = 6
@@ -72,7 +71,6 @@ class AppionLoop(appionScript.AppionScript):
 		while self.notdone:
 			apDisplay.printColor("\nBeginning Main Loop", "green")
 			imgnum = 0
-			lockTime={}
 			while imgnum < len(self.imgtree) and self.notdone is True:
 				self.stats['startimage'] = time.time()
 				imgdata = self.imgtree[imgnum]
@@ -81,15 +79,12 @@ class AppionLoop(appionScript.AppionScript):
 				### CHECK IF IT IS OKAY TO START PROCESSING IMAGE
 				# If the file has been locked for more than 10 minutes worth of evaluations,
 				# we assume failure and remove it.
-				if imgdata.dbid not in lockTime.keys():
-					lockTime[imgdata.dbid]=0
-				if not self._startLoop(imgdata) and lockTime[imgdata.dbid] < 10*60:
-					lockTime[imgdata.dbid]+=(time.time() - self.stats['startimage'])
+                                self._lockDoneDict()
+				if not self._startLoop(imgdata):
+                                        self._unlockDoneDict()
 					continue
-				else:
-					self.unlockParallel(imgdata.dbid)
-					lockTime[imgdata.dbid]=0
-
+                                else:
+                                        self._unlockDoneDict()
 
 				### set the pixel size
 				self.params['apix'] = apDatabase.getPixelSize(imgdata)
@@ -437,30 +432,6 @@ class AppionLoop(appionScript.AppionScript):
 		resultfile.close()
 
 	#=====================
-	def _initializeDoneDict(self):
-		"""
-		reads or creates a done dictionary
-		"""
-                self._reloadDoneDict()
-		if self.donedict and self.params['continue'] == True:
-			apDisplay.printMsg("Reading old done dictionary: ")
-			try:
-				if self.donedict['commit'] == self.params['commit']:
-					### all is well
-					apDisplay.printMsg("Found "+str(len(self.donedict))+" done dictionary entries")
-					return
-				elif self.donedict['commit'] is True and self.params['commit'] is not True:
-					### die
-					apDisplay.printError("Commit flag was enabled and is now disabled, create a new runname")
-				else:
-					### set up fresh dictionary
-					apDisplay.printWarning("'--commit' flag was changed, creating new done dictionary")
-			except KeyError:
-				apDisplay.printMsg("Found "+str(len(self.donedict))+" done dictionary entries")
-
-		return
-
-	#=====================
 	def _lockDoneDict(self):
                 if not self.donedictlock:
                         lockname = os.path.join("/lock",self.params['rundir'],"donedict")
@@ -480,41 +451,24 @@ class AppionLoop(appionScript.AppionScript):
                 return
 
 	#=====================
-	def _reloadDoneDict(self):
+	def _readDoneDict(self, imgname=None):
 		"""
-		reloads done dictionary
+		reads done dictionary
 		"""
-		#Lock DoneDict file
-		self._lockDoneDict()
-
-                prefixResults=self.etcd.get_prefix(self.params['rundir'])
-                self.donedict={}
-                for v,m in prefixResults:
-                        if m.key.split("/")[-1] == "commit":
-                                self.donedict["commit"]=v=="True"
-                        else:
-                                self.donedict[m.key.split("/")[-1]]=v=="True"
-
-		#Unlock DoneDict file
-		self._unlockDoneDict()
+                result=self.etcd.get(os.path.join(self.params['rundir'],imgname))
+                return result[0]=="True"
 
 	#=====================
 	def _writeDoneDict(self, imgname=None):
 		"""
 		write finished image (imgname) to done dictionary
 		"""
-		#Lock DoneDict file
-		self._lockDoneDict()
 
 		### set new parameters
 		if imgname != None:
-			self.donedict[imgname] = True
                         self.etcd.put(os.path.join(self.params['rundir'],imgname), "True")
-                self.donedict['commit'] = self.params['commit']
                 self.etcd.put(os.path.join(self.params['rundir'],'commit'), str(self.params['commit']))
 
-		#Unlock DoneDict file
-		self._unlockDoneDict()
 
 	#=====================
 	def _getAllImages(self):
@@ -580,9 +534,8 @@ class AppionLoop(appionScript.AppionScript):
 		checks to see if image (imgname) has been done already
 		"""
 		imgname = imgdata['filename']
-		self._reloadDoneDict()
 		try:
-			self.donedict[imgname]
+			alreadyProcessed=self._readDoneDict(imgname)
 			if not self.stats['lastimageskipped']:
 				sys.stderr.write("skipping already processed images\n")
 			elif self.stats['skipcount'] % 80 == 0:
@@ -593,13 +546,14 @@ class AppionLoop(appionScript.AppionScript):
 			self.stats['skipcount'] += 1
 			apDisplay.printDebug( "_alreadyProcessed adding to count, skipcount" )
 			self.stats['count'] += 1
-			return True
+			return alreadyProcessed
 		except:
 			self.stats['waittime'] = 0
 			if self.stats['lastimageskipped']:
 				apDisplay.printMsg("\nskipped"+str(self.stats['skipcount'])+" images so far")
 			self.stats['lastimageskipped']=False
 			return False
+
 		return False
 
 	#=====================
@@ -608,6 +562,10 @@ class AppionLoop(appionScript.AppionScript):
 		initilizes several parameters for a new image
 		and checks if it is okay to start processing image
 		"""
+		# check to see if image has already been processed
+		if self._alreadyProcessed(imgdata):
+			return False
+
 		if self.params['parallel']:
 			if self.lockParallel(imgdata.dbid):
 				apDisplay.printMsg('%s locked by another parallel run in the rundir' % (apDisplay.shortenImageName(imgdata['filename'])))
@@ -633,15 +591,8 @@ class AppionLoop(appionScript.AppionScript):
 		imgpath = os.path.join(imgdata['session']['image path'], imgdata['filename']+'.mrc')
 		if not os.path.isfile(imgpath):
 			apDisplay.printWarning(imgpath+" not found, skipping")
-			if self.params['parallel']:
-				self.unlockParallel(imgdata.dbid)
 			return False
 
-		# check to see if image has already been processed
-		if self._alreadyProcessed(imgdata):
-			if self.params['parallel']:
-				self.unlockParallel(imgdata.dbid)
-			return False
 
 		self.stats['waittime'] = 0
 
@@ -767,10 +718,7 @@ class AppionLoop(appionScript.AppionScript):
 		# This speeds up this function when rerun but means past image
 		# status can not be reverted.
 		try:
-			self.donedict[imgname]
-			return True, 'done'
-		except KeyError:
-			pass
+			return self._readDoneDict(imgname)
 		if self.reprocessImage(imgdata) is False:
 			self._writeDoneDict(imgname)
 			reason = 'reproc'
