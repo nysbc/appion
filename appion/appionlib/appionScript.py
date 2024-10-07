@@ -10,6 +10,7 @@ import time
 import subprocess
 import glob
 from optparse import OptionParser
+import etcd3
 #appion
 from appionlib import basicScript
 from appionlib import apParam
@@ -62,6 +63,7 @@ class AppionScript(basicScript.BasicScript):
 # 			time.sleep(loadavg)
 # 			apDisplay.printMsg("New load average "+str(round(os.getloadavg()[0],2)))
 		self.setLockname('lock')
+                self.imagelocks={}
 
 		### setup default parser: run directory, etc.
 		self.setParams(optargs,useglobalparams)
@@ -105,6 +107,7 @@ class AppionScript(basicScript.BasicScript):
 
 		### any custom init functions go here
 		self.onInit()
+                self.etcd=etcd3.client("semc-etcd01.semc.nysbc.org")
 
 	#=====================
 	def argumentFromParamDest(self, dest):
@@ -529,36 +532,31 @@ class AppionScript(basicScript.BasicScript):
 
 	#=====================
 	def setLockname(self,name):
-		self.lockname = '_'+name
+		self.lockname = '/'+name
 
 	def cleanParallelLock(self):
-		for file in glob.glob('%s*' % self.lockname):
-			os.remove(file)
-
+                for dbid in self.imagelocks.keys():
+                        self.unlockParallel(dbid)
+                        
 	def lockParallel(self,dbid):
 		'''
 		Check and create lock for dbid when running multiple instances on different
 		hosts. This is as safe as we can do.  If in doubt, add a secondary check
 		for the first output in the function
 		'''
-		try:
-			lock_file = '%s%d' % (self.lockname,dbid)
-			fileutil.open_if_not_exists(lock_file).close()
-		except OSError:
-			return True # exists before locking
+                lockfile = '%s/%d' % (self.lockname,dbid)
+                lockobtained = False
+                while not lockobtained:
+                        self.imagelocks[dbid]=self.etcd.lock(lockfile,600)
+                        lockobtained=self.imagelocks[dbid].acquire()
+                return lockobtained
 
 	def unlockParallel(self,dbid):
-		lockfile = '%s%d' % (self.lockname,dbid)
-		#apDisplay.printWarning('removing %s' % lockfile)
-		try:
-			os.remove(lockfile)
-		except:
-			# refs #4595 delay error exit a bit and checking if the file exists
-			time.sleep(0.2)
-			if os.path.isfile(lockfile):
-				apDisplay.printError('Parallel unlock failed on %s. Let it pass' % lockfile)
-			else:
-				apDisplay.printWarning('Missing %s to unlock. Moving on' % lockfile)
+		lockfile = '%s/%d' % (self.lockname,dbid)
+                lockreleased = False
+                while not lockreleased:
+                        lockreleased=self.imagelocks[dbid].release()
+                return lockreleased
 	#=====================
 
 class TestScript(AppionScript):

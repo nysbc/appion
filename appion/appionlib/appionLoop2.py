@@ -37,9 +37,7 @@ class AppionLoop(appionScript.AppionScript):
 		self.bad_images = []
 		self.sleep_minutes = 6
 		self.process_batch_count = 10
-                self.etcd=etcd3.client("semc-etcd01.semc.nysbc.org")
                 self.donedictlock=None
-                self.imagelock=None
 
 	#=====================
 	def setWaitSleepMin(self,minutes):
