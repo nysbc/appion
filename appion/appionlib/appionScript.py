@@ -555,6 +555,7 @@ class AppionScript(basicScript.BasicScript):
 		lockfile = '%s/%d' % (self.lockname,dbid)
                 lockreleased = False
                 while not lockreleased:
+		        apDisplay.printMsg("Releasing lock for %d" % dbid)
                         lockreleased=self.imagelocks[dbid].release()
                 return lockreleased
 	#=====================
