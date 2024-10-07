@@ -718,7 +718,7 @@ class AppionLoop(appionScript.AppionScript):
 		# This speeds up this function when rerun but means past image
 		# status can not be reverted.
                 if self._readDoneDict(imgname):
-                        return True
+                        return True, 'done'
 		if self.reprocessImage(imgdata) is False:
 			self._writeDoneDict(imgname)
 			reason = 'reproc'
