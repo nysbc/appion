@@ -37,9 +37,9 @@ class AppionLoop(appionScript.AppionScript):
 		self.bad_images = []
 		self.sleep_minutes = 6
 		self.process_batch_count = 10
-        self.etcd=etcd3.client("semc-etcd01.semc.nysbc.org")
-        self.donedictlock=None
-        self.imagelock=None
+                self.etcd=etcd3.client("semc-etcd01.semc.nysbc.org")
+                self.donedictlock=None
+                self.imagelock=None
 
 	#=====================
 	def setWaitSleepMin(self,minutes):
@@ -464,22 +464,22 @@ class AppionLoop(appionScript.AppionScript):
 
 	#=====================
 	def _lockDoneDict(self):
-        if not self.donedictlock:
-            lockname = os.path.join("/lock",self.params['rundir'],"donedict")
-            lockobtained = False
-		    while not lockobtained:
-                self.donedictlock=self.etcd.lock(lockname,600)
-                lockobtained=self.donedictlock.acquire()
-		return
+                if not self.donedictlock:
+                        lockname = os.path.join("/lock",self.params['rundir'],"donedict")
+                lockobtained = False
+                while not lockobtained:
+                        self.donedictlock=self.etcd.lock(lockname,600)
+                        lockobtained=self.donedictlock.acquire()
+                return
 
 	#=====================
 	def _unlockDoneDict(self):
-        if self.donedictlock:
-            lockreleased = False
-            while not lockreleased:
-                lockreleased=self.donedictlock.release()
-            self.donedictlock=None
-		return
+                if self.donedictlock:
+                        lockreleased = False
+                while not lockreleased:
+                        lockreleased=self.donedictlock.release()
+                        self.donedictlock=None
+                return
 
 	#=====================
 	def _reloadDoneDict(self):
@@ -489,13 +489,13 @@ class AppionLoop(appionScript.AppionScript):
 		#Lock DoneDict file
 		self._lockDoneDict()
 
-        prefixResults=self.etcd.get_prefix(self.params['rundir'])
-        self.donedict={}
-        for v,m in prefixResults:
-            if m.key.decode("utf-8").split("/")[-1] == "commit":
-                self.donedict["commit"]=v==b"True"
-            else:
-                self.donedict[m.key.decode("utf-8").split("/")[-1]]=v==b"True"
+                prefixResults=self.etcd.get_prefix(self.params['rundir'])
+                self.donedict={}
+                for v,m in prefixResults:
+                        if m.key.decode("utf-8").split("/")[-1] == "commit":
+                                self.donedict["commit"]=v==b"True"
+                        else:
+                                self.donedict[m.key.decode("utf-8").split("/")[-1]]=v==b"True"
 
 		#Unlock DoneDict file
 		self._unlockDoneDict()
@@ -511,9 +511,9 @@ class AppionLoop(appionScript.AppionScript):
 		### set new parameters
 		if imgname != None:
 			self.donedict[imgname] = True
-            self.etcd.put(os.path.join(self.params['rundir'],imgname), "True")
-		self.donedict['commit'] = self.params['commit']
-        self.etcd.put(os.path.join(self.params['rundir'],'commit'), str(self.params['commit']))
+                        self.etcd.put(os.path.join(self.params['rundir'],imgname), "True")
+                self.donedict['commit'] = self.params['commit']
+                self.etcd.put(os.path.join(self.params['rundir'],'commit'), str(self.params['commit']))
 
 		#Unlock DoneDict file
 		self._unlockDoneDict()
