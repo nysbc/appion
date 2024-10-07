@@ -32,12 +32,12 @@ class AppionLoop(appionScript.AppionScript):
 		self.setFunctionResultKeys()
 		self._setRunAndParameters()
 		#self.specialCreateOutputDirs()
+                self.donedictlock = None
 		self._initializeDoneDict()
 		self.result_dirs={}
 		self.bad_images = []
 		self.sleep_minutes = 6
 		self.process_batch_count = 10
-                self.donedictlock=None
 
 	#=====================
 	def setWaitSleepMin(self,minutes):
