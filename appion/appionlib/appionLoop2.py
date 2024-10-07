@@ -492,10 +492,10 @@ class AppionLoop(appionScript.AppionScript):
                 prefixResults=self.etcd.get_prefix(self.params['rundir'])
                 self.donedict={}
                 for v,m in prefixResults:
-                        if m.key.decode("utf-8").split("/")[-1] == "commit":
-                                self.donedict["commit"]=v==b"True"
+                        if m.key.split("/")[-1] == "commit":
+                                self.donedict["commit"]=v=="True"
                         else:
-                                self.donedict[m.key.decode("utf-8").split("/")[-1]]=v==b"True"
+                                self.donedict[m.key.split("/")[-1]]=v=="True"
 
 		#Unlock DoneDict file
 		self._unlockDoneDict()
