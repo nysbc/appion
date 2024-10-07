@@ -549,7 +549,7 @@ class AppionScript(basicScript.BasicScript):
                 while not lockobtained:
                         self.imagelocks[dbid]=self.etcd.lock(lockfile,600)
                         lockobtained=self.imagelocks[dbid].acquire()
-                return lockobtained
+                return not lockobtained
 
 	def unlockParallel(self,dbid):
 		lockfile = '%s/%d' % (self.lockname,dbid)
