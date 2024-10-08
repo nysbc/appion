@@ -77,12 +77,12 @@ class AppionLoop(appionScript.AppionScript):
 				imgnum += 1
 
 				### CHECK IF IT IS OKAY TO START PROCESSING IMAGE
-				# If the file has been locked for more than 10 minutes worth of evaluations,
-				# we assume failure and remove it.
-                                self._lockDoneDict()
+                                donedictlockobtained=False
+                                while not donedictlockobtained:
+                                        donedictlockobtained=self._lockDoneDict()
 				if not self._startLoop(imgdata):
                                         self._unlockDoneDict()
-					continue
+				        continue
                                 else:
                                         self._unlockDoneDict()
 
@@ -439,12 +439,17 @@ class AppionLoop(appionScript.AppionScript):
                 while not lockobtained:
                         self.donedictlock=self.etcd.lock(lockname,600)
                         lockobtained=self.donedictlock.acquire()
-                return
+                return lockobtained
 
 	#=====================
 	def _unlockDoneDict(self):
-                if self.donedictlock:
-                        lockreleased = False
+                if type(self.donedictlock) is etcd3.locks.Lock:
+                        if self.donedictlock.is_acquire():
+                                lockreleased = True 
+                        else:
+                                lockreleased = False
+                else:
+                        return
                 while not lockreleased:
                         lockreleased=self.donedictlock.release()
                         self.donedictlock=None
