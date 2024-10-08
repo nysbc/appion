@@ -431,18 +431,19 @@ class AppionLoop(appionScript.AppionScript):
 
 	#=====================
 	def _lockDoneDict(self):
-                apDisplay.printMsg("Locking done dictionary")
+                apDisplay.printMsg("Locking done dictionary.")
                 if not self.donedictlock:
                         lockname = os.path.join("/lock",self.params['rundir'],"donedict")
                 lockobtained = False
                 while not lockobtained:
-                        self.donedictlock=self.etcd.lock(lockname,600)
+                        self.donedictlock=self.etcd.lock(lockname,30)
                         lockobtained=self.donedictlock.acquire()
+                apDisplay.printMsg("Done dictionary is locked.")
                 return lockobtained
 
 	#=====================
 	def _unlockDoneDict(self):
-                apDisplay.printMsg("Unlocking done dictionary")
+                apDisplay.printMsg("Unlocking done dictionary.")
                 if type(self.donedictlock) is etcd3.locks.Lock:
                         if not self.donedictlock.is_acquired():
                                 apDisplay.printMsg("Done dictionary is already unlocked.")
