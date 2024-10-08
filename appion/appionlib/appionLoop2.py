@@ -444,7 +444,7 @@ class AppionLoop(appionScript.AppionScript):
 	#=====================
 	def _unlockDoneDict(self):
                 if type(self.donedictlock) is etcd3.locks.Lock:
-                        if self.donedictlock.is_acquired():
+                        if not self.donedictlock.is_acquired():
                                 lockreleased = True 
                         else:
                                 lockreleased = False
