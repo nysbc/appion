@@ -77,9 +77,7 @@ class AppionLoop(appionScript.AppionScript):
 				imgnum += 1
 
 				### CHECK IF IT IS OKAY TO START PROCESSING IMAGE
-                                donedictlockobtained=False
-                                while not donedictlockobtained:
-                                        donedictlockobtained=self._lockDoneDict()
+                                self._lockDoneDict()
 				if not self._startLoop(imgdata):
                                         self._unlockDoneDict()
 				        continue
@@ -433,6 +431,7 @@ class AppionLoop(appionScript.AppionScript):
 
 	#=====================
 	def _lockDoneDict(self):
+                apDisplay.printMsg("Locking done dictionary")
                 if not self.donedictlock:
                         lockname = os.path.join("/lock",self.params['rundir'],"donedict")
                 lockobtained = False
@@ -443,11 +442,13 @@ class AppionLoop(appionScript.AppionScript):
 
 	#=====================
 	def _unlockDoneDict(self):
+                apDisplay.printMsg("Unlocking done dictionary")
                 if type(self.donedictlock) is etcd3.locks.Lock:
                         if not self.donedictlock.is_acquired():
-                                lockreleased = True 
-                        else:
                                 lockreleased = False
+                        else:
+                                apDisplay.printMsg("Done dictionary is already unlocked.")
+                                lockreleased = True
                 else:
                         return
                 while not lockreleased:
