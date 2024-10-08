@@ -525,6 +525,7 @@ class AppionScript(basicScript.BasicScript):
 		if proc.returncode > 0:
 			pieces = cmd.split(' ')
 			apDisplay.printWarning('AppionScript %s had an error. Please check its log file: \n%s' % (pieces[0].upper(),logfilepath))
+                        self.badprocess = True
 		else:
 			apDisplay.printMsg('AppionScript ran successfully')
 		apDisplay.printMsg('------------------------------------------------')

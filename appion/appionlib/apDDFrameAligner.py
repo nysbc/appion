@@ -100,6 +100,7 @@ class DDFrameAligner(object):
 		apDisplay.printMsg('Running: %s'% cmd)
 		self.proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
 		(stdoutdata, stderrdata) = self.proc.communicate()
+                self.badprocess = self.proc.returncode != 0
 
 		# write log file
 		output = stdoutdata

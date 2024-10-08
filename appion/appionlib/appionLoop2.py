@@ -37,6 +37,7 @@ class AppionLoop(appionScript.AppionScript):
 		self.bad_images = []
 		self.sleep_minutes = 6
 		self.process_batch_count = 10
+		self.badprocess = False
 
 	#=====================
 	def setWaitSleepMin(self,minutes):
@@ -66,7 +67,6 @@ class AppionLoop(appionScript.AppionScript):
 		self.preLoopFunctions()
 		### start the loop
 		self.notdone=True
-		self.badprocess = False
 		self.stats['startloop'] = time.time()
 		while self.notdone:
 			apDisplay.printColor("\nBeginning Main Loop", "green")
@@ -106,7 +106,7 @@ class AppionLoop(appionScript.AppionScript):
 					self.loopCleanUp(imgdata)
 				else:
 					apDisplay.printWarning("IMAGE FAILED; nothing inserted into database")
-					self.badprocess = False
+                                        self.badprocess = False
 					self.stats['lastpeaks'] = 0
 				### FINISH with custom functions
 
@@ -470,9 +470,9 @@ class AppionLoop(appionScript.AppionScript):
 		"""
 		write finished image (imgname) to done dictionary
 		"""
-
 		### set new parameters
 		if imgname != None:
+                        apDisplay.printMsg("Writing %s to donedict" % imgname)
                         self.etcd.put(os.path.join(self.params['rundir'],imgname), "True")
                 self.etcd.put(os.path.join(self.params['rundir'],'commit'), str(self.params['commit']))
 
