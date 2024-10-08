@@ -445,10 +445,10 @@ class AppionLoop(appionScript.AppionScript):
                 apDisplay.printMsg("Unlocking done dictionary")
                 if type(self.donedictlock) is etcd3.locks.Lock:
                         if not self.donedictlock.is_acquired():
-                                lockreleased = False
-                        else:
                                 apDisplay.printMsg("Done dictionary is already unlocked.")
                                 lockreleased = True
+                        else:
+                                lockreleased = False
                 else:
                         return
                 while not lockreleased:
