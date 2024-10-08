@@ -454,7 +454,7 @@ class AppionLoop(appionScript.AppionScript):
                         return
                 while not lockreleased:
                         lockreleased=self.donedictlock.release()
-                        self.donedictlock=None
+                self.donedictlock=None
                 return
 
 	#=====================
