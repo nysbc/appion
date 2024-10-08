@@ -122,12 +122,6 @@ class FrameStackLoop(apDDLoop.DDStackLoop):
 			apDisplay.printWarning(e.args[0])
 			return
 
-		if self.params['parallel'] and (os.path.isfile(self.dd.getFrameStackPath(temp=True)) or os.path.isfile(self.dd.getFrameStackPath())):
-			# This is a secondary image lock check, checking the first output of the process.
-			# It alone is not good enough
-			apDisplay.printWarning('Some other parallel process is working on the same image. Skipping')
-			return
-
 		# set other parameters
 		self.dd.setNewBinning(self.params['bin'])
 		self.nframes = self.dd.getNumberOfFrameSavedFromImageData(imgdata)
