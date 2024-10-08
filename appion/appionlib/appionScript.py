@@ -545,10 +545,10 @@ class AppionScript(basicScript.BasicScript):
 		for the first output in the function
 		'''
                 lockfile = os.path.join(self.lockname,self.params['rundir'], str(dbid))
-                lockobtained = False
-                while not lockobtained:
-                        self.imagelocks[dbid]=self.etcd.lock(lockfile,600)
-                        lockobtained=self.imagelocks[dbid].acquire()
+                self.imagelocks[dbid]=self.etcd.lock(lockfile,600)
+                lockobtained=self.imagelocks[dbid].acquire()
+                if lockobtained:
+                        apDisplay.printMsg("Lock obtained for %d" % dbid)
                 return not lockobtained
 
 	def unlockParallel(self,dbid):
