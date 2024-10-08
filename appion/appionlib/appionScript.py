@@ -544,7 +544,7 @@ class AppionScript(basicScript.BasicScript):
 		hosts. This is as safe as we can do.  If in doubt, add a secondary check
 		for the first output in the function
 		'''
-                lockfile = '%s/%d' % (self.lockname,dbid)
+                lockfile = os.path.join(self.lockname,self.params['rundir'], str(dbid))
                 lockobtained = False
                 while not lockobtained:
                         self.imagelocks[dbid]=self.etcd.lock(lockfile,600)
