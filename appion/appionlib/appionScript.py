@@ -546,7 +546,7 @@ class AppionScript(basicScript.BasicScript):
 		'''
                 lockfile = os.path.join(self.lockname,self.params['rundir'], str(dbid))
                 self.imagelocks[dbid]=self.etcd.lock(lockfile,600)
-                lockobtained=self.imagelocks[dbid].acquire()
+                lockobtained=self.imagelocks[dbid].acquire(timeout=0)
                 if lockobtained:
                         apDisplay.printMsg("Lock obtained for %d" % dbid)
                 return not lockobtained
