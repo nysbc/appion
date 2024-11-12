@@ -447,7 +447,7 @@ class DDFrameProcessing(DirectDetectorProcessing):
 		apDisplay.printMsg('frame flip debug: buffer session_frame_path: %s' % (session_frame_path,))
 		if session_frame_path is False:
 			if imagedata['session']['frame path']:
-				 session_frame_path = imagedata['session']['frame path']
+				session_frame_path = imagedata['session']['frame path']
 			else:
 				# raw frames are saved in a subdirctory of image path pre-3.0
 				imagepath = imagedata['session']['image path']

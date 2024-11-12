@@ -7,6 +7,7 @@ import time
 import math
 import random
 import etcd3
+import grpc
 #appion
 from appionlib import apDisplay
 from appionlib import apDatabase
@@ -32,7 +33,7 @@ class AppionLoop(appionScript.AppionScript):
 		self.setFunctionResultKeys()
 		self._setRunAndParameters()
 		#self.specialCreateOutputDirs()
-                self.donedictlock = None
+		self.donedictlock = None
 		self.result_dirs={}
 		self.bad_images = []
 		self.sleep_minutes = 6
@@ -77,12 +78,12 @@ class AppionLoop(appionScript.AppionScript):
 				imgnum += 1
 
 				### CHECK IF IT IS OKAY TO START PROCESSING IMAGE
-                                self._lockDoneDict()
+				self._lockDoneDict()
 				if not self._startLoop(imgdata):
-                                        self._unlockDoneDict()
-				        continue
-                                else:
-                                        self._unlockDoneDict()
+					self._unlockDoneDict()
+					continue
+				else:
+					self._unlockDoneDict()
 
 				### set the pixel size
 				self.params['apix'] = apDatabase.getPixelSize(imgdata)
@@ -106,7 +107,7 @@ class AppionLoop(appionScript.AppionScript):
 					self.loopCleanUp(imgdata)
 				else:
 					apDisplay.printWarning("IMAGE FAILED; nothing inserted into database")
-                                        self.badprocess = False
+					self.badprocess = False
 					self.stats['lastpeaks'] = 0
 				### FINISH with custom functions
 
@@ -431,39 +432,45 @@ class AppionLoop(appionScript.AppionScript):
 
 	#=====================
 	def _lockDoneDict(self):
-                apDisplay.printMsg("Locking done dictionary.")
-                if not self.donedictlock:
-                        lockname = os.path.join("/lock",self.params['rundir'],"donedict")
-                lockobtained = False
-                while not lockobtained:
-                        self.donedictlock=self.etcd.lock(lockname,30)
-                        lockobtained=self.donedictlock.acquire()
-                apDisplay.printMsg("Done dictionary is locked.")
-                return lockobtained
+		apDisplay.printMsg("Locking done dictionary.")
+		if not self.donedictlock:
+			lockname = os.path.join("/lock",self.params['rundir'],"donedict")
+			lockobtained = False
+			while not lockobtained:
+				try:
+					self.donedictlock=self.etcd.lock(lockname,30)
+					lockobtained=self.donedictlock.acquire()
+				except grpc.RpcError:
+					return False
+		apDisplay.printMsg("Done dictionary is locked.")
+		return lockobtained
 
 	#=====================
 	def _unlockDoneDict(self):
-                apDisplay.printMsg("Unlocking done dictionary.")
-                if type(self.donedictlock) is etcd3.locks.Lock:
-                        if not self.donedictlock.is_acquired():
-                                apDisplay.printMsg("Done dictionary is already unlocked.")
-                                lockreleased = True
-                        else:
-                                lockreleased = False
-                else:
-                        return
-                while not lockreleased:
-                        lockreleased=self.donedictlock.release()
-                self.donedictlock=None
-                return
+		apDisplay.printMsg("Unlocking done dictionary.")
+		if type(self.donedictlock) is etcd3.locks.Lock:
+			if not self.donedictlock.is_acquired():
+				apDisplay.printMsg("Done dictionary is already unlocked.")
+				lockreleased = True
+			else:
+				lockreleased = False
+		else:
+			return
+		while not lockreleased:
+			try:
+				lockreleased=self.donedictlock.release()
+			except grpc.RpcError:
+				lockreleased=False
+		self.donedictlock=None
+		return
 
 	#=====================
 	def _readDoneDict(self, imgname=None):
 		"""
 		reads done dictionary
 		"""
-                result=self.etcd.get(os.path.join(self.params['rundir'],imgname))
-                return result[0]=="True"
+		result=self.etcd.get(os.path.join(self.params['rundir'],imgname))
+		return result[0]=="True"
 
 	#=====================
 	def _writeDoneDict(self, imgname=None):
@@ -724,8 +731,8 @@ class AppionLoop(appionScript.AppionScript):
 		# was last tested will not be called rejected, but done
 		# This speeds up this function when rerun but means past image
 		# status can not be reverted.
-                if self._readDoneDict(imgname):
-                        return True, 'done'
+		if self._readDoneDict(imgname):
+			return True, 'done'
 		if self.reprocessImage(imgdata) is False:
 			self._writeDoneDict(imgname)
 			reason = 'reproc'

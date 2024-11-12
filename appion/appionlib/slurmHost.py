@@ -5,11 +5,11 @@ import subprocess
 class SlurmHost(processingHost.ProcessingHost):
 	def __init__ (self, command, jobType, configDict=None):
             
-                # added so detail on what kind of job is available in the class
-                # for web service that generates headers.  The plan is for this custom class to go away :)
-                # dcshrum@fsu.edu
-                self.command = command
-                self.jobType = jobType
+		# added so detail on what kind of job is available in the class
+		# for web service that generates headers.  The plan is for this custom class to go away :)
+		# dcshrum@fsu.edu
+		self.command = command
+		self.jobType = jobType
         
 		processingHost.ProcessingHost.__init__(self)  #initialize parent
 		self.type="Slurm"
@@ -17,7 +17,7 @@ class SlurmHost(processingHost.ProcessingHost):
 		self.statusCommand="squeue"
 		self.scriptPrefix="#SBATCH"
 		if configDict:
-			self.configure(configDict)
+				self.configure(configDict)
                 # print "SlurmHost object created\n"            
                             
                 

@@ -102,7 +102,7 @@ class ProcessingHost (object):
     def headersFromWebSevice (self, jobObject=None):
         if jobObject != None:
             currentJob=jobObject
-	elif self.currentJob != None:
+        elif self.currentJob != None:
             currentJob=self.currentJob
         else:
             raise UnboundLocalError ("Current Job not set")
@@ -129,7 +129,7 @@ class ProcessingHost (object):
             headerText = headerText + customExec + "\n"
             
         self.execCommand=headerArray['customResponse']['execCommand']
-	self.statusCommand=headerArray['customResponse']['statusCommand']
+        self.statusCommand=headerArray['customResponse']['statusCommand']
         return headerText
 
 
