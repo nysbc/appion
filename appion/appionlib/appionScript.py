@@ -554,6 +554,9 @@ class AppionScript(basicScript.BasicScript):
 				apDisplay.printMsg("Lock obtained for %d" % dbid)
 		except grpc.RpcError:
 			lockobtained=False
+		except Exception as e:
+			lockobtained=False
+			apDisplay.printMsg("Could not obtain lock.  Error message: %s" % e)
 		return not lockobtained
 
 	def unlockParallel(self,dbid):
@@ -565,6 +568,9 @@ class AppionScript(basicScript.BasicScript):
 					lockreleased=self.imagelocks[dbid].release()
 			except grpc.RpcError:
 				lockreleased=False
+			except Exception as e:
+				lockreleased=False
+				apDisplay.printMsg("Could not release lock.  Error message: %s" % e)				
 		return lockreleased
 	#=====================
 

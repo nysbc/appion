@@ -483,9 +483,11 @@ class AppionLoop(appionScript.AppionScript):
 		"""
 		### set new parameters
 		if imgname != None:
-                        apDisplay.printMsg("Writing %s to donedict" % imgname)
-                        self.etcd.put(os.path.join(self.params['rundir'],imgname), "True")
-                self.etcd.put(os.path.join(self.params['rundir'],'commit'), str(self.params['commit']))
+			apDisplay.printMsg("Writing %s to donedict" % imgname)
+			# Associating each key in the donedict with a TTL ensures that the etcd instance will clean itself up automatically.
+			imageLease=self.etcd.lease(ttl=864000)
+			self.etcd.put(os.path.join(self.params['rundir'],imgname), "True", lease=imageLease.lease_id)
+		self.etcd.put(os.path.join(self.params['rundir'],'commit'), str(self.params['commit']))
 
 
 	#=====================
