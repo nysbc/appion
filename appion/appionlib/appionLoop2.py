@@ -442,6 +442,8 @@ class AppionLoop(appionScript.AppionScript):
 					lockobtained=self.donedictlock.acquire()
 				except grpc.RpcError:
 					return False
+				except Exception as e:
+					apDisplay.printMsg("Could not obtain lock.  Error message: %s" % e)
 		apDisplay.printMsg("Done dictionary is locked.")
 		return lockobtained
 
@@ -461,6 +463,8 @@ class AppionLoop(appionScript.AppionScript):
 				lockreleased=self.donedictlock.release()
 			except grpc.RpcError:
 				lockreleased=False
+			except Exception as e:
+				apDisplay.printMsg("Could not release lock.  Error message: %s" % e)
 		self.donedictlock=None
 		return
 
