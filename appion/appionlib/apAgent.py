@@ -105,25 +105,8 @@ class Agent (basicAgent.BasicAgent):
 		print("Job type: %s"%(jobType))	
 
 
-		if "emanrecon" == jobType:
-			jobInstance = apRefineJobEman.EmanRefineJob(command)
-		elif "frealignrecon" == jobType:
-			jobInstance = apRefineJobFrealign.FrealignRefineJob(command)
-		elif "xmipprecon" == jobType:
-			jobInstance = apRefineJobXmipp.XmippSingleModelRefineJob(command)
-		elif "relionrecon" == jobType:
-			jobInstance = apRefineJobRelion.RelionSingleModelRefineJob(command)
-		elif "xmippml3d" == jobType:
-			jobInstance = apRefineJobXmippML3D.XmippML3DRefineJob(command)
-		elif "sparxisac" == jobType:
-			jobInstance = apSparxISAC.ISACJob(command)
-		elif "jobtest" == jobType:
-			jobInstance = jobtest.jobtestClass()
-		elif "gctf" == jobType:
-			jobInstance = apGpuJob.GpuJob(command)
 
-		else:
-			jobInstance = apGenericJob.genericJob(command)
+		jobInstance = apGenericJob.genericJob(command)
 		print(jobType, command)
 		return jobInstance
 
