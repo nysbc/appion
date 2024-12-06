@@ -6,6 +6,7 @@ import socket # For hostname
 import requests
 import json
 import pwd
+from jinja2 import Environment, FileSystemLoader
 
 class ProcessingHost (object):
     def __init__ (self):
@@ -148,24 +149,14 @@ class ProcessingHost (object):
         #Generate the processing host specific headers for the job file
         host = socket.gethostname()
 
-                
-        # dcshrum@fsu.edu
-        # I'm leaving my email so it's easy to locate my code :)
-        header = None
-        if (self.destinationsURL):
-            header = self.headersFromWebSevice(currentJob)
-        else:         
-            header = self.generateHeaders(currentJob)
-	
-        commandList = currentJob.getCommandList()		
+        commandList = currentJob.getCommandList()
+        commands="\n".join(commandList)
        
         try:
-            jobFile.write(header)		   
-            jobFile.write("\n# Target Host: " + host + "\n")
-            jobFile.write("# This job file has been created for the %s processing host. \n# Changes may be required to run this on another host.\n\n" % (host))
-            for line in commandList:
-                jobFile.write(line + '\n')
-        except IOError, e:
+            env = Environment(loader=FileSystemLoader("/etc/appion/templates"))
+            template = env.get_template("slurm_job.sh.j2")
+            jobFile.write(template.render(commands=commands))
+        except Exception as e:
             sys.stderr.write("Could not write to job file" + jobFile.name + ": " + str(e))
             return False
         #Job file was successfully written 
