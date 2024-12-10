@@ -152,13 +152,9 @@ class ProcessingHost (object):
         commandList = currentJob.getCommandList()
         commands="\n".join(commandList)
        
-        try:
-            env = Environment(loader=FileSystemLoader("/etc/appion/templates"))
-            template = env.get_template("slurm_job.sh.j2")
-            jobFile.write(template.render(commands=commands))
-        except Exception as e:
-            sys.stderr.write("Could not write to job file" + jobFile.name + ": " + str(e))
-            return False
+        env = Environment(loader=FileSystemLoader("/etc/appion/templates"))
+        template = env.get_template("slurm_job.sh.j2")
+        jobFile.write(template.render(commands=commands))
         #Job file was successfully written 
         return True
 	   
