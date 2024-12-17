@@ -546,26 +546,26 @@ class ImageLoader(appionLoop2.AppionLoop):
 		upfiles = glob.glob(imgdir)
 		if not upfiles:
 			apDisplay.printError("No images for upload in '%s'"%self.params['imgdir'])
-		if self.donedict and len(self.donedict) > 1:
-			apDisplay.printMsg("Cleaning up alreadly uploaded images")
-			newupfiles = []
-			count = 0
-			for imgfile in upfiles:
-				count += 1
-				if count % 10 == 0:
-					sys.stderr.write("..%d "%(len(newupfiles)))
-				basename = os.path.basename(imgfile)
-				justbase = os.path.splitext(basename)[0]
-				newfile = self.params['sessionname']+"_"+justbase
-				try:
-					self.donedict[newfile]
-				except:
-					newupfiles.append(imgfile)
-			sys.stderr.write("\n")
-			if len(newupfiles) > 0:
-				apDisplay.printMsg("Removed %d of %d files :: %d remain to process"%
-					(len(upfiles)-len(newupfiles), len(upfiles), len(newupfiles)))
-				upfiles = newupfiles
+		# if self.donedict and len(self.donedict) > 1:
+		# 	apDisplay.printMsg("Cleaning up alreadly uploaded images")
+		# 	newupfiles = []
+		# 	count = 0
+		# 	for imgfile in upfiles:
+		# 		count += 1
+		# 		if count % 10 == 0:
+		# 			sys.stderr.write("..%d "%(len(newupfiles)))
+		# 		basename = os.path.basename(imgfile)
+		# 		justbase = os.path.splitext(basename)[0]
+		# 		newfile = self.params['sessionname']+"_"+justbase
+		# 		try:
+		# 			self.donedict[newfile]
+		# 		except:
+		# 			newupfiles.append(imgfile)
+		# 	sys.stderr.write("\n")
+		# 	if len(newupfiles) > 0:
+		# 		apDisplay.printMsg("Removed %d of %d files :: %d remain to process"%
+		# 			(len(upfiles)-len(newupfiles), len(upfiles), len(newupfiles)))
+		# 		upfiles = newupfiles
 		upfiles.sort()
 		for upfile in upfiles:
 			fname = os.path.abspath(upfile)
