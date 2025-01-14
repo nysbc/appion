@@ -95,18 +95,11 @@ class DDFrameAligner(object):
 		'''
 		# Construct the command line with defaults
 		cmd = self.makeFrameAlignmentCommand()
+		cmd = "hq submit --wait --max-fails 3 --time-limit=5min --cpus 2 --resource gpus=1 %s" % cmd
 
 		# run as subprocess
 		apDisplay.printMsg('Running: %s'% cmd)
-		self.proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
-		(stdoutdata, stderrdata) = self.proc.communicate()
-                self.badprocess = self.proc.returncode != 0
-
-		# write log file
-		output = stdoutdata
-		self.writeLogFile(output)
-		# stream stderrdata even though it is likely empty due to piping to stdout
-		print stderrdata
+		self.proc = subprocess.Popen(cmd, shell=True)
 
 	def getValidAlignOptionMappings(self):
 		'''

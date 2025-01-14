@@ -20,6 +20,7 @@ from appionlib import apDDprocess
 from appionlib.apCtf import ctfdb
 from appionlib.apCtf import ctfinsert
 from appionlib.apCtf import ctffind4AvgRotPlot
+import stat
 
 class ctfEstimateLoop(appionLoop2.AppionLoop):
 	"""
@@ -157,40 +158,6 @@ class ctfEstimateLoop(appionLoop2.AppionLoop):
 
 	#======================
 	def processImage(self, imgdata):
-		"""
-		Input and output matches ctffind 4.1.5
-		time ./ctffind4 << eof
-		Input image file name                  [input.mrc] : 15aug13neil2_14jul14d_05sq_012hl_02ed-a.mrc
-		Output diagnostic filename
-		[diagnostic_output.mrc]                            : 15aug13neil2_14jul14d_05sq_012hl_02ed-a-pow.mrc
-		Pixel size                                   [1.0] : 2.7
-		Acceleration voltage                       [300.0] : 300 
-		Spherical aberration                         [2.7] : 2.7
-		Amplitude contrast                          [0.07] : 0.07
-		Size of power spectrum to compute            [512] : 512
-		Minimum resolution                          [30.0] : 20
-		Maximum resolution                           [5.0] : 5
-		Minimum defocus                           [5000.0] : 
-		Maximum defocus                          [50000.0] : 
-		Defocus search step                        [500.0] : 
-		Do you know what astigmatism is present       [no] : 
-		Slower, more exhaustive search                [no] : 
-		Use a restraint on astigmatism               [yes] : 
-		Expected (tolerated) astigmatism           [100.0] : 
-		Find additional phase shift?                  [no] : 
-		Do you want to set expert options?            [no] : 
-		"""
-		paramInputOrder = ['input',]
-		if self.params['ddstackid']:
-			paramInputOrder.extend(['is_movie','num_frame_avg'])
-		paramInputOrder.extend( ['output', 'apix', 'kv', 'cs', 'ampcontrast', 'fieldsize',
-			'resmin', 'resmax', 'defmin', 'defmax', 'defstep', 
-			'known_astig', 'exhaustive_astig_search','restrain_astig', 'expect_astig', 'phase',])
-		# finalize paramInputOrder
-		if self.params['shift_phase']:
-			paramInputOrder.extend(['min_phase_shift','max_phase_shift','phase_search_step'])
-		paramInputOrder.append('expert_opts')
-		paramInputOrder.append('newline')
 
 		#get Defocus in Angstroms
 		self.ctfvalues = {}
@@ -249,10 +216,10 @@ class ctfEstimateLoop(appionLoop2.AppionLoop):
 
 		# inputparams defocii and astig are in Angstroms
 		inputparams = {
-			'orig': origpath,
 			'input': apDisplay.short(imgdata['filename'])+".mrc",
+			'is_movie': self.getYesNoParamValue('is_movie'),
+			'num_frame_avg': self.params['num_frame_avg'],
 			'output': apDisplay.short(imgdata['filename'])+"-pow.mrc",
-
 			'apix': apix,
 			'kv': imgdata['scope']['high tension']/1000.0,			
 			'cs': self.params['cs'],
@@ -260,7 +227,8 @@ class ctfEstimateLoop(appionLoop2.AppionLoop):
 			'fieldsize': self.params['fieldsize'],
 			'resmin': self.params['resmin'],
 			'resmax': imageresmax,
-			
+			'defmin': None,
+			'defmax': None,
 			'defstep': self.params['defstep']*10000., #round(defocus/32.0, 1),
 			'known_astig': self.getKnownAstigValue(),
 			'exhaustive_astig_search': self.getExhaustiveAstigSearchValue(),
@@ -274,8 +242,7 @@ class ctfEstimateLoop(appionLoop2.AppionLoop):
 			'expert_opts': 'no',
 			'newline': '\n',
 			# For movie
-			'is_movie': self.getYesNoParamValue('is_movie'),
-			'num_frame_avg': self.params['num_frame_avg'],
+			'orig': origpath,
 		}
 
 		defrange = self.params['defstep'] * self.params['numstep'] * 1e4 ## do 25 steps in either direction # in angstrum
@@ -302,21 +269,47 @@ class ctfEstimateLoop(appionLoop2.AppionLoop):
 			# program crashes if this file exists
 			apFile.removeFile(inputparams['output'])
 
-		t0 = time.time()
-		apDisplay.printMsg("running ctf estimation at "+time.asctime())
-		for paramName in paramInputOrder:
-			apDisplay.printColor("%s = %s"%(paramName,inputparams[paramName]),"magenta")
-		print ""
-		ctfprogproc = subprocess.Popen(self.ctfprgmexe, shell=True, stdin=subprocess.PIPE,)		
-		apDisplay.printColor(self.ctfprgmexe, "magenta")
-		for paramName in paramInputOrder:
-			apDisplay.printColor(inputparams[paramName],"magenta")
-			ctfprogproc.stdin.write(str(inputparams[paramName])+'\n')
-		ctfprogproc.communicate()
-		tdiff = time.time()-t0
-		apDisplay.printMsg("ctf estimation completed in "+apDisplay.timeString(tdiff))
-		if tdiff < 1.0:
-			apDisplay.printError("Failed to run CTFFIND4 program...")
+		prompts={
+			'Input image file name': inputparams['input'],
+			'Input is a movie (stack of frames)' : inputparams['is_movie'],
+			'Number of frames to average together' : inputparams['num_frame_avg'],
+			'Output diagnostic image file name' : inputparams['output'],
+			'Pixel size' : inputparams['apix'],
+			'Acceleration voltage' : inputparams['kv'],
+			'Spherical aberration' : inputparams['cs'],
+			'Amplitude contrast' : inputparams['ampcontrast'],
+			'Size of amplitude spectrum to compute' : inputparams['fieldsize'],
+			'Minimum resolution' : inputparams['resmin'],
+			'Maximum resolution' : inputparams['resmax'],
+			'Minimum defocus' : inputparams['defmin'],
+			'Maximum defocus' : inputparams['defmax'],
+			'Defocus search step' : inputparams['defstep'],
+			'Do you know what astigmatism is present?' : inputparams['known_astig'],
+			'Slower, more exhaustive search?' : inputparams['exhaustive_astig_search'],
+			'Known astigmatism' : '0.0',
+			'Known astigmatism angle': '0.0',
+			'Use a restraint on astigmatism?' :inputparams['restrain_astig'],
+			'Expected (tolerated) astigmatism': inputparams['expect_astig'],
+			'Find additional phase shift?' : inputparams['phase'],
+			'Minimum phase shift (rad)' : inputparams['min_phase_shift'],
+			'Maximum phase shift (rad)' : inputparams['max_phase_shift'],
+			'Phase shift search step' : inputparams['phase_search_step'],
+			'Do you want to set expert options?' : inputparams['expert_opts']
+		}
+
+		expectscript=imgdata['filename']+".exp"
+		with open(expectscript, "w") as f:
+			f.write("#!/usr/bin/expect\n\n")
+			f.write("set timeout 10\n\n")
+			f.write("spawn %s\n\n" % self.ctfprgmexe)
+			for k,v in prompts.items():
+				f.write("expect \"%s\"\n" % k)
+				f.write("send \"%s\\n\"\n\n" % str(v))
+			f.write("expect eof")
+		os.chmod(expectscript, stat.S_IRWXU | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
+
+		cmd = "hq submit --wait --max-fails 3 --time-limit=5min --cpus 2 %s" % expectscript
+		ctfprogproc = subprocess.Popen(cmd, shell=True)
 
 		### cannot run ctffind_plot_results.sh on CentOS 6
 		# This script requires gnuplot version >= 4.6, but you have version 4.2
