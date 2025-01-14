@@ -21,6 +21,7 @@ from appionlib.apCtf import ctfdb
 from appionlib.apCtf import ctfinsert
 from appionlib.apCtf import ctffind4AvgRotPlot
 import stat
+import getpass
 
 class ctfEstimateLoop(appionLoop2.AppionLoop):
 	"""
@@ -297,18 +298,17 @@ class ctfEstimateLoop(appionLoop2.AppionLoop):
 			'Do you want to set expert options?' : inputparams['expert_opts']
 		}
 
-		expectscript=imgdata['filename']+".exp"
+		expectscript=imgdata['filename']+"_ctffind4.exp"
 		with open(expectscript, "w") as f:
-			f.write("#!/usr/bin/expect\n\n")
 			f.write("set timeout 10\n\n")
 			f.write("spawn %s\n\n" % self.ctfprgmexe)
 			for k,v in prompts.items():
 				f.write("expect \"%s\"\n" % k)
 				f.write("send \"%s\\n\"\n\n" % str(v))
 			f.write("expect eof")
-		os.chmod(expectscript, stat.S_IRWXU | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
+		os.chmod(expectscript, stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
 
-		cmd = "hq submit --wait --max-fails 3 --time-limit=5min --cpus 2 %s" % expectscript
+		cmd = "hq submit --wait --max-fails 3 --time-limit=5min --cpus 2 sudo -u %s /usr/bin/expect %s" % (getpass.getuser(), expectscript)
 		ctfprogproc = subprocess.Popen(cmd, shell=True)
 
 		### cannot run ctffind_plot_results.sh on CentOS 6

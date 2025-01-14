@@ -4,6 +4,7 @@ import socket
 import os
 import re
 import subprocess
+import getpass
 
 class DDFrameAligner(object):
 	# testbin.py is a test script in appion/bin as an example
@@ -95,6 +96,7 @@ class DDFrameAligner(object):
 		'''
 		# Construct the command line with defaults
 		cmd = self.makeFrameAlignmentCommand()
+		cmd = "sudo -u %s %s" % (getpass.getuser(), cmd)
 		cmd = "hq submit --wait --max-fails 3 --time-limit=5min --cpus 2 --resource gpus=1 %s" % cmd
 
 		# run as subprocess
