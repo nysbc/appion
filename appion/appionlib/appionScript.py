@@ -10,8 +10,6 @@ import time
 import subprocess
 import glob
 from optparse import OptionParser
-import etcd3
-import grpc
 #appion
 from appionlib import basicScript
 from appionlib import apParam
@@ -27,6 +25,7 @@ import sinedon
 from pyami import mem
 from pyami import version
 from pyami import fileutil
+from fcntl import flock, LOCK_EX, LOCK_UN
 
 #=====================
 #=====================
@@ -36,6 +35,7 @@ class AppionScript(basicScript.BasicScript):
 		"""
 		Starts a new function and gets all the parameters
 		"""
+		self.lockfile=None
 		### setup some expected values
 		self.successful_run = False
 		self.clusterjobdata = None
@@ -64,7 +64,6 @@ class AppionScript(basicScript.BasicScript):
 # 			time.sleep(loadavg)
 # 			apDisplay.printMsg("New load average "+str(round(os.getloadavg()[0],2)))
 		self.setLockname('lock')
-		self.imagelocks={}
 
 		### setup default parser: run directory, etc.
 		self.setParams(optargs,useglobalparams)
@@ -108,7 +107,6 @@ class AppionScript(basicScript.BasicScript):
 
 		### any custom init functions go here
 		self.onInit()
-		self.etcd=etcd3.client("semc-etcd01.semc.nysbc.org")
 
 	#=====================
 	def argumentFromParamDest(self, dest):
@@ -526,7 +524,6 @@ class AppionScript(basicScript.BasicScript):
 		if proc.returncode > 0:
 			pieces = cmd.split(' ')
 			apDisplay.printWarning('AppionScript %s had an error. Please check its log file: \n%s' % (pieces[0].upper(),logfilepath))
-			self.badprocess = True
 		else:
 			apDisplay.printMsg('AppionScript ran successfully')
 		apDisplay.printMsg('------------------------------------------------')
@@ -534,44 +531,31 @@ class AppionScript(basicScript.BasicScript):
 
 	#=====================
 	def setLockname(self,name):
-		self.lockname = '/'+name
+		self.lockname = '_'+name
 
 	def cleanParallelLock(self):
-		for dbid in self.imagelocks.keys():
-			self.unlockParallel(dbid)
-                        
+		for file in glob.glob('%s*' % self.lockname):
+			os.remove(file)
+
 	def lockParallel(self,dbid):
-		'''
-		Check and create lock for dbid when running multiple instances on different
-		hosts. This is as safe as we can do.  If in doubt, add a secondary check
-	for the first output in the function
-		'''
-		lockfile = os.path.join(self.lockname,self.params['rundir'], str(dbid))
+		lock_file = '%s%d' % (self.lockname,dbid)
+		self.lockfile=fileutil.open_if_not_exists(lock_file)
 		try:
-			self.imagelocks[dbid]=self.etcd.lock(lockfile,600)
-			lockobtained=self.imagelocks[dbid].acquire(timeout=0)
-			if lockobtained:
-				apDisplay.printMsg("Lock obtained for %d" % dbid)
-		except grpc.RpcError:
-			lockobtained=False
-		except Exception as e:
-			lockobtained=False
-			apDisplay.printMsg("Could not obtain lock.  Error message: %s" % e)
-		return not lockobtained
+			flock(self.lockfile,LOCK_EX)
+		except:
+			return False
+		return True
 
 	def unlockParallel(self,dbid):
-		lockreleased=False
-		if dbid in self.imagelocks.keys():
-			try:
-				while self.imagelocks[dbid].is_acquired():
-					apDisplay.printMsg("Releasing lock for %d" % dbid)
-					lockreleased=self.imagelocks[dbid].release()
-			except grpc.RpcError:
-				lockreleased=False
-			except Exception as e:
-				lockreleased=False
-				apDisplay.printMsg("Could not release lock.  Error message: %s" % e)				
-		return lockreleased
+		lockfile = '%s%d' % (self.lockname,dbid)
+		apDisplay.printWarning('removing %s' % lockfile)
+		try:
+			flock(self.lockfile, LOCK_UN)
+			self.lockfile.close()
+			os.remove(lockfile)
+		except:
+			return False
+		return True
 	#=====================
 
 class TestScript(AppionScript):
