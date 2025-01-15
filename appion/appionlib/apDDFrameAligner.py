@@ -97,7 +97,7 @@ class DDFrameAligner(object):
 		# Construct the command line with defaults
 		cmd = self.makeFrameAlignmentCommand()
 		cmd = "sudo -u %s %s" % (getpass.getuser(), cmd)
-		cmd = "hq submit --server-dir %s --wait --max-fails 3 --time-limit=5min --cpus 2 --resource gpus=1 %s" % (os.getenv("HQ_SERVER_DIR","/common/etc/hq"), cmd)
+		cmd = "hq --server-dir %s submit --cwd --wait --max-fails 3 --time-limit=5min --cpus 2 --resource gpus=1 %s" % (os.getenv("HQ_SERVER_DIR","/common/etc/hq/motioncor2"), os.getenv("HQ_CWD", "/common/sw/hq/motioncor2/jobs/hq-current"), cmd)
 
 		# run as subprocess
 		apDisplay.printMsg('Running: %s'% cmd)

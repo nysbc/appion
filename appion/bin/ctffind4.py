@@ -308,7 +308,7 @@ class ctfEstimateLoop(appionLoop2.AppionLoop):
 			f.write("expect eof")
 		os.chmod(expectscript, stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
 
-		cmd = "hq submit --server-dir %s --wait --max-fails 3 --time-limit=5min --cpus 2 sudo -u %s /usr/bin/expect %s" % (os.getenv("HQ_SERVER_DIR","/common/etc/hq"), getpass.getuser(), expectscript)
+		cmd = "hq --server-dir %s submit --cwd %s --wait --max-fails 3 --time-limit=5min --cpus 2 sudo -u %s /usr/bin/expect %s" % (os.getenv("HQ_SERVER_DIR","/common/etc/hq/ctffind4"), os.getenv("HQ_CWD", "/common/sw/hq/ctffind4/jobs/hq-current"), getpass.getuser(), expectscript)
 		ctfprogproc = subprocess.Popen(cmd, shell=True)
 
 		### cannot run ctffind_plot_results.sh on CentOS 6
