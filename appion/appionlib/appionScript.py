@@ -25,7 +25,7 @@ import sinedon
 from pyami import mem
 from pyami import version
 from pyami import fileutil
-from fcntl import flock, LOCK_EX, LOCK_UN
+from fcntl import flock, LOCK_EX, LOCK_UN, LOCK_NB
 
 #=====================
 #=====================
@@ -541,7 +541,7 @@ class AppionScript(basicScript.BasicScript):
 		lock_file = '%s%d' % (self.lockname,dbid)
 		self.lockfile=fileutil.open_if_not_exists(lock_file)
 		try:
-			flock(self.lockfile,LOCK_EX)
+			flock(self.lockfile, LOCK_EX | LOCK_NB)
 		except:
 			return False
 		return True

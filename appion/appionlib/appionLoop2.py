@@ -958,6 +958,11 @@ class AppionLoop(appionScript.AppionScript):
 		ttotal = time.time() - self.stats['startloop'] - self.stats['waittime']
 		apDisplay.printColor("COMPLETE LOOP:\t"+apDisplay.timeString(ttotal)+
 			" for "+str(self.stats["count"]-1)+" images","green")
+        # Add a marker file here.
+		markerFilePath=os.path.join(self.params['rundir'] , "DONE")
+		if not os.path.exists(markerFilePath):
+			with open(markerFilePath, "w") as f:
+				f.write("Loop completed at: %s" % time.asctime())
 		appionScript.AppionScript.close(self)
 
 
