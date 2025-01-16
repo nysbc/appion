@@ -159,7 +159,7 @@ class ctfEstimateLoop(appionLoop2.AppionLoop):
 	def processImage(self, imgdata):
 		"""
 		Input and output matches ctffind 4.1.5
-		time ./ctffind4 << eof
+		time ./ctffind << eof
 		Input image file name                  [input.mrc] : 15aug13neil2_14jul14d_05sq_012hl_02ed-a.mrc
 		Output diagnostic filename
 		[diagnostic_output.mrc]                            : 15aug13neil2_14jul14d_05sq_012hl_02ed-a-pow.mrc
@@ -177,7 +177,9 @@ class ctfEstimateLoop(appionLoop2.AppionLoop):
 		Slower, more exhaustive search                [no] : 
 		Use a restraint on astigmatism               [yes] : 
 		Expected (tolerated) astigmatism           [100.0] : 
-		Find additional phase shift?                  [no] : 
+		Find additional phase shift?                  [no] :
+		Determine sample tilt?                        [no] :
+		Determine samnple thickness?                  [No] :
 		Do you want to set expert options?            [no] : 
 		"""
 		paramInputOrder = ['input',]
@@ -189,6 +191,8 @@ class ctfEstimateLoop(appionLoop2.AppionLoop):
 		# finalize paramInputOrder
 		if self.params['shift_phase']:
 			paramInputOrder.extend(['min_phase_shift','max_phase_shift','phase_search_step'])
+		paramInputOrder.append('sample_tilt')
+		paramInputOrder.append('sample_thickness')
 		paramInputOrder.append('expert_opts')
 		paramInputOrder.append('newline')
 
@@ -271,6 +275,8 @@ class ctfEstimateLoop(appionLoop2.AppionLoop):
 			'min_phase_shift': math.radians(self.params['min_phase_shift']),
 			'max_phase_shift': math.radians(self.params['max_phase_shift']), 
 			'phase_search_step': math.radians(self.params['phase_search_step']),
+			'sample_tilt': 'no',
+			'sample_thickness': 'no',
 			'expert_opts': 'no',
 			'newline': '\n',
 			# For movie
@@ -383,7 +389,7 @@ class ctfEstimateLoop(appionLoop2.AppionLoop):
 
 	def convertCtffind4Resolution(self,res_str):
 		res_float = float(res_str)
-		# ctffind4 output inf if not well fitted
+		# ctffind5 output inf if not well fitted
 		if res_float == float('inf'):
 			# return a number as database can not take inf
 			return 100000.0
