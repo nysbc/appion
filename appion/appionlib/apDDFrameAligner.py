@@ -303,11 +303,11 @@ class MotionCor2_UCSF(DDFrameAligner):
 
 	def getInputCommand(self):
 		if self.framestackpath.endswith('.tif'):
-			cmd = '-InTiff %s' % self.framestackpath
+			cmd = '-InTiff %s' % os.path.abspath(self.framestackpath)
 		elif self.framestackpath.endswith('.eer'):
-			cmd = '-InEer %s' % self.framestackpath
+			cmd = '-InEer %s' % os.path.abspath(self.framestackpath)
 		else:
-			cmd = '-InMrc %s' % self.framestackpath
+			cmd = '-InMrc %s' % os.path.abspath(self.framestackpath)
 		return cmd
 
 	def makeFrameAlignmentCommand(self):
@@ -321,7 +321,7 @@ class MotionCor2_UCSF(DDFrameAligner):
 
 		# Construct the command line with defaults
 
-		cmd = '%s %s -OutMrc %s' % (self.executable, self.getInputCommand(), self.aligned_sumpath)
+		cmd = '%s %s -OutMrc %s' % (self.executable, self.getInputCommand(), os.path.abspath(self.aligned_sumpath))
 
 		if self.alignparams['is_eer']:
 			# binning from the upsampled stack

@@ -265,10 +265,10 @@ class ctfEstimateLoop(appionLoop2.AppionLoop):
 			apFile.removeFile(inputparams['output'])
 
 		prompts={
-			'Input image file name': inputparams['input'],
+			'Input image file name': os.path.abspath(inputparams['input']),
 			'Input is a movie (stack of frames)' : inputparams['is_movie'],
 			'Number of frames to average together' : inputparams['num_frame_avg'],
-			'Output diagnostic image file name' : inputparams['output'],
+			'Output diagnostic image file name' : os.path.abspath(inputparams['output']),
 			'Pixel size' : inputparams['apix'],
 			'Acceleration voltage' : inputparams['kv'],
 			'Spherical aberration' : inputparams['cs'],
