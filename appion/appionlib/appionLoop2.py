@@ -478,7 +478,7 @@ class AppionLoop(appionScript.AppionScript):
 		if not os.path.isfile(self.donedictfile):
 			try:
 				apDisplay.printWarning('creating %s' % self.donedictfile)
-				f=open(self.donedictfile, 'x', 0666)
+				f=open(self.donedictfile, 'a', 0666)
 				f.close()
 			except:
 				apDisplay.printWarning('%s already exists' % self.donedictfile)
