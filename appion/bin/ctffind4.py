@@ -299,7 +299,7 @@ class ctfEstimateLoop(appionLoop2.AppionLoop):
 			f.write("while 1 {\n")
 			f.write("\texpect {\n")
 			for k,v in prompts.items():
-				f.write("\t\t\"%s\" { send \"%s\"\\n }\n" % (k, str(v)))
+				f.write("\t\t\"%s\" { send \"%s\\n\" }\n" % (k, str(v)))
 			f.write("\t\teof {exit 0}\n")
 			f.write("\t}\n")
 			f.write("}")
