@@ -482,6 +482,8 @@ class AppionLoop(appionScript.AppionScript):
 			json.load(f)
 			f.seek(0)
 		except:
+			f.seek(0)
+			f.truncate()
 			json.dump({}, f)
 			f.flush()
 		return f
@@ -521,6 +523,8 @@ class AppionLoop(appionScript.AppionScript):
 		self.donedict['commit'] = self.params['commit']
 
 		### write donedict to file
+		f.seek(0)
+		f.truncate()
 		json.dump(self.donedict, f)
 
 		#Unlock DoneDict file

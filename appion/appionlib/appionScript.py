@@ -530,7 +530,7 @@ class AppionScript(basicScript.BasicScript):
 
 	#=====================
 	def setLockname(self,name):
-		self.lockname = '_'+name
+		self.lockname = '.'+name
 
 	def cleanParallelLock(self):
 		for file in glob.glob('%s*' % self.lockname):
