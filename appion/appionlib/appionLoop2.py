@@ -499,14 +499,13 @@ class AppionLoop(appionScript.AppionScript):
 		reloads done dictionary
 		"""
 		#Lock DoneDict file
-		self._lockDoneDict()
+		f = self._lockDoneDict()
 
-		f = open(self.donedictfile,'r')
+		f.seek(0)
 		self.donedict = json.load(f)
-		f.close()
 
 		#Unlock DoneDict file
-		self._unlockDoneDict()
+		self._unlockDoneDict(f)
 
 	#=====================
 	def _writeDoneDict(self, imgname=None):
@@ -514,12 +513,7 @@ class AppionLoop(appionScript.AppionScript):
 		write finished image (imgname) to done dictionary
 		"""
 		#Lock DoneDict file
-		self._lockDoneDict()
-
-		### reload donedict from file just in case two runs are running
-		f = open(self.donedictfile,'r')
-		self.donedict = json.load(f)
-		f.close()
+		f=self._lockDoneDict()
 
 		### set new parameters
 		if imgname != None:
@@ -527,12 +521,10 @@ class AppionLoop(appionScript.AppionScript):
 		self.donedict['commit'] = self.params['commit']
 
 		### write donedict to file
-		f = open(self.donedictfile, 'w', 0666)
 		json.dump(self.donedict, f)
-		f.close()
 
 		#Unlock DoneDict file
-		self._unlockDoneDict()
+		self._unlockDoneDict(f)
 
 	#=====================
 	def _getAllImages(self):
