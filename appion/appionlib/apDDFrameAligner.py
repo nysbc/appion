@@ -5,6 +5,7 @@ import os
 import re
 import subprocess
 import getpass
+from time import sleep
 
 class DDFrameAligner(object):
 	# testbin.py is a test script in appion/bin as an example
@@ -101,7 +102,15 @@ class DDFrameAligner(object):
 
 		# run as subprocess
 		apDisplay.printMsg('Running: %s'% cmd)
-		self.proc = subprocess.Popen(cmd, shell=True)
+		success=False
+		#Handles case where command fails because hq server has gone away.
+		while not success:
+			self.proc = subprocess.Popen(cmd, shell=True)
+			self.proc.wait()
+			if self.proc.returncode == 0:
+				success=True
+			else:
+				sleep(15)
 
 	def getValidAlignOptionMappings(self):
 		'''

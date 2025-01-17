@@ -22,6 +22,7 @@ from appionlib.apCtf import ctfinsert
 from appionlib.apCtf import ctffind4AvgRotPlot
 import stat
 import getpass
+from time import sleep
 
 class ctfEstimateLoop(appionLoop2.AppionLoop):
 	"""
@@ -309,7 +310,15 @@ class ctfEstimateLoop(appionLoop2.AppionLoop):
 		os.chmod(expectscript, stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
 
 		cmd = "hq --server-dir %s submit --cwd %s --wait --max-fails 3 --time-limit=5min --cpus 2 sudo -u %s /usr/bin/expect %s" % (os.getenv("HQ_SERVER_DIR","/common/etc/hq/ctffind4"), os.getenv("HQ_CWD", "/common/sw/hq/ctffind4/jobs/hq-current"), getpass.getuser(), expectscript)
-		ctfprogproc = subprocess.Popen(cmd, shell=True)
+		#Handles case where command fails because hq server has gone away.
+		success=False
+		while not success:
+			ctfprogproc = subprocess.Popen(cmd, shell=True)
+			ctfprogproc.wait()
+			if ctfprogproc.returncode == 0:
+				success=True
+			else:
+				sleep(15)
 
 		### cannot run ctffind_plot_results.sh on CentOS 6
 		# This script requires gnuplot version >= 4.6, but you have version 4.2
