@@ -296,10 +296,13 @@ class ctfEstimateLoop(appionLoop2.AppionLoop):
 		with open(expectscript, "w") as f:
 			f.write("set timeout 10\n\n")
 			f.write("spawn %s\n\n" % self.ctfprgmexe)
+			f.write("while 1 {\n")
+			f.write("\texpect {\n")
 			for k,v in prompts.items():
-				f.write("expect \"%s\"\n" % k)
-				f.write("send \"%s\\n\"\n\n" % str(v))
-			f.write("expect eof")
+				f.write("\t\t\"%s\" { send \"%s\" }\n" % (k, str(v)))
+			f.write("\t\teof {exit 0}\n")
+			f.write("\t}")
+			f.write("}")
 		os.chmod(expectscript, stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
 
 		cmd = "hq --server-dir %s submit --cwd %s --wait --max-fails 3 --time-limit=5min --cpus 2 sudo -u %s /usr/bin/expect %s" % (os.getenv("HQ_SERVER_DIR","/common/etc/hq/ctffind4"), os.getenv("HQ_CWD", "/common/sw/hq/ctffind4/jobs/hq-current"), getpass.getuser(), os.path.abspath(expectscript))
