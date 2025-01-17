@@ -97,7 +97,8 @@ class ctfEstimateLoop(appionLoop2.AppionLoop):
 		self.powerspecdir = os.path.join(self.params['rundir'], "opimages")
 		apParam.createDirectory(self.powerspecdir, warning=False)
 		self.logdir = os.path.join(self.params['rundir'], "logfiles")
-		apParam.createDirectory(self.logdir, warning=False)
+		if not os.path.exists(self.logdir):
+			apParam.createDirectory(self.logdir, warning=False)
 		self.ctfprgmexe = self.getCtfProgPath()
 		# check and process more often because it is slower than data collection
 		self.setWaitSleepMin(1)
@@ -292,6 +293,7 @@ class ctfEstimateLoop(appionLoop2.AppionLoop):
 			'Do you want to set expert options?' : inputparams['expert_opts']
 		}
 
+		#TODO Render this using a jinja template?
 		expectscript=imgdata['filename']+"_ctffind4.exp"
 		with open(expectscript, "w") as f:
 			f.write("set timeout 10\n\n")

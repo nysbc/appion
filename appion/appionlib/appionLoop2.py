@@ -475,7 +475,14 @@ class AppionLoop(appionScript.AppionScript):
 	#=====================
 	def _lockDoneDict(self):
 		apDisplay.printWarning('locking %s' % self.donedictfile)
-		f=open(self.donedictfile, 'w+', 0666)
+		if not os.path.isfile(self.donedictfile):
+			try:
+				apDisplay.printWarning('creating %s' % self.donedictfile)
+				f=open(self.donedictfile, 'x', 0666)
+				f.close()
+			except:
+				apDisplay.printWarning('%s already exists' % self.donedictfile)
+		f=open(self.donedictfile, 'r+')
 		flock(f, LOCK_EX)
 		return f
 
@@ -517,6 +524,7 @@ class AppionLoop(appionScript.AppionScript):
 		f.seek(0)
 		f.truncate()
 		json.dump(self.donedict, f)
+		f.flush()
 
 		#Unlock DoneDict file
 		self._unlockDoneDict(f)
