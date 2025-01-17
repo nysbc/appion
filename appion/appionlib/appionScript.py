@@ -24,7 +24,6 @@ import leginon.leginonconfig
 import sinedon
 from pyami import mem
 from pyami import version
-from pyami import fileutil
 from fcntl import flock, LOCK_EX, LOCK_UN, LOCK_NB
 
 #=====================
@@ -539,8 +538,9 @@ class AppionScript(basicScript.BasicScript):
 
 	def lockParallel(self,dbid):
 		lock_file = '%s%d' % (self.lockname,dbid)
-		self.lockfile=fileutil.open_if_not_exists(lock_file)
 		try:
+			fd = os.open(lock_file, os.O_CREAT|os.O_EXCL|os.O_RDWR)
+			self.lockfile = os.fdopen(fd, 'r+')
 			flock(self.lockfile, LOCK_EX | LOCK_NB)
 		except:
 			return False

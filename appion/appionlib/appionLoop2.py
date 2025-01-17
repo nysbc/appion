@@ -476,16 +476,14 @@ class AppionLoop(appionScript.AppionScript):
 	#=====================
 	def _lockDoneDict(self):
 		apDisplay.printWarning('locking %s' % self.donedictfile)
-		doneDictExists=os.path.isfile(self.donedictfile)
 		f=open(self.donedictfile, 'w+', 0666)
 		flock(f, LOCK_EX)
-		if not doneDictExists:
-			try:
-				json.load(f)
-				f.seek(0)
-			except:
-				json.dump({}, f)
-				f.flush()
+		try:
+			json.load(f)
+			f.seek(0)
+		except:
+			json.dump({}, f)
+			f.flush()
 		return f
 
 	#=====================
