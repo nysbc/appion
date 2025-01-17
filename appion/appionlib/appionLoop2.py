@@ -484,7 +484,9 @@ class AppionLoop(appionScript.AppionScript):
 		except:
 			f.seek(0)
 			f.truncate()
-			json.dump({}, f)
+			self.donedict = {}
+			self.donedict['commit'] = self.params['commit']
+			json.dump(self.donedict, f)
 			f.flush()
 		return f
 
