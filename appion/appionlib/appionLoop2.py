@@ -434,20 +434,19 @@ class AppionLoop(appionScript.AppionScript):
 
 		self.donedictfile = os.path.join(self.params['rundir'] , self.functionname+".donedict")
 		#Lock DoneDict file
-		self._lockDoneDict()
+		f=self._lockDoneDict()
+		f.seek(0)
 
 		if os.path.isfile(self.donedictfile) and self.params['continue'] == True:
 			### load previously done dictionary
 			apDisplay.printMsg("Reading old done dictionary: "+os.path.basename(self.donedictfile))
-			f = open(self.donedictfile,'r')
 			self.donedict = json.load(f)
-			f.close()
 			try:
 				if self.donedict['commit'] == self.params['commit']:
 					### all is well
 					apDisplay.printMsg("Found "+str(len(self.donedict))+" done dictionary entries")
 					#Unlock DoneDict file
-					self._unlockDoneDict()
+					self._unlockDoneDict(f)
 					return
 				elif self.donedict['commit'] is True and self.params['commit'] is not True:
 					### die
@@ -464,25 +463,27 @@ class AppionLoop(appionScript.AppionScript):
 		apDisplay.printMsg("Creating new done dictionary: "+os.path.basename(self.donedictfile))
 
 		### write donedict to file
-		f = open(self.donedictfile, 'w', 0666)
+		f.seek(0)
+		f.truncate()
 		json.dump(self.donedict, f)
-		f.close()
 
 		#Unlock DoneDict file
-		self._unlockDoneDict()
+		self._unlockDoneDict(f)
 
 		return
 
 	#=====================
 	def _lockDoneDict(self):
 		apDisplay.printWarning('locking %s' % self.donedictfile)
-		flock(self.donedictfile, LOCK_EX)
-		return
+		f=open(self.donedictfile, 'w', 0666)
+		flock(f, LOCK_EX)
+		return f
 
 	#=====================
-	def _unlockDoneDict(self):
+	def _unlockDoneDict(self, f):
 		apDisplay.printWarning('unlocking %s' % self.donedictfile)
-		flock(self.donedictfile, LOCK_UN)
+		flock(f, LOCK_UN)
+		f.close()
 		return
 
 	#=====================
