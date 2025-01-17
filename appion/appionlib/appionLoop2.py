@@ -432,12 +432,13 @@ class AppionLoop(appionScript.AppionScript):
 		reads or creates a done dictionary
 		"""
 
+		readOldDoneDict=os.path.isfile(self.donedictfile) and self.params['continue'] == True
 		self.donedictfile = os.path.join(self.params['rundir'] , self.functionname+".donedict")
 		#Lock DoneDict file
 		f=self._lockDoneDict()
 		f.seek(0)
 
-		if os.path.isfile(self.donedictfile) and self.params['continue'] == True:
+		if readOldDoneDict:
 			### load previously done dictionary
 			apDisplay.printMsg("Reading old done dictionary: "+os.path.basename(self.donedictfile))
 			self.donedict = json.load(f)
