@@ -106,14 +106,7 @@ class ctfEstimateLoop(appionLoop2.AppionLoop):
 
 	#======================
 	def getCtfProgPath(self):
-		exename = "ctffind4"
-		ctfprgmexe = subprocess.Popen("which "+exename, shell=True, stdout=subprocess.PIPE).stdout.read().strip()
-		if not os.path.isfile(ctfprgmexe):
-			ctfprgmexe = os.path.join(apParam.getAppionDirectory(), 'bin', exename)
-		if not os.path.isfile(ctfprgmexe):
-			apDisplay.printError(exename+" was not found at: "+apParam.getAppionDirectory())
-		apDisplay.printMsg("Running program %s"%(exename))
-		return ctfprgmexe
+		return os.getenv("APPION_CTFFIND4_PATH", "/common/sw/hq/bin/ctffind4")
 
 	#======================
 	def postLoopFunctions(self):

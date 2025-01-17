@@ -217,7 +217,7 @@ class MotionCorr_Purdue(MotionCorr1):
 			
 class MotionCor2_UCSF(DDFrameAligner):
 	def __init__(self):
-		self.executable = 'motioncor2'
+		self.executable = os.getenv("APPION_MOTIONCOR2_PATH","/common/sw/hq/bin/motioncor2")
 		DDFrameAligner.__init__(self)
 
 	def setKV(self, kv):
