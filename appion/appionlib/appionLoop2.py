@@ -482,9 +482,12 @@ class AppionLoop(appionScript.AppionScript):
 		if not doneDictExists:
 			try:
 				json.load(f)
+				f.seek(0)
 			except:
 				json.dump({}, f)
-				f.seek(0)
+				f.close()
+				f=open(self.donedictfile, 'w+', 0666)
+				flock(f, LOCK_EX)
 		return f
 
 	#=====================
