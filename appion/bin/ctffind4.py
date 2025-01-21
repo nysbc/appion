@@ -23,6 +23,7 @@ from appionlib.apCtf import ctffind4AvgRotPlot
 import stat
 import getpass
 from time import sleep
+from multiprocessing import Pool
 
 class ctfEstimateLoop(appionLoop2.AppionLoop):
 	"""
@@ -260,7 +261,10 @@ class ctfEstimateLoop(appionLoop2.AppionLoop):
 			return
 		### create local link to image
 		if not os.path.exists(inputparams['input']):
-			os.symlink(inputparams['orig'], inputparams['input'])
+			try:
+				os.symlink(inputparams['orig'], inputparams['input'])
+			except OSError:
+				pass
 
 		if os.path.isfile(inputparams['output']):
 			# program crashes if this file exists
@@ -462,8 +466,17 @@ class ctfEstimateLoop(appionLoop2.AppionLoop):
 			origPath = os.path.join(self.ddstackpath,source_imgdata['filename']+"_st.mrc")
 		return origPath, binning
 
-if __name__ == '__main__':
+def main():
 	imgLoop = ctfEstimateLoop()
 	imgLoop.run()
+
+if __name__ == '__main__':
+	appionProcCount=os.getenv("APPION_PROCESSES", 20)
+	appionProcCount=int(appionProcCount)
+	p=Pool(appionProcCount)
+	for _ in range(appionProcCount):
+		p.apply_async(main)
+	p.close()
+	p.join()
 
 
