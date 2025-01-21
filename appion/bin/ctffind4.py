@@ -95,7 +95,8 @@ class ctfEstimateLoop(appionLoop2.AppionLoop):
 	def preLoopFunctions(self):
 		self.ctfrun = None
 		self.powerspecdir = os.path.join(self.params['rundir'], "opimages")
-		apParam.createDirectory(self.powerspecdir, warning=False)
+		if not os.path.isdir(self.powerspecdir):
+			apParam.createDirectory(self.powerspecdir, warning=False)
 		self.logdir = os.path.join(self.params['rundir'], "logfiles")
 		if not os.path.exists(self.logdir):
 			apParam.createDirectory(self.logdir, warning=False)
