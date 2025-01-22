@@ -6,6 +6,8 @@ import re
 import subprocess
 import getpass
 from time import sleep
+from hashlib import md5
+import shutil
 
 class DDFrameAligner(object):
 	# testbin.py is a test script in appion/bin as an example
@@ -98,7 +100,9 @@ class DDFrameAligner(object):
 		# Construct the command line with defaults
 		cmd = self.makeFrameAlignmentCommand()
 		cmd = "sudo -u %s %s" % (getpass.getuser(), cmd)
-		cmd = "hq --server-dir %s submit --cwd %s --wait --max-fails 3 --time-limit=5min --cpus 2 --resource gpus=1 %s" % (os.getenv("HQ_SERVER_DIR","/common/etc/hq/motioncor2"), os.getenv("HQ_CWD", "/common/sw/hq/motioncor2/jobs/hq-current"), cmd)
+		csum = md5(bytes(cmd,"utf-8")).hexdigest()
+		logpath=os.path.join(os.getenv("HQ_LOG", "/common/sw/hq/motioncor2/logs"), "%s.log" % csum)
+		cmd = "hq --server-dir %s submit --cwd %s --stdout %s --wait --max-fails 3 --time-limit=5min --cpus 2 --resource gpus=1 %s" % (os.getenv("HQ_SERVER_DIR","/common/etc/hq/motioncor2"), os.getenv("HQ_CWD", "/common/sw/hq/motioncor2/jobs/hq-current"), logpath, cmd)
 
 		# run as subprocess
 		apDisplay.printMsg('Running: %s'% cmd)
@@ -111,6 +115,7 @@ class DDFrameAligner(object):
 				success=True
 			else:
 				sleep(15)
+		self.writeLogFile(logpath)
 
 	def getValidAlignOptionMappings(self):
 		'''
@@ -477,7 +482,7 @@ class MotionCor2_UCSF(DDFrameAligner):
 	def getAlignedSumFrameList(self):
 		return self.sumframelist
 	
-	def writeLogFile(self, outbuffer):
+	def writeLogFile(self, logpath):
 		''' 
 		takes output log buffer from running frame aligner 
 		will write motioncor2 log file and standard log file that is readable by appion image viewer (motioncorr1 format)
@@ -485,9 +490,9 @@ class MotionCor2_UCSF(DDFrameAligner):
 
 		### motioncor2 format
 		log2 = self.framestackpath[:-4]+'_Log.motioncor2.txt'
-		f = open(log2, "w")
-		f.write(outbuffer)
-		f.close()
+		shutil.copyfile(logpath, log2)
+		cmd = "hq --server-dir %s submit --cwd %s --wait --max-fails 3 --time-limit=5min --cpus 2 rm %s" % (os.getenv("HQ_SERVER_DIR","/common/etc/hq/motioncor2"), os.getenv("HQ_CWD", "/common/sw/hq/motioncor2/jobs/hq-current"), logpath)
+		subprocess.Popen(cmd, shell=True)
 
 		### this is unnecessary, need to figure out how to convert outbuffer from subprocess PIPE to readable format
 		f = open(log2, "r")
@@ -530,12 +535,12 @@ class MotionCor2_UCSF(DDFrameAligner):
 
 		### motioncorr1 format, needs conversion from motioncorr2 format
 		log = self.framestackpath[:-4]+'_Log.txt'
-                f = open(log,"w")
+		f = open(log,"w")
 		f.write("Sum Frame #%.3d - #%.3d (Reference Frame #%.3d):\n" % (0, self.alignparams['total_rendered_frames'], self.alignparams['total_rendered_frames']/2))
 		# Eer nframe is not predictable.
 		for i in range(len(shifts_adjusted)):
-	                f.write("......Add Frame #%.3d with xy shift: %.5f %.5f\n" % (i+self.alignparams['Throw'], shifts_adjusted[i][0], shifts_adjusted[i][1]))
-                f.close()
+			f.write("......Add Frame #%.3d with xy shift: %.5f %.5f\n" % (i+self.alignparams['Throw'], shifts_adjusted[i][0], shifts_adjusted[i][1]))
+			f.close()
 
 class MotionCor3(MotionCor2_UCSF):
 	def __init__(self):
