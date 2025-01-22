@@ -543,8 +543,8 @@ class AppionScript(basicScript.BasicScript):
 			self.lockfile = os.fdopen(fd, 'r+')
 			flock(self.lockfile, LOCK_EX | LOCK_NB)
 		except:
-			return False
-		return True
+			return True
+		return False
 
 	def unlockParallel(self,dbid):
 		lockfile = '%s%d' % (self.lockname,dbid)
