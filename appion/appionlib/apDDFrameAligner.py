@@ -540,7 +540,7 @@ class MotionCor2_UCSF(DDFrameAligner):
 		# Eer nframe is not predictable.
 		for i in range(len(shifts_adjusted)):
 			f.write("......Add Frame #%.3d with xy shift: %.5f %.5f\n" % (i+self.alignparams['Throw'], shifts_adjusted[i][0], shifts_adjusted[i][1]))
-			f.close()
+		f.close()
 
 class MotionCor3(MotionCor2_UCSF):
 	def __init__(self):
