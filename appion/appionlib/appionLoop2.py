@@ -514,6 +514,8 @@ class AppionLoop(appionScript.AppionScript):
 		"""
 		#Lock DoneDict file
 		f=self._lockDoneDict()
+		self.donedict=json.load(f)
+
 
 		### set new parameters
 		if imgname != None:
