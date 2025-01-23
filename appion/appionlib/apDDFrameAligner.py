@@ -513,6 +513,10 @@ class MotionCor2_UCSF(DDFrameAligner):
 		temp = []
 		found = False
 		for line in outbuffer:
+			# This line is not present in the output from MotionCor 1.6.4
+			# but is present in MotionCor 1.5.0's output.  This means
+			# that this program can only be used with 1.5.0 or another compatible version
+			# of motioncor2.
 			if "Full-frame alignment shift" in line or found:
 				temp.append(line)
 				found = True
