@@ -428,6 +428,10 @@ class MotionCor2_UCSF(DDFrameAligner):
 
 		# GPU ID
 		cmd += ' -Gpu %s' % self.alignparams['Gpu'].replace(","," ")
+		# If we don't include this motioncor3 will fail to run outside of a container:
+		# https://github.com/czimaginginstitute/MotionCor3/issues/17#issuecomment-2156153031
+		# For motioncor2, we need to just use a container for now.
+		cmd += ' -UseGpus 1'
 
 		# EER upsampling
 		if self.alignparams['is_eer']:
