@@ -8,6 +8,7 @@ import getpass
 from time import sleep
 from hashlib import md5
 import shutil
+import sys
 
 class DDFrameAligner(object):
 	# testbin.py is a test script in appion/bin as an example
@@ -115,7 +116,11 @@ class DDFrameAligner(object):
 				success=True
 			else:
 				sleep(15)
-		self.writeLogFile(logpath)
+		try:
+			self.writeLogFile(logpath)
+		except Exception as e:
+			print(e)
+			sys.exit(1)
 
 	def getValidAlignOptionMappings(self):
 		'''
