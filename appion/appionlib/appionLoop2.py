@@ -39,6 +39,8 @@ class AppionLoop(appionScript.AppionScript):
 		self.bad_images = []
 		self.sleep_minutes = 6
 		self.process_batch_count = 10
+		self.donedictpath = os.path.join(self.params['rundir'] , self.functionname+".donedict")
+		self.donedictfile=self._lockDoneDict()
 
 	#=====================
 	def setWaitSleepMin(self,minutes):
@@ -135,6 +137,9 @@ class AppionLoop(appionScript.AppionScript):
 		self._printSummary()
 		self.stats['count'] += count
 		self.stats['totalcount'] += count
+		self.donedictfile.seek(0)
+		self.donedictfile.truncate()
+		json.dump(self.donedict,self.donedictfile)
 
 		# This just print. It does not really do anything
 		if self.params['limit'] is not None and self.stats['totalcount'] > self.params['limit']:
@@ -431,32 +436,26 @@ class AppionLoop(appionScript.AppionScript):
 		"""
 		reads or creates a done dictionary
 		"""
+		self.donedictfile.seek(0)
 
-		self.donedictfile = os.path.join(self.params['rundir'] , self.functionname+".donedict")
-		#Lock DoneDict file
-		f=self._lockDoneDict()
-		f.seek(0)
-
-		apDisplay.printMsg("Attempting to read old done dictionary: "+os.path.basename(self.donedictfile))
+		apDisplay.printMsg("Attempting to read old done dictionary: "+os.path.basename(self.donedictpath))
 		try:
 			self.donedict=json.load(f)
-			f.seek(0)
+			self.donedictfile.seek(0)
 		except:
-			f.seek(0)
-			f.truncate()
-			apDisplay.printMsg("Failed to read old done dictionary; creating new done dictionary: "+os.path.basename(self.donedictfile))
+			self.donedictfile.seek(0)
+			self.donedictfile.truncate()
+			apDisplay.printMsg("Failed to read old done dictionary; creating new done dictionary: "+os.path.basename(self.donedictpath))
 			self.donedict = {}
 			self.donedict['commit'] = self.params['commit']
-			json.dump(self.donedict, f)
-			f.flush()
+			json.dump(self.donedict, self.donedictfile)
+			self.donedictfile.flush()
 
 		if self.params['continue'] == True:
 			try:
 				if self.donedict['commit'] == self.params['commit']:
 					### all is well
 					apDisplay.printMsg("Found "+str(len(self.donedict))+" done dictionary entries")
-					#Unlock DoneDict file
-					self._unlockDoneDict(f)
 					return
 				elif self.donedict['commit'] is True and self.params['commit'] is not True:
 					### die
@@ -467,28 +466,25 @@ class AppionLoop(appionScript.AppionScript):
 			except KeyError:
 				apDisplay.printMsg("Found "+str(len(self.donedict))+" done dictionary entries")
 
-		#Unlock DoneDict file
-		self._unlockDoneDict(f)
-
 		return
 
 	#=====================
 	def _lockDoneDict(self):
-		apDisplay.printWarning('locking %s' % self.donedictfile)
-		if not os.path.isfile(self.donedictfile):
+		apDisplay.printWarning('locking %s' % self.donedictpath)
+		if not os.path.isfile(self.donedictpath):
 			try:
-				apDisplay.printWarning('creating %s' % self.donedictfile)
-				f=open(self.donedictfile, 'a', 0666)
+				apDisplay.printWarning('creating %s' % self.donedictpath)
+				f=open(self.donedictpath, 'a', 0666)
 				f.close()
 			except:
-				apDisplay.printWarning('%s already exists' % self.donedictfile)
-		f=open(self.donedictfile, 'r+')
+				apDisplay.printWarning('%s already exists' % self.donedictpath)
+		f=open(self.donedictpath, 'r+')
 		flock(f, LOCK_EX)
 		return f
 
 	#=====================
 	def _unlockDoneDict(self, f):
-		apDisplay.printWarning('unlocking %s' % self.donedictfile)
+		apDisplay.printWarning('unlocking %s' % self.donedictpath)
 		flock(f, LOCK_UN)
 		f.close()
 		return
@@ -498,38 +494,20 @@ class AppionLoop(appionScript.AppionScript):
 		"""
 		reloads done dictionary
 		"""
-		#Lock DoneDict file
-		f = self._lockDoneDict()
 
-		f.seek(0)
+		self.donedictfile.seek(0)
 		self.donedict = json.load(f)
 
-		#Unlock DoneDict file
-		self._unlockDoneDict(f)
 
 	#=====================
 	def _writeDoneDict(self, imgname=None):
 		"""
 		write finished image (imgname) to done dictionary
 		"""
-		#Lock DoneDict file
-		f=self._lockDoneDict()
-		self.donedict=json.load(f)
-
-
 		### set new parameters
 		if imgname != None:
 			self.donedict[imgname] = True
 		self.donedict['commit'] = self.params['commit']
-
-		### write donedict to file
-		f.seek(0)
-		f.truncate()
-		json.dump(self.donedict, f)
-		f.flush()
-
-		#Unlock DoneDict file
-		self._unlockDoneDict(f)
 
 	#=====================
 	def _getAllImages(self):
@@ -967,6 +945,7 @@ class AppionLoop(appionScript.AppionScript):
 			with open(markerFilePath, "w") as f:
 				f.write("Loop completed at: %s" % time.asctime())
 		appionScript.AppionScript.close(self)
+		self._unlockDoneDict(self.donedictfile)
 
 
 #=====================
