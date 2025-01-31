@@ -18,6 +18,7 @@ from appionlib import appionScript
 from pyami import mem
 from pyami import fileutil
 from fcntl import flock, LOCK_EX, LOCK_UN
+from multiprocessing import Pool
 
 class AppionLoop(appionScript.AppionScript):
 	#=====================
@@ -53,6 +54,35 @@ class AppionLoop(appionScript.AppionScript):
 		'''
 		self.process_batch_count = count
 
+	def processOneImage(self, imgnum):
+		imgdata = self.imgtree[imgnum]
+
+		### CHECK IF IT IS OKAY TO START PROCESSING IMAGE
+		if not self._startLoop(imgdata):
+			return
+
+		### set the pixel size
+		self.params['apix'] = apDatabase.getPixelSize(imgdata)
+		if not self.params['background']:
+			apDisplay.printMsg("Pixel size for image number %d: %s" % (imgnum, str(self.params['apix'])))
+
+		### START any custom functions HERE:
+		results = self.loopProcessImage(imgdata)
+
+		### WRITE db data
+		if self.params['commit'] is True:
+			if not self.params['background']:
+				apDisplay.printColor(" ==== Committing data to database (imgnum %d) ==== " % imgnum, "blue")
+			self.loopCommitToDatabase(imgdata)
+			self.commitResultsToDatabase(imgdata, results)
+		else:
+			apDisplay.printWarning("not committing results to database, all data will be lost (imgnum %d)" % imgnum)
+			apDisplay.printMsg("to preserve data start script over and add 'commit' flag (imgnum %d)" % imgnum)
+			self.writeResultsToFiles(imgdata, results)
+		self.loopCleanUp(imgdata)
+		### FINISH with custom functions
+
+
 	#=====================
 	def run(self):
 		"""
@@ -67,48 +97,29 @@ class AppionLoop(appionScript.AppionScript):
 		self.preLoopFunctions()
 		### start the loop
 		self.notdone=True
-		self.badprocess = False
 		self.stats['startloop'] = time.time()
+		maxProcs=os.getenv("MAX_APPION_PROCS",8)
+		maxProcs=int(maxProcs)
 		while self.notdone:
 			apDisplay.printColor("\nBeginning Main Loop", "green")
 			imgnum = 0
+			# The number of processes spawned is proportional to the total
+			# backlog of images.
+			procs=round(len(self.imgtree) ** (1/3))
+			if procs > maxProcs:
+				procs=maxProcs
 			while imgnum < len(self.imgtree) and self.notdone is True:
 				self.stats['startimage'] = time.time()
-				imgdata = self.imgtree[imgnum]
-				imgnum += 1
+				if (imgnum + procs) > len(self.imgtree):
+					procs=len(self.imgtree)-imgnum
+				imgnums=[imgnum + i for i in range(procs)]
+				p=Pool(procs)
+				p.map(self.processOneImage, imgnums)
+				p.close()
+				p.join()
+				imgnum+=procs
+				self.finishLoopImages(procs)
 
-				### CHECK IF IT IS OKAY TO START PROCESSING IMAGE
-				if not self._startLoop(imgdata):
-					continue
-
-				### set the pixel size
-				self.params['apix'] = apDatabase.getPixelSize(imgdata)
-				if not self.params['background']:
-					apDisplay.printMsg("Pixel size: "+str(self.params['apix']))
-
-				### START any custom functions HERE:
-				results = self.loopProcessImage(imgdata)
-
-				### WRITE db data
-				if self.badprocess is False:
-					if self.params['commit'] is True:
-						if not self.params['background']:
-							apDisplay.printColor(" ==== Committing data to database ==== ", "blue")
-						self.loopCommitToDatabase(imgdata)
-						self.commitResultsToDatabase(imgdata, results)
-					else:
-						apDisplay.printWarning("not committing results to database, all data will be lost")
-						apDisplay.printMsg("to preserve data start script over and add 'commit' flag")
-						self.writeResultsToFiles(imgdata, results)
-					self.loopCleanUp(imgdata)
-				else:
-					apDisplay.printWarning("IMAGE FAILED; nothing inserted into database")
-					self.badprocess = False
-					self.stats['lastpeaks'] = 0
-				### FINISH with custom functions
-
-				self.finishLoopOneImage(imgdata)
-				#END LOOP OVER IMAGES
 			if self.notdone is True:
 				self.notdone = self._waitForMoreImages()
 			#END NOTDONE LOOP
@@ -117,24 +128,13 @@ class AppionLoop(appionScript.AppionScript):
 		self.close()
 
 	#=====================
-	def finishLoopOneImage(self, imgdata):
+	def finishLoopImages(self, count):
 		'''
 		Things to do after an image is processed whether commit or not
 		'''
-		self._writeDoneDict(imgdata['filename'])
-		if self.params['parallel']:
-			self.unlockParallel(imgdata.dbid)
-
-	# 				loadavg = os.getloadavg()[0]
-	# 				if loadavg > 2.0:
-	# 					apDisplay.printMsg("Load average is high "+str(round(loadavg,2)))
-	# 					loadsquared = loadavg*loadavg
-	# 					apDisplay.printMsg("Sleeping %.1f seconds"%(loadavg))
-	# 					time.sleep(loadavg)
-	# 					apDisplay.printMsg("New load average "+str(round(os.getloadavg()[0],2)))
-
 		self._printSummary()
-		self._advanceStatsCount()
+		self.stats['count'] += count
+		self.stats['totalcount'] += count
 
 		# This just print. It does not really do anything
 		if self.params['limit'] is not None and self.stats['totalcount'] > self.params['limit']:
@@ -672,12 +672,6 @@ class AppionLoop(appionScript.AppionScript):
 				"""apDisplay.printMsg("processing "+apDisplay.shortenImageName(imgdata['filename']))"""
 
 		return True
-
-	def _advanceStatsCount(self):
-		# self.stats['count'] is reset when images are skipped or processed by the last waitForMoreImage.
-		# self.stats['totalcount'] advances for in every image processed in this instance,
-		self.stats['count'] += 1
-		self.stats['totalcount'] += 1
 
 	#=====================
 	def _printSummary(self):
