@@ -434,7 +434,8 @@ class AppionLoop(appionScript.AppionScript):
 		"""
 		reads or creates a done dictionary
 		"""
-		self.donedictfile.seek(0)
+		if not self.donedictfile:
+			self.donedictfile=open(self.donedictpath)
 
 		apDisplay.printMsg("Attempting to read old done dictionary: "+os.path.basename(self.donedictpath))
 		try:
