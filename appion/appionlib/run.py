@@ -1,6 +1,7 @@
 import os
 from appionlib import apDisplay
-from multiprocessing import Pool
+from appionlib import apDatabase
+from multiprocessing import Pool]
 import time
     
 def run(loop):
@@ -31,7 +32,8 @@ def run(loop):
                 procs=len(loop.imgtree)-imgnum
             imgnums=[imgnum + i for i in range(procs)]
             p=Pool(procs)
-            p.map(loop.processOneImage, imgnums)
+            for idx in imgnums:
+                p.apply_async(processOneImage, (loop, idx))
             p.close()
             p.join()
             imgnum+=procs
@@ -43,3 +45,30 @@ def run(loop):
 
     loop.postLoopFunctions()
     loop.close()
+
+def processOneImage(loop, imgnum):
+    imgdata = loop.imgtree[imgnum]
+
+    ### CHECK IF IT IS OKAY TO START PROCESSING IMAGE
+    if not loop._startLoop(imgdata):
+        return
+
+    ### set the pixel size
+    loop.params['apix'] = apDatabase.getPixelSize(imgdata)
+    if not loop.params['background']:
+        apDisplay.printMsg("Pixel size for image number %d: %s" % (imgnum, str(loop.params['apix'])))
+
+    ### START any custom functions HERE:
+    results = loop.loopProcessImage(imgdata)
+
+    ### WRITE db data
+    if loop.params['commit'] is True:
+        if not loop.params['background']:
+            apDisplay.printColor(" ==== Committing data to database (imgnum %d) ==== " % imgnum, "blue")
+        loop.loopCommitToDatabase(imgdata)
+        loop.commitResultsToDatabase(imgdata, results)
+    else:
+        apDisplay.printWarning("not committing results to database, all data will be lost (imgnum %d)" % imgnum)
+        apDisplay.printMsg("to preserve data start script over and add 'commit' flag (imgnum %d)" % imgnum)
+        loop.writeResultsToFiles(imgdata, results)
+    loop.loopCleanUp(imgdata)
