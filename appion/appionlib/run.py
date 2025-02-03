@@ -32,11 +32,27 @@ def run(loop):
                 procs=len(loop.imgtree)-imgnum
             imgnums=[imgnum + i for i in range(procs)]
             p=Pool(procs)
+            applyresults=[]
             for idx in imgnums:
                 pixsize=apDatabase.getPixelSize(loop.imgtree[idx])
-                p.apply_async(processOneImage, (loop, idx, pixsize))
+                applyresults.append(p.apply_async(processOneImage, (loop, idx, pixsize)))
             p.close()
             p.join()
+            applyresults=[r.get() for r in applyresults]
+            for applyresult in applyresults:
+                imgdata=applyresults[0]
+                results=applyresults[1]
+                ### WRITE db data
+                if loop.params['commit'] is True:
+                    if not loop.params['background']:
+                        apDisplay.printColor(" ==== Committing data to database ==== ", "blue")
+                    loop.loopCommitToDatabase(imgdata)
+                    loop.commitResultsToDatabase(imgdata, results)
+                else:
+                    apDisplay.printWarning("not committing results to database, all data will be lost")
+                    apDisplay.printMsg("to preserve data start script over and add 'commit' flag")
+                    loop.writeResultsToFiles(imgdata, results)
+                loop.loopCleanUp(imgdata)
             imgnum+=procs
             loop.finishLoopImages(procs)
 
@@ -62,14 +78,5 @@ def processOneImage(loop, imgnum, pixsize):
     ### START any custom functions HERE:
     results = loop.loopProcessImage(imgdata)
 
-    ### WRITE db data
-    if loop.params['commit'] is True:
-        if not loop.params['background']:
-            apDisplay.printColor(" ==== Committing data to database (imgnum %d) ==== " % imgnum, "blue")
-        loop.loopCommitToDatabase(imgdata)
-        loop.commitResultsToDatabase(imgdata, results)
-    else:
-        apDisplay.printWarning("not committing results to database, all data will be lost (imgnum %d)" % imgnum)
-        apDisplay.printMsg("to preserve data start script over and add 'commit' flag (imgnum %d)" % imgnum)
-        loop.writeResultsToFiles(imgdata, results)
-    loop.loopCleanUp(imgdata)
+    return (imgdata, results)
+
