@@ -23,6 +23,7 @@ from appionlib.apCtf import ctffind4AvgRotPlot
 import stat
 import getpass
 from time import sleep
+from .run import run
 
 class ctfEstimateLoop(appionLoop2.AppionLoop):
 	"""
@@ -468,6 +469,6 @@ class ctfEstimateLoop(appionLoop2.AppionLoop):
 
 if __name__ == '__main__':
 	imgLoop = ctfEstimateLoop()
-	imgLoop.run()
+	run(imgLoop)
 
 

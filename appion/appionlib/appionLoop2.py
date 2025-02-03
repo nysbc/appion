@@ -87,45 +87,7 @@ class AppionLoop(appionScript.AppionScript):
 
 	#=====================
 	def run(self):
-		"""
-		processes all images
-		"""
-		### get images from database
-		self._getAllImages()
-		os.chdir(self.params['rundir'])
-		self.stats['startimage'] = time.time()
-		self.preLoopFunctions()
-		### start the loop
-		self.notdone=True
-		self.stats['startloop'] = time.time()
-		maxProcs=os.getenv("MAX_APPION_PROCS",8)
-		maxProcs=int(maxProcs)
-		while self.notdone:
-			apDisplay.printColor("\nBeginning Main Loop", "green")
-			imgnum = 0
-			# The number of processes spawned is proportional to the total
-			# backlog of images.
-			procs=int(round(len(self.imgtree) ** (1/3)))
-			if procs > maxProcs:
-				procs=maxProcs
-			while imgnum < len(self.imgtree) and self.notdone is True:
-				self.stats['startimage'] = time.time()
-				if (imgnum + procs) > len(self.imgtree):
-					procs=len(self.imgtree)-imgnum
-				imgnums=[imgnum + i for i in range(procs)]
-				p=Pool(procs)
-				p.map(self.processOneImage, imgnums)
-				p.close()
-				p.join()
-				imgnum+=procs
-				self.finishLoopImages(procs)
-
-			if self.notdone is True:
-				self.notdone = self._waitForMoreImages()
-			#END NOTDONE LOOP
-
-		self.postLoopFunctions()
-		self.close()
+		raise NotImplementedError
 
 	#=====================
 	def finishLoopImages(self, count):
