@@ -24,7 +24,6 @@ import leginon.leginonconfig
 import sinedon
 from pyami import mem
 from pyami import version
-from fcntl import flock, LOCK_EX, LOCK_UN, LOCK_NB
 
 #=====================
 #=====================
@@ -34,7 +33,6 @@ class AppionScript(basicScript.BasicScript):
 		"""
 		Starts a new function and gets all the parameters
 		"""
-		self.lockfile=None
 		### setup some expected values
 		self.successful_run = False
 		self.clusterjobdata = None
@@ -62,7 +60,6 @@ class AppionScript(basicScript.BasicScript):
 # 			loadsquared = loadavg*loadavg
 # 			time.sleep(loadavg)
 # 			apDisplay.printMsg("New load average "+str(round(os.getloadavg()[0],2)))
-		self.setLockname('lock')
 
 		### setup default parser: run directory, etc.
 		self.setParams(optargs,useglobalparams)
@@ -527,36 +524,6 @@ class AppionScript(basicScript.BasicScript):
 			apDisplay.printMsg('AppionScript ran successfully')
 		apDisplay.printMsg('------------------------------------------------')
 		return proc.returncode
-
-	#=====================
-	def setLockname(self,name):
-		self.lockname = '.'+name
-
-	def cleanParallelLock(self):
-		for file in glob.glob('%s*' % self.lockname):
-			os.remove(file)
-
-	def lockParallel(self,dbid):
-		lock_file = '%s%d' % (self.lockname,dbid)
-		try:
-			fd = os.open(lock_file, os.O_CREAT|os.O_EXCL|os.O_RDWR)
-			self.lockfile = os.fdopen(fd, 'r+')
-			flock(self.lockfile, LOCK_EX | LOCK_NB)
-		except:
-			return True
-		return False
-
-	def unlockParallel(self,dbid):
-		lockfile = '%s%d' % (self.lockname,dbid)
-		apDisplay.printWarning('removing %s' % lockfile)
-		try:
-			flock(self.lockfile, LOCK_UN)
-			self.lockfile.close()
-			os.remove(lockfile)
-		except:
-			return False
-		return True
-	#=====================
 
 class TestScript(AppionScript):
 	def setupParserOptions(self):

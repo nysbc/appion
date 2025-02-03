@@ -90,8 +90,6 @@ class AppionLoop(appionScript.AppionScript):
 		"""
 		processes all images
 		"""
-		if not self.params['parallel']:
-			self.cleanParallelLock()
 		### get images from database
 		self._getAllImages()
 		os.chdir(self.params['rundir'])
@@ -601,10 +599,6 @@ class AppionLoop(appionScript.AppionScript):
 		initilizes several parameters for a new image
 		and checks if it is okay to start processing image
 		"""
-		if self.params['parallel']:
-			if self.lockParallel(imgdata.dbid):
-				apDisplay.printMsg('%s locked by another parallel run in the rundir' % (apDisplay.shortenImageName(imgdata['filename'])))
-				return False
 		#calc images left
 		apDisplay.printDebug('_startLoop imagecount=%d, count=%d' % (self.stats['imagecount'], self.stats['count']))
 		self.stats['imagesleft'] = self.stats['imagecount'] - self.stats['count']
@@ -624,14 +618,10 @@ class AppionLoop(appionScript.AppionScript):
 		imgpath = os.path.join(imgdata['session']['image path'], imgdata['filename']+'.mrc')
 		if not os.path.isfile(imgpath):
 			apDisplay.printWarning(imgpath+" not found, skipping")
-			if self.params['parallel']:
-				self.unlockParallel(imgdata.dbid)
 			return False
 
 		# check to see if image has already been processed
 		if self._alreadyProcessed(imgdata):
-			if self.params['parallel']:
-				self.unlockParallel(imgdata.dbid)
 			return False
 
 		self.stats['waittime'] = 0
