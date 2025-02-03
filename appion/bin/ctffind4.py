@@ -23,7 +23,7 @@ from appionlib.apCtf import ctffind4AvgRotPlot
 import stat
 import getpass
 from time import sleep
-from .run import run
+from appionlib.run import run
 
 class ctfEstimateLoop(appionLoop2.AppionLoop):
 	"""
