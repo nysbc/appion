@@ -57,31 +57,7 @@ class AppionLoop(appionScript.AppionScript):
 		self.process_batch_count = count
 
 	def processOneImage(self, imgnum):
-		imgdata = self.imgtree[imgnum]
-
-		### CHECK IF IT IS OKAY TO START PROCESSING IMAGE
-		if not self._startLoop(imgdata):
-			return
-
-		### set the pixel size
-		self.params['apix'] = apDatabase.getPixelSize(imgdata)
-		if not self.params['background']:
-			apDisplay.printMsg("Pixel size for image number %d: %s" % (imgnum, str(self.params['apix'])))
-
-		### START any custom functions HERE:
-		results = self.loopProcessImage(imgdata)
-
-		### WRITE db data
-		if self.params['commit'] is True:
-			if not self.params['background']:
-				apDisplay.printColor(" ==== Committing data to database (imgnum %d) ==== " % imgnum, "blue")
-			self.loopCommitToDatabase(imgdata)
-			self.commitResultsToDatabase(imgdata, results)
-		else:
-			apDisplay.printWarning("not committing results to database, all data will be lost (imgnum %d)" % imgnum)
-			apDisplay.printMsg("to preserve data start script over and add 'commit' flag (imgnum %d)" % imgnum)
-			self.writeResultsToFiles(imgdata, results)
-		self.loopCleanUp(imgdata)
+			raise NotImplementedError
 		### FINISH with custom functions
 
 
