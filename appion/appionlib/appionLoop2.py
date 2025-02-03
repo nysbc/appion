@@ -34,13 +34,13 @@ class AppionLoop(appionScript.AppionScript):
 		self.setFunctionResultKeys()
 		self._setRunAndParameters()
 		#self.specialCreateOutputDirs()
-		self._initializeDoneDict()
 		self.result_dirs={}
 		self.bad_images = []
 		self.sleep_minutes = 6
 		self.process_batch_count = 10
 		self.donedictpath = os.path.join(self.params['rundir'] , self.functionname+".donedict")
 		self.donedictfile=self._lockDoneDict()
+		self._initializeDoneDict()
 
 	#=====================
 	def setWaitSleepMin(self,minutes):
@@ -434,8 +434,6 @@ class AppionLoop(appionScript.AppionScript):
 		"""
 		reads or creates a done dictionary
 		"""
-		if not self.donedictfile:
-			self.donedictfile=open(self.donedictpath)
 
 		apDisplay.printMsg("Attempting to read old done dictionary: "+os.path.basename(self.donedictpath))
 		try:
