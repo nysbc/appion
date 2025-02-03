@@ -18,7 +18,6 @@ from appionlib import apProject
 from appionlib import apDatabase
 from appionlib import appiondata
 from appionlib import apWebScript
-from appionlib import apThread
 #leginon
 import leginon.leginonconfig
 import sinedon
@@ -87,13 +86,6 @@ class AppionScript(basicScript.BasicScript):
 		### setup run directory
 		self.setProcessingDirName()
 		self.setupRunDirectory()
-
-		### Start pool of threads to run subprocesses.
-		### Later you will use self.process_launcher.launch(...) to
-		### put commands into the queue.
-		### There is currently a timeout built into it that will cause
-		### the threads to die if they have no tasks after 10 seconds.
-		self.process_launcher = apThread.ProcessLauncher(2, self.params['rundir'])
 
 		### write function log
 		self.logfile = apParam.writeFunctionLog(sys.argv, msg=(not self.quiet))
@@ -491,9 +483,6 @@ class AppionScript(basicScript.BasicScript):
 	#=====================
 	def onClose(self):
 		return
-
-	def runAppionScriptInIndependentThread(self,cmd):
-		self.process_launcher.launch(cmd, shell=True)
 
 	def runAppionScriptInSubprocess(self,cmd,logfilepath):
 		# Running another AppionScript as a subprocess
