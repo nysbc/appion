@@ -105,7 +105,7 @@ class AppionLoop(appionScript.AppionScript):
 			imgnum = 0
 			# The number of processes spawned is proportional to the total
 			# backlog of images.
-			procs=round(len(self.imgtree) ** (1/3))
+			procs=int(round(len(self.imgtree) ** (1/3)))
 			if procs > maxProcs:
 				procs=maxProcs
 			while imgnum < len(self.imgtree) and self.notdone is True:
