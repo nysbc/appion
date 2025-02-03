@@ -1,7 +1,7 @@
 import os
 from appionlib import apDisplay
 from appionlib import apDatabase
-from multiprocessing import Pool]
+from multiprocessing import Pool
 import time
     
 def run(loop):
