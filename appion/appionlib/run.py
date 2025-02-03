@@ -33,7 +33,8 @@ def run(loop):
             imgnums=[imgnum + i for i in range(procs)]
             p=Pool(procs)
             for idx in imgnums:
-                p.apply_async(processOneImage, (loop, idx))
+                pixsize=apDatabase.getPixelSize(loop.imgtree[idx])
+                p.apply_async(processOneImage, (loop, idx, pixsize))
             p.close()
             p.join()
             imgnum+=procs
@@ -46,7 +47,7 @@ def run(loop):
     loop.postLoopFunctions()
     loop.close()
 
-def processOneImage(loop, imgnum):
+def processOneImage(loop, imgnum, pixsize):
     imgdata = loop.imgtree[imgnum]
 
     ### CHECK IF IT IS OKAY TO START PROCESSING IMAGE
@@ -54,7 +55,7 @@ def processOneImage(loop, imgnum):
         return
 
     ### set the pixel size
-    loop.params['apix'] = apDatabase.getPixelSize(imgdata)
+    loop.params['apix'] = pixsize
     if not loop.params['background']:
         apDisplay.printMsg("Pixel size for image number %d: %s" % (imgnum, str(loop.params['apix'])))
 
