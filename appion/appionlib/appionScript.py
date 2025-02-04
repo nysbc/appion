@@ -18,11 +18,13 @@ from appionlib import apProject
 from appionlib import apDatabase
 from appionlib import appiondata
 from appionlib import apWebScript
+from appionlib import apThread
 #leginon
 import leginon.leginonconfig
 import sinedon
 from pyami import mem
 from pyami import version
+from fcntl import flock, LOCK_EX, LOCK_UN, LOCK_NB
 
 #=====================
 #=====================
@@ -32,6 +34,7 @@ class AppionScript(basicScript.BasicScript):
 		"""
 		Starts a new function and gets all the parameters
 		"""
+		self.lockfile=None
 		### setup some expected values
 		self.successful_run = False
 		self.clusterjobdata = None
@@ -59,6 +62,7 @@ class AppionScript(basicScript.BasicScript):
 # 			loadsquared = loadavg*loadavg
 # 			time.sleep(loadavg)
 # 			apDisplay.printMsg("New load average "+str(round(os.getloadavg()[0],2)))
+		self.setLockname('lock')
 
 		### setup default parser: run directory, etc.
 		self.setParams(optargs,useglobalparams)
@@ -86,6 +90,13 @@ class AppionScript(basicScript.BasicScript):
 		### setup run directory
 		self.setProcessingDirName()
 		self.setupRunDirectory()
+
+		### Start pool of threads to run subprocesses.
+		### Later you will use self.process_launcher.launch(...) to
+		### put commands into the queue.
+		### There is currently a timeout built into it that will cause
+		### the threads to die if they have no tasks after 10 seconds.
+		self.process_launcher = apThread.ProcessLauncher(2, self.params['rundir'])
 
 		### write function log
 		self.logfile = apParam.writeFunctionLog(sys.argv, msg=(not self.quiet))
@@ -484,6 +495,9 @@ class AppionScript(basicScript.BasicScript):
 	def onClose(self):
 		return
 
+	def runAppionScriptInIndependentThread(self,cmd):
+		self.process_launcher.launch(cmd, shell=True)
+
 	def runAppionScriptInSubprocess(self,cmd,logfilepath):
 		# Running another AppionScript as a subprocess
 		apDisplay.printMsg('running AppionScript:')
@@ -513,6 +527,36 @@ class AppionScript(basicScript.BasicScript):
 			apDisplay.printMsg('AppionScript ran successfully')
 		apDisplay.printMsg('------------------------------------------------')
 		return proc.returncode
+
+	#=====================
+	def setLockname(self,name):
+		self.lockname = '.'+name
+
+	def cleanParallelLock(self):
+		for file in glob.glob('%s*' % self.lockname):
+			os.remove(file)
+
+	def lockParallel(self,dbid):
+		lock_file = '%s%d' % (self.lockname,dbid)
+		try:
+			fd = os.open(lock_file, os.O_CREAT|os.O_EXCL|os.O_RDWR)
+			self.lockfile = os.fdopen(fd, 'r+')
+			flock(self.lockfile, LOCK_EX | LOCK_NB)
+		except:
+			return True
+		return False
+
+	def unlockParallel(self,dbid):
+		lockfile = '%s%d' % (self.lockname,dbid)
+		apDisplay.printWarning('removing %s' % lockfile)
+		try:
+			flock(self.lockfile, LOCK_UN)
+			self.lockfile.close()
+			os.remove(lockfile)
+		except:
+			return False
+		return True
+	#=====================
 
 class TestScript(AppionScript):
 	def setupParserOptions(self):

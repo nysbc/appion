@@ -18,7 +18,6 @@ from appionlib import appionScript
 from pyami import mem
 from pyami import fileutil
 from fcntl import flock, LOCK_EX, LOCK_UN
-from multiprocessing import Pool
 
 class AppionLoop(appionScript.AppionScript):
 	#=====================
@@ -34,13 +33,11 @@ class AppionLoop(appionScript.AppionScript):
 		self.setFunctionResultKeys()
 		self._setRunAndParameters()
 		#self.specialCreateOutputDirs()
+		self._initializeDoneDict()
 		self.result_dirs={}
 		self.bad_images = []
 		self.sleep_minutes = 6
 		self.process_batch_count = 10
-		self.donedictpath = os.path.join(self.params['rundir'] , self.functionname+".donedict")
-		self.donedictfile=self._lockDoneDict()
-		self._initializeDoneDict()
 
 	#=====================
 	def setWaitSleepMin(self,minutes):
@@ -56,26 +53,88 @@ class AppionLoop(appionScript.AppionScript):
 		'''
 		self.process_batch_count = count
 
-	def processOneImage(self, imgnum):
-			raise NotImplementedError
-		### FINISH with custom functions
-
-
 	#=====================
 	def run(self):
-		raise NotImplementedError
+		"""
+		processes all images
+		"""
+		if not self.params['parallel']:
+			self.cleanParallelLock()
+		### get images from database
+		self._getAllImages()
+		os.chdir(self.params['rundir'])
+		self.stats['startimage'] = time.time()
+		self.preLoopFunctions()
+		### start the loop
+		self.notdone=True
+		self.badprocess = False
+		self.stats['startloop'] = time.time()
+		while self.notdone:
+			apDisplay.printColor("\nBeginning Main Loop", "green")
+			imgnum = 0
+			while imgnum < len(self.imgtree) and self.notdone is True:
+				self.stats['startimage'] = time.time()
+				imgdata = self.imgtree[imgnum]
+				imgnum += 1
+
+				### CHECK IF IT IS OKAY TO START PROCESSING IMAGE
+				if not self._startLoop(imgdata):
+					continue
+
+				### set the pixel size
+				self.params['apix'] = apDatabase.getPixelSize(imgdata)
+				if not self.params['background']:
+					apDisplay.printMsg("Pixel size: "+str(self.params['apix']))
+
+				### START any custom functions HERE:
+				results = self.loopProcessImage(imgdata)
+
+				### WRITE db data
+				if self.badprocess is False:
+					if self.params['commit'] is True:
+						if not self.params['background']:
+							apDisplay.printColor(" ==== Committing data to database ==== ", "blue")
+						self.loopCommitToDatabase(imgdata)
+						self.commitResultsToDatabase(imgdata, results)
+					else:
+						apDisplay.printWarning("not committing results to database, all data will be lost")
+						apDisplay.printMsg("to preserve data start script over and add 'commit' flag")
+						self.writeResultsToFiles(imgdata, results)
+					self.loopCleanUp(imgdata)
+				else:
+					apDisplay.printWarning("IMAGE FAILED; nothing inserted into database")
+					self.badprocess = False
+					self.stats['lastpeaks'] = 0
+				### FINISH with custom functions
+
+				self.finishLoopOneImage(imgdata)
+				#END LOOP OVER IMAGES
+			if self.notdone is True:
+				self.notdone = self._waitForMoreImages()
+			#END NOTDONE LOOP
+
+		self.postLoopFunctions()
+		self.close()
 
 	#=====================
-	def finishLoopImages(self, count):
+	def finishLoopOneImage(self, imgdata):
 		'''
 		Things to do after an image is processed whether commit or not
 		'''
+		self._writeDoneDict(imgdata['filename'])
+		if self.params['parallel']:
+			self.unlockParallel(imgdata.dbid)
+
+	# 				loadavg = os.getloadavg()[0]
+	# 				if loadavg > 2.0:
+	# 					apDisplay.printMsg("Load average is high "+str(round(loadavg,2)))
+	# 					loadsquared = loadavg*loadavg
+	# 					apDisplay.printMsg("Sleeping %.1f seconds"%(loadavg))
+	# 					time.sleep(loadavg)
+	# 					apDisplay.printMsg("New load average "+str(round(os.getloadavg()[0],2)))
+
 		self._printSummary()
-		self.stats['count'] += count
-		self.stats['totalcount'] += count
-		self.donedictfile.seek(0)
-		self.donedictfile.truncate()
-		json.dump(self.donedict,self.donedictfile)
+		self._advanceStatsCount()
 
 		# This just print. It does not really do anything
 		if self.params['limit'] is not None and self.stats['totalcount'] > self.params['limit']:
@@ -373,24 +432,31 @@ class AppionLoop(appionScript.AppionScript):
 		reads or creates a done dictionary
 		"""
 
-		apDisplay.printMsg("Attempting to read old done dictionary: "+os.path.basename(self.donedictpath))
+		self.donedictfile = os.path.join(self.params['rundir'] , self.functionname+".donedict")
+		#Lock DoneDict file
+		f=self._lockDoneDict()
+		f.seek(0)
+
+		apDisplay.printMsg("Attempting to read old done dictionary: "+os.path.basename(self.donedictfile))
 		try:
 			self.donedict=json.load(f)
-			self.donedictfile.seek(0)
+			f.seek(0)
 		except:
-			self.donedictfile.seek(0)
-			self.donedictfile.truncate()
-			apDisplay.printMsg("Failed to read old done dictionary; creating new done dictionary: "+os.path.basename(self.donedictpath))
+			f.seek(0)
+			f.truncate()
+			apDisplay.printMsg("Failed to read old done dictionary; creating new done dictionary: "+os.path.basename(self.donedictfile))
 			self.donedict = {}
 			self.donedict['commit'] = self.params['commit']
-			json.dump(self.donedict, self.donedictfile)
-			self.donedictfile.flush()
+			json.dump(self.donedict, f)
+			f.flush()
 
 		if self.params['continue'] == True:
 			try:
 				if self.donedict['commit'] == self.params['commit']:
 					### all is well
 					apDisplay.printMsg("Found "+str(len(self.donedict))+" done dictionary entries")
+					#Unlock DoneDict file
+					self._unlockDoneDict(f)
 					return
 				elif self.donedict['commit'] is True and self.params['commit'] is not True:
 					### die
@@ -401,25 +467,28 @@ class AppionLoop(appionScript.AppionScript):
 			except KeyError:
 				apDisplay.printMsg("Found "+str(len(self.donedict))+" done dictionary entries")
 
+		#Unlock DoneDict file
+		self._unlockDoneDict(f)
+
 		return
 
 	#=====================
 	def _lockDoneDict(self):
-		apDisplay.printWarning('locking %s' % self.donedictpath)
-		if not os.path.isfile(self.donedictpath):
+		apDisplay.printWarning('locking %s' % self.donedictfile)
+		if not os.path.isfile(self.donedictfile):
 			try:
-				apDisplay.printWarning('creating %s' % self.donedictpath)
-				f=open(self.donedictpath, 'a', 0666)
+				apDisplay.printWarning('creating %s' % self.donedictfile)
+				f=open(self.donedictfile, 'a', 0666)
 				f.close()
 			except:
-				apDisplay.printWarning('%s already exists' % self.donedictpath)
-		f=open(self.donedictpath, 'r+')
+				apDisplay.printWarning('%s already exists' % self.donedictfile)
+		f=open(self.donedictfile, 'r+')
 		flock(f, LOCK_EX)
 		return f
 
 	#=====================
 	def _unlockDoneDict(self, f):
-		apDisplay.printWarning('unlocking %s' % self.donedictpath)
+		apDisplay.printWarning('unlocking %s' % self.donedictfile)
 		flock(f, LOCK_UN)
 		f.close()
 		return
@@ -429,20 +498,38 @@ class AppionLoop(appionScript.AppionScript):
 		"""
 		reloads done dictionary
 		"""
+		#Lock DoneDict file
+		f = self._lockDoneDict()
 
-		self.donedictfile.seek(0)
+		f.seek(0)
 		self.donedict = json.load(f)
 
+		#Unlock DoneDict file
+		self._unlockDoneDict(f)
 
 	#=====================
 	def _writeDoneDict(self, imgname=None):
 		"""
 		write finished image (imgname) to done dictionary
 		"""
+		#Lock DoneDict file
+		f=self._lockDoneDict()
+		self.donedict=json.load(f)
+
+
 		### set new parameters
 		if imgname != None:
 			self.donedict[imgname] = True
 		self.donedict['commit'] = self.params['commit']
+
+		### write donedict to file
+		f.seek(0)
+		f.truncate()
+		json.dump(self.donedict, f)
+		f.flush()
+
+		#Unlock DoneDict file
+		self._unlockDoneDict(f)
 
 	#=====================
 	def _getAllImages(self):
@@ -536,6 +623,10 @@ class AppionLoop(appionScript.AppionScript):
 		initilizes several parameters for a new image
 		and checks if it is okay to start processing image
 		"""
+		if self.params['parallel']:
+			if self.lockParallel(imgdata.dbid):
+				apDisplay.printMsg('%s locked by another parallel run in the rundir' % (apDisplay.shortenImageName(imgdata['filename'])))
+				return False
 		#calc images left
 		apDisplay.printDebug('_startLoop imagecount=%d, count=%d' % (self.stats['imagecount'], self.stats['count']))
 		self.stats['imagesleft'] = self.stats['imagecount'] - self.stats['count']
@@ -550,15 +641,21 @@ class AppionLoop(appionScript.AppionScript):
 			elif self.stats['count'] % 80 == 0:
 				sys.stderr.write("\n")
 			self.stats['lastcount'] = self.stats['count']
+			if apDisplay.isDebugOn():
+				self._checkMemLeak()
 
 		# skip if image doesn't exist:
 		imgpath = os.path.join(imgdata['session']['image path'], imgdata['filename']+'.mrc')
 		if not os.path.isfile(imgpath):
 			apDisplay.printWarning(imgpath+" not found, skipping")
+			if self.params['parallel']:
+				self.unlockParallel(imgdata.dbid)
 			return False
 
 		# check to see if image has already been processed
 		if self._alreadyProcessed(imgdata):
+			if self.params['parallel']:
+				self.unlockParallel(imgdata.dbid)
 			return False
 
 		self.stats['waittime'] = 0
@@ -575,6 +672,12 @@ class AppionLoop(appionScript.AppionScript):
 				"""apDisplay.printMsg("processing "+apDisplay.shortenImageName(imgdata['filename']))"""
 
 		return True
+
+	def _advanceStatsCount(self):
+		# self.stats['count'] is reset when images are skipped or processed by the last waitForMoreImage.
+		# self.stats['totalcount'] advances for in every image processed in this instance,
+		self.stats['count'] += 1
+		self.stats['totalcount'] += 1
 
 	#=====================
 	def _printSummary(self):
@@ -628,6 +731,46 @@ class AppionLoop(appionScript.AppionScript):
 			#print "\tMEM: ",(mem.active()-startmem)/1024,"M (",(mem.active()-startmem)/(1024*count),"M)"
 			apDisplay.printDebug( 'printSummary adding to stats count')
 			self._printLine()
+
+	#=====================
+	def _checkMemLeak(self):
+		"""
+		unnecessary code for determining if the program is eating memory over time
+		"""
+		### Memory leak code:
+		#self.stats['memlist'].append(mem.mySize()/1024)
+		self.stats['memlist'].append(mem.active())
+		memfree = mem.free()
+		minavailmem = 64*1024; # 64 MB, size of one image
+		if(memfree < minavailmem):
+			apDisplay.printDebug("Memory is low ("+str(int(memfree/1024))+"MB): there is probably a memory leak")
+
+		if(self.stats['count'] > 15):
+			memlist = self.stats['memlist'][-15:]
+			n       = len(memlist)
+			
+			gain    = (memlist[n-1] - memlist[0])/1024.0
+			sumx    = n*(n-1.0)/2.0
+			sumxsq  = n*(n-1.0)*(2.0*n-1.0)/6.0
+			sumy = 0.0; sumxy = 0.0; sumysq = 0.0
+			for i in range(n):
+				value  = float(memlist[i])/1024.0
+				sumxy  += float(i)*value
+				sumy   += value
+				sumysq += value**2
+			###
+			stdx  = math.sqrt(n*sumxsq - sumx**2)
+			stdy  = math.sqrt(n*sumysq - sumy**2)
+			rho   = float(n*sumxy - sumx*sumy)/float(stdx*stdy+1e-6)
+			slope = float(n*sumxy - sumx*sumy)/float(n*sumxsq - sumx*sumx)
+			memleak = rho*slope
+			###
+			if(self.stats['memleak'] > 3 and slope > 20 and memleak > 512 and gain > 2048):
+				apDisplay.printDebug("Memory leak of "+str(round(memleak,2))+"MB")
+			elif(memleak > 32):
+				self.stats['memleak'] += 1
+				apDisplay.printDebug("substantial memory leak "+str(round(memleak,2))+"MB")
+				print "(",str(n),round(slope,5),round(rho,5),round(gain,2),")"
 
 	#=====================
 	def skipTestOnImage(self,imgdata):
@@ -830,7 +973,6 @@ class AppionLoop(appionScript.AppionScript):
 			with open(markerFilePath, "w") as f:
 				f.write("Loop completed at: %s" % time.asctime())
 		appionScript.AppionScript.close(self)
-		self._unlockDoneDict(self.donedictfile)
 
 
 #=====================

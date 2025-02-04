@@ -23,7 +23,7 @@ from appionlib.apCtf import ctffind4AvgRotPlot
 import stat
 import getpass
 from time import sleep
-from appionlib.run import run
+from multiprocessing import Pool
 
 class ctfEstimateLoop(appionLoop2.AppionLoop):
 	"""
@@ -466,9 +466,17 @@ class ctfEstimateLoop(appionLoop2.AppionLoop):
 			origPath = os.path.join(self.ddstackpath,source_imgdata['filename']+"_st.mrc")
 		return origPath, binning
 
+def main():
+	imgLoop = ctfEstimateLoop()
+	imgLoop.run()
 
 if __name__ == '__main__':
-	imgLoop = ctfEstimateLoop()
-	run(imgLoop)
+	appionProcCount=os.getenv("APPION_PROCESSES", 20)
+	appionProcCount=int(appionProcCount)
+	p=Pool(appionProcCount)
+	for _ in range(appionProcCount):
+		p.apply_async(main)
+	p.close()
+	p.join()
 
 
