@@ -73,7 +73,14 @@ class AppionLoop(appionScript.AppionScript):
 		while self.notdone:
 			apDisplay.printColor("\nBeginning Main Loop", "green")
 			imgnum = 0
-			twoqueues=0
+			# Add a second HyperQueue allocation queue if images get backed up.
+			# Yes this is a hack-	 I know.
+			if len(self.imgtree) > 20:
+				cmd = "hq --server-dir=%s alloc resume 2" % os.path.join(self.params['rundir'],"hq","server")
+				subprocess.Popen(cmd, shell=True)
+			else:
+				cmd = "hq --server-dir=%s alloc pause 2" % os.path.join(self.params['rundir'],"hq","server")
+				subprocess.Popen(cmd, shell=True)
 			while imgnum < len(self.imgtree) and self.notdone is True:
 				self.stats['startimage'] = time.time()
 				imgdata = self.imgtree[imgnum]
@@ -110,20 +117,7 @@ class AppionLoop(appionScript.AppionScript):
 				### FINISH with custom functions
 
 				self.finishLoopOneImage(imgdata)
-				# Add a second HyperQueue allocation queue if images take more than a minute to process.
-				# Be reluctant to pause the second queue.
-				# We do this because superresolution images often take a lot of time and require more workers.
-				# Yes this is a hack- I know.
-				if (time.time() - self.stats['startimage'] > 60) and not twoqueues:
-					twoqueues+=1
-					cmd = "hq --server-dir=%s alloc resume 2" % os.path.join(self.params['rundir'],"hq","server")
-					subprocess.Popen(cmd, shell=True)
-				elif twoqueues >= 10:
-					cmd = "hq --server-dir=%s alloc pause 2" % os.path.join(self.params['rundir'],"hq","server")
-					subprocess.Popen(cmd, shell=True)
-					twoqueues=0
-				elif twoqueues:
-					twoqueues+=1
+
 				#END LOOP OVER IMAGES
 			if self.notdone is True:
 				self.notdone = self._waitForMoreImages()
