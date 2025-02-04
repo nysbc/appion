@@ -109,7 +109,7 @@ class ctfEstimateLoop(appionLoop2.AppionLoop):
 
 	#======================
 	def getCtfProgPath(self):
-		return os.getenv("APPION_CTFFIND4_PATH", "/common/sw/hq/bin/ctffind4")
+		return os.getenv("APPION_CTFFIND4_PATH", "/common/sw/containers/opt/ctffind4/4.1.14/bin/ctffind4")
 
 	#======================
 	def postLoopFunctions(self):
@@ -312,7 +312,19 @@ class ctfEstimateLoop(appionLoop2.AppionLoop):
 			f.write("}")
 		os.chmod(expectscript, stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
 
-		cmd = "hq --server-dir %s submit --cwd %s --wait --max-fails 3 --time-limit=5min --cpus 2 sudo -u %s /usr/bin/expect %s" % (os.getenv("HQ_SERVER_DIR","/common/etc/hq/ctffind4"), os.getenv("HQ_CWD", "/common/sw/hq/ctffind4/jobs/hq-current"), getpass.getuser(), os.path.abspath(expectscript))
+		serverdir=os.path.join(self.params['rundir'],"hq","server")
+		jobdir=os.path.join(self.params['rundir'],"hq","jobs")
+		try:
+			if not os.path.exists(serverdir):
+				os.makedirs(serverdir)
+		except OSError:
+			pass
+		try:
+			if not os.path.exists(jobdir):
+				os.makedirs(jobdir)
+		except OSError:
+			pass
+		cmd = "hq --server-dir %s submit --cwd %s --wait --max-fails 3 --time-limit=5min --cpus 2 /usr/bin/expect %s" % (os.getenv("HQ_SERVER_DIR",serverdir), os.getenv("HQ_CWD", jobdir), os.path.abspath(expectscript))
 		#Handles case where command fails because hq server has gone away.
 		success=False
 		while not success:
@@ -471,7 +483,7 @@ def main():
 	imgLoop.run()
 
 if __name__ == '__main__':
-	appionProcCount=os.getenv("APPION_PROCESSES", 20)
+	appionProcCount=os.getenv("APPION_PROCESSES", 8)
 	appionProcCount=int(appionProcCount)
 	p=Pool(appionProcCount)
 	for _ in range(appionProcCount):

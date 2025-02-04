@@ -13,7 +13,7 @@ def main():
 	makeStack.run()
 
 if __name__ == '__main__':
-	appionProcCount=os.getenv("APPION_PROCESSES", 20)
+	appionProcCount=os.getenv("APPION_PROCESSES", 8)
 	appionProcCount=int(appionProcCount)
 	p=Pool(appionProcCount)
 	for _ in range(appionProcCount):

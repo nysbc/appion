@@ -100,10 +100,21 @@ class DDFrameAligner(object):
 		'''
 		# Construct the command line with defaults
 		cmd = self.makeFrameAlignmentCommand()
-		cmd = "sudo -u %s %s" % (getpass.getuser(), cmd)
-		csum = md5(cmd).hexdigest()
-		logpath=os.path.join(os.getenv("HQ_LOG", "/common/sw/hq/motioncor2/logs"), "%s.log" % csum)
-		cmd = "hq --server-dir %s submit --cwd %s --stdout %s --wait --max-fails 3 --time-limit=5min --cpus 2 --resource gpus=1 %s" % (os.getenv("HQ_SERVER_DIR","/common/etc/hq/motioncor2"), os.getenv("HQ_CWD", "/common/sw/hq/motioncor2/jobs/hq-current"), logpath, cmd)
+		stdoutpath=self.framestackpath[:-4]+'_Log.motioncor2.txt'
+		stderrpath=self.framestackpath[:-4]+'_Log.motioncor2.err'
+		serverdir=os.path.join(self.params['rundir'],"hq","server")
+		jobdir=os.path.join(self.params['rundir'],"hq","jobs")
+		try:
+			if not os.path.exists(serverdir):
+				os.makedirs(serverdir)
+		except OSError:
+			pass
+		try:
+			if not os.path.exists(jobdir):
+				os.makedirs(jobdir)
+		except OSError:
+			pass
+		cmd = "hq --server-dir %s submit --cwd %s --stdout %s --stderr %s --wait --max-fails 3 --time-limit=5min --cpus 2 --resource gpus=1 %s" % (os.getenv("HQ_SERVER_DIR",serverdir), os.getenv("HQ_CWD", jobdir), stdoutpath, stderrpath, cmd)
 
 		# run as subprocesscmd
 		apDisplay.printMsg('Running: %s'% cmd)
@@ -117,7 +128,7 @@ class DDFrameAligner(object):
 			else:
 				sleep(15)
 		try:
-			self.writeLogFile(logpath)
+			self.writeLogFile(stdoutpath)
 		except Exception as e:
 			print(e)
 			sys.exit(1)
@@ -227,7 +238,7 @@ class MotionCorr_Purdue(MotionCorr1):
 			
 class MotionCor2_UCSF(DDFrameAligner):
 	def __init__(self):
-		self.executable = os.getenv("APPION_MOTIONCOR2_PATH","/common/sw/hq/bin/motioncor2")
+		self.executable = os.getenv("APPION_MOTIONCOR2_PATH","/common/sw/containers/opt/motioncor2/1.5.0/bin/motioncor2")
 		DDFrameAligner.__init__(self)
 
 	def setKV(self, kv):
@@ -497,14 +508,8 @@ class MotionCor2_UCSF(DDFrameAligner):
 		will write motioncor2 log file and standard log file that is readable by appion image viewer (motioncorr1 format)
 		'''
 
-		### motioncor2 format
-		log2 = self.framestackpath[:-4]+'_Log.motioncor2.txt'
-		shutil.copyfile(logpath, log2)
-		cmd = "hq --server-dir %s submit --cwd %s --wait --max-fails 3 --time-limit=5min --cpus 2 rm %s" % (os.getenv("HQ_SERVER_DIR","/common/etc/hq/motioncor2"), os.getenv("HQ_CWD", "/common/sw/hq/motioncor2/jobs/hq-current"), logpath)
-		subprocess.Popen(cmd, shell=True)
-
 		### this is unnecessary, need to figure out how to convert outbuffer from subprocess PIPE to readable format
-		f = open(log2, "r")
+		f = open(logpath, "r")
 			
 		outbuffer = f.readlines()
 		f.close()
