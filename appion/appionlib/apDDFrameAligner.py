@@ -107,6 +107,7 @@ class DDFrameAligner(object):
 			jobdir=os.path.join(self.params['rundir'],"hq","jobs")
 		except Exception as e:
 			apDisplay.printMsg("whoopsie %s" % str(e))
+			sys.exit(1)
 		try:
 			if not os.path.exists(serverdir):
 				os.makedirs(serverdir)
