@@ -1315,8 +1315,8 @@ class CtfDisplay(object):
 		#########
 		meandef = abs(self.defocus1+self.defocus2)/2.0
 		deftext = "%.2f um"%(meandef*1e6)
-		tsize = draw.textsize(deftext, font=font)
-		coord = (powerspec.shape[0]-4-tsize[0], powerspec.shape[0]-4-tsize[1])
+		tbbox = font.getbbox(deftext)
+		coord = (powerspec.shape[0]-4-tbbox[2]+tbbox[0], powerspec.shape[0]-4-tbbox[3]+tbbox[1])
 		for i in [-2,2]:
 			for j in [-2,2]:
 				draw.text((coord[0]+i,coord[1]+j), deftext, font=font, fill="black")
@@ -1332,8 +1332,9 @@ class CtfDisplay(object):
 				draw.text((leftcoord[0]+i,leftcoord[1]+j) , "Raw CTF Data", font=font, fill="black")
 		draw.text(leftcoord, "Raw CTF Data", font=font, fill="#00BFFF")
 
-		tsize = draw.textsize("Elliptical Average", font=font)
-		xdist = powerspec.shape[0] - 4 - tsize[0]
+		mytext = "Elliptical Average"
+		tbbox = font.getbbox(deftext)
+		xdist = powerspec.shape[0] - 4 - tbbox[2]+tbbox[0]
 		rightcoord = (xdist, 4)
 		for i in [-2,2]:
 			for j in [-2,2]:
