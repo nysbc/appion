@@ -116,10 +116,10 @@ class AppionLoop(appionScript.AppionScript):
 				# Yes this is a hack- I know.
 				if (time.time() - self.stats['startimage'] > 60) and not twoqueues:
 					twoqueues+=1
-					cmd = "hq alloc --server-dir=%s alloc resume 2" % os.path.join(self.params['rundir'],"hq","server")
+					cmd = "hq --server-dir=%s alloc resume 2" % os.path.join(self.params['rundir'],"hq","server")
 					subprocess.Popen(cmd, shell=True)
 				elif twoqueues >= 10:
-					cmd = "hq alloc --server-dir=%s alloc pause 2" % os.path.join(self.params['rundir'],"hq","server")
+					cmd = "hq --server-dir=%s alloc pause 2" % os.path.join(self.params['rundir'],"hq","server")
 					subprocess.Popen(cmd, shell=True)
 					twoqueues=0
 				elif twoqueues:
