@@ -18,6 +18,7 @@ from appionlib import appionScript
 from pyami import mem
 from pyami import fileutil
 from fcntl import flock, LOCK_EX, LOCK_UN
+import subprocess
 
 class AppionLoop(appionScript.AppionScript):
 	#=====================
@@ -73,6 +74,7 @@ class AppionLoop(appionScript.AppionScript):
 			apDisplay.printColor("\nBeginning Main Loop", "green")
 			imgnum = 0
 			while imgnum < len(self.imgtree) and self.notdone is True:
+				twoqueues=0
 				self.stats['startimage'] = time.time()
 				imgdata = self.imgtree[imgnum]
 				imgnum += 1
@@ -108,6 +110,19 @@ class AppionLoop(appionScript.AppionScript):
 				### FINISH with custom functions
 
 				self.finishLoopOneImage(imgdata)
+				# Add a second HyperQueue allocation queue if images take more than a minute to process.
+				# Be reluctant to pause the second queue.
+				# We do this because superresolution images often take a lot of time and require more workers.
+				# Yes this is a hack- I know.
+				if (time.time() - self.stats['startimage'] > 60) and not twoqueues:
+					twoqueues+=1
+					cmd = "hq alloc --server-dir=%s alloc resume 2" % os.path.join(self.params['rundir'],"hq","server")
+					subprocess.Popen(cmd, shell=True)
+				elif twoqueues >= 10:
+					cmd = "hq alloc --server-dir=%s alloc pause 2" % os.path.join(self.params['rundir'],"hq","server")
+					subprocess.Popen(cmd, shell=True)
+				elif twoqueues:
+					twoqueues+=1
 				#END LOOP OVER IMAGES
 			if self.notdone is True:
 				self.notdone = self._waitForMoreImages()
