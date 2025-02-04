@@ -100,10 +100,13 @@ class DDFrameAligner(object):
 		'''
 		# Construct the command line with defaults
 		cmd = self.makeFrameAlignmentCommand()
-		stdoutpath=self.framestackpath[:-4]+'_Log.motioncor2.txt'
-		stderrpath=self.framestackpath[:-4]+'_Log.motioncor2.err'
-		serverdir=os.path.join(self.params['rundir'],"hq","server")
-		jobdir=os.path.join(self.params['rundir'],"hq","jobs")
+		try:
+			stdoutpath=self.framestackpath[:-4]+'_Log.motioncor2.txt'
+			stderrpath=self.framestackpath[:-4]+'_Log.motioncor2.err'
+			serverdir=os.path.join(self.params['rundir'],"hq","server")
+			jobdir=os.path.join(self.params['rundir'],"hq","jobs")
+		except Exception as e:
+			apDisplay.printMsg("whoopsie %s" % str(e))
 		try:
 			if not os.path.exists(serverdir):
 				os.makedirs(serverdir)
