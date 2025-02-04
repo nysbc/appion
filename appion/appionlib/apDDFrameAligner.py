@@ -103,8 +103,8 @@ class DDFrameAligner(object):
 		try:
 			stdoutpath=self.framestackpath[:-4]+'_Log.motioncor2.txt'
 			stderrpath=self.framestackpath[:-4]+'_Log.motioncor2.err'
-			serverdir=os.path.join(self.params['rundir'],"hq","server")
-			jobdir=os.path.join(self.params['rundir'],"hq","jobs")
+			serverdir=os.path.join(os.path.dirname(self.framestackpath),"hq","server")
+			jobdir=os.path.join(os.path.dirname(self.framestackpath),"hq","jobs")
 		except Exception as e:
 			apDisplay.printMsg("whoopsie %s" % str(e))
 			sys.exit(1)
