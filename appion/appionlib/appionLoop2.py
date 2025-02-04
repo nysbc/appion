@@ -73,8 +73,8 @@ class AppionLoop(appionScript.AppionScript):
 		while self.notdone:
 			apDisplay.printColor("\nBeginning Main Loop", "green")
 			imgnum = 0
+			twoqueues=0
 			while imgnum < len(self.imgtree) and self.notdone is True:
-				twoqueues=0
 				self.stats['startimage'] = time.time()
 				imgdata = self.imgtree[imgnum]
 				imgnum += 1
@@ -121,6 +121,7 @@ class AppionLoop(appionScript.AppionScript):
 				elif twoqueues >= 10:
 					cmd = "hq alloc --server-dir=%s alloc pause 2" % os.path.join(self.params['rundir'],"hq","server")
 					subprocess.Popen(cmd, shell=True)
+					twoqueues=0
 				elif twoqueues:
 					twoqueues+=1
 				#END LOOP OVER IMAGES
