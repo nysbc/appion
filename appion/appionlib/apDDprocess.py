@@ -4,15 +4,11 @@ import os
 import sys
 import numpy
 import time
-import math
-import scipy.stats
 import scipy.ndimage as ndimage
 ma = numpy.ma
-import shutil
 from pyami import mrc,imagefun,arraystats,numpil
 from leginon import correctorclient,leginondata,ddinfo
 from appionlib import apDisplay, apDatabase,apDBImage, appiondata,apFile
-import subprocess
 import socket
 import itertools
 from joblib import Parallel, delayed

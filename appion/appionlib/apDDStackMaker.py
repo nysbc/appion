@@ -2,10 +2,6 @@
 
 #pythonlib
 import os
-import sys
-import math
-import shutil
-import subprocess
 import multiprocessing as mp
 #pyami
 from pyami import fileutil

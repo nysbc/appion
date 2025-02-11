@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 from appionlib import apDisplay
-import socket
 import os
 import re
 import subprocess
