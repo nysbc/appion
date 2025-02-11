@@ -20,8 +20,6 @@ from appionlib import apThread
 #leginon
 import leginon.leginonconfig
 import sinedon
-from pyami import mem
-from pyami import version
 from fcntl import flock, LOCK_EX, LOCK_UN, LOCK_NB
 
 #=====================
@@ -41,7 +39,6 @@ class AppionScript(basicScript.BasicScript):
 		sys.stdout.write("\n\n")
 		self.quiet = quiet
 		self.maxnproc = maxnproc
-		self.startmem = mem.active()
 		self.t0 = time.time()
 		self.createDefaultStats()
 		self.timestamp = apParam.makeTimestamp()
@@ -269,11 +266,6 @@ class AppionScript(basicScript.BasicScript):
 			f.close()
 			sline = line.strip()
 			progrunq['revision'] = sline
-		if os.path.isdir(os.path.join(appiondir, ".svn")):
-			if progrunq['revision'] is None:
-				progrunq['revision'] = version.getSubversionRevision(appiondir)
-			else:
-				progrunq['revision'] += "-"+version.getSubversionRevision(appiondir)
 		if not progrunq['revision']:
 			progrunq['revision'] = 'unknown'
 		self.logger.info("Running Appion version '%s'"%(progrunq['revision']))
