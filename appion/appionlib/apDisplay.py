@@ -1,37 +1,12 @@
 
 import math
 import os
-import re
-import sys
 import types
 
 ####
 # This is a low-level file with NO database connections
 # Please keep it this way
 ####
-
-debug = False
-writeOut = False
-try:
-	outFile = os.path.basename(sys.argv[0]).split(".")[0]+".out"
-except:
-	outFile = "function.out"
-
-def isDebugOn():
-	return debug
-
-def printColor(text, colorstr):
-	"""
-	standardized log message
-	"""
-	if writeOut is True:
-		try:
-			f = open(outFile, "a")
-			f.write(" ... "+text+"\n")
-			f.close()
-		except:
-			print "write error"
-	sys.stderr.write(colorString(text, colorstr)+"\n")
 
 def bytes(numbytes):
 	numbytes = int(numbytes)

@@ -6,6 +6,8 @@ from appionlib import appiondata, apDatabase, apDisplay
 from leginon import correctorclient
 import logging
 
+LOGGER=logging.getLogger(__name__)
+
 class ApCorrectorClient(correctorclient.CorrectorClient):
 	def __init__(self, session, is_upload=False):
 		super(ApCorrectorClient,self).__init__()
@@ -52,7 +54,7 @@ def makeUniqueImageFilename(old_imagedata,old_presetname,new_presetname):
 				break
 			else:
 				version_number += 1
-		apDisplay.printColor('New image filename is: %s' % new_name,'magenta')
+		LOGGER.info('New image filename is: %s' % new_name)
 		return new_name
 
 def makeAlignedImageData(old_imagedata,new_camdata,new_array,alignlabel='a'):

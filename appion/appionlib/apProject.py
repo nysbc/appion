@@ -105,7 +105,7 @@ def setDBfromProjectId(projectid, die=True):
 	if newdbname is None:
 		return False
 	sinedon.setConfig('appiondata', db=newdbname)
-	apDisplay.printColor("Connected to database: '"+newdbname+"'", "green")
+	LOGGER.info("Connected to database: '"+newdbname+"'")
 	return True
 
 def setAppiondbBySessionName(sessionname, die=True):

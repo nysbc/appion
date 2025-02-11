@@ -123,7 +123,7 @@ def getVirtualStackParticlesFromId(stackid, msg=True):
 
 	pinfo = sinedon.directq.complexMysqlQuery('appiondata',sqlcmd)
 
-	apDisplay.printColor("Original stack: %s"%orig_stackfile,"cyan")
+	LOGGER.info("Original stack: %s"%orig_stackfile)
 	return {'stackid':orig_stack, 'filename':orig_stackfile, 'particles':pinfo}
 
 #===============
@@ -213,7 +213,7 @@ def getOnlyStackData(stackid, msg=True):
 		LOGGER.error("Stack ID: "+str(stackid)+" does not exist in the database")
 	if msg is True:
 		sys.stderr.write("Old stack info: ")
-		apDisplay.printColor("'"+stackdata['description']+"'","cyan")
+		LOGGER.info("'"+stackdata['description']+"'")
 	return stackdata
 
 #===============
@@ -401,7 +401,7 @@ def commitSubStack(params, newname=False, centered=False, oldstackparts=None, so
 
 	t0 = time.time()
 	oldstackdata = getOnlyStackData(params['stackid'], msg=False)
-	apDisplay.printColor("got old stackdata in "+apDisplay.timeString(time.time()-t0),"cyan")
+	LOGGER.info("got old stackdata in "+apDisplay.timeString(time.time()-t0))
 
 	t0 = time.time()
 	#create new stack data
@@ -538,9 +538,9 @@ def commitSubStack(params, newname=False, centered=False, oldstackparts=None, so
 	if newpartnum == 0:
 		LOGGER.error("No particles were inserted for the stack")
 
-	apDisplay.printColor("Inserted "+str(newpartnum-1)+ \
+	LOGGER.info("Inserted "+str(newpartnum-1)+ \
 		" stack particles into the database in "+ \
-		apDisplay.timeString(time.time()-t0),"cyan")
+		apDisplay.timeString(time.time()-t0))
 
 	LOGGER.info("\nInserting Runs in Stack")
 	runsinstack = getRunsInStack(params['stackid'])
