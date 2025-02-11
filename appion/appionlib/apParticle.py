@@ -99,10 +99,10 @@ def getDefocPairParticles(imgdata, selectionid, particlelabel=None):
 		defimgdata = apDefocalPairs.getManualDefocusPair(imgdata)
 	if defimgdata is None:
 		LOGGER.warning("Could not find defocal pair for image %s (id %d)"
-			%(apDisplay.short(imgdata['filename']), imgdata.dbid))
+			%(os.path.basename(imgdata['filename']), imgdata.dbid))
 		return ([], {'shiftx':0, 'shifty':0, 'scale':1})
 	LOGGER.info("Found defocus pair %s (id %d) for image %s (id %d)"
-		%(apDisplay.short(defimgdata['filename']), defimgdata.dbid, apDisplay.short(imgdata['filename']), imgdata.dbid))
+		%(os.path.basename(defimgdata['filename']), defimgdata.dbid, os.path.basename(imgdata['filename']), imgdata.dbid))
 
 	### get particles
 	partq = appiondata.ApParticleData()
@@ -112,7 +112,7 @@ def getDefocPairParticles(imgdata, selectionid, particlelabel=None):
 		partq['label'] = particlelabel
 	partdatas = partq.query()
 	LOGGER.info("Found %d particles for defocal pair %s (id %d)"
-		%(len(partdatas), apDisplay.short(defimgdata['filename']), defimgdata.dbid,))
+		%(len(partdatas), os.path.basename(defimgdata['filename']), defimgdata.dbid,))
 
 	if len(partdatas) == 0:
 		return ([], {'shiftx':0, 'shifty':0, 'scale':1})

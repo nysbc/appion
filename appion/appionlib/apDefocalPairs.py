@@ -97,7 +97,7 @@ def getManualDefocusPair(imgdata):
 ##===================
 def getShift(imgdata1 ,imgdata2):
 	#assumes images are square
-	print "Finding shift between", apDisplay.short(imgdata1['filename']), "and", apDisplay.short(imgdata2['filename'])
+	print "Finding shift between", os.path.basename(imgdata1['filename']), "and", os.path.basename(imgdata2['filename'])
 	dimension1 = imgdata1['camera']['dimension']['x']
 	binning1   = imgdata1['camera']['binning']['x']
 	dimension2 = imgdata2['camera']['dimension']['x']
@@ -181,8 +181,8 @@ def insertShift(imgdata,siblingdata,peak):
 		shiftq['correlation']=peak['subpixel peak value']
 	else:
 		shiftq['correlation']=0.0
-	LOGGER.info("Inserting shift beteween "+apDisplay.short(imgdata['filename'])+\
-		" and "+apDisplay.short(siblingdata['filename'])+" into database")
+	LOGGER.info("Inserting shift beteween "+os.path.basename(imgdata['filename'])+\
+		" and "+os.path.basename(siblingdata['filename'])+" into database")
 	shiftq.insert()
 	return True
 

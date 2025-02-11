@@ -353,7 +353,7 @@ def insertImgAssessmentStatus(imgdata, runname="run1", assessment=None, msg=True
 	#check assessment
 	if msg is True:
 		finalassess = getImgAssessmentStatus(imgdata)
-		imgname = apDisplay.short(imgdata['filename'])
+		imgname = os.path.basename(imgdata['filename'])
 		if finalassess is True:
 			astr = apDisplay.colorString("keep", "green")
 		elif finalassess is False:
@@ -562,7 +562,7 @@ def setImgViewerStatus(imgdata, status=None, msg=True):
 	#check assessment
 	if msg is True:
 		finalassess = getImgViewerStatus(imgdata)
-		imgname = apDisplay.short(imgdata['filename'])
+		imgname = os.path.basename(imgdata['filename'])
 		if finalassess is True:
 			astr = apDisplay.colorString("exemplar", "green")
 		elif finalassess is False:

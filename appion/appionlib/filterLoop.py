@@ -142,7 +142,7 @@ class MiniFilterLoop(FilterLoop):
 		return
 	def processImage(self, imgdict, filtarray):
 		from pyami import mrc
-		mrc.write(filtarray, apDisplay.short(imgdict['filename'])+"_sm.mrc")
+		mrc.write(filtarray, os.path.basename(imgdict['filename'])+"_sm.mrc")
 
 #=====================
 #=====================
