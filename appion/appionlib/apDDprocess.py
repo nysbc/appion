@@ -8,7 +8,7 @@ import scipy.ndimage as ndimage
 ma = numpy.ma
 from pyami import mrc,imagefun,arraystats,numpil
 from leginon import correctorclient,leginondata,ddinfo
-from appionlib import apDisplay, apDatabase,apDBImage, appiondata,apFile
+from appionlib import apDisplay, apDatabase,apDBImage, appiondata
 import socket
 import itertools
 from joblib import Parallel, delayed

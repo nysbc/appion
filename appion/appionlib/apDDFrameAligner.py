@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from appionlib import apDisplay
+import logging
 import os
 import re
 import subprocess
@@ -11,6 +11,7 @@ class DDFrameAligner(object):
 	# testbin.py is a test script in appion/bin as an example
 	executable = 'testbin.py'
 	def __init__(self):
+		self.logger=logging.getLogger(__name__)
 		self.alignparams = {}
 		self.gain_dark_cmd = ''
 		self.save_aligned_stack = True
@@ -88,7 +89,7 @@ class DDFrameAligner(object):
 		cmd = ' '.join([self.executable, self.framestackpath, self.aligned_sumpath, '%d' % (self.stackbinning)])
 		cmd += self.joinFrameAlignOptions(glue='-')
 		cmd += ' > '+self.logpath
-		apDisplay.printWarning('This example alignment copies and bins the first frame')
+		self.logger.warning('This example alignment copies and bins the first frame')
 		return cmd
 
 	def alignFrameStack(self):
@@ -103,7 +104,7 @@ class DDFrameAligner(object):
 			serverdir=os.path.join(os.path.dirname(self.framestackpath),"hq","server")
 			jobdir=os.path.join(os.path.dirname(self.framestackpath),"hq","jobs")
 		except Exception as e:
-			apDisplay.printMsg("whoopsie %s" % str(e))
+			self.logger.info("whoopsie %s" % str(e))
 			sys.exit(1)
 		try:
 			if not os.path.exists(serverdir):
@@ -118,7 +119,7 @@ class DDFrameAligner(object):
 		cmd = "hq --server-dir %s submit --cwd %s --stdout %s --stderr %s --wait --max-fails 3 --time-limit=5min --cpus 2 --resource gpus=1 %s" % (os.getenv("HQ_SERVER_DIR",serverdir), os.getenv("HQ_CWD", jobdir), stdoutpath, stderrpath, cmd)
 
 		# run as subprocesscmd
-		apDisplay.printMsg('Running: %s'% cmd)
+		self.logger.info('Running: %s'% cmd)
 		success=False
 		#Handles case where command fails because hq server has gone away.
 		while not success:
@@ -179,7 +180,7 @@ class MotionCorr1(DDFrameAligner):
 		if norm_path:
 			cmd += " -fgr %s" % norm_path
 		self.gain_dark_cmd = cmd
-		apDisplay.printMsg('Gain Dark Command Option: %s' % cmd)
+		self.logger.info('Gain Dark Command Option: %s' % cmd)
 
 	def makeFrameAlignmentCommand(self):
 		cmd = '%s %s -fcs %s -dsp 0' % (self.executable, self.framestackpath, self.aligned_sumpath)
@@ -208,7 +209,7 @@ class MotionCorr1(DDFrameAligner):
 		MotionCorr1 has its own log file. This just stream to appionlog
 		'''
 		print outbuffer
-		apDisplay.printMsg('Real alignment log written to %s' % self.logpath)
+		self.logger.info('Real alignment log written to %s' % self.logpath)
 
 	def setGPUid(self,gpuid):
 		p = {'gpuid':gpuid}
@@ -281,7 +282,7 @@ class MotionCor2_UCSF(DDFrameAligner):
 		if 'totaldose' in self.alignparams.keys() and self.alignparams['totaldose']> 0:
 			raw_dose = self.alignparams['totaldose'] / nraw
 		else:
-			apDisplay.printWarning('Use fake dose about 0.03 e/p per raw frame')
+			self.logger.warning('Use fake dose about 0.03 e/p per raw frame')
 			raw_dose = 0.03 #make fake dose similar to Falcon4EC 7 e/p/s
 
 		modulo = nraw % size
@@ -311,7 +312,7 @@ class MotionCor2_UCSF(DDFrameAligner):
 		if norm_path:
 			cmd += " -Gain %s" % norm_path
 		self.gain_dark_cmd = cmd
-		apDisplay.printMsg('Gain Dark Command Option: %s' % cmd)
+		self.logger.info('Gain Dark Command Option: %s' % cmd)
 
 	def setDefectMapCmd(self,defect_path):
 		'''
@@ -321,7 +322,7 @@ class MotionCor2_UCSF(DDFrameAligner):
 		if defect_path:
 			cmd += " -DefectMap %s" % defect_path
 		self.defect_map_cmd = cmd
-		apDisplay.printMsg('DefectMap Command Option: %s' % cmd)
+		self.logger.info('DefectMap Command Option: %s' % cmd)
 
 	def getInputCommand(self):
 		if self.framestackpath.endswith('.tif'):
@@ -357,7 +358,7 @@ class MotionCor2_UCSF(DDFrameAligner):
 			cmd += ' -Bft %d %d' % (self.alignparams['Bft_global'], self.alignparams['Bft_local'])		
 		
 		else:
-			apDisplay.printError("Invalid Bft arguments ! (global: %s, local: %s)" %(self.alignparams['Bft_global'], self.alignparams['Bft_local']))
+			self.logger.error("Invalid Bft arguments ! (global: %s, local: %s)" %(self.alignparams['Bft_global'], self.alignparams['Bft_local']))
 
 		# frame truncation
 		if self.alignparams['Throw'] > 0:
@@ -529,7 +530,7 @@ class MotionCor2_UCSF(DDFrameAligner):
 		shifts = []
 
 		if not found:
-			apDisplay.printError('%s did not run successfully.  Please check %s for error'	% (self.executable, logpath))
+			self.logger.error('%s did not run successfully.  Please check %s for error'	% (self.executable, logpath))
 		for l in temp: 
 			m = re.match("...... Frame", l)
 			if m:

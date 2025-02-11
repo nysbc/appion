@@ -6,6 +6,7 @@ import datetime
 from pyami import mrc,imagefun
 from leginon import leginondata,ddinfo
 from appionlib import apDisplay,apDDprocess
+from time import time
 
 # testing options
 save_jpg = False

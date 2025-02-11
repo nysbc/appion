@@ -2,7 +2,6 @@
 
 from appionlib import appionLoop2
 from appionlib import apDDprocess
-from appionlib import apDisplay
 from appionlib import appiondata
 from leginon import leginondata
 
@@ -88,7 +87,7 @@ class DDStackLoop(appionLoop2.AppionLoop):
 
 	def commitToDatabase(self,imgdata):
 		if self.aligned_imagedata != None:
-			apDisplay.printMsg('Uploading aligned image as %s' % self.aligned_imagedata['filename'])
+			self.logger.info('Uploading aligned image as %s' % self.aligned_imagedata['filename'])
 			q = appiondata.ApDDAlignImagePairData(source=imgdata,result=self.aligned_imagedata,ddstackrun=self.rundata)
 			q.insert()
 			# Issue #6155 need new query to get timestamp
@@ -98,7 +97,7 @@ class DDStackLoop(appionLoop2.AppionLoop):
 			transferZLPThickness(q['source'],q['result'])
 	
 		if self.aligned_dw_imagedata != None:
-			apDisplay.printMsg('Uploading aligned image as %s' % self.aligned_dw_imagedata['filename'])
+			self.logger.info('Uploading aligned image as %s' % self.aligned_dw_imagedata['filename'])
 			q = appiondata.ApDDAlignImagePairData(source=imgdata,result=self.aligned_dw_imagedata,ddstackrun=self.rundata)
 			q.insert()
 			# Issue #6155 need new query to get timestamp
