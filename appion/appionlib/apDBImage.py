@@ -4,11 +4,12 @@ from leginon import leginondata
 #appion
 from appionlib import appiondata, apDatabase, apDisplay
 from leginon import correctorclient
+import logging
 
 class ApCorrectorClient(correctorclient.CorrectorClient):
 	def __init__(self, session, is_upload=False):
 		super(ApCorrectorClient,self).__init__()
-		self.logger = apDisplay.LeginonLogger()
+		self.logger = logging.getLogger(__name__)
 		self.session = session
 		self.is_upload = is_upload
 

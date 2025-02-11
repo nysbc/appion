@@ -23,6 +23,7 @@ except:
 def isDebugOn():
 	return debug
 
+<<<<<<< HEAD
 def getCallingFunctionAndModule():
 	cm=""
 	cf=""
@@ -112,6 +113,8 @@ def printDebug(text):
 			print "write error"
 	sys.stderr.write(colorString("!!! DEBUG: [ %d ] [ %s ] [%s] " % (os.getpid(), cm, cf) +text,"yellow")+"\n")
 
+=======
+>>>>>>> f6e0e5c63 (Clean up apDisplay)
 def printColor(text, colorstr):
 	"""
 	standardized log message
@@ -124,29 +127,6 @@ def printColor(text, colorstr):
 		except:
 			print "write error"
 	sys.stderr.write(colorString(text, colorstr)+"\n")
-	
-
-def shortenImageName(imgname):
-	"""
-	takes a long imagename and truncates it for display purposes
-	"""
-	shortimgname = imgname
-	#remove path
-	shortimgname = os.path.basename(shortimgname)
-	#remove the altas name
-	shortimgname = re.sub("^(?P<ses>[0-9][0-9][a-z][a-z][a-z][0-9][0-9][^_]+)_.+(?P<gr>0[^0]gr)",
-		"\g<ses>_\g<gr>",shortimgname)
-	#remove the version tags
-	shortimgname = re.sub("_v[0-9][0-9]","",shortimgname)
-	#remove extra leading zeros, but leave one
-	shortimgname = re.sub("_00+(?P<num>0[^0])","_\g<num>",shortimgname)
-	#first RCT id, keep second
-	shortimgname = re.sub("_[0-9][0-9]_(?P<en>[0-9]+en)","_\g<en>",shortimgname)
-	#remove double underscores
-	shortimgname = re.sub("__","_",shortimgname)
-	#remove orphaned underscores
-	shortimgname = re.sub("_+$","",shortimgname)
-	return shortimgname
 
 def bytes(numbytes):
 	numbytes = int(numbytes)
@@ -191,10 +171,6 @@ def orderOfMag(num):
 			return str(int(num/1e9))+"G"
 	else:
 		return str(num)
-
-def short(imgname):
-	# ALIAS to shortenImageName
-	return shortenImageName(imgname)
 
 def timeString(avg, stdev=0):
 	""" 
@@ -261,117 +237,6 @@ def timeString(avg, stdev=0):
 				+str(int(round( (avg % base)/subbase )))+" "+minorunit )
 	return str(timestr)
 
-def printDataBox(labellist,numlist,typelist=None):
-	"""
-	prints a data box, used in pyace
-	"""
-	if( len(labellist) != len(numlist) 
-	 or ( typelist!=None and len(typelist) != len(numlist) ) ):
-		print len(labellist)," != ",len(numlist)," != ",len(typelist)
-		printError("printDataBox() list lengths are off")
-	sys.stderr.write(_headerStr(labellist)+"\n")
-	labelstr = " "
-	for lab in labellist:
-		labelstr += "| "+lab+" "
-		if len(lab) < 5:
-			for i in range(5-len(lab)):
-				labelstr += " "
-	sys.stderr.write(labelstr+"|\n")
-
-	datastr = " "
-	for i in range(len(labellist)):
-		datastr += "| "
-		if typelist==None or typelist[i] == 1:
-			numstr = colorProb(numlist[i])
-		elif numlist[i] < 0:
-			numstr = "%2.2f" % numlist[i]
-		else:
-			numstr = "%1.3f" % numlist[i]
-		pad = len(labellist[i])-5
-		if pad % 2 == 1:
-			datastr += " "
-			pad -= 1
-		pad/=2
-		if(pad > 0):
-			for i in range(pad):
-				datastr += " "
-		datastr += numstr
-		if(pad > 0):
-			for i in range(pad):
-				datastr += " "
-		datastr += " "
-	sys.stderr.write(datastr+"|\n")
-	sys.stderr.write(_headerStr(labellist)+"\n")
-
-def _headerStr(labellist):
-	headstr = " "
-	for lab in labellist:
-		headstr += "+"
-		leng = len(lab)
-		if leng < 5: leng = 5
-		for i in range(leng+2):
-			headstr += "-"
-	headstr += "+"
-	return headstr
-
-def rightPadString(s,n=10,fill=" "):
-	n = int(n)
-	s = str(s)
-	if(len(s) > n):
-		return s[:n]
-	while(len(s) < n):
-		s += fill
-	return s
-
-def leftPadString(s,n=10,fill=" "):
-	n = int(n)
-	s = str(s)
-	if(len(s) > n):
-		return s[:n]
-	while(len(s) < n):
-		s = fill+s
-	return s
-
-def colorType(val):
-	"""
-	colors a value based on type
-	"""
-	if val is None:
-		return colorString("None","red")
-	elif val is True:
-		return colorString("True","green")
-	elif val is False:
-		return colorString("False","red")
-	elif type(val) == type(0.33):
-		return colorString(val,"cyan")
-	elif type(val) == type(512):
-		return colorString(val,"green")
-	elif type(val) == type("hello"):
-		return colorString("'"+val+"'","brown")	
-	return val
-
-def colorProb(num,red=0.50,green=0.80):
-	"""
-	colors a probability based on score
-	"""
-	if(num == None):
-		return None
-	elif(num >= green and num <= 1):
-		numstr = "%1.3f" % num
-		return colorString(numstr,"green")
-	elif(num < red and num >= 0):
-		numstr = "%1.3f" % num
-		return colorString(numstr,"red")
-	elif num >= red and num < green:
-		numstr = "%1.3f" % num
-		return colorString(numstr,"brown")
-	elif num < 0:
-		numstr = "%2.2f" % num
-		return colorString(numstr,"purple")		
-	else:
-		numstr = "%2.2f" % num
-		return colorString(numstr,"blue")
-
 def color(text, fg, bg=None):
 	return colorString(text, fg, bg)
 
@@ -437,37 +302,6 @@ def colorString(text, fg=None, bg=None):
 		except KeyError: 
 			pass
 	return "%s%s%s%s" % (b, f, text, clear)
-
-def environmentError():
-	env = []
-	env.append("APPIONDIR")
-	env.append('PATH')
-	env.append('MATLAB')
-	env.append('MATLABPATH')
-	env.append('PYTHONPATH')
-	env.append('LD_LIBRARY_PATH')
-	env.append('LM_LICENSE_FILE')
-	print colorString("Check your environmental variables and the Appion documentation.\nThese are your current environment values:","red")
-	for name in env:
-		if name in os.environ:
-			value = os.environ[name]
-		else:
-			value = '*** NOT SET ***'
-		print colorString("%-20s -> %s" % (name, value), "red")
-
-class LeginonLogger(object):
-	'''
-	fake leginon-style logger that uses apDisplay function
-	so that leginon classes can be used in appion.
-	'''
-	def info(self,msg):
-		printMsg(msg)
-	def debug(self,msg):
-		printDebug(msg)
-	def warning(self,msg):
-		printWarning(msg)
-	def error(self,msg):
-		printWarning('Leginon ERROR: ',msg)
 
 ####
 # This is a low-level file with NO database connections
