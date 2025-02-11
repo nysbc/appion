@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-import pyami.quietscipy
-
 #builtin
 import os
 import re
