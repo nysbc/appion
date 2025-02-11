@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 from appionlib import apDDAlignStackMaker
 from appionlib import apDDFrameAligner
-from appionlib import apDisplay
 from appionlib import apDatabase
 import shutil
 import os
@@ -22,7 +21,7 @@ class MotionCorrAlignStackLoop(apDDAlignStackMaker.AlignStackLoop):
 		if self.params['align'] and not self.params['defergpu']:
 			# We don't have gpu locking
 			if self.params['parallel']:
-					apDisplay.printWarning('Make sure that you use different gpuid for each parallel process')
+					self.logger.warning('Make sure that you use different gpuid for each parallel process')
 
 	def setFrameAligner(self):
 		self.framealigner = apDDFrameAligner.MotionCorr1()
@@ -100,7 +99,7 @@ class MotionCor2UCSFAlignStackLoop(MotionCorrAlignStackLoop):
 		super(MotionCor2UCSFAlignStackLoop,self).checkConflicts()
 		# does NOT keep stack by default
 		if self.params['keepstack'] is True:
-			apDisplay.printWarning('Frame stack saving not available to MotionCor2 from UCSF')
+			self.logger.warning('Frame stack saving not available to MotionCor2 from UCSF')
 			self.params['keepstack'] = False
 
 	def getAlignBin(self):
@@ -115,7 +114,7 @@ class MotionCor2UCSFAlignStackLoop(MotionCorrAlignStackLoop):
 		has_bad_pixels = False
 		is_align = self.isAlign()
 		has_non_zero_dark = False
-		apDisplay.printMsg('frame flip debug: has_bad_pixel %s, is_align %s, has_non_zero_dark %s' % (has_bad_pixels, is_align, has_non_zero_dark))
+		self.logger.info('frame flip debug: has_bad_pixel %s, is_align %s, has_non_zero_dark %s' % (has_bad_pixels, is_align, has_non_zero_dark))
 		if has_bad_pixels or not is_align or has_non_zero_dark:
 			self.dd.setUseFrameAlignerFlat(False)
 			return False
@@ -147,10 +146,10 @@ class MotionCor2UCSFAlignStackLoop(MotionCorrAlignStackLoop):
 		if not is_eer:
 			if totaldose is None and self.params['doseweight']:
 				self.has_dose = False
-				apDisplay.printWarning('No total dose estimated. Dose weighted alignment will be skipped')
+				self.logger.warning('No total dose estimated. Dose weighted alignment will be skipped')
 		else:
 			if totaldose is None:
-				apDisplay.printWarning('Per frame dose of 0.03 e/p is assumed on eer raw frames since no value is entered.')
+				self.logger.warning('Per frame dose of 0.03 e/p is assumed on eer raw frames since no value is entered.')
 
 		if self.isUseFrameAlignerFlat() and not self.params['force_cpu_flat']:
 			frame_flip, frame_rotate=self.dd.getImageFrameOrientation()
@@ -183,11 +182,11 @@ class MotionCor2UCSFAlignStackLoop(MotionCorrAlignStackLoop):
 		if gain_flip:
 			need_flip = not need_flip
 		if need_flip:
-			apDisplay.printMsg('Flipping the aligned sum back')
+			self.logger.info('Flipping the aligned sum back')
 			self.imageYFlip(self.dd.aligned_sumpath)
 			self.imageYFlip(self.dd.aligned_dw_sumpath)
 		if gain_rotate:
-			apDisplay.printMsg('Rotating the aligned sum back')
+			self.logger.info('Rotating the aligned sum back')
 			self.imageRotate(self.dd.aligned_sumpath, gain_rotate)
 			self.imageRotate(self.dd.aligned_dw_sumpath, gain_rotate)
 		# dose weighted result handled here

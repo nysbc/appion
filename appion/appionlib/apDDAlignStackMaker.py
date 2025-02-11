@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import subprocess
 import os
 import socket
 import shutil
@@ -10,7 +9,6 @@ import glob
 from pyami import fileutil
 from pyami import mrc
 #appion
-from appionlib import apDisplay
 from appionlib import apDDStackMaker
 from appionlib import apDDFrameAligner
 from appionlib import apDDResult
@@ -35,20 +33,20 @@ class AlignStackLoop(apDDStackMaker.FrameStackLoop):
 					fileutil.mkdirs(self.params['tempdir'])
 					os.access(self.params['tempdir'],os.W_OK|os.X_OK)
 				except:
-					apDisplay.printError('Local temp directory not writable')
+					self.logger.error('Local temp directory not writable')
 		else:
 			# makes no sense to save gain corrected ddstack in tempdir if no alignment
 			# will be done on the same machine
 			if self.params['tempdir']:
-				apDisplay.printWarning('tempdir is not neccessary without aligning on the same host. Reset to None')
+				self.logger.warning('tempdir is not neccessary without aligning on the same host. Reset to None')
 				self.params['tempdir'] = None
 			# Stack cleaning should not be done in some cases
 			if not self.params['keepstack']:
 				if self.params['defergpu']:
-					apDisplay.printWarning('The gain/dark-corrected stack must be saved if alignment is deferred')
+					self.logger.warning('The gain/dark-corrected stack must be saved if alignment is deferred')
 					self.params['keepstack'] = True
 				else:
-					apDisplay.printError('Why making only gain/dark-corrected ddstacks but not keeping them')
+					self.logger.error('Why making only gain/dark-corrected ddstacks but not keeping them')
 
 	def setFrameAligner(self):
 		self.framealigner = apDDFrameAligner.DDFrameAligner()
@@ -124,14 +122,14 @@ class AlignStackLoop(apDDStackMaker.FrameStackLoop):
 	def imageYFlip(self, filepath):
 		if os.path.isfile(filepath):
 			a = mrc.read(filepath)
-			apDisplay.printMsg('flipping %s' % filepath)
+			self.logger.info('flipping %s' % filepath)
 			a = numpy.flipud(a)
 			mrc.write(a, filepath)
 
 	def imageRotate(self, filepath, number):
 		if os.path.isfile(filepath):
 			a = mrc.read(filepath)
-			apDisplay.printWarning('Rotation direction not checked yet, report if wrong')
+			self.logger.warning('Rotation direction not checked yet, report if wrong')
 			# This operation has not being checked, yet.
 			a = numpy.rot90(a, number)
 			mrc.write(a, filepath)
@@ -169,7 +167,7 @@ class AlignStackLoop(apDDStackMaker.FrameStackLoop):
 	
 	def organizeAlignedSum(self):
 		if not os.path.isfile(self.dd.aligned_sumpath):
-			apDisplay.printWarning('Frame alignment FAILED: \n%s not created.' % os.path.basename(self.dd.aligned_sumpath))
+			self.logger.warning('Frame alignment FAILED: \n%s not created.' % os.path.basename(self.dd.aligned_sumpath))
 			return False
 		else:
 			# successful alignment
@@ -194,12 +192,12 @@ class AlignStackLoop(apDDStackMaker.FrameStackLoop):
 		if os.path.isfile(self.dd.aligned_sumpath):
 			# Save the alignment result
 			self.aligned_imagedata = self.dd.makeAlignedImageData(alignlabel=self.params['alignlabel'])
-			apDisplay.printDebug('self.dd.aligned_stackpath= %s' % self.dd.aligned_stackpath)
-			apDisplay.printDebug('self.dd.framestackpath= %s' % self.dd.framestackpath)
+			self.logger.debug('self.dd.aligned_stackpath= %s' % self.dd.aligned_stackpath)
+			self.logger.debug('self.dd.framestackpath= %s' % self.dd.framestackpath)
 
 			if self.params['keepstack']:
 				if not os.path.isfile(self.dd.aligned_stackpath):
-					apDisplay.printWarning('No aligned stack generated as %s' % self.dd.aligned_stackpath)
+					self.logger.warning('No aligned stack generated as %s' % self.dd.aligned_stackpath)
 			else:
 				if os.path.isfile(self.dd.aligned_stackpath):
 					apFile.removeFile(self.dd.aligned_stackpath)
@@ -207,14 +205,14 @@ class AlignStackLoop(apDDStackMaker.FrameStackLoop):
 			# replace the unaligned stack with aligned_stack
 			if os.path.isfile(self.dd.aligned_stackpath):
 				# aligned_stackpath exists either because keepstack is true
-				apDisplay.printMsg(' Replacing unaligned stack with the aligned one....')
+				self.logger.info(' Replacing unaligned stack with the aligned one....')
 				apFile.removeFile(self.dd.framestackpath)
-				apDisplay.printMsg('Moving %s to %s' % (self.dd.aligned_stackpath,self.dd.framestackpath))
+				self.logger.info('Moving %s to %s' % (self.dd.aligned_stackpath,self.dd.framestackpath))
 				shutil.move(self.dd.aligned_stackpath,self.dd.framestackpath)
 
 	def otherCleanUp(self, imgdata):
 		if not self.is_ok:
-			apDisplay.printWarning('Nothing to clean up')
+			self.logger.warning('Nothing to clean up')
 			return
 		# Clean up tempdir in case of failed alignment
 		if self.dd.framestackpath != self.dd.tempframestackpath:
@@ -228,7 +226,7 @@ class AlignStackLoop(apDDStackMaker.FrameStackLoop):
 			# Move the Log to permanent location for display and inspection
 			if os.path.isfile(self.temp_logpath):
 				shutil.move(self.temp_logpath,self.log)
-				apDisplay.printMsg('Moving result for %s from %s to %s' % (self.dd.image['filename'],self.dd.tempdir,self.dd.rundir))
+				self.logger.info('Moving result for %s from %s to %s' % (self.dd.image['filename'],self.dd.tempdir,self.dd.rundir))
 
 	def alignFrameStack(self):
 		# Align
@@ -241,7 +239,7 @@ class AlignStackLoop(apDDStackMaker.FrameStackLoop):
 			ddr = apDDResult.DDResults(aligned_imgdata)
 			xydict = ddr.getFrameTrajectoryFromLog()
 		except Exception as e:
-			apDisplay.printError('Can not commit alignmnet stats: %s' % e) 
+			self.logger.error('Can not commit alignmnet stats: %s' % e) 
 		trajdata = ddr.saveFrameTrajectory(ddr.ddstackrun, xydict)
 		ddr.saveAlignStats(ddr.ddstackrun, trajdata)
 
@@ -255,7 +253,7 @@ class AlignStackLoop(apDDStackMaker.FrameStackLoop):
 			pattern = imgdata['filename']+'_c*.mrc'
 			mrcs_to_delete = glob.glob(pattern)
 			if mrcs_to_delete:
-				apDisplay.printWarning('Deleting temporary results after upload')
+				self.logger.warning('Deleting temporary results after upload')
 			for filename in mrcs_to_delete:
 				apFile.removeFile(filename, False)
 

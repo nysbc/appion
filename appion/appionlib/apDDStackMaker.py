@@ -9,7 +9,6 @@ from pyami import fileutil
 from leginon import ddinfo
 #appion
 from appionlib import apDDLoop
-from appionlib import apDisplay
 from appionlib import apDDprocess
 from appionlib import apDatabase
 from appionlib import apFile
@@ -55,7 +54,7 @@ class FrameStackLoop(apDDLoop.DDStackLoop):
 	def checkConflicts(self):
 			# Stack cleaning should not be done in some cases
 			if not self.params['keepstack']:
-					apDisplay.printError('Why making only gain/dark-corrected ddstacks but not keeping them')
+					self.logger.error('Why making only gain/dark-corrected ddstacks but not keeping them')
 
 	def getFrameType(self):
 		# set how frames are saved depending on what is found in the basepath
@@ -105,7 +104,7 @@ class FrameStackLoop(apDDLoop.DDStackLoop):
 		super(FrameStackLoop,self).processImage(imgdata)
 		# need to avoid non-frame saved image for proper caching
 		if imgdata is None or imgdata['camera']['save frames'] != True:
-			apDisplay.printWarning('%s skipped for no-frame-saved\n ' % imgdata['filename'])
+			self.logger.warning('%s skipped for no-frame-saved\n ' % imgdata['filename'])
 			return
 		if self.params['stackid'] and imgdata.dbid not in self.imageids:
 			return
@@ -114,8 +113,8 @@ class FrameStackLoop(apDDLoop.DDStackLoop):
 		self.dd.last_correct_dark_gain = self.last_correct_dark_gain
 		try:
 			self.dd.setImageData(imgdata)
-		except Exception, e:
-			apDisplay.printWarning(e.args[0])
+		except Exception as e:
+			self.logger.warning(e.args[0])
 			return
 
 		# set other parameters
@@ -128,10 +127,10 @@ class FrameStackLoop(apDDLoop.DDStackLoop):
 		### first remove any existing stack file
 		apFile.removeFile(self.dd.framestackpath)
 		apFile.removeFile(self.dd.tempframestackpath)
-		apDisplay.printColor('frame stack path are cleaned up before start', 'blue')
+		self.logger.info('frame stack path are cleaned up before start')
 
 		if not self.isUseFrameAlignerFlat():
-			apDisplay.printWarning('frame flip debug: Set to gain/dark correct each frame')
+			self.logger.warning('frame flip debug: Set to gain/dark correct each frame')
 			### make stack named as self.dd.tempframestackpath
 			self.dd.makeCorrectedFrameStack(self.params['rawarea'])
 		else:
@@ -190,17 +189,17 @@ class FrameStackLoop(apDDLoop.DDStackLoop):
 			try:
 				fileutil.mkdirs(to_dir)
 			except:
-				apDisplay.printWarning('Error making destination %s' % to_dir)
+				self.logger.warning('Error making destination %s' % to_dir)
 				to_dir = None
 
 		if 'Falcon' in self.dd.__class__.__name__:
 			if self.getUseBufferFromImage(imgdata):
-				apDisplay.printMsg('Falcon does not compress well. skip compression')
+				self.logger.info('Falcon does not compress well. skip compression')
 				j = mp.Process(target=apFile.rsync, args=[raw_frame_path, to_dir, False, delay])
 		else:
 			j = mp.Process(target=apFile.compress_and_rsync, args=[raw_frame_path, to_dir, False, delay])
 		j.start()
-		apDisplay.printColor('Sent multiprocess job','green')
+		self.logger.info('Sent multiprocess job')
 
 	def isAlign(self):
 		return False
