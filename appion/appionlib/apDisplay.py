@@ -1,8 +1,6 @@
 
 import math
 import os
-import re
-import sys
 import types
 import glob
 import os
@@ -12,121 +10,6 @@ import inspect
 # This is a low-level file with NO database connections
 # Please keep it this way
 ####
-
-debug = False
-writeOut = False
-try:
-	outFile = os.path.basename(sys.argv[0]).split(".")[0]+".out"
-except:
-	outFile = "function.out"
-
-def isDebugOn():
-	return debug
-
-<<<<<<< HEAD
-def getCallingFunctionAndModule():
-	cm=""
-	cf=""
-	if len(inspect.stack()) >= 3:
-		cm=inspect.stack()[2]
-		try:
-			cf=cm[3]
-		except IndexError:
-			cf=""
-		cm=inspect.getmodule(cm[0])
-		try:
-			cm=cm.__name__
-		except AttributeError:
-			cm=""
-	return cm, cf
-
-def printWarning(text):
-	"""
-	standardized warning message
-	"""
-	cm, cf = getCallingFunctionAndModule()
-	if writeOut is True:
-		try:
-			f = open(outFile, "a")
-			f.write(" !!! WARNING: "+text+"\n")
-			f.close()
-		except:
-			print "write error"
-	sys.stderr.write(colorString("!!! WARNING: [ %d ] [ %s ] [%s] " % (os.getpid(), cm, cf) +text,"yellow")+"\n")
-
-def printMsg(text, colorstr=None):
-	"""
-	standardized log message
-	"""
-	cm, cf = getCallingFunctionAndModule()
-	if writeOut is True:
-		try:
-			f = open(outFile, "a")
-			f.write(" ... "+text+"\n")
-			f.close()
-		except:
-			print "write error"
-	sys.stderr.write(" ... [ %d ] [ %s ] [%s] " % (os.getpid(), cm, cf) +colorString(text, colorstr)+"\n")
-	
-def printError(text,raised=True):
-	"""
-	standardized error message
-	"""
-	# TODO: need a better way to release appionLoop image locks
-	# from only this appion command so that it can be reprocessed
-	'''
-	for lockfile in glob.glob('_lock*'):
-		# This would unlock images other parallel run is processing.
-		# Bad idea.
-		printWarning('removing %s' % lockfile)
-		try:
-			os.remove(lockfile)
-		except OSError as e:
-			printWarning('unlock %s failed: %s.' % (lockfile, e))
-	'''
-	cm, cf = getCallingFunctionAndModule()
-	if writeOut is True:
-		try:
-			f = open(outFile, "a")
-			f.write(" *** ERROR: "+text+"\n")
-			f.close()
-		except:
-			print "write error"
-	if raised:
-		raise Exception, colorString("\n *** FATAL ERROR *** [ %d ] [ %s ] [%s] \n" % (os.getpid(), cm, cf) +text+"\n\a","red")
-	else:
-		sys.stderr.write(colorString("\n *** FATAL ERROR *** [ %d ] [ %s ] [%s] \n" % (os.getpid(), cm, cf) +text+"\n\a","red"))
-
-def printDebug(text):
-	"""
-	standardized debug message
-	"""
-	cm, cf = getCallingFunctionAndModule()
-	if not debug:
-		return
-	if writeOut is True:
-		try:
-			f = open(outFile, "a")
-			f.write(" !!! DEBUG: "+text+"\n")
-			f.close()
-		except:
-			print "write error"
-	sys.stderr.write(colorString("!!! DEBUG: [ %d ] [ %s ] [%s] " % (os.getpid(), cm, cf) +text,"yellow")+"\n")
-
-=======
->>>>>>> f6e0e5c63 (Clean up apDisplay)
-def printColor(text, colorstr):
-	"""
-	standardized log message
-	"""
-	if writeOut is True:
-		try:
-			f = open(outFile, "a")
-			f.write(" ... "+text+"\n")
-			f.close()
-		except:
-			print "write error"
-	sys.stderr.write(colorString(text, colorstr)+"\n")
 
 def bytes(numbytes):
 	numbytes = int(numbytes)

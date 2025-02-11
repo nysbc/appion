@@ -671,10 +671,9 @@ class AppionLoop(appionScript.AppionScript):
 		#only if an image was processed last
 		if(self.stats['lastcount'] != self.stats['count']):
 			if self.params['background'] is False:
-				apDisplay.printColor( "\nStarting image %d ( skip:%d, remain:%d ) id:%d, file: %s"
+				self.logger.info( "\nStarting image %d ( skip:%d, remain:%d ) id:%d, file: %s"
 					%(self.stats['count'], self.stats['skipcount'], self.stats['imagesleft'], 
-					imgdata.dbid, os.path.basename(imgdata['filename']),),
-					"green")
+					imgdata.dbid, os.path.basename(imgdata['filename']),))
 			elif self.stats['count'] % 80 == 0:
 				sys.stderr.write("\n")
 			self.stats['lastcount'] = self.stats['count']
@@ -1000,8 +999,8 @@ class AppionLoop(appionScript.AppionScript):
 		program has finished print final stats
 		"""
 		ttotal = time.time() - self.stats['startloop'] - self.stats['waittime']
-		apDisplay.printColor("COMPLETE LOOP:\t"+apDisplay.timeString(ttotal)+
-			" for "+str(self.stats["count"]-1)+" images","green")
+		self.logger.info("COMPLETE LOOP:\t"+apDisplay.timeString(ttotal)+
+			" for "+str(self.stats["count"]-1)+" images")
 		appionScript.AppionScript.close(self)
 
 

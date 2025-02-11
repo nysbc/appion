@@ -43,7 +43,7 @@ def diffOfGaussParam(imgarray, params):
 		pixrange = float(sizerange/apix/float(bin)/2.0)
 		dogarrays, pixradlist = diffOfGaussLevels(imgarray, pixrad, numslices, pixrange)
 		diamarray = numpy.asarray(pixradlist, dtype=numpy.float32) * apix * float(bin) * 2.0
-		apDisplay.printColor("diameter list= "+str(numpy.around(diamarray,3)), "cyan")
+		LOGGER.info("diameter list= "+str(numpy.around(diamarray,3)))
 		params['diamarray'] = diamarray
 		return dogarrays
 

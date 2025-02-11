@@ -8,6 +8,7 @@ from optparse import OptionParser
 #appion
 from appionlib import apParam
 from appionlib import apDisplay
+import logging
 
 ####
 # This is a low-level file with NO database connections
@@ -23,6 +24,7 @@ class BasicScript(object):
 		Starts a new function and gets all the parameters
 		"""
 		### setup some expected values
+		self.logger=logging.getLogger(__name__)
 		self.t0 = time.time()
 		self.createDefaultStats()
 		self.quiet = quiet
@@ -106,7 +108,7 @@ class BasicScript(object):
 			logfile=self.logfile, msg=(not self.quiet))
 		if self.quiet is False:
 			self.logger.info("Ended at "+time.strftime("%a, %d %b %Y %H:%M:%S"))
-			apDisplay.printColor("Total run time:\t"+apDisplay.timeString(time.time()-self.t0),"green")
+			self.logger.info("Total run time:\t"+apDisplay.timeString(time.time()-self.t0))
 
 	#=====================
 	def parsePythonPath(self):
