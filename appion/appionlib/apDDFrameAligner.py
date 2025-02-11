@@ -1,13 +1,10 @@
 #!/usr/bin/env python
 from appionlib import apDisplay
-import socket
 import os
 import re
 import subprocess
-import getpass
 from time import sleep
 from hashlib import md5
-import shutil
 import sys
 
 class DDFrameAligner(object):

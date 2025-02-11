@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 import os
-import math
-import glob
 import numpy
 from appionlib import appiondata
 from appionlib import apProject
