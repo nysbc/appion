@@ -20,6 +20,10 @@ from appionlib import apDDprocess
 from appionlib.apCtf import ctfdb
 from appionlib.apCtf import ctfinsert
 from appionlib.apCtf import ctffind4AvgRotPlot
+import stat
+import getpass
+from time import sleep
+from multiprocessing import Pool
 
 class ctfEstimateLoop(appionLoop2.AppionLoop):
 	"""
@@ -92,9 +96,11 @@ class ctfEstimateLoop(appionLoop2.AppionLoop):
 	def preLoopFunctions(self):
 		self.ctfrun = None
 		self.powerspecdir = os.path.join(self.params['rundir'], "opimages")
-		apParam.createDirectory(self.powerspecdir, warning=False)
+		if not os.path.isdir(self.powerspecdir):
+			apParam.createDirectory(self.powerspecdir, warning=False)
 		self.logdir = os.path.join(self.params['rundir'], "logfiles")
-		apParam.createDirectory(self.logdir, warning=False)
+		if not os.path.exists(self.logdir):
+			apParam.createDirectory(self.logdir, warning=False)
 		self.ctfprgmexe = self.getCtfProgPath()
 		# check and process more often because it is slower than data collection
 		self.setWaitSleepMin(1)
@@ -103,14 +109,7 @@ class ctfEstimateLoop(appionLoop2.AppionLoop):
 
 	#======================
 	def getCtfProgPath(self):
-		exename = "ctffind4"
-		ctfprgmexe = subprocess.Popen("which "+exename, shell=True, stdout=subprocess.PIPE).stdout.read().strip()
-		if not os.path.isfile(ctfprgmexe):
-			ctfprgmexe = os.path.join(apParam.getAppionDirectory(), 'bin', exename)
-		if not os.path.isfile(ctfprgmexe):
-			apDisplay.printError(exename+" was not found at: "+apParam.getAppionDirectory())
-		apDisplay.printMsg("Running program %s"%(exename))
-		return ctfprgmexe
+		return os.getenv("APPION_CTFFIND4_PATH", "/common/sw/containers/opt/ctffind4/4.1.14/bin/ctffind4")
 
 	#======================
 	def postLoopFunctions(self):
@@ -157,40 +156,6 @@ class ctfEstimateLoop(appionLoop2.AppionLoop):
 
 	#======================
 	def processImage(self, imgdata):
-		"""
-		Input and output matches ctffind 4.1.5
-		time ./ctffind4 << eof
-		Input image file name                  [input.mrc] : 15aug13neil2_14jul14d_05sq_012hl_02ed-a.mrc
-		Output diagnostic filename
-		[diagnostic_output.mrc]                            : 15aug13neil2_14jul14d_05sq_012hl_02ed-a-pow.mrc
-		Pixel size                                   [1.0] : 2.7
-		Acceleration voltage                       [300.0] : 300 
-		Spherical aberration                         [2.7] : 2.7
-		Amplitude contrast                          [0.07] : 0.07
-		Size of power spectrum to compute            [512] : 512
-		Minimum resolution                          [30.0] : 20
-		Maximum resolution                           [5.0] : 5
-		Minimum defocus                           [5000.0] : 
-		Maximum defocus                          [50000.0] : 
-		Defocus search step                        [500.0] : 
-		Do you know what astigmatism is present       [no] : 
-		Slower, more exhaustive search                [no] : 
-		Use a restraint on astigmatism               [yes] : 
-		Expected (tolerated) astigmatism           [100.0] : 
-		Find additional phase shift?                  [no] : 
-		Do you want to set expert options?            [no] : 
-		"""
-		paramInputOrder = ['input',]
-		if self.params['ddstackid']:
-			paramInputOrder.extend(['is_movie','num_frame_avg'])
-		paramInputOrder.extend( ['output', 'apix', 'kv', 'cs', 'ampcontrast', 'fieldsize',
-			'resmin', 'resmax', 'defmin', 'defmax', 'defstep', 
-			'known_astig', 'exhaustive_astig_search','restrain_astig', 'expect_astig', 'phase',])
-		# finalize paramInputOrder
-		if self.params['shift_phase']:
-			paramInputOrder.extend(['min_phase_shift','max_phase_shift','phase_search_step'])
-		paramInputOrder.append('expert_opts')
-		paramInputOrder.append('newline')
 
 		#get Defocus in Angstroms
 		self.ctfvalues = {}
@@ -249,10 +214,10 @@ class ctfEstimateLoop(appionLoop2.AppionLoop):
 
 		# inputparams defocii and astig are in Angstroms
 		inputparams = {
-			'orig': origpath,
 			'input': apDisplay.short(imgdata['filename'])+".mrc",
+			'is_movie': self.getYesNoParamValue('is_movie'),
+			'num_frame_avg': self.params['num_frame_avg'],
 			'output': apDisplay.short(imgdata['filename'])+"-pow.mrc",
-
 			'apix': apix,
 			'kv': imgdata['scope']['high tension']/1000.0,			
 			'cs': self.params['cs'],
@@ -260,7 +225,8 @@ class ctfEstimateLoop(appionLoop2.AppionLoop):
 			'fieldsize': self.params['fieldsize'],
 			'resmin': self.params['resmin'],
 			'resmax': imageresmax,
-			
+			'defmin': None,
+			'defmax': None,
 			'defstep': self.params['defstep']*10000., #round(defocus/32.0, 1),
 			'known_astig': self.getKnownAstigValue(),
 			'exhaustive_astig_search': self.getExhaustiveAstigSearchValue(),
@@ -274,8 +240,7 @@ class ctfEstimateLoop(appionLoop2.AppionLoop):
 			'expert_opts': 'no',
 			'newline': '\n',
 			# For movie
-			'is_movie': self.getYesNoParamValue('is_movie'),
-			'num_frame_avg': self.params['num_frame_avg'],
+			'orig': origpath,
 		}
 
 		defrange = self.params['defstep'] * self.params['numstep'] * 1e4 ## do 25 steps in either direction # in angstrum
@@ -296,27 +261,79 @@ class ctfEstimateLoop(appionLoop2.AppionLoop):
 			return
 		### create local link to image
 		if not os.path.exists(inputparams['input']):
-			os.symlink(inputparams['orig'], inputparams['input'])
+			try:
+				os.symlink(inputparams['orig'], inputparams['input'])
+			except OSError:
+				pass
 
 		if os.path.isfile(inputparams['output']):
 			# program crashes if this file exists
 			apFile.removeFile(inputparams['output'])
 
-		t0 = time.time()
-		apDisplay.printMsg("running ctf estimation at "+time.asctime())
-		for paramName in paramInputOrder:
-			apDisplay.printColor("%s = %s"%(paramName,inputparams[paramName]),"magenta")
-		print ""
-		ctfprogproc = subprocess.Popen(self.ctfprgmexe, shell=True, stdin=subprocess.PIPE,)		
-		apDisplay.printColor(self.ctfprgmexe, "magenta")
-		for paramName in paramInputOrder:
-			apDisplay.printColor(inputparams[paramName],"magenta")
-			ctfprogproc.stdin.write(str(inputparams[paramName])+'\n')
-		ctfprogproc.communicate()
-		tdiff = time.time()-t0
-		apDisplay.printMsg("ctf estimation completed in "+apDisplay.timeString(tdiff))
-		if tdiff < 1.0:
-			apDisplay.printError("Failed to run CTFFIND4 program...")
+		prompts={
+			'Input image file name': os.path.abspath(inputparams['input']),
+			'Input is a movie (stack of frames)' : inputparams['is_movie'],
+			'Number of frames to average together' : inputparams['num_frame_avg'],
+			'Output diagnostic image file name' : os.path.abspath(inputparams['output']),
+			'Pixel size' : inputparams['apix'],
+			'Acceleration voltage' : inputparams['kv'],
+			'Spherical aberration' : inputparams['cs'],
+			'Amplitude contrast' : inputparams['ampcontrast'],
+			'Size of amplitude spectrum to compute' : inputparams['fieldsize'],
+			'Minimum resolution' : inputparams['resmin'],
+			'Maximum resolution' : inputparams['resmax'],
+			'Minimum defocus' : inputparams['defmin'],
+			'Maximum defocus' : inputparams['defmax'],
+			'Defocus search step' : inputparams['defstep'],
+			'Do you know what astigmatism is present?' : inputparams['known_astig'],
+			'Slower, more exhaustive search?' : inputparams['exhaustive_astig_search'],
+			'Known astigmatism' : '0.0',
+			'Known astigmatism angle': '0.0',
+			'Use a restraint on astigmatism?' :inputparams['restrain_astig'],
+			'Expected (tolerated) astigmatism': inputparams['expect_astig'],
+			'Find additional phase shift?' : inputparams['phase'],
+			'Minimum phase shift (rad)' : inputparams['min_phase_shift'],
+			'Maximum phase shift (rad)' : inputparams['max_phase_shift'],
+			'Phase shift search step' : inputparams['phase_search_step'],
+			'Do you want to set expert options?' : inputparams['expert_opts']
+		}
+
+		#TODO Render this using a jinja template?
+		expectscript=imgdata['filename']+"_ctffind4.exp"
+		with open(expectscript, "w") as f:
+			f.write("set timeout 10\n\n")
+			f.write("spawn %s\n\n" % self.ctfprgmexe)
+			f.write("while 1 {\n")
+			f.write("\texpect {\n")
+			for k,v in prompts.items():
+				f.write("\t\t\"%s\" { send \"%s\\n\" }\n" % (k, str(v)))
+			f.write("\t\teof {exit 0}\n")
+			f.write("\t}\n")
+			f.write("}")
+		os.chmod(expectscript, stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH)
+
+		serverdir=os.path.join(self.params['rundir'],"hq","server")
+		jobdir=os.path.join(self.params['rundir'],"hq","jobs")
+		try:
+			if not os.path.exists(serverdir):
+				os.makedirs(serverdir)
+		except OSError:
+			pass
+		try:
+			if not os.path.exists(jobdir):
+				os.makedirs(jobdir)
+		except OSError:
+			pass
+		cmd = "hq --server-dir %s submit --cwd %s --wait --max-fails 3 --time-limit=5min --cpus 2 /usr/bin/expect %s" % (os.getenv("HQ_SERVER_DIR",serverdir), os.getenv("HQ_CWD", jobdir), os.path.abspath(expectscript))
+		#Handles case where command fails because hq server has gone away.
+		success=False
+		while not success:
+			ctfprogproc = subprocess.Popen(cmd, shell=True)
+			ctfprogproc.wait()
+			if ctfprogproc.returncode == 0:
+				success=True
+			else:
+				sleep(15)
 
 		### cannot run ctffind_plot_results.sh on CentOS 6
 		# This script requires gnuplot version >= 4.6, but you have version 4.2
@@ -461,8 +478,17 @@ class ctfEstimateLoop(appionLoop2.AppionLoop):
 			origPath = os.path.join(self.ddstackpath,source_imgdata['filename']+"_st.mrc")
 		return origPath, binning
 
-if __name__ == '__main__':
+def main():
 	imgLoop = ctfEstimateLoop()
 	imgLoop.run()
+
+if __name__ == '__main__':
+	appionProcCount=os.getenv("APPION_PROCESSES", 8)
+	appionProcCount=int(appionProcCount)
+	p=Pool(appionProcCount)
+	for _ in range(appionProcCount):
+		p.apply_async(main)
+	p.close()
+	p.join()
 
 
