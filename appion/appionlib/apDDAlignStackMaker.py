@@ -55,6 +55,12 @@ class AlignStackLoop(apDDStackMaker.FrameStackLoop):
 
 	def checkFrameAlignerExecutable(self):
 		self.setFrameAligner()
+		exename = self.framealigner.getExecutableName()
+		alignexe = subprocess.Popen("which "+exename, shell=True, stdout=subprocess.PIPE).stdout.read().strip()
+		if not os.path.isfile(alignexe):
+			apDisplay.printError('Correction program "%s" not available' % exename)
+		else:
+			apDisplay.printMsg('Correction program used: %s' % alignexe)
 
 	#=======================
 	def preLoopFunctions(self):

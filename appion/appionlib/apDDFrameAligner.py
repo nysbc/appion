@@ -4,11 +4,6 @@ import socket
 import os
 import re
 import subprocess
-import getpass
-from time import sleep
-from hashlib import md5
-import shutil
-import sys
 
 class DDFrameAligner(object):
 	# testbin.py is a test script in appion/bin as an example
@@ -100,42 +95,18 @@ class DDFrameAligner(object):
 		'''
 		# Construct the command line with defaults
 		cmd = self.makeFrameAlignmentCommand()
-		try:
-			stdoutpath=self.framestackpath[:-4]+'_Log.motioncor2.txt'
-			stderrpath=self.framestackpath[:-4]+'_Log.motioncor2.err'
-			serverdir=os.path.join(os.path.dirname(self.framestackpath),"hq","server")
-			jobdir=os.path.join(os.path.dirname(self.framestackpath),"hq","jobs")
-		except Exception as e:
-			apDisplay.printMsg("whoopsie %s" % str(e))
-			sys.exit(1)
-		try:
-			if not os.path.exists(serverdir):
-				os.makedirs(serverdir)
-		except OSError:
-			pass
-		try:
-			if not os.path.exists(jobdir):
-				os.makedirs(jobdir)
-		except OSError:
-			pass
-		cmd = "hq --server-dir %s submit --cwd %s --stdout %s --stderr %s --wait --max-fails 3 --time-limit=5min --cpus 2 --resource gpus=1 %s" % (os.getenv("HQ_SERVER_DIR",serverdir), os.getenv("HQ_CWD", jobdir), stdoutpath, stderrpath, cmd)
 
-		# run as subprocesscmd
+		# run as subprocess
 		apDisplay.printMsg('Running: %s'% cmd)
-		success=False
-		#Handles case where command fails because hq server has gone away.
-		while not success:
-			self.proc = subprocess.Popen(cmd, shell=True)
-			self.proc.wait()
-			if self.proc.returncode == 0:
-				success=True
-			else:
-				sleep(15)
-		try:
-			self.writeLogFile(stdoutpath)
-		except Exception as e:
-			print(e)
-			sys.exit(1)
+		self.proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
+		(stdoutdata, stderrdata) = self.proc.communicate()
+                self.badprocess = self.proc.returncode != 0
+
+		# write log file
+		output = stdoutdata
+		self.writeLogFile(output)
+		# stream stderrdata even though it is likely empty due to piping to stdout
+		print stderrdata
 
 	def getValidAlignOptionMappings(self):
 		'''
@@ -242,7 +213,7 @@ class MotionCorr_Purdue(MotionCorr1):
 			
 class MotionCor2_UCSF(DDFrameAligner):
 	def __init__(self):
-		self.executable = os.getenv("APPION_MOTIONCOR2_PATH","/common/sw/containers/opt/motioncor2/1.5.0/bin/motioncor2")
+		self.executable = 'motioncor2'
 		DDFrameAligner.__init__(self)
 
 	def setKV(self, kv):
@@ -328,11 +299,11 @@ class MotionCor2_UCSF(DDFrameAligner):
 
 	def getInputCommand(self):
 		if self.framestackpath.endswith('.tif'):
-			cmd = '-InTiff %s' % os.path.abspath(self.framestackpath)
+			cmd = '-InTiff %s' % self.framestackpath
 		elif self.framestackpath.endswith('.eer'):
-			cmd = '-InEer %s' % os.path.abspath(self.framestackpath)
+			cmd = '-InEer %s' % self.framestackpath
 		else:
-			cmd = '-InMrc %s' % os.path.abspath(self.framestackpath)
+			cmd = '-InMrc %s' % self.framestackpath
 		return cmd
 
 	def makeFrameAlignmentCommand(self):
@@ -346,7 +317,7 @@ class MotionCor2_UCSF(DDFrameAligner):
 
 		# Construct the command line with defaults
 
-		cmd = '%s %s -OutMrc %s' % (self.executable, self.getInputCommand(), os.path.abspath(self.aligned_sumpath))
+		cmd = '%s %s -OutMrc %s' % (self.executable, self.getInputCommand(), self.aligned_sumpath)
 
 		if self.alignparams['is_eer']:
 			# binning from the upsampled stack
@@ -448,10 +419,6 @@ class MotionCor2_UCSF(DDFrameAligner):
 
 		# GPU ID
 		cmd += ' -Gpu %s' % self.alignparams['Gpu'].replace(","," ")
-		# If we don't include this motioncor3 will fail to run outside of a container:
-		# https://github.com/czimaginginstitute/MotionCor3/issues/17#issuecomment-2156153031
-		# For motioncor2, we need to just use a container for now.
-		cmd += ' -UseGpus 1'
 
 		# EER upsampling
 		if self.alignparams['is_eer']:
@@ -506,14 +473,20 @@ class MotionCor2_UCSF(DDFrameAligner):
 	def getAlignedSumFrameList(self):
 		return self.sumframelist
 	
-	def writeLogFile(self, logpath):
+	def writeLogFile(self, outbuffer):
 		''' 
 		takes output log buffer from running frame aligner 
 		will write motioncor2 log file and standard log file that is readable by appion image viewer (motioncorr1 format)
 		'''
 
+		### motioncor2 format
+		log2 = self.framestackpath[:-4]+'_Log.motioncor2.txt'
+		f = open(log2, "w")
+		f.write(outbuffer)
+		f.close()
+
 		### this is unnecessary, need to figure out how to convert outbuffer from subprocess PIPE to readable format
-		f = open(logpath, "r")
+		f = open(log2, "r")
 			
 		outbuffer = f.readlines()
 		f.close()
@@ -522,17 +495,13 @@ class MotionCor2_UCSF(DDFrameAligner):
 		temp = []
 		found = False
 		for line in outbuffer:
-			# This line is not present in the output from MotionCor 1.6.4
-			# but is present in MotionCor 1.5.0's output.  This means
-			# that this program can only be used with 1.5.0 or another compatible version
-			# of motioncor2.
 			if "Full-frame alignment shift" in line or found:
 				temp.append(line)
 				found = True
 		shifts = []
 
 		if not found:
-			apDisplay.printError('%s did not run successfully.  Please check %s for error'	% (self.executable, logpath))
+			apDisplay.printError('%s did not run successfully.  Please check %s for error'	% (self.executable, log2))
 		for l in temp: 
 			m = re.match("...... Frame", l)
 			if m:
@@ -557,12 +526,12 @@ class MotionCor2_UCSF(DDFrameAligner):
 
 		### motioncorr1 format, needs conversion from motioncorr2 format
 		log = self.framestackpath[:-4]+'_Log.txt'
-		f = open(log,"w")
+                f = open(log,"w")
 		f.write("Sum Frame #%.3d - #%.3d (Reference Frame #%.3d):\n" % (0, self.alignparams['total_rendered_frames'], self.alignparams['total_rendered_frames']/2))
 		# Eer nframe is not predictable.
 		for i in range(len(shifts_adjusted)):
-			f.write("......Add Frame #%.3d with xy shift: %.5f %.5f\n" % (i+self.alignparams['Throw'], shifts_adjusted[i][0], shifts_adjusted[i][1]))
-		f.close()
+	                f.write("......Add Frame #%.3d with xy shift: %.5f %.5f\n" % (i+self.alignparams['Throw'], shifts_adjusted[i][0], shifts_adjusted[i][1]))
+                f.close()
 
 class MotionCor3(MotionCor2_UCSF):
 	def __init__(self):

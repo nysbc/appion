@@ -73,14 +73,6 @@ class AppionLoop(appionScript.AppionScript):
 		while self.notdone:
 			apDisplay.printColor("\nBeginning Main Loop", "green")
 			imgnum = 0
-			# Add a second HyperQueue allocation queue if images get backed up.
-			# Yes this is a hack-	 I know.
-			if len(self.imgtree) > 20:
-				cmd = "hq --server-dir=%s alloc resume 2" % os.path.join(self.params['rundir'],"hq","server")
-				subprocess.Popen(cmd, shell=True)
-			else:
-				cmd = "hq --server-dir=%s alloc pause 2" % os.path.join(self.params['rundir'],"hq","server")
-				subprocess.Popen(cmd, shell=True)
 			while imgnum < len(self.imgtree) and self.notdone is True:
 				self.stats['startimage'] = time.time()
 				imgdata = self.imgtree[imgnum]
