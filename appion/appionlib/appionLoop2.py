@@ -15,10 +15,9 @@ from appionlib import apParam
 from appionlib import apProject
 from appionlib import appionScript
 #leginon
-from pyami import mem
-from pyami import fileutil
 from fcntl import flock, LOCK_EX, LOCK_UN
 import subprocess
+
 
 class AppionLoop(appionScript.AppionScript):
 	#=====================
@@ -135,14 +134,6 @@ class AppionLoop(appionScript.AppionScript):
 		if self.params['parallel']:
 			self.unlockParallel(imgdata.dbid)
 
-	# 				loadavg = os.getloadavg()[0]
-	# 				if loadavg > 2.0:
-	# 					apDisplay.printMsg("Load average is high "+str(round(loadavg,2)))
-	# 					loadsquared = loadavg*loadavg
-	# 					apDisplay.printMsg("Sleeping %.1f seconds"%(loadavg))
-	# 					time.sleep(loadavg)
-	# 					apDisplay.printMsg("New load average "+str(round(os.getloadavg()[0],2)))
-
 		self._printSummary()
 		self._advanceStatsCount()
 
@@ -204,13 +195,6 @@ class AppionLoop(appionScript.AppionScript):
 		do something before starting the loop
 		"""
 		return
-
-	#=====================
-	#def insertPreLoopFunctionRun(self,rundata,params):
-	#	"""
-	#	put in run and param insertion to db here
-	#	"""
-	#	return
 
 	#=====================
 	def processImage(self, imgdata):
@@ -651,8 +635,6 @@ class AppionLoop(appionScript.AppionScript):
 			elif self.stats['count'] % 80 == 0:
 				sys.stderr.write("\n")
 			self.stats['lastcount'] = self.stats['count']
-			if apDisplay.isDebugOn():
-				self._checkMemLeak()
 
 		# skip if image doesn't exist:
 		imgpath = os.path.join(imgdata['session']['image path'], imgdata['filename']+'.mrc')
@@ -741,46 +723,6 @@ class AppionLoop(appionScript.AppionScript):
 			#print "\tMEM: ",(mem.active()-startmem)/1024,"M (",(mem.active()-startmem)/(1024*count),"M)"
 			apDisplay.printDebug( 'printSummary adding to stats count')
 			self._printLine()
-
-	#=====================
-	def _checkMemLeak(self):
-		"""
-		unnecessary code for determining if the program is eating memory over time
-		"""
-		### Memory leak code:
-		#self.stats['memlist'].append(mem.mySize()/1024)
-		self.stats['memlist'].append(mem.active())
-		memfree = mem.free()
-		minavailmem = 64*1024; # 64 MB, size of one image
-		if(memfree < minavailmem):
-			apDisplay.printDebug("Memory is low ("+str(int(memfree/1024))+"MB): there is probably a memory leak")
-
-		if(self.stats['count'] > 15):
-			memlist = self.stats['memlist'][-15:]
-			n       = len(memlist)
-			
-			gain    = (memlist[n-1] - memlist[0])/1024.0
-			sumx    = n*(n-1.0)/2.0
-			sumxsq  = n*(n-1.0)*(2.0*n-1.0)/6.0
-			sumy = 0.0; sumxy = 0.0; sumysq = 0.0
-			for i in range(n):
-				value  = float(memlist[i])/1024.0
-				sumxy  += float(i)*value
-				sumy   += value
-				sumysq += value**2
-			###
-			stdx  = math.sqrt(n*sumxsq - sumx**2)
-			stdy  = math.sqrt(n*sumysq - sumy**2)
-			rho   = float(n*sumxy - sumx*sumy)/float(stdx*stdy+1e-6)
-			slope = float(n*sumxy - sumx*sumy)/float(n*sumxsq - sumx*sumx)
-			memleak = rho*slope
-			###
-			if(self.stats['memleak'] > 3 and slope > 20 and memleak > 512 and gain > 2048):
-				apDisplay.printDebug("Memory leak of "+str(round(memleak,2))+"MB")
-			elif(memleak > 32):
-				self.stats['memleak'] += 1
-				apDisplay.printDebug("substantial memory leak "+str(round(memleak,2))+"MB")
-				print "(",str(n),round(slope,5),round(rho,5),round(gain,2),")"
 
 	#=====================
 	def skipTestOnImage(self,imgdata):
