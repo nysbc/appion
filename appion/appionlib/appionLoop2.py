@@ -618,7 +618,7 @@ class AppionLoop(appionScript.AppionScript):
 		"""
 		if self.params['parallel']:
 			if self.lockParallel(imgdata.dbid):
-				self.logger.info('%s locked by another parallel run in the rundir' % (apDisplay.shortenImageName(imgdata['filename'])))
+				self.logger.info('%s locked by another parallel run in the rundir' % (os.path.basename(imgdata['filename'])))
 				return False
 		#calc images left
 		self.logger.debug('_startLoop imagecount=%d, count=%d' % (self.stats['imagecount'], self.stats['count']))
@@ -629,7 +629,7 @@ class AppionLoop(appionScript.AppionScript):
 			if self.params['background'] is False:
 				apDisplay.printColor( "\nStarting image %d ( skip:%d, remain:%d ) id:%d, file: %s"
 					%(self.stats['count'], self.stats['skipcount'], self.stats['imagesleft'], 
-					imgdata.dbid, apDisplay.short(imgdata['filename']),),
+					imgdata.dbid, os.path.basename(imgdata['filename']),),
 					"green")
 			elif self.stats['count'] % 80 == 0:
 				sys.stderr.write("\n")

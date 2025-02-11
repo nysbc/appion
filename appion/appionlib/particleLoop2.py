@@ -102,7 +102,7 @@ class ParticleLoop(filterLoop.FilterLoop):
 
 		if self.params['background'] is False:
 			self.logger.info("Found "+str(len(self.peaktree))+" particles for "
-				+apDisplay.shortenImageName(imgdata['filename']))
+				+os.path.basename(imgdata['filename']))
 		self.stats['lastpeaks'] = len(self.peaktree)
 
 		if self.params['nojpegs'] is False:
