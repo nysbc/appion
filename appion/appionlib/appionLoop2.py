@@ -75,7 +75,7 @@ class AppionLoop(appionScript.AppionScript):
 			imgnum = 0
 			# Add a second HyperQueue allocation queue if images get backed up.
 			# Yes this is a hack-	 I know.
-			if len(self.imgtree) > 20:
+			if len(self.imgtree) > int(os.getenv("HQ_SECONDQUEUE_THRESHOLD",20)):
 				cmd = "hq --server-dir=%s alloc resume 2" % os.path.join(self.params['rundir'],"hq","server")
 				subprocess.Popen(cmd, shell=True)
 			else:
