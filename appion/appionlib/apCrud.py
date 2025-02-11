@@ -3,17 +3,14 @@
 
 from pyami import convexhull
 from appionlib import apImage
-from appionlib import apDisplay
 import os
 import sys
 import math
-import pyami.quietscipy
 import numpy
 ma = numpy.ma
 import scipy.ndimage as nd
 try:
 	from pyami import convolver
-	from pyami import mrc
 except ImportError:
 	import convolver
 try:
@@ -22,6 +19,9 @@ except:
 	pass
 import leginon.polygon
 import leginon.libCVwrapper
+import logging
+
+LOGGER=logging.getLogger(__name__)
 
 def outputTestImage(array,name,description,testlog):
 	width=25
@@ -434,7 +434,7 @@ def makeImageFromLabels(labeled_image,ltotal,goodlabels):
 			return labeled_image
 		# Special case when database got more assessed region.  Most likely an user error. See issue #2584
 		if len(goodlabels)>ltotal:
-			apDisplay.printWarning('There are more regions to keep than the number of regions.  Assuming want all!')
+			LOGGER.warning('There are more regions to keep than the number of regions.  Assuming want all!')
 			return labeled_image
 	if len(goodlabels)*2 < ltotal:
 		for i,l1 in enumerate(goodlabels):
@@ -514,7 +514,7 @@ def makeMask(params,image):
 	cdiam=float(params["cdiam"]/scale)
 
 	if float(diam) < 20 :
-		apDisplay.printWarning("Particle too small, Probably Won't Work")
+		LOGGER.warning("Particle too small, Probably Won't Work")
 
 	if (params["cdiam"]==0):
 		cdiam=diam

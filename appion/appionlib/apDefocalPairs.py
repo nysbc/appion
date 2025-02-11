@@ -2,6 +2,7 @@
 
 import sys
 import numpy
+import logging
 #pyami
 import pyami.peakfinder as peakfinder
 import pyami.correlator as correlator
@@ -13,6 +14,7 @@ from appionlib import appiondata
 from appionlib import apImage
 from appionlib import apDisplay
 
+LOGGER=logging.getLogger(__name__)
 ##===================
 ##===================
 def getShiftFromImage(imgdata, sessionname):
@@ -21,7 +23,7 @@ def getShiftFromImage(imgdata, sessionname):
 		shiftpeak = getShift(imgdata, sibling)
 		recordShift(sessionname, imgdata, sibling, shiftpeak)
 	else:
-		apDisplay.printWarning("No sibling found")
+		LOGGER.warning("No sibling found")
 		shiftpeak=None
 	return sibling, shiftpeak
 
@@ -105,17 +107,17 @@ def getShift(imgdata1 ,imgdata2):
 
 	#test to make sure images are at same mag
 	if imgdata1['scope']['magnification'] != imgdata2['scope']['magnification']:
-		apDisplay.printWarning("Defocus pairs are at different magnifications, so shift can't be calculated.")
+		LOGGER.warning("Defocus pairs are at different magnifications, so shift can't be calculated.")
 		return None
 
 	#test to see if images capture the same area
 	if (dimension1 * binning1) != (dimension2 * binning2):
-		apDisplay.printWarning("Defocus pairs do not capture the same imaging area, so shift can't be calculated.")
+		LOGGER.warning("Defocus pairs do not capture the same imaging area, so shift can't be calculated.")
 		return None
 
 	#images must not be less than finalsize (currently 512) pixels. This is arbitrary but for good reason
 	if dimension1 < finalsize or dimension2 < finalsize:
-		apDisplay.printWarning("Images must be greater than "+finalsize+" pixels to calculate shift.")
+		LOGGER.warning("Images must be greater than "+finalsize+" pixels to calculate shift.")
 		return None
 
 	#low pass filter 2 images to twice the final pixelsize BEFORE binning
@@ -146,7 +148,7 @@ def getShift(imgdata1 ,imgdata2):
 	xshift = int(round(shift[0]*shrinkfactor1))
 	yshift = int(round(shift[1]*shrinkfactor1))
 	peak['shift'] = numpy.array((xshift, yshift))
-	apDisplay.printMsg("Determined shifts: %f %f"%(peak['shift'][0],peak['shift'][1]))
+	LOGGER.info("Determined shifts: %f %f"%(peak['shift'][0],peak['shift'][1]))
 	#print peak['shift']
 	#sys.exit(1)
 	return peak
@@ -164,13 +166,13 @@ def recordShift(sessionname,img,sibling,peak):
 ##===================
 def insertShift(imgdata,siblingdata,peak):
 	if not siblingdata or not peak:
-		apDisplay.printWarning("No sibling or peak found. No database insert")
+		LOGGER.warning("No sibling or peak found. No database insert")
 		return False
 	shiftq=appiondata.ApImageTransformationData()
 	shiftq['image1']=imgdata
 	shiftdata=shiftq.query()
 	if shiftdata:
-		apDisplay.printWarning("Shift values already in database")
+		LOGGER.warning("Shift values already in database")
 		return False
 	shiftq['image2']=siblingdata
 	shiftq['shiftx']=peak['shift'][1]
@@ -180,7 +182,7 @@ def insertShift(imgdata,siblingdata,peak):
 		shiftq['correlation']=peak['subpixel peak value']
 	else:
 		shiftq['correlation']=0.0
-	apDisplay.printMsg("Inserting shift beteween "+apDisplay.short(imgdata['filename'])+\
+	LOGGER.info("Inserting shift beteween "+apDisplay.short(imgdata['filename'])+\
 		" and "+apDisplay.short(siblingdata['filename'])+" into database")
 	shiftq.insert()
 	return True

@@ -11,10 +11,12 @@ from PIL import ImageDraw
 from appionlib import apImage
 from appionlib import apDBImage
 from appionlib import apFile
-from appionlib import apDisplay
 from appionlib import apParam
 #leginon
 from pyami import imagefun
+import logging
+
+LOGGER=logging.getLogger(__name__)
 
 def findPeaks(imgdict, maplist, params, maptype="ccmaxmap", pikfile=True):
 	peaktreelist = []
@@ -55,7 +57,7 @@ def findPeaks(imgdict, maplist, params, maptype="ccmaxmap", pikfile=True):
 		peaktree = maxThreshPeaks(peaktree, maxthresh)
 		postcount = len(peaktree)
 		#if precount != postcount:
-		apDisplay.printMsg("Filtered %d particles above threshold %.2f"%(precount-postcount,maxthresh))
+		LOGGER.info("Filtered %d particles above threshold %.2f"%(precount-postcount,maxthresh))
 
 	return peaktree
 
@@ -138,7 +140,7 @@ def findPeaksInMap(imgmap, thresh, pixdiam, count=1, olapmult=1.5, maxpeaks=500,
 			peaktree[len(peaktree)-1]['correlation'])
 		peaktree = peaktree[0:maxpeaks]
 
-	apDisplay.printMsg(outstr[5:])
+	LOGGER.info(outstr[5:])
 	return peaktree
 
 
@@ -182,7 +184,7 @@ def createPeakMapImage(peaktree, ccmap, imgname="peakmap.jpg", pixrad="10.0", bi
 	image = Image.blend(image, image2, 0.2)
 
 	if msg is True:
-		apDisplay.printMsg("writing summary JPEG: "+imgname)
+		LOGGER.info("writing summary JPEG: "+imgname)
 	image.save(imgname, "JPEG", quality=80)
 
 
@@ -240,7 +242,7 @@ def maxThreshPeaks(peaktree, maxthresh):
 
 def mergePeakTrees(imgdict, peaktreelist, params, msg=True, pikfile=True):
 	if msg is True:
-		apDisplay.printMsg("Merging individual picked peaks into one set")
+		LOGGER.info("Merging individual picked peaks into one set")
 	bin =         int(params["bin"])
 	diam =        float(params["diam"])
 	apix =        float(params["apix"])
@@ -266,10 +268,10 @@ def mergePeakTrees(imgdict, peaktreelist, params, msg=True, pikfile=True):
 				bestpeaktree.append(peakdict)
 
 	if(len(bestpeaktree) > maxpeaks):
-		apDisplay.printWarning("more than maxpeaks ("+str(maxpeaks)+" peaks), selecting only top peaks")
+		LOGGER.warning("more than maxpeaks ("+str(maxpeaks)+" peaks), selecting only top peaks")
 		#orders peaks from biggest to smallest
 		bestpeaktree.sort(_peakCompareBigSmall)
-		apDisplay.printMsg("Corr best=%.3f, worst=%.3f"
+		LOGGER.info("Corr best=%.3f, worst=%.3f"
 			%(peaktree[0]['correlation'], peaktree[len(peaktree)-1]['correlation']))
 		bestpeaktree = bestpeaktree[0:maxpeaks]
 
@@ -281,7 +283,7 @@ def mergePeakTrees(imgdict, peaktreelist, params, msg=True, pikfile=True):
 def removeOverlappingPeaks(peaktree, cutoff, msg=True, doubles=False):
 	#distance in pixels for two peaks to be too close together
 	if msg is True:
-		apDisplay.printMsg("overlap distance cutoff: "+str(round(cutoff,1))+" pixels")
+		LOGGER.info("overlap distance cutoff: "+str(round(cutoff,1))+" pixels")
 	cutsq = cutoff**2 + 1
 
 	initpeaks = len(peaktree)
@@ -306,7 +308,7 @@ def removeOverlappingPeaks(peaktree, cutoff, msg=True, doubles=False):
 
 	numpeaks = len(peaktree)
 	if msg is True:
-		apDisplay.printMsg("kept "+str(numpeaks)+" non-overlapping peaks of "
+		LOGGER.info("kept "+str(numpeaks)+" non-overlapping peaks of "
 			+str(initpeaks)+" total peaks")
 
 	return peaktree
@@ -414,7 +416,7 @@ def findBlobs(ccmap, thresh, maxsize=500, minsize=1, maxpeaks=1500, border=10,
 	percentcov  =  round(100.0*float(ccthreshmap.sum())/float(totalarea),2)
 	#imagefun.find_blobs(image,mask,border,maxblobs,maxblobsize,minblobsize,maxmoment,method)
 	if percentcov > 25:
-		apDisplay.printWarning("too much coverage in threshold: "+str(percentcov))
+		LOGGER.warning("too much coverage in threshold: "+str(percentcov))
 		return [],percentcov
 	#apImage.arrayToJpeg(ccmap, "dogmap2.jpg")
 	#apImage.arrayToJpeg(ccthreshmap, "threshmap2.jpg")
@@ -496,7 +498,7 @@ def subCreatePeakJpeg(imgarray, peaktree, pixrad, imgfile, bin=1, msg=True):
 	if len(peaktree) > 0:
 		drawPeaks(peaktree, draw, bin, pixrad)
 	if msg is True:
-		apDisplay.printMsg("writing peak JPEG: "+imgfile)
+		LOGGER.info("writing peak JPEG: "+imgfile)
 	image = Image.blend(image, image2, 0.9) 
 	image.save(imgfile, "JPEG", quality=95)
 
@@ -550,10 +552,10 @@ def createTiltedPeakJpeg(imgdata1, imgdata2, peaktree1, peaktree2, params, proci
 	image = Image.blend(image, image2, 0.9) 
 
 	outfile1 = os.path.join(jpegdir, imgname1+".prtl.jpg")
-	apDisplay.printMsg("writing peak JPEG: "+outfile1)
+	LOGGER.info("writing peak JPEG: "+outfile1)
 	image.save(outfile1, "JPEG", quality=95)
 	outfile2 = os.path.join(jpegdir, imgname2+".prtl.jpg")
-	apDisplay.printMsg("writing peak JPEG: "+outfile2)
+	LOGGER.info("writing peak JPEG: "+outfile2)
 	image.save(outfile2, "JPEG", quality=95)
 
 	return

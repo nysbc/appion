@@ -2,11 +2,13 @@
 
 import math
 import numpy
-import pyami.quietscipy
 from scipy import ndimage
 from appionlib import apDisplay
 from appionlib.apImage import imagenorm
 from appionlib.apImage import imagefile
+import logging
+
+LOGGER=logging.getLogger(__name__)
 
 def convertDogPeaks(peaks, params):
 	"""
@@ -59,7 +61,7 @@ def diffOfGauss(imgarray0, pixrad, k=1.2):
 	sigmaprime = sigma1 * math.sqrt(k*k-1.0)
 	#determine pixel range
 	pixrange = pixrad * (k - 1.0) / math.sqrt(k)
-	apDisplay.printMsg("filtering particles of size "+str(pixrad)+" +/- "
+	LOGGER.info("filtering particles of size "+str(pixrad)+" +/- "
 		+str(round(pixrange,1))+" pixels")
 	#do the blurring
 	print sigma1, sigmaprime
@@ -76,7 +78,7 @@ def diffOfGaussLevels(imgarray, r0, N, dr, writeImg=False, apix=1):
 		imagefile.arrayToJpeg(imgarray, "binned-image.jpg")
 
 	if dr >= 2*r0:
-		apDisplay.printError("size range %.2f has be less than twice the diameter %.2f"
+		LOGGER.error("size range %.2f has be less than twice the diameter %.2f"
 			%(dr, 2*r0))
 	# initial params
 	#print "r0=", r0*apix
@@ -104,13 +106,13 @@ def diffOfGaussLevels(imgarray, r0, N, dr, writeImg=False, apix=1):
 
 	# calculate first image blur
 	sigma = sigma0
-	apDisplay.printMsg("gaussian blur map %d of %d"%(1, N+1))
+	LOGGER.info("gaussian blur map %d of %d"%(1, N+1))
 	gaussmap = ndimage.gaussian_filter(imgarray, sigma=sigma0)
 	sigmavals = [sigma0,]
 	sigprimes = []
 	gaussmaps = [gaussmap,]
 	for i in range(N):
-		apDisplay.printMsg("gaussian blur map %d of %d"%(i+2, N+1))
+		LOGGER.info("gaussian blur map %d of %d"%(i+2, N+1))
 		sigmaprime = sigma * math.sqrt(k**2 - 1.0)
 		sigprimes.append(sigmaprime)
 		#calculate new sigma

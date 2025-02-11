@@ -1,14 +1,17 @@
 #!/usr/bin/env python
 
 import numpy
+import logging
 from pyami import mrc,imagefun
-from appionlib import apDDprocess,apDisplay
+from appionlib import apDDprocess
 import os
+LOGGER=logging.getLogger(__name__)
 try:
 	#The tifffile module only works with python 2.6 and above
 	from pyami import tifffile
 except:
-	apDisplay.printError('Need tifffile to use apDEprocess module')
+	LOGGER.exception('Need tifffile to use apDEprocess module')
+import time
 
 # testing options
 save_jpg = False
@@ -48,12 +51,12 @@ class DEProcessing(apDDprocess.DDFrameProcessing):
 		# strip off DOS path in rawframe directory name if included
 		rawframename = imagedata['camera']['frames name'].split('\\')[-1]
 		if not rawframename:
-			apDisplay.printWarning('No Raw Frame Saved for %s' % imagedata['filename'])
+			self.logger.warning('No Raw Frame Saved for %s' % imagedata['filename'])
 		session_frame_path = self.getSessionFramePathFromImage(imagedata)
 		# frame stackfile is image filename plus '.frames.mrc'
 		rawframedir = os.path.join(session_frame_path,'%s.frames.mrc' % imagedata['filename'])
 		if not self.waitForPathExist(rawframedir,30):
-			apDisplay.printError('Raw Frame Dir %s does not exist.' % rawframedir)
+			self.logger.error('Raw Frame Dir %s does not exist.' % rawframedir)
 		return rawframedir
 
 	def loadOneRawFrame(self,rawframe_path,frame_number):
@@ -75,16 +78,16 @@ class DEProcessing(apDDprocess.DDFrameProcessing):
 			offset = {'x':0,'y':0}
 			dimension = self.getDefaultDimension()
 		crop_end = {'x': offset['x']+dimension['x']*bin['x'], 'y':offset['y']+dimension['y']*bin['y']}
-		apDisplay.printMsg('Frame path: %s' %  rawframe_path)
+		self.logger.info('Frame path: %s' %  rawframe_path)
 		waitmin = 0
 		while not os.path.exists(rawframe_path):
 			if self.waittime < 0.1:
-				apDisplay.printWarning('Frame File %s does not exist.' % rawframe_path)
+				self.logger.warning('Frame File %s does not exist.' % rawframe_path)
 				return False
-			apDisplay.printWarning('Frame File %s does not exist. Wait for 3 min.' % rawframe_path)
+			self.logger.warning('Frame File %s does not exist. Wait for 3 min.' % rawframe_path)
 			time.sleep(180)
 			waitmin += 3
-			apDisplay.printMsg('Waited for %d min so far' % waitmin)
+			self.logger.info('Waited for %d min so far' % waitmin)
 			if waitmin > self.waittime:
 				return False
 		return self.readImageFrame(rawframe_path,frame_number,offset,crop_end,bin)

@@ -28,18 +28,18 @@ class BasicScript(object):
 		self.quiet = quiet
 		self.timestamp = apParam.makeTimestamp()
 		if not self.quiet:
-			apDisplay.printMsg("Time stamp: "+self.timestamp)
+			self.logger.info("Time stamp: "+self.timestamp)
 		self.functionname = apParam.getFunctionName(sys.argv[0])
 		if not self.quiet:
-			apDisplay.printMsg("Function name: "+self.functionname)
+			self.logger.info("Function name: "+self.functionname)
 
 		apParam.setUmask()
 		self.parsePythonPath()
 # 		loadavg = os.getloadavg()[0]
 # 		if loadavg > 2.0:
-# 			apDisplay.printMsg("Load average is %.2f, wait for %.1f second " % (round(loadavg,2),loadavg**2))
+# 			self.logger.info("Load average is %.2f, wait for %.1f second " % (round(loadavg,2),loadavg**2))
 # 			time.sleep(loadavg**2)
-# 			apDisplay.printMsg("Load average is high "+str(round(loadavg,2)))
+# 			self.logger.info("Load average is high "+str(round(loadavg,2)))
 
 		### setup default parser: run directory, etc.
 		self.setParams(optargs)
@@ -73,7 +73,7 @@ class BasicScript(object):
 				else:
 					multiple_ok = False
 				if opt in argmdict and not multiple_ok:
-					apDisplay.printError("Multiple arguments were supplied for argument: "+str(opt))
+					self.logger.error("Multiple arguments were supplied for argument: "+str(opt))
 				argmdict[opt] = True
 
 	#=====================
@@ -100,12 +100,12 @@ class BasicScript(object):
 		self.onClose()
 # 		loadavg = os.getloadavg()[0]
 # 		if loadavg > 2.0:
-# 			apDisplay.printMsg("Load average is high "+str(round(loadavg,2)))
+# 			self.logger.info("Load average is high "+str(round(loadavg,2)))
 # 			time.sleep(loadavg**2)
 		apParam.closeFunctionLog(functionname=self.functionname, 
 			logfile=self.logfile, msg=(not self.quiet))
 		if self.quiet is False:
-			apDisplay.printMsg("Ended at "+time.strftime("%a, %d %b %Y %H:%M:%S"))
+			self.logger.info("Ended at "+time.strftime("%a, %d %b %Y %H:%M:%S"))
 			apDisplay.printColor("Total run time:\t"+apDisplay.timeString(time.time()-self.t0),"green")
 
 	#=====================
@@ -124,10 +124,10 @@ class BasicScript(object):
 		leginons = leginons.keys()
 		appions = appions.keys()
 		if len(appions) > 1:
-			apDisplay.printWarning("There is more than one appion directory in your PYTHONPATH")
+			self.logger.warning("There is more than one appion directory in your PYTHONPATH")
 			print appions
 		if len(leginons) > 1:
-			apDisplay.printWarning("There is more than one leginon directory in your PYTHONPATH")
+			self.logger.warning("There is more than one leginon directory in your PYTHONPATH")
 			print leginons
 
 	#######################################################
@@ -140,7 +140,7 @@ class BasicScript(object):
 		set the input parameters
 		this function should be rewritten in each program
 		"""
-		apDisplay.printError("you did not create a 'setupParserOptions' function in your script")
+		self.logger.error("you did not create a 'setupParserOptions' function in your script")
 		self.parser.set_usage("Usage: %prog --commit --description='<text>' [options]")
 		self.parser.add_option("--stackid", dest="stackid", type="int",
 			help="ID for particle stack (optional)", metavar="INT")
@@ -150,11 +150,11 @@ class BasicScript(object):
 		"""
 		make sure the necessary parameters are set correctly
 		"""
-		apDisplay.printError("you did not create a 'checkConflicts' function in your script")
+		self.logger.error("you did not create a 'checkConflicts' function in your script")
 		if self.params['runname'] is None:
-			apDisplay.printError("enter a run name ID, e.g. --runname=run1")
+			self.logger.error("enter a run name ID, e.g. --runname=run1")
 		if self.params['description'] is None:
-			apDisplay.printError("enter a description, e.g. --description='awesome data'")
+			self.logger.error("enter a description, e.g. --description='awesome data'")
 
 	#=====================
 	def start(self):
@@ -187,7 +187,7 @@ class BasicScriptInstanceRun(object):
 		self.jobtype = self.getJobType(command)
 		self.app = self.createInst(self.jobtype,command)
 		if self.app is None:
-			apDisplay.printError('No BasicScript subclass instance created')
+			self.logger.error('No BasicScript subclass instance created')
 		else:
 			self.app.start()
 			self.run()
@@ -224,13 +224,13 @@ class BasicScriptInstanceRun(object):
 class TestScript(BasicScript):
 	#------------
 	def setupParserOptions(self):
-		apDisplay.printMsg("Parser options")
+		self.logger.info("Parser options")
 	#------------
 	def checkConflicts(self):
-		apDisplay.printMsg("Conflicts")
+		self.logger.info("Conflicts")
 	#------------
 	def start(self):
-		apDisplay.printMsg("Hey this works")
+		self.logger.info("Hey this works")
 
 if __name__ == '__main__':
 	testscript = TestScript()

@@ -5,10 +5,12 @@ import time
 import glob
 import subprocess
 import shutil
-from appionlib import apDisplay
 from appionlib import apRelion
 from pyami import mrc
 from pyami import fileutil
+import logging
+
+LOGGER=logging.getLogger(__name__)
 
 ####
 # This is a low-level file with NO database connections
@@ -21,7 +23,7 @@ def md5sumfile(fname):
 	Returns an md5 hash for file fname
 	"""
 	if not os.path.isfile(fname):
-		apDisplay.printError("MD5SUM, file not found: "+fname)
+		LOGGER.error("MD5SUM, file not found: "+fname)
 	f = file(fname, 'rb')
 	#this next library is deprecated in python 2.6+, need to use hashlib
 	import md5
@@ -39,13 +41,13 @@ def removeFile(filename, warn=False):
 	f = os.path.abspath(filename)
 	if os.path.isfile(f) or os.path.islink(f):
 		if warn is True:
-			apDisplay.printWarning("removing file:"+f)
+			LOGGER.warning("removing file:"+f)
 			time.sleep(1)
 		try:
 			os.remove(f)
 			return True
 		except:
-			apDisplay.printWarning('%s could not be removed' % f)
+			LOGGER.warning('%s could not be removed' % f)
 	return False
 
 #===============
@@ -53,13 +55,13 @@ def removeDir(dirname, warn=True):
 	dir = os.path.abspath(dirname)
 	if os.path.isdir(dir):
 		if warn is True:
-			apDisplay.printWarning("removing directory: "+dir)
+			LOGGER.warning("removing directory: "+dir)
 			time.sleep(1)
 		try:
 			shutil.rmtree(dir)
 			return True
 		except:
-			apDisplay.printWarning('%s could not be removed' % dir)
+			LOGGER.warning('%s could not be removed' % dir)
 	return False
 
 #===============
@@ -68,12 +70,12 @@ def removeStack(filename, warn=True):
 	for f in (rootname+".hed", rootname+".img", rootname+".hdf"):
 		if os.path.isfile(f):
 			if warn is True:
-				apDisplay.printWarning("removing stack: "+f)
+				LOGGER.warning("removing stack: "+f)
 				time.sleep(1)
 			try:
 				os.remove(f)
 			except:
-				apDisplay.printWarning('%s could not be removed' % f)
+				LOGGER.warning('%s could not be removed' % f)
 
 #===============
 def moveStack(filename1, filename2, warn=True):
@@ -85,18 +87,18 @@ def moveStack(filename1, filename2, warn=True):
 		outf = rootname2+ext
 		if os.path.isfile(inf):
 			if warn is True:
-				apDisplay.printWarning("replacing stack file '%s' with '%s' "%(outf,inf))
+				LOGGER.warning("replacing stack file '%s' with '%s' "%(outf,inf))
 				time.sleep(1)
 			try:
 				shutil.move(inf,outf)
 			except:
-				apDisplay.printWarning('%s could not be replaced with %s' % (outf,inf))
+				LOGGER.warning('%s could not be replaced with %s' % (outf,inf))
 
 #===============
 def removeFilePattern(pattern, warn=True):
 	files = glob.glob(pattern)
 	if warn is True:
-		apDisplay.printWarning("%d files with the patterns '%s' will be removed" 
+		LOGGER.warning("%d files with the patterns '%s' will be removed" 
 			% (len(files), pattern))
 		time.sleep(3)
 	removed = 0
@@ -105,7 +107,7 @@ def removeFilePattern(pattern, warn=True):
 		if removeFile(fullpath):
 			removed+=1
 	if warn is True:
-		apDisplay.printMsg("Removed %d of %d files"%(removed, len(files)))
+		LOGGER.info("Removed %d of %d files"%(removed, len(files)))
 	return
 
 #===============
@@ -140,7 +142,7 @@ def getBoxSize(filename, msg=True):
 	"""
 	if not os.path.isfile(filename):
 		if msg is True:
-			apDisplay.printWarning("file does not exist")
+			LOGGER.warning("file does not exist")
 		return (1,1,1)
 	if filename[-4:] == '.hed' or filename[-4:] == '.img':
 		root=os.path.splitext(filename)[0]
@@ -180,7 +182,7 @@ def getBoxSize(filename, msg=True):
 			zdim = int(m.groups()[2])
 			return (xdim,ydim,zdim)
 	if msg is True:
-		apDisplay.printWarning("failed to get boxsize: "+lines)
+		LOGGER.warning("failed to get boxsize: "+lines)
 	return (1,1,1)
 
 #===============
@@ -201,19 +203,19 @@ def numImagesInStack(imgfile, boxsize=None):
 		numimg = int('%d' % (os.stat(imgfile+'.hed')[6]/1024))
 	elif imgfile[-4:] == '.spi':
 		if boxsize is None:
-			apDisplay.printError("boxsize is required for SPIDER stacks")
+			LOGGER.error("boxsize is required for SPIDER stacks")
 		imgmem = boxsize*(boxsize+2)*4
 		numimg = int('%d' % (os.stat(imgfile)[6]/imgmem))
 	elif imgfile.endswith(".star"):
 		return len(apRelion.getPartsFromStar(imgfile))
 	else:
-		apDisplay.printError("numImagesInStack() requires an IMAGIC, SPIDER, or RELION stack")
+		LOGGER.error("numImagesInStack() requires an IMAGIC, SPIDER, or RELION stack")
 	return numimg
 
 def safeSymLink(source, destination):
 	''' create new symbolic link only if the destination is not a file'''
 	if (os.path.isfile(destination) and not os.path.islink(destination)):
-		apDisplay.printWarning('destination is a non-linked file, linking from %s to %s not performed' % (source,destination))
+		LOGGER.warning('destination is a non-linked file, linking from %s to %s not performed' % (source,destination))
 		return False
 	else:
 		if (os.path.islink(destination)):
@@ -224,7 +226,7 @@ def safeSymLink(source, destination):
 def safeCopy(source, destination):
 	''' copy from source only if the destination is not a file'''
 	if (os.path.isfile(destination) and not os.path.islink(destination)):
-		apDisplay.printWarning('destination is a non-linked file, copying from %s to %s not performed' % (source,destination))
+		LOGGER.warning('destination is a non-linked file, copying from %s to %s not performed' % (source,destination))
 		return False
 	else:
 		if (os.path.islink(destination)):
@@ -241,7 +243,7 @@ def replaceUniqueLinePatternInTxtFile(filepath,search_string,new_linetext):
 	newlines = []
 	for line in lines:
 		if search_string in line:
-			apDisplay.printWarning('%s will be replaced by %s in %s' % (line[:-1],new_linetext[:-1],filepath))
+			LOGGER.warning('%s will be replaced by %s in %s' % (line[:-1],new_linetext[:-1],filepath))
 			newline = new_linetext
 		else:
 			newline = line

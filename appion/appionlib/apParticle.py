@@ -19,6 +19,10 @@ from sinedon import connections
 # Please keep it this way
 ####
 
+import logging
+
+LOGGER=logging.getLogger(__name__)
+
 #===========================
 def getParticles(imgdata, selectionRunId, particlelabel=None):
 	"""
@@ -94,10 +98,10 @@ def getDefocPairParticles(imgdata, selectionid, particlelabel=None):
 		# For pairs from Leginon Manual Application
 		defimgdata = apDefocalPairs.getManualDefocusPair(imgdata)
 	if defimgdata is None:
-		apDisplay.printWarning("Could not find defocal pair for image %s (id %d)"
+		LOGGER.warning("Could not find defocal pair for image %s (id %d)"
 			%(apDisplay.short(imgdata['filename']), imgdata.dbid))
 		return ([], {'shiftx':0, 'shifty':0, 'scale':1})
-	apDisplay.printMsg("Found defocus pair %s (id %d) for image %s (id %d)"
+	LOGGER.info("Found defocus pair %s (id %d) for image %s (id %d)"
 		%(apDisplay.short(defimgdata['filename']), defimgdata.dbid, apDisplay.short(imgdata['filename']), imgdata.dbid))
 
 	### get particles
@@ -107,7 +111,7 @@ def getDefocPairParticles(imgdata, selectionid, particlelabel=None):
 	if particlelabel is not None:
 		partq['label'] = particlelabel
 	partdatas = partq.query()
-	apDisplay.printMsg("Found %d particles for defocal pair %s (id %d)"
+	LOGGER.info("Found %d particles for defocal pair %s (id %d)"
 		%(len(partdatas), apDisplay.short(defimgdata['filename']), defimgdata.dbid,))
 
 	if len(partdatas) == 0:
@@ -121,13 +125,13 @@ def getDefocPairParticles(imgdata, selectionid, particlelabel=None):
 		shiftdatas = shiftq.query()
 		if shiftdatas:
 			shiftdata = shiftdatas[0]
-			apDisplay.printMsg("Shifting particles by %.1f,%.1f (%d X)"
+			LOGGER.info("Shifting particles by %.1f,%.1f (%d X)"
 				%(shiftdata['shiftx'], shiftdata['shifty'], shiftdata['scale']))
 			break
 		else:
 			if has_tried == True:
-				apDisplay.printError("No shift inserted to database after one try")
-			apDisplay.printMsg("Calculating shift....")
+				LOGGER.error("No shift inserted to database after one try")
+			LOGGER.info("Calculating shift....")
 			shiftpeak = apDefocalPairs.getShift(defimgdata, imgdata)
 			apDefocalPairs.insertShift(defimgdata, imgdata, shiftpeak)
 			has_tried = True
@@ -150,7 +154,7 @@ def insertParticlePeakPairs(peaktree1, peaktree2, peakerrors, imgdata1, imgdata2
 	len2 = len(peaktree2)
 	len3 = len(peakerrors)
 	if len1 != len2 or len2 != len3:
-		apDisplay.printError("insertParticlePeakPairs particle arrays must have the same length "+\
+		LOGGER.error("insertParticlePeakPairs particle arrays must have the same length "+\
 			str(len1)+" "+str(len2)+" "+str(len3))
 
 	#GET RUN DATA
@@ -159,7 +163,7 @@ def insertParticlePeakPairs(peaktree1, peaktree2, peakerrors, imgdata1, imgdata2
 	runq['session'] = sessiondata
 	selectionruns=runq.query(results=1)
 	if not selectionruns:
-		apDisplay.printError("could not find selection run in database")
+		LOGGER.error("could not find selection run in database")
 
 	#GET TRANSFORM DATA
 	transq = appiondata.ApImageTiltTransformData()
@@ -168,13 +172,13 @@ def insertParticlePeakPairs(peaktree1, peaktree2, peakerrors, imgdata1, imgdata2
 	transq['tiltrun'] = selectionruns[0]
 	transids = transq.query(results=1)
 	if not transids:
-		apDisplay.printError("could not find transform id in database")
+		LOGGER.error("could not find transform id in database")
 
 	### WRITE PARTICLES TO DATABASE
 	count = 0
 	t0 = time.time()
 	last50 = time.time()
-	apDisplay.printMsg("looping over "+str(len(peaktree1))+" particles")
+	LOGGER.info("looping over "+str(len(peaktree1))+" particles")
 	for i in range(len(peaktree1)):
 		remaining_peaks = len(peaktree1)-count
 		if count and remaining_peaks and remaining_peaks % 50 == 0:
@@ -220,7 +224,7 @@ def insertParticlePeakPairs(peaktree1, peaktree2, peakerrors, imgdata1, imgdata2
 		partq2.insert(force=True)
 		partpairq.insert(force=True)
 
-	apDisplay.printMsg("inserted "+str(count)+" of "+str(len(peaktree1))+" peaks into database"
+	LOGGER.info("inserted "+str(count)+" of "+str(len(peaktree1))+" peaks into database"
 		+" in "+apDisplay.timeString(time.time()-t0))
 	return
 
@@ -240,7 +244,7 @@ def insertParticlePeaks(peaktree, imgdata, runname, msg=False, query=False):
 	selectionruns=runq.query(results=1)
 
 	if not selectionruns:
-		apDisplay.printError("could not find selection run in database")
+		LOGGER.error("could not find selection run in database")
 
 	### WRITE PARTICLES TO DATABASE
 	count = 0
@@ -271,11 +275,11 @@ def insertParticlePeaks(peaktree, imgdata, runname, msg=False, query=False):
 		if 'peakarea' in peakdict and peakdict['peakarea'] is not None and peakdict['peakarea'] > 0:
 			peakhasarea = True
 		else:
-			apDisplay.printWarning("peak has no area")
+			LOGGER.warning("peak has no area")
 			peakhasarea = False
 
 		if 'correlation' in peakdict and peakdict['correlation'] is not None and peakdict['correlation'] > 2:
-			apDisplay.printWarning("peak has correlation greater than 2.0")
+			LOGGER.warning("peak has correlation greater than 2.0")
 
 		### INSERT VALUES
 		if peakhasarea is True:
@@ -287,7 +291,7 @@ def insertParticlePeaks(peaktree, imgdata, runname, msg=False, query=False):
 				count+=1
 				particlesq.insert()
 	if msg is True:
-		apDisplay.printMsg("inserted "+str(count)+" of "+str(len(peaktree))+" peaks into database"
+		LOGGER.info("inserted "+str(count)+" of "+str(len(peaktree))+" peaks into database"
 			+" in "+apDisplay.timeString(time.time()-t0))
 	return
 
@@ -306,7 +310,7 @@ def fastInsertParticlePeaks(peaktree, imgdata, runname, msg=False):
 	selectionruns=runq.query(results=1)
 
 	if not selectionruns:
-		apDisplay.printError("could not find selection run in database")
+		LOGGER.error("could not find selection run in database")
 
 	mysql_string = """INSERT INTO `ApParticleData` (`xcoord`, `ycoord`, `diameter`, `peakarea`,`REF|leginondata|AcquisitionImageData|image`, `REF|ApSelectionRunData|selectionrun`) VALUES (%s, %s, %s, %s, %s, %s)"""
 	values_list = []
@@ -323,7 +327,7 @@ def fastInsertParticlePeaks(peaktree, imgdata, runname, msg=False):
 	cursor.close()
 	count = len(values_list)    
 	if msg is True:
-		apDisplay.printMsg("inserted "+str(count)+" of "+str(len(peaktree))+" peaks into database"
+		LOGGER.info("inserted "+str(count)+" of "+str(len(peaktree))+" peaks into database"
 			+" in "+apDisplay.timeString(time.time()-t0))
 	return
 

@@ -15,8 +15,10 @@ from appionlib import apFile
 from appionlib import pymagic
 import numpy
 from pyami import mrc, mem
-import pyami.quietscipy
 from scipy import ndimage
+import logging
+
+LOGGER=logging.getLogger(__name__)
 
 ####
 # This is a low-level file with NO database connections
@@ -60,7 +62,7 @@ def numberStackFile(oldheadfile, startnum=0, msg=True):
 		http://www.imagescience.de/formats/formats.htm
 	"""
 	if msg is True:
-		apDisplay.printMsg("saving particle numbers to stack header")
+		LOGGER.info("saving particle numbers to stack header")
 	t0 = time.time()
 	newheadfile = (os.path.splitext(oldheadfile)[0]+"-temp.hed")
 
@@ -102,11 +104,11 @@ def numberStackFile(oldheadfile, startnum=0, msg=True):
 		nf.write(headerstr)
 		i += 1
 	if not os.path.isfile(newheadfile):
-		apDisplay.printError("failed to number particles in stack file")
+		LOGGER.error("failed to number particles in stack file")
 	apFile.removeFile(oldheadfile)
 	shutil.move(newheadfile, oldheadfile)
 	if msg is True:
-		apDisplay.printMsg("completed %d particles in %s"%(numimg, apDisplay.timeString(time.time()-t0)))
+		LOGGER.info("completed %d particles in %s"%(numimg, apDisplay.timeString(time.time()-t0)))
 	return True
 
 #===============
@@ -118,7 +120,7 @@ def getPartSegmentLimit(filename):
 	maxnumpart = int(math.floor(bytelimit / partbytes))
 	maxnumpart = 2 ** int(math.log(maxnumpart)/math.log(2))
 	if maxnumpart < 1:
-		apDisplay.printError("Single image in the stack exceeds %d byte.  This can not be processed. Please bin it down first." % bytelimit)
+		LOGGER.error("Single image in the stack exceeds %d byte.  This can not be processed. Please bin it down first." % bytelimit)
 	return maxnumpart
 
 #===============
@@ -131,13 +133,13 @@ def readImagic(filename, first=1, last=None, msg=True):
 	"""
 	t0 = time.time()
 	if first < 1:
-		apDisplay.printError("particle numbering starts at 1")
+		LOGGER.error("particle numbering starts at 1")
 	if last is not None and first > last:
-		apDisplay.printError("requested first particle %d is greater than last particle %d"%(first,last))
+		LOGGER.error("requested first particle %d is greater than last particle %d"%(first,last))
 	if msg is True:
-		apDisplay.printMsg("reading stack from disk into memory: "+os.path.basename(filename))
+		LOGGER.info("reading stack from disk into memory: "+os.path.basename(filename))
 		if last is not None:
-			apDisplay.printMsg("particles %d through %d"%(first, last))
+			LOGGER.info("particles %d through %d"%(first, last))
 	root=os.path.splitext(filename)[0]
 	headerfilename=root + ".hed"
 	datafilename=root + ".img"
@@ -146,7 +148,7 @@ def readImagic(filename, first=1, last=None, msg=True):
 	### it takes double memory on machine to read stack
 	filesize = apFile.fileSize(datafilename)
 	if first is None and last is None and filesize > bytelimit:
-		apDisplay.printError("Stack is too large to read %s into %s "%(apDisplay.bytes(filesize), apDisplay.bytes(bytelimit)))
+		LOGGER.error("Stack is too large to read %s into %s "%(apDisplay.bytes(filesize), apDisplay.bytes(bytelimit)))
 
 	### read stack header
 
@@ -157,13 +159,13 @@ def readImagic(filename, first=1, last=None, msg=True):
 	if last is None:
 		last = headerdict['nimg']
 	elif last > headerdict['nimg']:
-		apDisplay.printWarning("requested particle %d from stack of length %d"%(last, headerdict['nimg']))
+		LOGGER.warning("requested particle %d from stack of length %d"%(last, headerdict['nimg']))
 		last = headerdict['nimg']
 	numpart = last - first + 1
 	if partbytes*numpart > filesize:
-		apDisplay.printError("requested particle %d from stack of length %d"%(last, filesize/partbytes))
+		LOGGER.error("requested particle %d from stack of length %d"%(last, filesize/partbytes))
 	if partbytes*numpart > bytelimit:
-		apDisplay.printError("Stack is too large to read %d particles, requesting %s from %s limit"
+		LOGGER.error("Stack is too large to read %d particles, requesting %s from %s limit"
 			%(numpart, apDisplay.bytes(partbytes*numpart), apDisplay.bytes(bytelimit)))
 
 	### read stack images
@@ -171,8 +173,8 @@ def readImagic(filename, first=1, last=None, msg=True):
 	stack = {'header': headerdict, 'images': images}
 
 	if msg is True:
-		apDisplay.printMsg("read %d particles equaling %s in size"%(numpart, apDisplay.bytes(partbytes*numpart)))
-		apDisplay.printMsg("finished in "+apDisplay.timeString(time.time()-t0))
+		LOGGER.info("read %d particles equaling %s in size"%(numpart, apDisplay.bytes(partbytes*numpart)))
+		LOGGER.info("finished in "+apDisplay.timeString(time.time()-t0))
 
 	return stack
 
@@ -195,9 +197,9 @@ def readImagicHeader(headerfilename):
 	numimg1 = imgnum+imgfollow
 	numimg2 = int('%d' % (os.stat(headerfilename)[6]/1024))
 	if numimg1 != numimg2 and imgnum!=0:
-		apDisplay.printWarning("Number of particles from header (%d) does not match the data (%d)"
+		LOGGER.warning("Number of particles from header (%d) does not match the data (%d)"
 			%(numimg1, numimg2))
-		#apDisplay.printWarning("Sadly, this is fairly common, so I will use the number from the data")
+		#LOGGER.warning("Sadly, this is fairly common, so I will use the number from the data")
 	header['nimg'] = numimg2
 	header['npix']=i[11]
 	header['lines']=i[12]
@@ -260,7 +262,7 @@ def readImagicData(datafilename, headerdict, firstpart=1, numpart=1):
 	except:
 		mult = numpart*headerdict['rows']*headerdict['lines']
 		print mult, shape, rawarray.shape, numpart, headerdict['nimg'], headerdict['rows'], headerdict['lines']
-		apDisplay.printError("could not read image stack")
+		LOGGER.error("could not read image stack")
 	return images
 
 #===============
@@ -281,13 +283,13 @@ def writeImagic(array, filename, msg=True):
 		none
 	"""
 	if len(array) == 0:
-		apDisplay.printWarning("writeImagic: no particles to write")
+		LOGGER.warning("writeImagic: no particles to write")
 		return
 
 	boxsize2d = array[0].shape
 	for part in array:
 		if part.shape != boxsize2d:
-			apDisplay.printError("your particles have different boxsizes: "
+			LOGGER.error("your particles have different boxsizes: "
 				+str(part.shape)+" and "+str(boxsize2d.shape))
 
 	#this is required, IMAGIC only support 32bit
@@ -299,12 +301,12 @@ def writeImagic(array, filename, msg=True):
 
 	t0 = time.time()
 	if msg is True:
-		apDisplay.printMsg("writing stack to disk from memory: "+filename)
+		LOGGER.info("writing stack to disk from memory: "+filename)
 	root=os.path.splitext(filename)[0]
 	headerfilename = root+".hed"
 	datafilename   = root+".img"
 	if os.path.isfile(headerfilename) or os.path.isfile(datafilename):
-		apDisplay.printWarning("stack files '"+headerfilename+"' already exist")
+		LOGGER.warning("stack files '"+headerfilename+"' already exist")
 
 	### write header file info, and dump images to image file
 	i = 0
@@ -323,10 +325,10 @@ def writeImagic(array, filename, msg=True):
 	headfile.close()
 	datafile.close()
 	if partnum < 1:
-		apDisplay.printWarning("did not write any particles to file")
+		LOGGER.warning("did not write any particles to file")
 	if msg is True:
-		apDisplay.printMsg("wrote "+str(partnum)+" particles to header file")
-		apDisplay.printMsg("finished in "+apDisplay.timeString(time.time()-t0))
+		LOGGER.info("wrote "+str(partnum)+" particles to header file")
+		LOGGER.info("finished in "+apDisplay.timeString(time.time()-t0))
 	return
 
 #=========================
@@ -414,7 +416,7 @@ def intToFourByte(intnum):
 	fourbyte = numpy.array((intnum), dtype=numpy.int32).tostring()
 	return fourbyte
 	if abs(intnum) > 2130706432:
-		apDisplay.printError("integer overflow")
+		LOGGER.error("integer overflow")
 	usenum = intnum
 	f1 = chr(usenum%256)
 	usenum /= 256
@@ -489,27 +491,27 @@ def readSingleParticleFromStack(filename, partnum=1, boxsize=None, msg=True):
 	"""
 	t0 = time.time()
 	if partnum < 1:
-		apDisplay.printError("particle numbering starts at 1")
+		LOGGER.error("particle numbering starts at 1")
 
 	root=os.path.splitext(filename)[0]
 	headerfilename=root + ".hed"
 	datafilename=root + ".img"
 
 	if msg is True:
-		apDisplay.printMsg("reading particle %d from stack %s into memory"%(partnum, os.path.basename(filename)))
+		LOGGER.info("reading particle %d from stack %s into memory"%(partnum, os.path.basename(filename)))
 
 	### determine boxsize
 	if boxsize is None:
 		headerdict = readImagicHeader(headerfilename)
 		boxsize = headerdict['rows']
 		if partnum > headerdict['nimg']:
-			apDisplay.printError("requested particle %d from stack of length %d"%(partnum, headerdict['nimg']))
+			LOGGER.error("requested particle %d from stack of length %d"%(partnum, headerdict['nimg']))
 	filesize = apFile.fileSize(datafilename)
 
 	### calculate number of bytes per particle
 	partbytes = boxsize**2*4
 	if partbytes*partnum > filesize:
-		apDisplay.printError("requested particle %d from stack of length %d"%(partnum, filesize/partbytes))
+		LOGGER.error("requested particle %d from stack of length %d"%(partnum, filesize/partbytes))
 
 	### open file
 	f = open(datafilename, 'rb')
@@ -529,7 +531,7 @@ def readSingleParticleFromStack(filename, partnum=1, boxsize=None, msg=True):
 	except:
 		print partimg
 		print boxsize, boxsize*boxsize, partimg.shape
-		apDisplay.printError("could not read particle from stack")
+		LOGGER.error("could not read particle from stack")
 
 	### FIXME: flip data to be consistent with write function
 	partimg = numpy.fliplr(partimg)
@@ -570,11 +572,11 @@ def appendParticleListToStackFile(partlist, mergestackfile, msg=True):
 	finalsize = apFile.fileSize(mergedatafile)
 	addsize = len(part32bit.tostring() * len(partlist))
 	if finalsize != addsize + premergesize:
-		apDisplay.printError("size mismatch %s vs. %s + %s = %s"%(
+		LOGGER.error("size mismatch %s vs. %s + %s = %s"%(
 			apDisplay.bytes(finalsize), apDisplay.bytes(addsize),
 			apDisplay.bytes(premergesize), apDisplay.bytes(premergesize+addsize)))
 	elif msg is True:
-		apDisplay.printMsg("size match %s vs. %s + %s = %s"%(
+		LOGGER.info("size match %s vs. %s + %s = %s"%(
 			apDisplay.bytes(finalsize), apDisplay.bytes(addsize),
 			apDisplay.bytes(premergesize), apDisplay.bytes(premergesize+addsize)))
 
@@ -593,10 +595,10 @@ def appendParticleListToStackFile(partlist, mergestackfile, msg=True):
 	finalnumpart = apFile.numImagesInStack(mergeheaderfile)
 	addpart = len(partlist)
 	if finalnumpart != addpart + premergenumpart:
-		apDisplay.printError("size mismatch %d vs. %d + %d = %d"
+		LOGGER.error("size mismatch %d vs. %d + %d = %d"
 			%(finalnumpart, addpart, premergenumpart, addpart+premergenumpart))
 	elif msg is True:
-		apDisplay.printMsg("size match %d vs. %d + %d = %d"
+		LOGGER.info("size match %d vs. %d + %d = %d"
 			%(finalnumpart, addpart, premergenumpart, addpart+premergenumpart))
 	return True
 
@@ -629,7 +631,7 @@ def appendStackFileToStackFile(stackfile, mergestackfile, msg=True):
 
 	finalsize = apFile.fileSize(mergedatafile)
 	if finalsize != addsize + premergesize:
-		apDisplay.printError("size mismatch %s vs. %s + %s = %s"%(
+		LOGGER.error("size mismatch %s vs. %s + %s = %s"%(
 			apDisplay.bytes(finalsize), apDisplay.bytes(addsize),
 			apDisplay.bytes(premergesize), apDisplay.bytes(premergesize+addsize)))
 
@@ -643,7 +645,7 @@ def appendStackFileToStackFile(stackfile, mergestackfile, msg=True):
 	numberStackFile(mergeheaderfile, msg=msg)
 	finalnumpart = apFile.numImagesInStack(mergeheaderfile)
 	if finalnumpart != addnumpart + premergenumpart:
-		apDisplay.printError("size mismatch %d vs. %d + %d = %d"
+		LOGGER.error("size mismatch %d vs. %d + %d = %d"
 			%(finalnumpart, addnumpart, premergenumpart, addnumpart + premergenumpart))
 
 
@@ -666,7 +668,7 @@ def mergeStacks(stacklist, mergestack, msg=True):
 		npart = apFile.numImagesInStack(stackdatafile)
 		size = apFile.fileSize(stackdatafile)
 		if msg is True:
-			apDisplay.printMsg("%d particles in %s (%s)"%(npart, stackdatafile, apDisplay.bytes(size)))
+			LOGGER.info("%d particles in %s (%s)"%(npart, stackdatafile, apDisplay.bytes(size)))
 		totalsize += size
 		numpart += npart
 
@@ -675,17 +677,17 @@ def mergeStacks(stacklist, mergestack, msg=True):
 		fin.close()
 	fout.close()
 	if numpart < 1:
-		apDisplay.printError("found %d particles"%(numpart))
+		LOGGER.error("found %d particles"%(numpart))
 	if msg is True:
-		apDisplay.printMsg("found %d particles"%(numpart))
+		LOGGER.info("found %d particles"%(numpart))
 	finalsize = apFile.fileSize(mergedata)
 	if finalsize != totalsize:
-		apDisplay.printError("size mismatch %s vs. %s"%(apDisplay.bytes(finalsize), apDisplay.bytes(totalsize)))
+		LOGGER.error("size mismatch %s vs. %s"%(apDisplay.bytes(finalsize), apDisplay.bytes(totalsize)))
 	if msg is True:
-		apDisplay.printMsg("size match %s vs. %s"%(apDisplay.bytes(finalsize), apDisplay.bytes(totalsize)))
+		LOGGER.info("size match %s vs. %s"%(apDisplay.bytes(finalsize), apDisplay.bytes(totalsize)))
 
 	### merge header files
-	#apDisplay.printError("not finished")
+	#LOGGER.error("not finished")
 	mergehead = open(mergeheader, 'wb')
 	partnum = 1
 	totalsize = 0
@@ -695,10 +697,10 @@ def mergeStacks(stacklist, mergestack, msg=True):
 		### size checks
 		size = apFile.fileSize(headerfilename)
 		if msg is True:
-			apDisplay.printMsg("%s (%d kB)"%(headerfilename, size/1024))
+			LOGGER.info("%s (%d kB)"%(headerfilename, size/1024))
 		totalsize += size
 
-		#apDisplay.printMsg("%d\t%s"%(npart, stackfile))
+		#LOGGER.info("%d\t%s"%(npart, stackfile))
 		i = 0
 		npart = apFile.numImagesInStack(stackfile)
 		while i < npart:
@@ -736,15 +738,15 @@ def mergeStacks(stacklist, mergestack, msg=True):
 			i += 1
 	mergehead.close()
 	if msg is True:
-		apDisplay.printMsg("wrote %d particles to file %s"%(numpart, mergestack))
+		LOGGER.info("wrote %d particles to file %s"%(numpart, mergestack))
 	finalsize = apFile.fileSize(mergeheader)
 	if finalsize != totalsize:
-		apDisplay.printError("size mismatch %s vs. %s"
+		LOGGER.error("size mismatch %s vs. %s"
 			%(apDisplay.bytes(finalsize), apDisplay.bytes(totalsize)))
 	if msg is True:
-		apDisplay.printMsg("size match %s vs. %s"
+		LOGGER.info("size match %s vs. %s"
 			%(apDisplay.bytes(finalsize), apDisplay.bytes(totalsize)))
-		apDisplay.printMsg("finished stack merge of %s in %s"
+		LOGGER.info("finished stack merge of %s in %s"
 			%(mergestack, apDisplay.timeString(time.time()-t0)))
 
 #===============
@@ -803,11 +805,11 @@ def setImagic4DHeader(oldhedfile,machineonly=False):
 	of.close()
 	nf.close()
 	if not os.path.isfile(newhedfile):
-		apDisplay.printError("failed to imagic header in file %s"%oldhedfile)
+		LOGGER.error("failed to imagic header in file %s"%oldhedfile)
 	oldsize = apFile.fileSize(oldhedfile)
 	newsize = apFile.fileSize(newhedfile)
 	if oldsize != newsize:
-		apDisplay.printError("failed to imagic header in file %s"%oldhedfile)
+		LOGGER.error("failed to imagic header in file %s"%oldhedfile)
 	shutil.move(newhedfile, oldhedfile)
 	return
 
@@ -825,7 +827,7 @@ def readParticleListFromStack(filename, partlist, boxsize=None, msg=True):
 	firstpartnum = partlist[0]
 	lastpartnum = partlist[len(partlist)-1]
 	if firstpartnum < 1:
-		apDisplay.printError("particle numbering starts at 1")
+		LOGGER.error("particle numbering starts at 1")
 
 	root=os.path.splitext(filename)[0]
 	headerfilename=root + ".hed"
@@ -836,14 +838,14 @@ def readParticleListFromStack(filename, partlist, boxsize=None, msg=True):
 		headerdict = readImagicHeader(headerfilename)
 		boxsize = headerdict['rows']
 		if lastpartnum > headerdict['nimg']:
-			apDisplay.printError("requested particle %d from stack %s of length %d"
+			LOGGER.error("requested particle %d from stack %s of length %d"
 				%(lastpartnum, os.path.basename(datafilename), headerdict['nimg']))
 	filesize = apFile.fileSize(datafilename)
 
 	### calculate number of bytes per particle
 	partbytes = boxsize**2*4
 	if partbytes*lastpartnum > filesize:
-		apDisplay.printError("requested particle %d from stack %s of length %d"
+		LOGGER.error("requested particle %d from stack %s of length %d"
 			%(lastpartnum, os.path.basename(datafilename), filesize/partbytes))
 
 	### open file
@@ -853,7 +855,7 @@ def readParticleListFromStack(filename, partlist, boxsize=None, msg=True):
 	unames=os.uname()
 	for partnum in partlist:
 		if msg is True:
-			apDisplay.printMsg("reading particle %d from stack %s into memory"
+			LOGGER.info("reading particle %d from stack %s into memory"
 				%(partnum, os.path.basename(datafilename)))
 
 		seekpos = partbytes*(partnum-prevpartnum-1)
@@ -882,7 +884,7 @@ def readParticleListFromStack(filename, partlist, boxsize=None, msg=True):
 		except:
 			print partimg
 			print boxsize, boxsize*boxsize, partimg.shape
-			apDisplay.printError("could not read particle from stack")
+			LOGGER.error("could not read particle from stack")
 		partdatalist.append(partimg)
 	f.close()
 	return partdatalist
@@ -904,13 +906,13 @@ class processStack(object):
 	#===============
 	def message(self, msg):
 		if self.msg is True:
-			apDisplay.printMsg("processStack1: "+msg)
+			LOGGER.info("processStack1: "+msg)
 
 	#===============
 	def initValues(self, stackfile, numrequest=None):
 		### check for stack
 		if not os.path.isfile(stackfile):
-			apDisplay.printError("stackfile does not exist: "+stackfile)
+			LOGGER.error("stackfile does not exist: "+stackfile)
 		### amount of free memory on machine (converted to bytes)
 		self.freememory = mem.free()*1024
 		self.message("Free memory: %s"%(apDisplay.bytes(self.freememory)))
@@ -986,7 +988,7 @@ class processStack(object):
 
 			### check for proper implementation
 			if self.index == 0:
-				apDisplay.printError("No particles were processed in stack loop")
+				LOGGER.error("No particles were processed in stack loop")
 
 			### setup for next iteration
 			first = last+1
@@ -998,7 +1000,7 @@ class processStack(object):
 		### check for off-one reading errors
 		if self.index < self.numpart-1:
 			print "INDEX %d -- NUMPART %d"%(self.index, self.numpart)
-			apDisplay.printError("Did not properly process all particles")
+			LOGGER.error("Did not properly process all particles")
 
 		### custom post-loop command
 		self.postLoop()
@@ -1102,7 +1104,7 @@ def splitStackEvenOdd(stackfile, rundir=None, msg=False):
 	oddfile = splitClass.wrtieOddParticles(stackfile, oddfile)
 	evenfile = splitClass.wrtieEvenParticles(stackfile, evenfile)
 	if msg is True:
-		apDisplay.printMsg("Created even/odd split stacks %s and %s from original stack %s"
+		LOGGER.info("Created even/odd split stacks %s and %s from original stack %s"
 			%(oddfile, evenfile, stackfile))
 	return oddfile, evenfile
 

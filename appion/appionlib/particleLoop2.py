@@ -25,7 +25,7 @@ class ParticleLoop(filterLoop.FilterLoop):
 		"""
 		this function MUST return the parameters to insert into the DB
 		"""
-		apDisplay.printError("you did not create a 'getParticleParamsData' function in your script")
+		self.logger.error("you did not create a 'getParticleParamsData' function in your script")
 		raise NotImplementedError()
 
 	########################################################################
@@ -35,7 +35,7 @@ class ParticleLoop(filterLoop.FilterLoop):
 		"""
 		put in any additional parser options
 		"""
-		apDisplay.printError("you did not create a 'setupParserOptions' function in your script")
+		self.logger.error("you did not create a 'setupParserOptions' function in your script")
 		raise NotImplementedError()
 
 	#=====================
@@ -43,7 +43,7 @@ class ParticleLoop(filterLoop.FilterLoop):
 		"""
 		put in any additional conflicting parameters
 		"""
-		apDisplay.printError("you did not create a 'checkConflicts' function in your script")
+		self.logger.error("you did not create a 'checkConflicts' function in your script")
 		raise NotImplementedError()
 
 	#=====================
@@ -62,7 +62,7 @@ class ParticleLoop(filterLoop.FilterLoop):
 			imgdata, sinedon dictionary with image info
 			filtarray, filtered array ready for processing
 		"""
-		apDisplay.printError("you did not create a 'processImage' function in your script")
+		self.logger.error("you did not create a 'processImage' function in your script")
 		raise NotImplementedError()
 
 	#=====================
@@ -101,7 +101,7 @@ class ParticleLoop(filterLoop.FilterLoop):
 		self.peaktree = filterLoop.FilterLoop.loopProcessImage(self, imgdata)
 
 		if self.params['background'] is False:
-			apDisplay.printMsg("Found "+str(len(self.peaktree))+" particles for "
+			self.logger.info("Found "+str(len(self.peaktree))+" particles for "
 				+apDisplay.shortenImageName(imgdata['filename']))
 		self.stats['lastpeaks'] = len(self.peaktree)
 
@@ -111,7 +111,7 @@ class ParticleLoop(filterLoop.FilterLoop):
 			else:
 				apPeaks.createPeakJpeg(imgdata, self.peaktree, self.params, self.filtarray)
 		elif self.params['background'] is False:
-			apDisplay.printWarning("Skipping JPEG creation")
+			self.logger.warning("Skipping JPEG creation")
 
 		if self.params['defocpair'] is True:
 			self.sibling, self.shiftpeak = apDefocalPairs.getShiftFromImage(imgdata, self.params['sessionname'])
@@ -182,11 +182,11 @@ class ParticleLoop(filterLoop.FilterLoop):
 			elif isinstance(paramQuery, appiondata.ApTiltAlignParamsData):
 				paramData = rundatas[0]['tiltparams']
 			else:
-				apDisplay.printError("selection run does not have valid parameter data\n")
+				self.logger.error("selection run does not have valid parameter data\n")
 
 			#make sure all params are the same as previous session
 			if not paramData:
-				apDisplay.printError("No parameters\n")
+				self.logger.error("No parameters\n")
 			else:
 				for key in paramQuery:
 
@@ -195,11 +195,11 @@ class ParticleLoop(filterLoop.FilterLoop):
 							data_dbid=paramData[key].dbid
 							query_dbid=paramQuery[key].dbid
 							if data_dbid != query_dbid:
-								apDisplay.printWarning(str(key)+":"+str(paramQuery[key].dbid)+" not equal to "+str(paramData[key].dbid))
-								apDisplay.printError("All parameters for a picker run name must be identical\n")
+								self.logger.warning(str(key)+":"+str(paramQuery[key].dbid)+" not equal to "+str(paramData[key].dbid))
+								self.logger.error("All parameters for a picker run name must be identical\n")
 						except:
-							apDisplay.printWarning(str(key)+":"+str(paramQuery[key])+" not equal to "+str(paramData[key]))
-							apDisplay.printError("All parameters for a picker run name must be identical\n")
+							self.logger.warning(str(key)+":"+str(paramQuery[key])+" not equal to "+str(paramData[key]))
+							self.logger.error("All parameters for a picker run name must be identical\n")
 			#if I made it here all parameters are the same, so it isn't necessary to commit
 			return rundatas[0]
 
@@ -213,7 +213,7 @@ class ParticleLoop(filterLoop.FilterLoop):
 		elif isinstance(paramQuery, appiondata.ApTiltAlignParamsData):
 			runq['tiltparams']=paramQuery
 		else:
-			apDisplay.printError("self.getParticleParamsData() did not return valid parameter data\n")
+			self.logger.error("self.getParticleParamsData() did not return valid parameter data\n")
 
 		#create path
 		runq['path'] = appiondata.ApPathData(path=os.path.abspath(self.params['rundir']))
@@ -272,7 +272,7 @@ class ParticleLoop(filterLoop.FilterLoop):
 		filterLoop.FilterLoop.checkGlobalConflicts(self)
 
 		if self.params['diam'] is None or self.params['diam'] < 1:
-			apDisplay.printError("please input the diameter of your particle")
+			self.logger.error("please input the diameter of your particle")
 
 
 #=====================

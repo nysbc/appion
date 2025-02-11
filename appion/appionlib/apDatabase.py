@@ -1,11 +1,9 @@
 #Part of the new pyappion
 
 #pythonlib
-import sys
 import os
 import time
 import math
-import shutil
 #sinedon
 import sinedon
 import sinedon.data as data
@@ -15,7 +13,9 @@ import leginon.leginondata
 from appionlib import apDisplay
 from appionlib import appiondata
 from appionlib import apDefocalPairs
+import logging
 
+LOGGER=logging.getLogger(__name__)
 ####
 # This is a database connections file with no file functions
 # Please keep it this way
@@ -45,7 +45,7 @@ def getSpecificImagesFromDB(imglist, sessiondata=None, msg=True):
 			imgtree.append(imgres[0])
 		else:
 			print imgres
-			apDisplay.printWarning("Could not find image: "+imgname)
+			LOGGER.warning("Could not find image: "+imgname)
 	return imgtree
 
 #================
@@ -60,7 +60,7 @@ def getImagesFromDB(session, preset, msg=True):
 	"""
 	t0 = time.time()
 	if msg is True:
-		apDisplay.printMsg("Querying database for preset '"+preset+"' images from session '"+session+"' ... ")
+		LOGGER.info("Querying database for preset '"+preset+"' images from session '"+session+"' ... ")
 	if preset != 'manual':
 		sessionq = leginon.leginondata.SessionData(name=session)
 		sessiondata = sessionq.query(results=1)[0]
@@ -85,7 +85,7 @@ def getImagesFromDB(session, preset, msg=True):
 	#for img in imgtree:
 		#img.holdimages=False
 	if msg is True:
-		apDisplay.printMsg("%d images received in %s"%(len(imgtree), apDisplay.timeString(time.time()-t0)))
+		LOGGER.info("%d images received in %s"%(len(imgtree), apDisplay.timeString(time.time()-t0)))
 	return imgtree
 
 #================
@@ -93,7 +93,7 @@ def getAllImagesFromDB(session):
 	"""
 	returns list of image data based on session name
 	"""
-	apDisplay.printMsg("Querying database for all images from session '"+session+"' ... ")
+	LOGGER.info("Querying database for all images from session '"+session+"' ... ")
 	sessionq= leginon.leginondata.SessionData(name=session)
 	imgquery = leginon.leginondata.AcquisitionImageData()
 	imgquery['session'] = sessionq
@@ -106,7 +106,7 @@ def getImageDataFromSpecificImageId(imageid):
 	if imagedata:
 		return imagedata
 	else:
-		apDisplay.printWarning('Image (id=%d) does not exist' % (imageid))
+		LOGGER.warning('Image (id=%d) does not exist' % (imageid))
 		return None
 
 #================
@@ -116,14 +116,14 @@ def getRefImageDataFromSpecificImageId(reftype,imageid):
 		if imagedata:
 			return imagedata[reftype]
 		else:
-			apDisplay.printError('Image (id=%d) to retrieve reference image does not exist' % (imageid))
+			LOGGER.error('Image (id=%d) to retrieve reference image does not exist' % (imageid))
 
 #================
 def getAllTiltSeriesFromSessionName(sessionname):
 	"""
 	returns list of image data based on session name
 	"""
-	apDisplay.printMsg("Querying database for all tilt series from session '"+sessionname+"' ... ")
+	LOGGER.info("Querying database for all tilt series from session '"+sessionname+"' ... ")
 	sessionq= leginon.leginondata.SessionData(name=sessionname)
 	seriesquery = leginon.leginondata.TiltSeriesData()
 	seriesquery['session'] = sessionq
@@ -132,18 +132,18 @@ def getAllTiltSeriesFromSessionName(sessionname):
 
 #================
 def getExpIdFromSessionName(sessionname):
-	apDisplay.printMsg("Looking up session, "+sessionname)
+	LOGGER.info("Looking up session, "+sessionname)
 	sessionq = leginon.leginondata.SessionData(name=sessionname)
 	sessioninfo = sessionq.query(readimages=False, results=1)
 	if sessioninfo:
 		return sessioninfo[0].dbid
 	else:
-		apDisplay.printError("could not find session, "+sessionname)
+		LOGGER.error("could not find session, "+sessionname)
 
 #================
 def getSessionDataFromSessionId(sessionid):
 	sessionid = int(sessionid)
-	apDisplay.printMsg("Looking up session, %d" % sessionid)
+	LOGGER.info("Looking up session, %d" % sessionid)
 	sessionq = leginon.leginondata.SessionData()
 	sessioninfo = sessionq.direct_query(sessionid)
 	return sessioninfo
@@ -151,24 +151,24 @@ def getSessionDataFromSessionId(sessionid):
 #================
 def getSessionDataFromSessionName(sessionname, msg=True):
 	if msg is True:
-		apDisplay.printMsg("Looking up session, "+sessionname)
+		LOGGER.info("Looking up session, "+sessionname)
 	sessionq = leginon.leginondata.SessionData(name=sessionname)
 	sessioninfo = sessionq.query(readimages=False, results=1)
 	if sessioninfo:
 		return sessioninfo[0]
 	else:
-		apDisplay.printWarning("could not find session, "+sessionname)
+		LOGGER.warning("could not find session, "+sessionname)
 		return None
 
 #================
 def getTiltSeriesDataFromTiltNumAndSessionId(tiltseries,sessiondata):
-	apDisplay.printMsg("Looking up session first, "+ str(sessiondata.dbid));
+	LOGGER.info("Looking up session first, "+ str(sessiondata.dbid));
 	tiltseriesq = leginon.leginondata.TiltSeriesData(session=sessiondata,number=tiltseries)
 	tiltseriesdata = tiltseriesq.query(readimages=False,results=1)
 	if tiltseriesdata:
 		return tiltseriesdata[0]
 	else:
-		apDisplay.printError("could not find tilt series, "+str(tiltseries))
+		LOGGER.error("could not find tilt series, "+str(tiltseries))
 
 
 #================
@@ -181,7 +181,7 @@ def getPredictionDataForImage(imagedata):
 #================
 def getImagesFromTiltSeries(tiltseriesdata,printMsg=True):
 	if printMsg:
-		apDisplay.printMsg("Looking up images for tilt series %d" % tiltseriesdata['number']);
+		LOGGER.info("Looking up images for tilt series %d" % tiltseriesdata['number']);
 	q = leginon.leginondata.AcquisitionImageData()
 	q['tilt series'] = tiltseriesdata
 	results = q.query()
@@ -190,7 +190,7 @@ def getImagesFromTiltSeries(tiltseriesdata,printMsg=True):
 		if imagedata['label'] != 'projection':
 			realist.append(imagedata)
 	if printMsg:
-		apDisplay.printMsg("found %d images" % len(realist))
+		LOGGER.info("found %d images" % len(realist))
 	return realist
 
 #================
@@ -204,7 +204,7 @@ def getImageData(imgname):
 		#imgtree[0].holdimages=False
 		return imgtree[0]
 	else:
-		apDisplay.printError("Image "+imgname+" not found in database\n")
+		LOGGER.error("Image "+imgname+" not found in database\n")
 
 #================
 def getImgDir(sessionname):
@@ -223,7 +223,7 @@ def getSessionName(imgname):
 	if 'session' in imgtree[0]:
 		return imgtree[0]['session']['name']
 	else:
-		apDisplay.printError("Image "+imgname+" not found in database\n")
+		LOGGER.error("Image "+imgname+" not found in database\n")
 
 #================
 def getFrameImageCameraState(sessiondata):
@@ -277,7 +277,7 @@ def getPixelSize(imgdata):
 	pixelsizedatas = pixelsizeq.query()
 
 	if len(pixelsizedatas) == 0:
-		apDisplay.printError("No pixelsize information was found image %s\n\twith mag %d, tem id %d, ccdcamera id %d"
+		LOGGER.error("No pixelsize information was found image %s\n\twith mag %d, tem id %d, ccdcamera id %d"
 			%(imgdata['filename'], imgdata['scope']['magnification'],
 			imgdata['scope']['tem'].dbid, imgdata['camera']['ccdcamera'].dbid)
 		)
@@ -292,7 +292,7 @@ def getPixelSize(imgdata):
 		if pixelsizedata.timestamp < oldestpixelsizedata.timestamp:
 			oldestpixelsizedata = pixelsizedata
 	if pixelsizedata.timestamp > imgdata.timestamp:
-		apDisplay.printWarning("There is no pixel size calibration data for this image, using oldest value")
+		LOGGER.warning("There is no pixel size calibration data for this image, using oldest value")
 		pixelsizedata = oldestpixelsizedata
 	binning = imgdata['camera']['binning']['x']
 	pixelsize = pixelsizedata['pixelsize'] * binning
@@ -311,7 +311,7 @@ def getImgSize(imgdict):
 		size=int(imagedata[0]['camera']['dimension']['y'])
 		return(size)
 	else:
-		apDisplay.printError("Image "+fname+" not found in database\n")
+		LOGGER.error("Image "+fname+" not found in database\n")
 	return(size)
 
 #================
@@ -323,7 +323,7 @@ def getImgSizeFromName(imgname):
 		size=int(imagedata[0]['camera']['dimension']['y'])
 		return(size)
 	else:
-		apDisplay.printError("Image "+imgname+" not found in database\n")
+		LOGGER.error("Image "+imgname+" not found in database\n")
 	return(size)
 
 #================
@@ -347,7 +347,7 @@ def insertImgAssessmentStatus(imgdata, runname="run1", assessment=None, msg=True
 		assessquery['selectionkeep'] = assessment
 		assessquery.insert()
 	else:
-		apDisplay.printWarning("No image assessment made, invalid data: "+str(assessment))
+		LOGGER.warning("No image assessment made, invalid data: "+str(assessment))
 
 
 	#check assessment
@@ -360,7 +360,7 @@ def insertImgAssessmentStatus(imgdata, runname="run1", assessment=None, msg=True
 			astr = apDisplay.colorString("reject", "red")
 		elif finalassess is None:
 			astr = apDisplay.colorString("none", "yellow")
-		apDisplay.printMsg("Final image assessment: "+astr+" ("+imgname+")")
+		LOGGER.info("Final image assessment: "+astr+" ("+imgname+")")
 
 	return True
 
@@ -557,7 +557,7 @@ def setImgViewerStatus(imgdata, status=None, msg=True):
 			+ (" WHERE `REF|AcquisitionImageData|image`=%d" % (imgdata.dbid,)))
 		db.execute(q)
 	elif currentstatus is True and statusVal is None:
-		apDisplay.printWarning('Currently not handle status change from EXEMPLAR to DEFAULT')
+		LOGGER.warning('Currently not handle status change from EXEMPLAR to DEFAULT')
 
 	#check assessment
 	if msg is True:
@@ -569,7 +569,7 @@ def setImgViewerStatus(imgdata, status=None, msg=True):
 			astr = apDisplay.colorString("hidden", "red")
 		elif finalassess is None:
 			astr = apDisplay.colorString("none", "yellow")
-		apDisplay.printMsg("Final image assessment: "+astr+" ("+imgname+")")
+		LOGGER.info("Final image assessment: "+astr+" ("+imgname+")")
 
 	return
 
@@ -595,7 +595,7 @@ def getDoseFromSessionPresetNames(sessionname, presetname):
 	presetdata = leginon.leginondata.PresetData(name=presetname,session=sessiondata).query(results=1)[0]
 	dose = presetdata['dose']
 	if not dose:
-		raise apDisplay.printError("dose not available for %s session and preset %s" % (sessionname,presetname))
+		raise LOGGER.error("dose not available for %s session and preset %s" % (sessionname,presetname))
 	return dose / 1e20
 
 #================
@@ -606,7 +606,7 @@ def getDoseFromImageData(imgdata):
 		return dose / 1e20
 	except:
 		# fails either because no preset or no dose
-		apDisplay.printWarning("dose not available for this image")
+		LOGGER.warning("dose not available for this image")
 		return None
 
 #================
