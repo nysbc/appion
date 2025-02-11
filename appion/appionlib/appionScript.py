@@ -10,10 +10,10 @@ import time
 import subprocess
 import glob
 from optparse import OptionParser
+import logging
 #appion
 from appionlib import basicScript
 from appionlib import apParam
-from appionlib import apDisplay
 from appionlib import apProject
 from appionlib import apDatabase
 from appionlib import appiondata
@@ -34,6 +34,7 @@ class AppionScript(basicScript.BasicScript):
 		"""
 		Starts a new function and gets all the parameters
 		"""
+		self.logger=logging.getLogger(__name__)
 		self.lockfile=None
 		### setup some expected values
 		self.successful_run = False
@@ -48,20 +49,20 @@ class AppionScript(basicScript.BasicScript):
 		self.timestamp = apParam.makeTimestamp()
 		self.argdict = {}
 		self.optdict = {}
-		apDisplay.printMsg("Time stamp: "+self.timestamp)
+		self.logger.info("Time stamp: "+self.timestamp)
 		self.functionname = apParam.getFunctionName(sys.argv[0])
-		apDisplay.printMsg("Function name: "+self.functionname)
+		self.logger.info("Function name: "+self.functionname)
 		self.appiondir = apParam.getAppionDirectory()
-		apDisplay.printMsg("Appion directory: "+self.appiondir)
+		self.logger.info("Appion directory: "+self.appiondir)
 		hostname = apParam.getHostname()
-		apDisplay.printMsg("Processing hostname: "+hostname)
+		self.logger.info("Processing hostname: "+hostname)
 		self.parsePythonPath()
 # 		loadavg = os.getloadavg()[0]
 # 		if loadavg > 2.0:
-# 			apDisplay.printMsg("Load average is high "+str(round(loadavg,2)))
+# 			self.logger.info("Load average is high "+str(round(loadavg,2)))
 # 			loadsquared = loadavg*loadavg
 # 			time.sleep(loadavg)
-# 			apDisplay.printMsg("New load average "+str(round(os.getloadavg()[0],2)))
+# 			self.logger.info("New load average "+str(round(os.getloadavg()[0],2)))
 		self.setLockname('lock')
 
 		### setup default parser: run directory, etc.
@@ -71,17 +72,17 @@ class AppionScript(basicScript.BasicScript):
 
 		### setup correct database after we have read the project id
 		if 'projectid' in self.params and self.params['projectid'] is not None:
-			apDisplay.printMsg("Using split database")
+			self.logger.info("Using split database")
 			# use a project database
 			newdbname = apProject.getAppionDBFromProjectId(self.params['projectid'])
 			sinedon.setConfig('appiondata', db=newdbname)
-			apDisplay.printColor("Connected to database: '"+newdbname+"'", "green")
+			self.logger.info("Connected to database: '"+newdbname+"'")
 
 		### check if user wants to print help message
 		if 'commit' in self.params and self.params['commit'] is True:
-			apDisplay.printMsg("Committing data to database")
+			self.logger.info("Committing data to database")
 		else:
-			apDisplay.printWarning("Not committing data to database")
+			self.logger.warning("Not committing data to database")
 
 		self.checkConflicts()
 		if useglobalparams is True:
@@ -215,7 +216,7 @@ class AppionScript(basicScript.BasicScript):
 			return clustdatas[0]
 		else:
 			### special case: more than one job with given path
-			apDisplay.printWarning("More than one cluster job has this path")
+			self.logger.warning("More than one cluster job has this path")
 			self.clusterjobdata = clustdatas[0]
 			return clustdatas[0]
 
@@ -225,7 +226,7 @@ class AppionScript(basicScript.BasicScript):
 		Using tables to track program run parameters in a generic fashion
 		inspired by Roberto Marabini and Carlos Oscar Sanchez Sorzano from the Xmipp team/Carazo lab
 		"""
-		apDisplay.printMsg("Uploading ScriptData....")
+		self.logger.info("Uploading ScriptData....")
 		prognameq = appiondata.ScriptProgramName()
 		prognameq['name'] = self.functionname
 
@@ -277,7 +278,7 @@ class AppionScript(basicScript.BasicScript):
 				progrunq['revision'] += "-"+version.getSubversionRevision(appiondir)
 		if not progrunq['revision']:
 			progrunq['revision'] = 'unknown'
-		apDisplay.printMsg("Running Appion version '%s'"%(progrunq['revision']))
+		self.logger.info("Running Appion version '%s'"%(progrunq['revision']))
 		progrunq['appion_path'] = appiondata.ApPathData(path=os.path.abspath(appiondir))
 
 		for paramname in self.params.keys():
@@ -301,14 +302,14 @@ class AppionScript(basicScript.BasicScript):
 		Set the run directory
 		"""
 		if self.params['rundir'] is None:
-			apDisplay.printWarning("run directory not defined, automatically setting it")
+			self.logger.warning("run directory not defined, automatically setting it")
 			self.setProcessingDirName()
 			self.setRunDir()
 			if self.params['rundir'] is None:
-				apDisplay.printError("No run directory was set")
+				self.logger.error("No run directory was set")
 
 		if self.quiet is False:
-			apDisplay.printMsg("Run directory: "+self.params['rundir'])
+			self.logger.info("Run directory: "+self.params['rundir'])
 
 		#if apDatabase.queryDirectory(self.params['rundir']):
 		#	self.preExistingDirectoryError()
@@ -350,7 +351,7 @@ class AppionScript(basicScript.BasicScript):
 	def close(self):
 		### run basic script closing functions
 		basicScript.BasicScript.close(self)
-		apDisplay.printMsg("Run directory:\n "+self.params['rundir'])
+		self.logger.info("Run directory:\n "+self.params['rundir'])
 		### additionally set to done is database
 		if self.params['commit'] is True:
 			clustdata = self.getClusterJobData()
@@ -405,12 +406,12 @@ class AppionScript(basicScript.BasicScript):
 		make sure the necessary parameters are set correctly
 		"""
 		if self.params['runname'] is None:
-			apDisplay.printError("enter a runname, e.g. --runname=run1")
+			self.logger.error("enter a runname, e.g. --runname=run1")
 		if self.params['projectid'] is None:
-			apDisplay.printError("enter a project id, e.g. --projectid=159")
+			self.logger.error("enter a project id, e.g. --projectid=159")
 		if self.maxnproc is not None and self.params['nproc'] is not None:
 			if self.params['nproc'] > self.maxnproc:
-				apDisplay.printWarning("You have specify --nproc=%d.\n  However,we know from experience larger "
+				self.logger.warning("You have specify --nproc=%d.\n  However,we know from experience larger "
 					+"than %d processors in this script can cause problem.\n  We have therefore changed "
 					+"--nproc to %d for you." % (self.params['nproc'],self.maxnproc,self.maxnproc))
 				self.params['nproc'] = self.maxnproc
@@ -421,7 +422,7 @@ class AppionScript(basicScript.BasicScript):
 
 	#=====================
 	def preExistingDirectoryError(self):
-		apDisplay.printWarning("Run directory already exists in the database")
+		self.logger.warning("Run directory already exists in the database")
 
 	#=====================
 	def setupParserOptions(self):
@@ -429,7 +430,7 @@ class AppionScript(basicScript.BasicScript):
 		set the input parameters
 		this function should be rewritten in each program
 		"""
-		apDisplay.printError("you did not create a 'setupParserOptions' function in your script")
+		self.logger.error("you did not create a 'setupParserOptions' function in your script")
 		self.parser.set_usage("Usage: %prog --commit --description='<text>' [options]")
 		self.parser.add_option("--stackid", dest="stackid", type="int",
 			help="ID for particle stack (optional)", metavar="INT")
@@ -439,11 +440,11 @@ class AppionScript(basicScript.BasicScript):
 		"""
 		make sure the necessary parameters are set correctly
 		"""
-		apDisplay.printError("you did not create a 'checkConflicts' function in your script")
+		self.logger.error("you did not create a 'checkConflicts' function in your script")
 		if self.params['runname'] is None:
-			apDisplay.printError("enter an unique run name, e.g. --runname=run1")
+			self.logger.error("enter an unique run name, e.g. --runname=run1")
 		if self.params['description'] is None:
-			apDisplay.printError("enter a description, e.g. --description='awesome data'")
+			self.logger.error("enter a description, e.g. --description='awesome data'")
 
 	#=====================
 	def setProcessingDirName(self):
@@ -500,9 +501,9 @@ class AppionScript(basicScript.BasicScript):
 
 	def runAppionScriptInSubprocess(self,cmd,logfilepath):
 		# Running another AppionScript as a subprocess
-		apDisplay.printMsg('running AppionScript:')
-		apDisplay.printMsg('------------------------------------------------')
-		apDisplay.printMsg(cmd)
+		self.logger.info('running AppionScript:')
+		self.logger.info('------------------------------------------------')
+		self.logger.info(cmd)
 		# stderr=subprocess.PIPE only works with shell=True with python 2.4.
 		# works on python 2.6.  Use shell=True now but shell=True does not
 		# work with path changed by appionwrapper.  It behaves as if the wrapper
@@ -517,15 +518,15 @@ class AppionScript(basicScript.BasicScript):
 			apParam.createDirectory(logdir)
 			file = open(logfilepath,'w')
 		except:
-			apDisplay.printError('Log file can not be created, process did not run.')
+			self.logger.error('Log file can not be created, process did not run.')
 		file.write(stdout_value)
 		file.close()
 		if proc.returncode > 0:
 			pieces = cmd.split(' ')
-			apDisplay.printWarning('AppionScript %s had an error. Please check its log file: \n%s' % (pieces[0].upper(),logfilepath))
+			self.logger.warning('AppionScript %s had an error. Please check its log file: \n%s' % (pieces[0].upper(),logfilepath))
 		else:
-			apDisplay.printMsg('AppionScript ran successfully')
-		apDisplay.printMsg('------------------------------------------------')
+			self.logger.info('AppionScript ran successfully')
+		self.logger.info('------------------------------------------------')
 		return proc.returncode
 
 	#=====================
@@ -557,7 +558,7 @@ class AppionScript(basicScript.BasicScript):
 
 	def unlockParallel(self,dbid):
 		lockfile = '%s%d' % (self.lockname,dbid)
-		apDisplay.printWarning('removing %s' % lockfile)
+		self.logger.warning('removing %s' % lockfile)
 		try:
 			flock(self.lockfile, LOCK_UN)
 			self.lockfile.close()
@@ -569,13 +570,13 @@ class AppionScript(basicScript.BasicScript):
 
 class TestScript(AppionScript):
 	def setupParserOptions(self):
-		apDisplay.printMsg("Parser options")
+		self.logger.info("Parser options")
 	def checkConflicts(self):
-		apDisplay.printMsg("Conflicts")
+		self.logger.info("Conflicts")
 	def setRunDir(self):
 		self.params['rundir'] = os.getcwd()
 	def start(self):
-		apDisplay.printMsg("Hey this works")
+		self.logger.info("Hey this works")
 		raise NotImplementedError
 
 if __name__ == '__main__':
