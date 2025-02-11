@@ -5,8 +5,6 @@ import os
 import sys
 import time
 from optparse import OptionParser
-#leginon
-from pyami import mem
 #appion
 from appionlib import apParam
 from appionlib import apDisplay
@@ -25,7 +23,6 @@ class BasicScript(object):
 		Starts a new function and gets all the parameters
 		"""
 		### setup some expected values
-		self.startmem = mem.active()
 		self.t0 = time.time()
 		self.createDefaultStats()
 		self.quiet = quiet
@@ -86,7 +83,6 @@ class BasicScript(object):
 		self.stats['totalcount'] = 1
 		self.stats['count'] = 1
 		self.stats['lastcount'] = 0
-		self.stats['startmem'] = mem.active()
 		self.stats['memleak'] = 0
 		self.stats['peaksum'] = 0
 		self.stats['lastpeaks'] = None
@@ -98,7 +94,6 @@ class BasicScript(object):
 		self.stats['waittime'] = 0
 		self.stats['lastimageskipped'] = False
 		self.stats['notpair'] = 0
-		self.stats['memlist'] = [mem.active()]
 
 	#=====================
 	def close(self):
@@ -111,8 +106,6 @@ class BasicScript(object):
 			logfile=self.logfile, msg=(not self.quiet))
 		if self.quiet is False:
 			apDisplay.printMsg("Ended at "+time.strftime("%a, %d %b %Y %H:%M:%S"))
-			if apDisplay.isDebugOn():
-				apDisplay.printDebug("Memory increase during run: %.3f MB"%((mem.active()-self.startmem)/1024.0))
 			apDisplay.printColor("Total run time:\t"+apDisplay.timeString(time.time()-self.t0),"green")
 
 	#=====================
