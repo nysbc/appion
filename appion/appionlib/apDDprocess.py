@@ -8,12 +8,16 @@ import scipy.ndimage as ndimage
 ma = numpy.ma
 from pyami import mrc,imagefun,arraystats,numpil
 from leginon import correctorclient,leginondata,ddinfo
-from appionlib import apDisplay, apDatabase,apDBImage, appiondata
+from appionlib import apDatabase,apDBImage, appiondata
 import socket
 import itertools
 from joblib import Parallel, delayed
 import timeit
 import glob
+
+import logging
+
+LOGGER=logging.getLogger(__name__)
 
 # testing options
 save_jpg = False
@@ -29,7 +33,7 @@ def initializeDDFrameprocess(sessionname,wait_flag=False):
 	camemdata = apDatabase.getFrameImageCameraState(sessiondata) #CameraEMData
 	dcamdata = camemdata['ccdcamera'] #InstrumentData instance
 	if not dcamdata:
-		self.logger.error('Can not determine DD camera type. Did you save frames?')
+		LOGGER.error('Can not determine DD camera type. Did you save frames?')
 	if 'GatanK2' in dcamdata['name']:
 		from appionlib import apK2process
 		return apK2process.GatanK2Processing(wait_flag)
@@ -55,7 +59,7 @@ def initializeDDFrameprocess(sessionname,wait_flag=False):
 		from appionlib import apSimFrameProcess
 		return apSimFrameProcess.SimFrameProcessing(wait_flag)
 	else:
-		self.logger.error('Unknown frame camera name %s' % dcamdata['name'])
+		LOGGER.error('Unknown frame camera name %s' % dcamdata['name'])
 
 class DirectDetectorProcessing(object):
 	def __init__(self):
@@ -78,7 +82,7 @@ class DirectDetectorProcessing(object):
 		if result:
 			self.setImageData(result)
 		else:
-			self.logger.error("Image with ID of %d not found" % imageid)
+			LOGGER.error("Image with ID of %d not found" % imageid)
 
 	def getImageId(self):
 		return self.image.dbid
@@ -188,19 +192,19 @@ class DirectDetectorProcessing(object):
 	def checkFrameListRange(self,framelist):
 		# check parameter
 		if not self.image:
-			self.logger.error("You must set an image for the operation")
+			LOGGER.error("You must set an image for the operation")
 		if framelist is None:
 			# handle default all frames used
 			framelist = range(self.totalframe)
 			return framelist
 		if min(framelist) not in range(self.totalframe):
-			self.logger.error("Starting Frame not in saved raw frame range, can not be processed")
+			LOGGER.error("Starting Frame not in saved raw frame range, can not be processed")
 		framelength_original = len(framelist)
 		framelist_original = list(framelist)
 		while max(framelist) >= self.totalframe:
 			del framelist[framelist.index(max(framelist))]
 		if len(framelist) < framelength_original:
-			self.logger.warning( "%s instead of %s frames will be used since not enough frames are saved." % (framelist,framelist_original))
+			LOGGER.warning( "%s instead of %s frames will be used since not enough frames are saved." % (framelist,framelist_original))
 		return framelist
 
 	def getAllAlignImagePairData(self,ddstackrundata,query_source=True):
@@ -233,11 +237,11 @@ class DirectDetectorProcessing(object):
 		'''
 		logfile = self.framestackpath[:-4]+'_Log.txt'
 		if not os.path.isfile(logfile):
-			self.logger.warning('No alignment log file %s found for thresholding drift' % logfile)
+			LOGGER.warning('No alignment log file %s found for thresholding drift' % logfile)
 			return False
 		positions = ddinfo.readPositionsFromAlignLog(logfile)
 		shifts = ddinfo.calculateFrameShiftFromPositions(positions)
-		self.logger.debug('Got %d shifts' % (len(shifts)-1))
+		LOGGER.debug('Got %d shifts' % (len(shifts)-1))
 		return shifts
 
 	def getStillFrames(self,threshold):
@@ -277,7 +281,7 @@ class DirectDetectorProcessing(object):
 				return framelist
 			framelist = list(set(framelist).intersection(set(stillframes)))
 			framelist.sort()
-			self.logger.info('Limit frames used to %s' % (framelist,))
+			LOGGER.info('Limit frames used to %s' % (framelist,))
 			return framelist
 
 class DDFrameProcessing(DirectDetectorProcessing):
@@ -331,8 +335,8 @@ class DDFrameProcessing(DirectDetectorProcessing):
 		else:
 			self.__setRawFrameInfoFromDDStack()
 		if debug:
-			self.logger.info('%s' % (self.image['filename']))
-			self.logger.info('%s' % ( self.framestackpath))
+			LOGGER.info('%s' % (self.image['filename']))
+			LOGGER.info('%s' % ( self.framestackpath))
 		# These are only used if alignment of the frames are made
 		self.aligned_sumpath = os.path.join(self.rundir,self.image['filename']+'_c.mrc')
 		self.aligned_dw_sumpath = os.path.join(self.rundir,self.image['filename']+'_c-DW.mrc')
@@ -393,7 +397,7 @@ class DDFrameProcessing(DirectDetectorProcessing):
 
 	def setRawFrameDir(self,path):
 		if debug:
-			self.logger.info('setting rawframedir %s' % (path,))
+			LOGGER.info('setting rawframedir %s' % (path,))
 		self.rawframe_dir = path
 
 	def getRawFrameDir(self):
@@ -404,12 +408,12 @@ class DDFrameProcessing(DirectDetectorProcessing):
 		if raw_frame_type == 'stack':
 			return self.getRawFrameDir()
 		else:
-			self.logger.error('frame flip debug: getRawFrameType is not stack, but %s' % (raw_frame_type,))
+			LOGGER.error('frame flip debug: getRawFrameType is not stack, but %s' % (raw_frame_type,))
 			return self.makeRawFrameStack()
 
 	def setRawFrameType(self,frametype='singles'):
 		if frametype in ('singles','stack'):
-			self.logger.info('Raw frame type is %s' % frametype)
+			LOGGER.info('Raw frame type is %s' % frametype)
 			self.rawframetype = frametype
 
 	def getRawFrameType(self):
@@ -418,7 +422,7 @@ class DDFrameProcessing(DirectDetectorProcessing):
 				# Do this only on the first image
 				self.setRawFrameType(ddinfo.getRawFrameType(self.getSessionFramePathFromImage(self.image)))
 			else:
-				self.logger.error('RawFrameType not set')
+				LOGGER.error('RawFrameType not set')
 		return self.rawframetype
 
 	def getBufferFrameSessionPathFromImage(self, imagedata):
@@ -427,7 +431,7 @@ class DDFrameProcessing(DirectDetectorProcessing):
 			return False
 		if self.getAllAlignImagePairData(None,query_source=True):
 			# Transfer to permanent location is automatic
-			self.logger.warning('Alignment already run. frames moved from buffer')
+			LOGGER.warning('Alignment already run. frames moved from buffer')
 			return False
 		else:
 			return session_frame_path
@@ -440,7 +444,7 @@ class DDFrameProcessing(DirectDetectorProcessing):
 		# defined in database.  It is only False if the BufferHostData is
 		# not defined for the camera or set to disabled.
 		session_frame_path = self.getBufferFrameSessionPathFromImage(imagedata)
-		self.logger.info('frame flip debug: buffer session_frame_path: %s' % (session_frame_path,))
+		LOGGER.info('frame flip debug: buffer session_frame_path: %s' % (session_frame_path,))
 		if session_frame_path is False:
 			if imagedata['session']['frame path']:
 				session_frame_path = imagedata['session']['frame path']
@@ -457,15 +461,15 @@ class DDFrameProcessing(DirectDetectorProcessing):
 		# strip off DOS path in rawframe directory name 
 		rawframename = imagedata['camera']['frames name'].split('\\')[-1]
 		if not rawframename:
-			self.logger.warning('No Raw Frame Saved for %s' % imagedata['filename'])
+			LOGGER.warning('No Raw Frame Saved for %s' % imagedata['filename'])
 		session_frame_path = self.getSessionFramePathFromImage(imagedata)
 
 		# single frame directory is image filename plus '.frames'
 		rawframedir = os.path.join(session_frame_path,'%s.frames' % imagedata['filename'])
 		if not self.waitForPathExist(rawframedir,self.rawtransfer_wait):
-			self.logger.error('Raw Frame Dir %s does not exist.' % rawframedir)
+			LOGGER.error('Raw Frame Dir %s does not exist.' % rawframedir)
 		self.getFrameNamePattern(rawframedir)
-		self.logger.info('Raw Frame Dir from image is %s' % (rawframedir,))
+		LOGGER.info('Raw Frame Dir from image is %s' % (rawframedir,))
 		return rawframedir
 
 	def getKVFromImage(self, imagedata):
@@ -492,10 +496,10 @@ class DDFrameProcessing(DirectDetectorProcessing):
 		while not os.path.exists(newpath):
 			if self.waittime < 0.1:
 				return False
-			self.logger.warning('%s does not exist. Wait for %.1f min.' % (newpath,sleep_time/60.0))
+			LOGGER.warning('%s does not exist. Wait for %.1f min.' % (newpath,sleep_time/60.0))
 			time.sleep(sleep_time)
 			waitmin += sleep_time / 60.0
-			self.logger.info('Waited for %.1f min so far' % waitmin)
+			LOGGER.info('Waited for %.1f min so far' % waitmin)
 			if waitmin > timeout:
 				return False
 		return True
@@ -509,11 +513,11 @@ class DDFrameProcessing(DirectDetectorProcessing):
 		if imageid:
 			imagedata = leginondata.AcquisitionImageData().direct_query(imageid)
 			if self.image['camera']['ccdcamera']['name'] != imagedata['camera']['ccdcamera']['name']:
-				self.logger.error('Default reference image id=%d not from the same camera as the data' % (imageid))
-				self.logger.info('Reference comes from %s' % imagedata['filename'])
+				LOGGER.error('Default reference image id=%d not from the same camera as the data' % (imageid))
+				LOGGER.info('Reference comes from %s' % imagedata['filename'])
 			return imagedata
 		else:
-			self.logger.info('Reference comes from current image')
+			LOGGER.info('Reference comes from current image')
 			return self.image
 
 	def getRefImageData(self,reftype):
@@ -523,7 +527,7 @@ class DDFrameProcessing(DirectDetectorProcessing):
 		if self.getUseAlternativeChannelReference():
 			oldrefname = refdata['filename']
 			refdata = self.c_client.getAlternativeChannelReference(reftype,refdata)
-			#self.logger.warning('Use Alternative Channel Reference %s instead of %s' % (refdata['filename'],oldrefname))
+			#LOGGER.warning('Use Alternative Channel Reference %s instead of %s' % (refdata['filename'],oldrefname))
 		return refdata
 
 	def _getRefImageData(self,reftype):
@@ -557,7 +561,7 @@ class DDFrameProcessing(DirectDetectorProcessing):
 		'''
 		imagedata = self.image
 		if not imagedata:
-			self.logger.error('No image set.')
+			LOGGER.error('No image set.')
 		# set rawframe path
 		self.setRawFrameDir(self.getRawFrameDirFromImage(imagedata))
 		# total number of frames saved
@@ -574,7 +578,7 @@ class DDFrameProcessing(DirectDetectorProcessing):
 		'''
 		set cemrainfo attributes with current values of the image
 		'''
-		self.logger.info('Setting new camera info....')
+		LOGGER.info('Setting new camera info....')
 		self.camerainfo = self.__getCameraInfoFromImage(nframe,use_full_raw_area)
 
 	def getTrimingEdge(self):
@@ -670,16 +674,16 @@ class DDFrameProcessing(DirectDetectorProcessing):
 		crop_end = {'x': offset['x']+dimension['x']*bin['x'], 'y':offset['y']+dimension['y']*bin['y']}
 		framename = self.getFrameNameFromNumber(frame_number)
 		rawframe_path = os.path.join(rawframe_dir,framename)
-		self.logger.info('Frame path: %s' %  rawframe_path)
+		LOGGER.info('Frame path: %s' %  rawframe_path)
 		waitmin = 0
 		while not os.path.exists(rawframe_path):
 			if self.waittime < 0.1:
-				self.logger.warning('Frame File %s does not exist.' % rawframe_path)
+				LOGGER.warning('Frame File %s does not exist.' % rawframe_path)
 				return False
-			self.logger.warning('Frame File %s does not exist. Wait for 1 min.' % rawframe_path)
+			LOGGER.warning('Frame File %s does not exist. Wait for 1 min.' % rawframe_path)
 			time.sleep(60)
 			waitmin += 1
-			self.logger.info('Waited for %d min so far' % waitmin)
+			LOGGER.info('Waited for %d min so far' % waitmin)
 			if waitmin > self.waittime:
 				return False
 		return self.readFrameImage(rawframe_path,offset,crop_end,bin)
@@ -705,7 +709,7 @@ class DDFrameProcessing(DirectDetectorProcessing):
 		if frame_rotate is None:
 			# old data have no orientation record
 			frame_flip,frame_rotate = self.handleOldFrameOrientation()
-		self.logger.debug('frame flip %s, frame_rotate %s' % (frame_flip,frame_rotate))
+		LOGGER.debug('frame flip %s, frame_rotate %s' % (frame_flip,frame_rotate))
 		return frame_flip, frame_rotate
 
 	def modifyFrameImage(self,a,offset,crop_end,bin):
@@ -714,15 +718,15 @@ class DDFrameProcessing(DirectDetectorProcessing):
 		if frame_flip:
 			if frame_rotate and frame_rotate == 2:
 				# Faster to just flip left-right than up-down flip + rotate
-				apDisplay.printColor("flipping the frame left-right",'blue')
+				LOGGER.info("flipping the frame left-right")
 				a = numpy.fliplr(a)
 				frame_rotate = 0
 			else:
-				apDisplay.printColor("flipping the frame up-down",'blue')
+				LOGGER.info("flipping the frame up-down")
 				a = numpy.flipud(a)
 			self.frame_modified = True
 		if frame_rotate:
-			apDisplay.printColor("rotating the frame by %d degrees" % (frame_rotate*90,),'blue')
+			LOGGER.info("rotating the frame by %d degrees" % (frame_rotate*90,))
 			a = numpy.rot90(a,frame_rotate)
 			self.frame_modified = True
 		a = a[offset['y']:crop_end['y'],offset['x']:crop_end['x']]
@@ -730,7 +734,7 @@ class DDFrameProcessing(DirectDetectorProcessing):
 			if bin['x'] == bin['y']:
 				a = imagefun.bin(a,bin['x'])
 			else:
-				self.logger.error("Binnings in x,y are different")
+				LOGGER.error("Binnings in x,y are different")
 		return a
 
 	def sumupFrames(self,rawframe_dir,framelist):
@@ -741,7 +745,7 @@ class DDFrameProcessing(DirectDetectorProcessing):
 		
 		'''
 		start_frame = framelist[0]
-		self.logger.info( 'Summing up %d Frames %s ....' % (len(framelist),framelist))
+		LOGGER.info( 'Summing up %d Frames %s ....' % (len(framelist),framelist))
 		for frame_number in framelist:
 			if frame_number == start_frame:
 				rawarray = self.loadOneRawFrame(rawframe_dir,frame_number)
@@ -757,7 +761,7 @@ class DDFrameProcessing(DirectDetectorProcessing):
 	def correctFrameImage(self,framelist,use_full_raw_area=False):
 		corrected = self.__correctFrameImage(framelist,use_full_raw_area)
 		if corrected is False:
-			self.logger.error('Failed to correct Image')
+			LOGGER.error('Failed to correct Image')
 		else:
 			return corrected
 
@@ -773,11 +777,11 @@ class DDFrameProcessing(DirectDetectorProcessing):
 		return False
 
 	def darkCorrection(self,rawarray,darkarray,nframe):
-		self.logger.info('Doing dark correction')
+		LOGGER.info('Doing dark correction')
 		onedshape = rawarray.shape[0] * rawarray.shape[1]
 		b = darkarray.reshape(onedshape)
 		if self.use_GS:
-			self.logger.warning('..Use Gram-Schmidt process to determine scale')
+			LOGGER.warning('..Use Gram-Schmidt process to determine scale')
 			dark_scale = self.c_client.calculateDarkScale(rawarray,darkarray)
 		else:
 			dark_scale = nframe
@@ -785,7 +789,7 @@ class DDFrameProcessing(DirectDetectorProcessing):
 		return corrected,dark_scale
 
 	def makeNorm(self,brightarray,darkarray,dark_scale):
-		self.logger.info('..Making new norm array from dark scale of %.2f' % dark_scale)
+		LOGGER.info('..Making new norm array from dark scale of %.2f' % dark_scale)
 		#calculate normarray
 		normarray = self.c_client.calculateNorm(brightarray,darkarray,dark_scale)
 		# clip norm to a smaller range to filter out very big values
@@ -815,7 +819,7 @@ class DDFrameProcessing(DirectDetectorProcessing):
 		if debug:
 			self.log.write('%s %s\n' % (self.image['filename'],get_new_refs))
 		if not get_new_refs and start_frame != 0:
-			self.logger.warning("Imaging condition unchanged. Reference in memory will be used.")
+			LOGGER.warning("Imaging condition unchanged. Reference in memory will be used.")
 		# o.k. to set attribute now that condition change is checked
 		self.use_full_raw_area = use_full_raw_area
 		if get_new_refs:
@@ -830,7 +834,7 @@ class DDFrameProcessing(DirectDetectorProcessing):
 			numpil.write(rawarray,'%s_raw.jpg' % ddtype,'jpeg')
 
 		if not self.correct_dark_gain:
-			self.logger.info('Use summed frame image without further correction')
+			LOGGER.info('Use summed frame image without further correction')
 			return rawarray
 
 		# DARK CORRECTION
@@ -848,19 +852,19 @@ class DDFrameProcessing(DirectDetectorProcessing):
 			numpil.write(corrected,'%s_dark_corrected.jpg' % ddtype,'jpeg')
 		if debug:
 			self.scalefile.write('%s\t%.4f\n' % (start_frame,dark_scale))
-		self.logger.info('..Dark Scale= %.4f' % dark_scale)
+		LOGGER.info('..Dark Scale= %.4f' % dark_scale)
 
 		# MASK CORRECTION
 		if self.correct_frame_mask:
 			if get_new_refs:
 				if not os.path.isfile("variance.mrc"):
-					self.logger.info('Making debris mask')
+					LOGGER.info('Making debris mask')
 					mask = self.makeMaskArray(start_frame)
 					mrc.write(mask, "variance.mrc")
 				else:
 					mask = mrc.read("variance.mrc")
 				# experimental.  Need to create variance.map to run
-#				self.logger.info('Making variance threshold mask')
+#				LOGGER.info('Making variance threshold mask')
 #				mask = self.makeVarianceMaskArray()
 				self.mask = mask
 				if save_jpg and mask.max() > mask.min():
@@ -870,16 +874,16 @@ class DDFrameProcessing(DirectDetectorProcessing):
 
 
 		# GAIN CORRECTION
-		self.logger.info('Doing gain correction')
+		LOGGER.info('Doing gain correction')
 		if get_new_refs:
 			normdata = self.getRefImageData('norm')
 			if not self.use_GS and normdata:
-				self.logger.warning('Ref Session Path:%s' % normdata['session']['image path'])
-				self.logger.warning('Use Norm Reference %s' % (normdata['filename'],))
+				LOGGER.warning('Ref Session Path:%s' % normdata['session']['image path'])
+				LOGGER.warning('Use Norm Reference %s' % (normdata['filename'],))
 				normarray = normdata['image']
 			else:
 				scaled_brightarray = self.getScaledBrightArray(nframe)
-				self.logger.warning('Corresponding Bright Reference %s' % (normdata['bright']['filename'],))
+				LOGGER.warning('Corresponding Bright Reference %s' % (normdata['bright']['filename'],))
 				normarray = self.makeNorm(scaled_brightarray,self.unscaled_darkarray, dark_scale)
 			self.normarray = normarray
 		else:
@@ -892,14 +896,14 @@ class DDFrameProcessing(DirectDetectorProcessing):
 		# BAD PIXEL FIXING
 		plan = self.getCorrectorPlan(self.camerainfo)
 		if plan is not None:
-			self.logger.info('Fixing bad pixel, columns, and rows')
+			LOGGER.info('Fixing bad pixel, columns, and rows')
 			self.c_client.fixBadPixels(corrected,plan)
 		#Clipping is turned off to avoid artifacts in analog DD
-		#self.logger.info('Cliping corrected image')
+		#LOGGER.info('Cliping corrected image')
 		#corrected = numpy.clip(corrected,0,10000)
 		if self.correct_frame_mask:
 			if numpy.any(mask):
-				self.logger.info('Doing mask correction')
+				LOGGER.info('Doing mask correction')
 				corrected = self.correctMaskRegion(corrected,mask,True)
 		if save_jpg:
 			numpil.write(corrected,'%s_gain_corrected.jpg' % ddtype,'jpeg')
@@ -917,7 +921,7 @@ class DDFrameProcessing(DirectDetectorProcessing):
 			if not self.use_full_raw_area:
 				# no plan and is using the original imagedata camearinfo means it truly has no plan.
 				return None
-			self.logger.warning('Using most recent corrector plan')
+			LOGGER.warning('Using most recent corrector plan')
 			# This will end up be the most recent value not the one prior to the image
 			plan, plandata = self.c_client.retrieveCorrectorPlan(self.camerainfo)
 		return plan
@@ -930,7 +934,7 @@ class DDFrameProcessing(DirectDetectorProcessing):
 		self.setCameraInfo(1,self.use_full_raw_area)
 		plan = self.getCorrectorPlan(self.camerainfo)
 		if plan and (plan['columns'] or plan['rows'] or plan['pixels']):
-			self.logger.warning('frame flip debug: has bad pixels')
+			LOGGER.warning('frame flip debug: has bad pixels')
 			return True
 		return False
 
@@ -949,8 +953,8 @@ class DDFrameProcessing(DirectDetectorProcessing):
 		nframe = 1
 		sigma = 2
 		thresh = 1 * nframe
-		self.logger.info('  using %s' % self.image['filename'])
-		self.logger.info('  frame index %d' % start_frame_index)
+		LOGGER.info('  using %s' % self.image['filename'])
+		LOGGER.info('  frame index %d' % start_frame_index)
 		# load raw frames
 		framelist = range(start_frame_index,start_frame_index+nframe)
 		oneframe = self.sumupFrames(self.rawframe_dir,framelist)
@@ -962,19 +966,19 @@ class DDFrameProcessing(DirectDetectorProcessing):
 		#mrc.write(mask.astype(numpy.int),'maska.mrc')
 		last_clabels = 100
 		clabels = 99 # fake label count to start
-		self.logger.info('..Dilating segamented mask until stable')
+		LOGGER.info('..Dilating segamented mask until stable')
 		itr = 0
 		while clabels < last_clabels:
 			last_clabels = clabels
 			mask = ndimage.morphology.binary_dilation(mask,ndimage.morphology.generate_binary_structure(2,1),2)
 			regions,clabels = ndimage.label(mask)
 			itr += 2
-		self.logger.info('    Completed in %d iterations' % itr)
+		LOGGER.info('    Completed in %d iterations' % itr)
 		if clabels == 1 and numpy.all(mask):
 			mask = numpy.logical_not(mask)
-			self.logger.warning('No debris found to be masked')
+			LOGGER.warning('No debris found to be masked')
 		else:
-			self.logger.info('    %d mask segment(s) found' % clabels)
+			LOGGER.info('    %d mask segment(s) found' % clabels)
 		#mrc.write(mask.astype(numpy.int),'maskb.mrc')
 		return mask
 
@@ -1022,7 +1026,7 @@ class DDFrameProcessing(DirectDetectorProcessing):
 					return array
 				array = imagefun.bin(array,additional_binning)
 				array = array[cdata['offset']['y']:cdata['offset']['y']+cdata['dimension']['y'],cdata['offset']['x']:cdata['offset']['x']+cdata['dimension']['x']]
-		self.logger.info('frame image shape is now x=%d,y=%d' % (array.shape[1],array.shape[0]))
+		LOGGER.info('frame image shape is now x=%d,y=%d' % (array.shape[1],array.shape[0]))
 		return array
 
 	def makeRawFrameStack(self):
@@ -1037,7 +1041,7 @@ class DDFrameProcessing(DirectDetectorProcessing):
 		first = 0
 		frameprocess_dir = os.path.dirname(self.tempframestackpath)
 		rawframestack_path = os.path.join(frameprocess_dir,self.image['filename']+'_raw_st.'+self.extname)
-		self.logger.info('Making raw frame stack and saving it to %s' % (rawframestack_path,))
+		LOGGER.info('Making raw frame stack and saving it to %s' % (rawframestack_path,))
 		for start_frame in range(first,first+total_frames):
 			array = self.loadOneRawFrame(rawframe_dir,start_frame)
 			array = self.modifyImageArray(array)
@@ -1058,7 +1062,7 @@ class DDFrameProcessing(DirectDetectorProcessing):
 		'''
 		Creates a file of non gain/dark corrected stack of frames
 		'''
-		self.logger.info('Making a non-gain corrected stack for FrameAligner')
+		LOGGER.info('Making a non-gain corrected stack for FrameAligner')
 		self.setupDarkNormMrcs(use_full_raw_area)
 		rawframestack_path = self.getRawFrameStackPath()
 		if not os.path.isfile(self.tempframestackpath) and os.path.isfile(rawframestack_path):
@@ -1066,19 +1070,19 @@ class DDFrameProcessing(DirectDetectorProcessing):
 			frame_flip, frame_rotate = self.getImageFrameOrientation()
 			if not self.getUseFrameAlignerGeomModification() and (frame_flip or frame_rotate and not self.frame_modified):
 				if frame_rotate:
-					self.logger.error("stack rotation not implemented")
+					LOGGER.error("stack rotation not implemented")
 				if frame_flip:
-					apDisplay.printColor("flipping the whole frame stack",'blue')
+					LOGGER.info("flipping the whole frame stack")
 					a = mrc.read(rawframestack_path)
 					# 3D array left-right flip creates the effect of up-down flip on axis 1 and 2
 					a = numpy.fliplr(a)
 					if self.getTrimingEdge() > 0:
 						a = self.trimArray(a)
 					mrc.write(a,self.tempframestackpath)
-					self.logger.info('flipped %s to %s.' % (rawframestack_path, self.tempframestackpath))
+					LOGGER.info('flipped %s to %s.' % (rawframestack_path, self.tempframestackpath))
 			else:
 				os.symlink(rawframestack_path,self.tempframestackpath)
-				self.logger.info('link %s to %s.' % (rawframestack_path, self.tempframestackpath))
+				LOGGER.info('link %s to %s.' % (rawframestack_path, self.tempframestackpath))
 		return self.tempframestackpath
 
 	def makeCorrectedFrameStack(self, use_full_raw_area=False):
@@ -1093,18 +1097,18 @@ class DDFrameProcessing(DirectDetectorProcessing):
 		if frame_flip:
 			if frame_rotate and frame_rotate == 2:
 				# Faster to just flip left-right than up-down flip + rotate
-				apDisplay.printColor("flipping the frame left-right",'blue')
+				LOGGER.info("flipping the frame left-right")
 				a = numpy.fliplr(a)
 				frame_rotate = 0
 				# reset flip
 				frame_flip = 0
 				self.frame_modified = True
 		if frame_rotate:
-			apDisplay.printColor("rotating the frame by %d degrees" % (frame_rotate*90,),'blue')
+			LOGGER.info("rotating the frame by %d degrees" % (frame_rotate*90,))
 			a = numpy.rot90(a,4-frame_rotate)
 			self.frame_modified = True
 		if frame_flip:
-			apDisplay.printColor("flipping the frame up-down",'blue')
+			LOGGER.info("flipping the frame up-down")
 			a = numpy.flipud(a)
 		frameprocess_dir = os.path.dirname(self.tempframestackpath)
 		self.defect_map_path = os.path.join(frameprocess_dir,'defect-%s-%d-%d.mrc' % (self.hostname,self.gpuid, os.getpid()))
@@ -1120,7 +1124,7 @@ class DDFrameProcessing(DirectDetectorProcessing):
 		'''
 		Creates local reference files for gain/dark-correcting the stack of frames
 		'''
-		self.logger.info('Will setupDarkNormMrcs make dark/gain? %s' % (self.correct_dark_gain,))
+		LOGGER.info('Will setupDarkNormMrcs make dark/gain? %s' % (self.correct_dark_gain,))
 		if not self.correct_dark_gain or self.getRefImageData('norm') is None: 
 			self.dark_path = None
 			self.norm_path = None
@@ -1128,10 +1132,10 @@ class DDFrameProcessing(DirectDetectorProcessing):
 		sys.stdout.write('\a')
 		sys.stdout.flush()
 		if use_full_raw_area is True:
-			apDisplay.displayError('use_full_raw_area when image is cropped is not implemented for gpu')
+			LOGGER.error('use_full_raw_area when image is cropped is not implemented for gpu')
 		frameprocess_dir = os.path.dirname(self.tempframestackpath)
 		get_new_refs = self.__conditionChanged(1,use_full_raw_area)
-		self.logger.info('decide to get new refs based on condition change ? %s' % (get_new_refs,))
+		LOGGER.info('decide to get new refs based on condition change ? %s' % (get_new_refs,))
 		# o.k. to set attribute now that condition change is checked
 		self.use_full_raw_area = use_full_raw_area
 		# at least write dark and norm image once
@@ -1147,15 +1151,15 @@ class DDFrameProcessing(DirectDetectorProcessing):
 			# output norm
 			normdata = self.getRefImageData('norm')
 			if normdata['bright']:
-				self.logger.warning('From Bright Reference %s' % (normdata['bright']['filename'],))
+				LOGGER.warning('From Bright Reference %s' % (normdata['bright']['filename'],))
 			if self.use_frame_aligner_flat:
 				normarray = normdata['image']
 				self.norm_path = os.path.join(frameprocess_dir,'norm-%s-%d-%d.mrc' % (self.hostname,self.gpuid,os.getpid()))
-				self.logger.warning('Save Norm Reference %s to %s' % (normdata['filename'],self.norm_path))
+				LOGGER.warning('Save Norm Reference %s to %s' % (normdata['filename'],self.norm_path))
 				try:
 					mrc.write(normarray,self.norm_path)
 				except Exception as e:
-					self.logger.error('Norm array not saved. Possible problem of reading from %s' % normdata.getpath())
+					LOGGER.error('Norm array not saved. Possible problem of reading from %s' % normdata.getpath())
 
 	def getNormRefMrcPath(self):
 		return self.norm_path
@@ -1174,7 +1178,7 @@ class DDFrameProcessing(DirectDetectorProcessing):
 		half_way_frame = int(total_frames // 2)
 		first = 0
 		for start_frame in range(first,first+total_frames):
-			self.logger.info('Processing New Frame::::: ')
+			LOGGER.info('Processing New Frame::::: ')
 			array = self.__correctFrameImage([start_frame,],use_full_raw_area)
 			# if non-fatal error occurs, end here
 			if array is False:
@@ -1182,7 +1186,7 @@ class DDFrameProcessing(DirectDetectorProcessing):
 			array = self.modifyImageArray(array)
 			if self.getTrimingEdge() > 0:
 				array = self.trimArray(array)
-			self.logger.info('final frame shape to put in stack x=%d,y=%d' % (array.shape[1],array.shape[0]))
+			LOGGER.info('final frame shape to put in stack x=%d,y=%d' % (array.shape[1],array.shape[0]))
 			if start_frame == first:
 				# overwrite old stack mrc file
 				mrc.write(array,self.tempframestackpath)
@@ -1370,7 +1374,7 @@ class DDFrameProcessing(DirectDetectorProcessing):
 		header = mrc.readHeaderFromFile(stackpath)
 		if header['amax'] == header['amin']:
 			return
-		self.logger.info('Update the stack header with middle slice')
+		LOGGER.info('Update the stack header with middle slice')
 		total_frames = header['nz']
 		half_way_frame = int(total_frames // 2)
 		array = mrc.read(stackpath,half_way_frame)
@@ -1427,13 +1431,13 @@ class DDFrameProcessing(DirectDetectorProcessing):
 		'''
 		rundir = self.getRunDir()
 		if not self.waitForPathExist(self.framestackpath,60):
-			self.logger.warning('Stack making not started, Skipping')
+			LOGGER.warning('Stack making not started, Skipping')
 			return False
 		# Unless the _Log.txt is made, even if faked, the frame stack is not completed
 		logpath = self.framestackpath[:-4]+'_Log.txt'
 
 		if not self.waitForPathExist(logpath,60):
-			self.logger.warning('Stack making not finished, Skipping')
+			LOGGER.warning('Stack making not finished, Skipping')
 			return False
 		return True	
 
@@ -1471,12 +1475,12 @@ class DDStackProcessing(DirectDetectorProcessing):
 				# This works if self.image is set
 				ddstackrun = self.getAlignImagePairData(None,query_source=False)['ddstackrun']
 			else:
-				self.logger.error('Image not from aligned ddstack run.  Can not determine stack location without ddstack id')
+				LOGGER.error('Image not from aligned ddstack run.  Can not determine stack location without ddstack id')
 		self.ddstackrun = ddstackrun
 
 	def getDDStackRun(self,show_msg=False):
 		if self.ddstackrun and show_msg:
-			self.logger.info('DDStack is from %s (id = %d)' % (self.ddstackrun['runname'],self.ddstackrun.dbid))
+			LOGGER.info('DDStack is from %s (id = %d)' % (self.ddstackrun['runname'],self.ddstackrun.dbid))
 		return self.ddstackrun
 
 	def setImageData(self,imagedata):
@@ -1498,17 +1502,17 @@ class DDStackProcessing(DirectDetectorProcessing):
 		DDStack are gain/dark corrected and may or may not be aligned
 		'''
 		if not os.path.isfile(self.framestackpath):
-			self.logger.error('No DD Stack to make image from')
-		self.logger.info('Getting summed image from %s' % self.framestackpath)
+			LOGGER.error('No DD Stack to make image from')
+		LOGGER.info('Getting summed image from %s' % self.framestackpath)
 		stack = mrc.mmap(self.framestackpath)
 		if max(framelist) >= stack.shape[0]:
-			self.logger.error('Last frame in list index out of range')
+			LOGGER.error('Last frame in list index out of range')
 		frametuple = tuple(framelist)
-		self.logger.info(' summing frames %s' % (frametuple,))
+		LOGGER.info(' summing frames %s' % (frametuple,))
 		if not roi:
 			sum = numpy.sum(stack[frametuple,:,:],axis=0)
 		else:
-			self.logger.info(' crop range of (%d,%d) to (%d,%d)' % (rot['x'][0],roi['x'][1]-1,roi['y'][0],roi['y'][1]-1))
+			LOGGER.info(' crop range of (%d,%d) to (%d,%d)' % (rot['x'][0],roi['x'][1]-1,roi['y'][0],roi['y'][1]-1))
 			sum = numpy.sum(stack[frametuple,roi['y'][0]:roi['y'][1],roi['x'][0]:roi['x'][1]],axis=0)
 		return sum
 

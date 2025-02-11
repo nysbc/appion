@@ -3,7 +3,8 @@
 import os
 import numpy
 from pyami import mrc
-from appionlib import apDDprocess,apDisplay
+from appionlib import apDDprocess
+import time
 
 from pyami import numpil
 
