@@ -3,9 +3,10 @@
 import os
 import numpy
 import datetime
-from pyami import mrc,imagefun
-from leginon import leginondata,ddinfo
-from appionlib import apDDprocess,apDisplay
+from pyami import mrc
+from leginon import leginondata
+from appionlib import apDDprocess
+from time import time
 
 # testing options
 save_jpg = False
@@ -45,13 +46,13 @@ class GatanK2Processing(apDDprocess.DDFrameProcessing):
 		# check if frames are saved
 		save_frames = imagedata['camera']['save frames']
 		if not save_frames:
-			apDisplay.printWarning('No Raw Frame Saved for %s' % imagedata['filename'])
+			self.logger.warning('No Raw Frame Saved for %s' % imagedata['filename'])
 		session_frame_path = self.getSessionFramePathFromImage(imagedata)
 		# frame stackfile is image filename plus '.frames.mrc'
 		rawframedir = os.path.join(session_frame_path,'%s.frames.%s' % (imagedata['filename'],self.extname))
 		if not self.waitForPathExist(rawframedir,30):
-			apDisplay.printError('Raw Frame Dir %s does not exist.' % rawframedir)
-		apDisplay.printMsg('K2 Raw Frame Dir from image is %s' % (rawframedir,))
+			self.logger.error('Raw Frame Dir %s does not exist.' % rawframedir)
+		self.logger.info('K2 Raw Frame Dir from image is %s' % (rawframedir,))
 		return rawframedir
 
 	def loadOneRawFrame(self,rawframe_path,frame_number):
@@ -77,16 +78,16 @@ class GatanK2Processing(apDDprocess.DDFrameProcessing):
 			offset = {'x':0,'y':0}
 			dimension = self.getDefaultDimension()
 		crop_end = {'x': offset['x']+dimension['x']*bin['x'], 'y':offset['y']+dimension['y']*bin['y']}
-		apDisplay.printMsg('Frame path: %s' %  rawframe_path)
+		self.logger.info('Frame path: %s' %  rawframe_path)
 		waitmin = 0
 		while not os.path.exists(rawframe_path):
 			if self.waittime < 0.1:
-				apDisplay.printWarning('Frame File %s does not exist.' % rawframe_path)
+				self.logger.warning('Frame File %s does not exist.' % rawframe_path)
 				return False
-			apDisplay.printWarning('Frame File %s does not exist. Wait for 3 min.' % rawframe_path)
+			self.logger.warning('Frame File %s does not exist. Wait for 3 min.' % rawframe_path)
 			time.sleep(180)
 			waitmin += 3
-			apDisplay.printMsg('Waited for %d min so far' % waitmin)
+			self.logger.info('Waited for %d min so far' % waitmin)
 			if waitmin > self.waittime:
 				return False
 		return self.readImageFrame(rawframe_path,frame_number,offset,crop_end,bin)
@@ -159,7 +160,7 @@ class GatanK2Processing(apDDprocess.DDFrameProcessing):
 			refdata = imagedata[reftype]
 			if refdata is None:
 				# Use chosen default image
-				apDisplay.printWarning('No %s reference for the image, use default' % reftype) 
+				self.logger.warning('No %s reference for the image, use default' % reftype) 
 				default_image = self.getCorrectedImageData()
 				refdata = default_image[reftype]
 		else:

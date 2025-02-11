@@ -16,6 +16,10 @@ import cPickle
 ## appion
 from appionlib import apDisplay
 
+import logging
+
+LOGGER=logging.getLogger(__name__)
+
 ####
 # This is a low-level file with NO database connections
 # Please keep it this way
@@ -47,7 +51,7 @@ def getAppionDirectory():
 		appiondir = trypath
 		return appiondir
 
-	apDisplay.printError("environmental variable, APPIONDIR, is not defined.\n"+
+	LOGGER.error("environmental variable, APPIONDIR, is not defined.\n"+
 		"Did you source useappion.sh?")
 
 
@@ -244,7 +248,7 @@ def dumpParameters(parameters, paramfile):
 #=====================
 def readRunParameters(paramfile):
 	if not os.path.isfile(paramfile):
-		apDisplay.printError("Could not find run parameters file: "+paramfile)
+		LOGGER.error("Could not find run parameters file: "+paramfile)
 	pf = open(paramfile, "r")
 	runparams = cPickle.load(pf)
 	pf.close()
@@ -260,7 +264,7 @@ def writeFunctionLog(cmdlist, logfile=None, msg=True):
 	else:
 		logfile = getFunctionName(sys.argv[0])+".log"
 	if msg is True:
-		apDisplay.printMsg("Writing function log to: "+logfile)
+		LOGGER.info("Writing function log to: "+logfile)
 	timestamp = getLogHeader()
 	out=""
 	f=open(logfile,'a')
@@ -313,7 +317,7 @@ def closeFunctionLog(functionname=None, logfile=None, msg=True, stats=None):
 	else:
 		logfile = "function.log"
 	if msg is True:
-		apDisplay.printMsg("Closing out function log: "+logfile)
+		LOGGER.info("Closing out function log: "+logfile)
 	if stats is not None and stats['count'] > 3:
 		timesum = stats['timesum']
 		timesumsq = stats['timesumsq']
@@ -343,13 +347,13 @@ def createDirectory(path, mode=0775, warning=True):
 	"""
 	if os.path.isdir(path):
 		if warning is True:
-			apDisplay.printWarning("directory \'"+path+"\' already exists.")
+			LOGGER.warning("directory \'"+path+"\' already exists.")
 		return False
 	try:
 		os.makedirs(path, mode=mode)
 		#makedirs(path, mode=mode)
 	except:
-		apDisplay.printError("Could not create directory, '"+path+"'\nCheck the folder write permissions")
+		LOGGER.error("Could not create directory, '"+path+"'\nCheck the folder write permissions")
 	return True
 
 #=====================
@@ -358,11 +362,11 @@ def removeDirectory(path, warning=True):
 	Used by appionLoop
 	"""
 	if os.path.isdir(path):
-		apDisplay.printWarning("directory \'"+path+"\' will be removed.")
+		LOGGER.warning("directory \'"+path+"\' will be removed.")
 		try:
 			shutil.rmtree(path, ignore_errors=not warning)
 		except:
-			apDisplay.printError("Could not remove directory, '"+path+"'\nCheck the folder write permissions")
+			LOGGER.error("Could not remove directory, '"+path+"'\nCheck the folder write permissions")
 			return False
 	return True
 
@@ -371,7 +375,7 @@ def convertParserToParams(parser,optargs=sys.argv[1:]):
 	parser.disable_interspersed_args()
 	(options, args) = parser.parse_args(optargs)
 	if len(args) > 0:
-		apDisplay.printError("Unknown commandline options: "+str(args))
+		LOGGER.error("Unknown commandline options: "+str(args))
 	if len(optargs) < 1 or (len(optargs) == 1 and '--jobtype=' in optargs[0]):
 		parser.print_help()
 		parser.error("no options defined")
@@ -471,14 +475,14 @@ def resetVirtualFrameBuffer(killall=False):
 	#random 4 digit port
 	port = int(random.random()*9000+1000)
 	portstr = str(port)
-	apDisplay.printMsg("Opening Xvfb port "+portstr)
+	LOGGER.info("Opening Xvfb port "+portstr)
 	xvfbcmd = (
 		"Xvfb :"+portstr
 		+" -once -ac -pn -screen 0 1200x1200x24 "
 		+fontpath+securfile+rgbfile
 		+" &"
 	)
-	apDisplay.printMsg(xvfbcmd)
+	LOGGER.info(xvfbcmd)
 	logf.write(xvfbcmd)
 	proc = subprocess.Popen(xvfbcmd, shell=True, stdout=logf, stderr=logf)
 	os.environ["DISPLAY"] = ":"+portstr
@@ -513,7 +517,7 @@ def killVirtualFrameBuffer(port=None):
 				rmxfile = "/bin/rm -fv /tmp/.X11-unix/X%d"%(port)
 				proc = subprocess.Popen(rmxfile, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 				proc.wait()
-				apDisplay.printMsg("Killed Xvfb on port %d"%(port))
+				LOGGER.info("Killed Xvfb on port %d"%(port))
 				return
 	return
 
@@ -529,7 +533,7 @@ def getFontPath(msg=True):
 		alias = os.path.join(path, "fonts.alias")
 		if os.path.isdir(path) and os.path.isfile(alias):
 			return " -fp "+path
-	apDisplay.printWarning("Xvfb: could not find Font Path")
+	LOGGER.warning("Xvfb: could not find Font Path")
 	return " "
 
 #=====================
@@ -548,7 +552,7 @@ def getSecureFile(msg=True):
 	for securfile in filelist:
 		if os.path.isfile(securfile):
 			return " -sp "+securfile
-	apDisplay.printWarning("Xvfb: could not find Security File")
+	LOGGER.warning("Xvfb: could not find Security File")
 	return " "
 
 #=====================
@@ -569,7 +573,7 @@ def getRgbFile(msg=True):
 	for rgbfile in filelist:
 		if os.path.isfile(rgbfile+".txt"):
 			return " -co "+rgbfile
-	apDisplay.printWarning("Xvfb: could not find RGB File")
+	LOGGER.warning("Xvfb: could not find RGB File")
 	return " "
 
 #=====================
@@ -590,7 +594,7 @@ def getNumProcessors(msg=True):
 				nproc += 1
 		f.close()
 	if msg is True:
-		apDisplay.printMsg("Found %i processors on this machine"%nproc)
+		LOGGER.info("Found %i processors on this machine"%nproc)
 	return nproc
 
 #=====================
@@ -598,7 +602,7 @@ def setUmask(msg=False):
 	newUmask = 002
 	prev = os.umask(newUmask)
 	if msg is True:
-		apDisplay.printMsg("Umask changed from "+str(prev)+" to "+str(newUmask))
+		LOGGER.info("Umask changed from "+str(prev)+" to "+str(newUmask))
 	return
 
 #=====================
@@ -610,7 +614,7 @@ def getExecPath(exefile, die=False):
 	if len(path) < 1:
 		if die is False:
 			return None
-		apDisplay.printError("Cound not find "+exefile+" in your PATH")
+		LOGGER.error("Cound not find "+exefile+" in your PATH")
 	return path
 
 #=====================
@@ -648,11 +652,11 @@ def runCmd(cmd, package="", verbose=False, showcmd=True, logfile=None, fail=Fals
 				waittime *= 1.1
 				time.sleep(waittime)
 	except:
-		apDisplay.printWarning("could not run command: "+cmd)
+		LOGGER.warning("could not run command: "+cmd)
 		raise
 	tdiff = time.time() - t0
 	if tdiff > 20:
-		apDisplay.printMsg("completed in "+apDisplay.timeString(tdiff))
+		LOGGER.info("completed in "+apDisplay.timeString(tdiff))
 	elif waited is True:
 		print ""
 
@@ -706,7 +710,7 @@ def ts(key, value, usage_key):
 		# usage_key is the flag for boolean type value
 		return '--%s' % usage_key
 	if key != usage_key:
-		apDisplay.printDebug('using %s instead of %s' % (usage_key, key))
+		LOGGER.debug('using %s instead of %s' % (usage_key, key))
 	# value conversion
 	if type(value) == type(all):
 		output = '--%s=%s' % (usage_key, value.__name__)

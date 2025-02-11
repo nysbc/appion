@@ -19,6 +19,10 @@ from appionlib import apScriptLog
 from appionlib.apCtf import ctftools
 from appionlib.StackClass import stackTools
 
+import logging
+
+LOGGER=logging.getLogger(__name__)
+
 debug = False
 
 ####
@@ -34,16 +38,16 @@ def makeNewStack(oldstack, newstack, partlist=None, remove=False, bad=False):
 	this is essentially subStack
 	"""
 	if not os.path.isfile(oldstack):
-		apDisplay.printWarning("could not find old stack: "+oldstack)
+		LOGGER.warning("could not find old stack: "+oldstack)
 
 	if os.path.isfile(newstack):
 		if remove is True:
-			apDisplay.printWarning("removing old stack: "+newstack)
+			LOGGER.warning("removing old stack: "+newstack)
 			time.sleep(2)
 			apFile.removeStack(newstack)
 		else:
-			apDisplay.printError("new stack already exists: "+newstack)
-	apDisplay.printMsg("creating a new stack\n\t"+newstack+
+			LOGGER.error("new stack already exists: "+newstack)
+	LOGGER.info("creating a new stack\n\t"+newstack+
 		"\nfrom the oldstack\n\t"+oldstack+"\n")
 
 	if isinstance(partlist, str) and os.path.exists(partlist):
@@ -63,7 +67,7 @@ def makeNewStack(oldstack, newstack, partlist=None, remove=False, bad=False):
 			badlist = list(set(range(1, oldstacknumpart+1)) - set(partlist))
 			stackTools.createSubStack(oldstack, badstack, badlist, msg=True)
 		else:
-			apDisplay.printMsg("Rejecting more particles than keeping, not creating a bad stack")
+			LOGGER.info("Rejecting more particles than keeping, not creating a bad stack")
 	return
 
 #===============
@@ -92,13 +96,13 @@ def getVirtualStackParticlesFromId(stackid, msg=True):
 	"""
 
 	if msg is True:
-		apDisplay.printMsg("Querying original particles from stackid="+str(stackid))
+		LOGGER.info("Querying original particles from stackid="+str(stackid))
 
 	stackdata = getOnlyStackData(stackid, msg=False)
 	try:
 		oldstackid = stackdata['oldstack'].dbid
 	except:
-		apDisplay.printError("Virtual stack: %i does not have original stack information")
+		LOGGER.error("Virtual stack: %i does not have original stack information")
 
 	# first find original stack that has a file associated with it
 	orig_stack = None
@@ -108,7 +112,7 @@ def getVirtualStackParticlesFromId(stackid, msg=True):
 		if not os.path.isfile(orig_stackfile):
 			oldstackid=orig_stackdata['oldstack'].dbid
 		else:
-			apDisplay.printMsg("original stackid: %i"%oldstackid)
+			LOGGER.info("original stackid: %i"%oldstackid)
 			orig_stack=oldstackid
 
 	sqlcmd = "SELECT s1.* FROM ApStackParticleData s1 "+ \
@@ -133,18 +137,18 @@ def checkDefocPairFromStackId(stackId):
 def getStackParticlesFromId(stackid, msg=True):
 	t0 = time.time()
 	if msg is True:
-		apDisplay.printMsg("querying stack particles from stackid="+str(stackid)+" at "+time.asctime())
+		LOGGER.info("querying stack particles from stackid="+str(stackid)+" at "+time.asctime())
 	stackdata = appiondata.ApStackData.direct_query(stackid)
 	stackq = appiondata.ApStackParticleData()
 	stackq['stack'] = stackdata
 	stackpartdata = stackq.query(readimages=False)
 	if not stackpartdata:
-		apDisplay.printWarning("failed to get particles of stackid="+str(stackid))
+		LOGGER.warning("failed to get particles of stackid="+str(stackid))
 	if msg is True:
-		apDisplay.printMsg("sorting particles")
+		LOGGER.info("sorting particles")
 	stackpartdata.sort(sortStackParts)
 	if msg is True:
-		apDisplay.printMsg("received "+str(len(stackpartdata))
+		LOGGER.info("received "+str(len(stackpartdata))
 			+" stack particles in "+apDisplay.timeString(time.time()-t0))
 	return stackpartdata
 
@@ -165,14 +169,14 @@ def getImageIdsFromStack(stackid, msg=True):
 	stackparticledata=stackq.query()
 	stackimages = []
 	if msg is True:
-		apDisplay.printMsg("querying particle images from stackid="+str(stackid)+" on "+time.asctime())
+		LOGGER.info("querying particle images from stackid="+str(stackid)+" on "+time.asctime())
 	for sp in stackparticledata:
 		spimagedata = sp['particle']['image']
 		spimageid = spimagedata.dbid
 		if spimageid not in stackimages:
 			stackimages.append(spimageid)
 	if msg is True:
-		apDisplay.printMsg("Found %d images from stackid=%d" % (len(stackimages),stackid))
+		LOGGER.info("Found %d images from stackid=%d" % (len(stackimages),stackid))
 	return stackimages
 
 #===============
@@ -185,7 +189,7 @@ def sortStackParts(a, b):
 #===============
 def getOneParticleFromStackId(stackid, particlenumber=1, msg=True):
 	if msg is True:
-		apDisplay.printMsg("querying one stack particle from stackid="+str(stackid)+" on "+time.asctime())
+		LOGGER.info("querying one stack particle from stackid="+str(stackid)+" on "+time.asctime())
 	stackdata=appiondata.ApStackData.direct_query(stackid)
 	stackq=appiondata.ApStackParticleData()
 	stackq['stack'] = stackdata
@@ -204,10 +208,10 @@ def getKiloVoltsFromStackId(stackid, msg=False):
 #===============
 def getOnlyStackData(stackid, msg=True):
 	if msg is True:
-		apDisplay.printMsg("Getting stack data for stackid="+str(stackid))
+		LOGGER.info("Getting stack data for stackid="+str(stackid))
 	stackdata = appiondata.ApStackData.direct_query(stackid)
 	if not stackdata:
-		apDisplay.printError("Stack ID: "+str(stackid)+" does not exist in the database")
+		LOGGER.error("Stack ID: "+str(stackid)+" does not exist in the database")
 	if msg is True:
 		sys.stderr.write("Old stack info: ")
 		apDisplay.printColor("'"+stackdata['description']+"'","cyan")
@@ -216,8 +220,8 @@ def getOnlyStackData(stackid, msg=True):
 #===============
 def getStackParticle(stackid, partnum, noDie=False):
 	if partnum <= 0:
-		apDisplay.printMsg("cannot get particle %d from stack %d"%(partnum,stackid))
-	#apDisplay.printMsg("getting particle %d from stack %d"%(partnum,stackid))
+		LOGGER.info("cannot get particle %d from stack %d"%(partnum,stackid))
+	#LOGGER.info("getting particle %d from stack %d"%(partnum,stackid))
 	stackparticleq = appiondata.ApStackParticleData()
 	stackparticleq['stack'] = appiondata.ApStackData.direct_query(stackid)
 	stackparticleq['particleNumber'] = partnum
@@ -225,9 +229,9 @@ def getStackParticle(stackid, partnum, noDie=False):
 	if not stackparticledata:
 		if noDie is True:
 			return
-		apDisplay.printError("partnum="+str(partnum)+" was not found in stackid="+str(stackid))
+		LOGGER.error("partnum="+str(partnum)+" was not found in stackid="+str(stackid))
 	if len(stackparticledata) > 1:
-		apDisplay.printError("There's a problem with this stack. More than one particle with the same number.")
+		LOGGER.error("There's a problem with this stack. More than one particle with the same number.")
 	return stackparticledata[0]
 
 #===============
@@ -239,7 +243,7 @@ def getStackParticleFromAlignParticle(alignrunid, alignpartnum, noDie=False):
 	if not alignstackdatas:
 		if noDie is True:
 			return
-		apDisplay.printError("alignpartnum="+str(alignpartnum)+" was not found in alignrunid="+str(alignrunid))	
+		LOGGER.error("alignpartnum="+str(alignpartnum)+" was not found in alignrunid="+str(alignrunid))	
 	alignstackdata = alignstackdatas[0]
 	alignpartq = appiondata.ApAlignParticleData()	
 	alignpartq['alignstack'] = alignstackdata
@@ -248,9 +252,9 @@ def getStackParticleFromAlignParticle(alignrunid, alignpartnum, noDie=False):
 	if not alignpartdata:
 		if noDie is True:
 			return
-		apDisplay.printError("alignpartnum="+str(alignpartnum)+" was not found in alignrunid="+str(alignrunid))	
+		LOGGER.error("alignpartnum="+str(alignpartnum)+" was not found in alignrunid="+str(alignrunid))	
 	if len(alignpartdata) > 1:
-		apDisplay.printError("There's a problem with this align stack. More than one particle with the same number.")
+		LOGGER.error("There's a problem with this align stack. More than one particle with the same number.")
 	return alignpartdata[0]['stackpart']
 
 #===============
@@ -262,9 +266,9 @@ def getStackParticleFromData(stackid, partdata, noDie=False):
 	if not stackparticledata:
 		if noDie is True:
 			return
-		apDisplay.printError("partid="+str(partdata.dbid)+" was not found in stackid="+str(stackid))
+		LOGGER.error("partid="+str(partdata.dbid)+" was not found in stackid="+str(stackid))
 	if len(stackparticledata) > 1:
-		apDisplay.printError("There's a problem with this stack. More than one particle with the same particledata.")
+		LOGGER.error("There's a problem with this stack. More than one particle with the same particledata.")
 	return stackparticledata[0]
 
 #===============
@@ -299,7 +303,7 @@ def checkForPreviousStack(stackname, stackpath=None):
 	stackdata = stackq.query(results=1)
 	if stackdata:
 		sdbid = stackdata[0].dbid
-		apDisplay.printError("A stack with name "+stackname+" (id: "+ \
+		LOGGER.error("A stack with name "+stackname+" (id: "+ \
 			str(sdbid)+") and path "+spath+" already exists!")
 	return
 
@@ -314,11 +318,11 @@ def getStackIdFromIterationId(iterid, msg=True):
 def getStackIdFromRecon(reconrunid, msg=True):
 	reconrundata = appiondata.ApRefineRunData.direct_query(reconrunid)
 	if not reconrundata:
-		apDisplay.printWarning("Could not find stack id for Recon Run="+str(reconrunid))
+		LOGGER.warning("Could not find stack id for Recon Run="+str(reconrunid))
 		return None
 	stackid = reconrundata['stack'].dbid
 	if msg is True:
-		apDisplay.printMsg("Found Stack id="+str(stackid)+" for Recon Run id="+str(reconrunid))
+		LOGGER.info("Found Stack id="+str(stackid)+" for Recon Run id="+str(reconrunid))
 	return stackid
 
 #===============
@@ -336,9 +340,9 @@ def getParticleContrastFromStackId(stackId):
 
 #======================
 def getParticleContrastFromMrc(mrcfile):
-	apDisplay.printMsg("Particle contrast determination is experimental")
+	LOGGER.info("Particle contrast determination is experimental")
 	if not os.path.isfile(mrcfile):
-		apDisplay.printWarning("Could not determine particle contrast, mrc file not found")
+		LOGGER.warning("Could not determine particle contrast, mrc file not found")
 		return None
 	rawimage = mrc.read(mrcfile)
 	boxSize = min(rawimage.shape)-1
@@ -375,10 +379,10 @@ def getParticleContrastFromMrc(mrcfile):
 		pyplot.show()
 		
 	if innerVal > outerVal:
-		apDisplay.printMsg("Contrast determined as WHITE particles on black background")
+		LOGGER.info("Contrast determined as WHITE particles on black background")
 		return "whiteOnBlack"
 	else:
-		apDisplay.printMsg("Contrast determined as BLACK particles on white background")
+		LOGGER.info("Contrast determined as BLACK particles on white background")
 		print "BLACK on white", mrcfile	
 		return "blackOnWhite"
 
@@ -413,7 +417,7 @@ def commitSubStack(params, newname=False, centered=False, oldstackparts=None, so
 	stackdata=stackq.query(results=1)
 
 	if stackdata:
-		apDisplay.printWarning("A stack with these parameters already exists")
+		LOGGER.warning("A stack with these parameters already exists")
 		return
 	stackq['oldstack'] = oldstackdata
 	stackq['hidden'] = False
@@ -436,13 +440,13 @@ def commitSubStack(params, newname=False, centered=False, oldstackparts=None, so
 
 	## insert now before datamanager cleans up referenced data
 	stackq.insert()
-	apDisplay.printMsg("created new stackdata in %s\n"%(apDisplay.timeString(time.time()-t0)))
+	LOGGER.info("created new stackdata in %s\n"%(apDisplay.timeString(time.time()-t0)))
 
 	newstackid = stackq.dbid
 
 	t0 = time.time()
 	# get list of included particles
-	apDisplay.printMsg("Getting list of particles to include")
+	LOGGER.info("Getting list of particles to include")
 
 	if included:
 		listfilelines = [p+1 for p in included]
@@ -457,14 +461,14 @@ def commitSubStack(params, newname=False, centered=False, oldstackparts=None, so
 			if re.match("[0-9]+", sline):
 				listfilelines.append(int(sline.split()[0])+1)
 			else:
-				apDisplay.printWarning("Line in listfile is not int: "+str(line))
+				LOGGER.warning("Line in listfile is not int: "+str(line))
 		f.close()
 		listfilelines.sort()
 
-	apDisplay.printMsg("Completed in "+apDisplay.timeString(time.time()-t0)+"\n")
+	LOGGER.info("Completed in "+apDisplay.timeString(time.time()-t0)+"\n")
 
 	## index old stack particles by number
-	apDisplay.printMsg("Retrieving original stack information")
+	LOGGER.info("Retrieving original stack information")
 	t0 = time.time()
 	part_by_number = {}
 	
@@ -478,9 +482,9 @@ def commitSubStack(params, newname=False, centered=False, oldstackparts=None, so
 	for part in oldstackparts:
 		part_by_number[part['particleNumber']] = part
 
-	apDisplay.printMsg("Completed in "+apDisplay.timeString(time.time()-t0)+"\n")
+	LOGGER.info("Completed in "+apDisplay.timeString(time.time()-t0)+"\n")
 	
-	apDisplay.printMsg("Assembling database insertion command")
+	LOGGER.info("Assembling database insertion command")
 	t0 = time.time()
 	count = 0
 	newpartnum = 1
@@ -516,7 +520,7 @@ def commitSubStack(params, newname=False, centered=False, oldstackparts=None, so
 
 		newpartnum += 1
 
-	apDisplay.printMsg("Inserting particle information into database")
+	LOGGER.info("Inserting particle information into database")
 
 	sqlstart = "INSERT INTO `ApStackParticleData` (`" + \
 		"`,`".join(sqlParams)+ "`) VALUES "
@@ -533,13 +537,13 @@ def commitSubStack(params, newname=False, centered=False, oldstackparts=None, so
 
 	sys.stderr.write("\n")
 	if newpartnum == 0:
-		apDisplay.printError("No particles were inserted for the stack")
+		LOGGER.error("No particles were inserted for the stack")
 
 	apDisplay.printColor("Inserted "+str(newpartnum-1)+ \
 		" stack particles into the database in "+ \
 		apDisplay.timeString(time.time()-t0),"cyan")
 
-	apDisplay.printMsg("\nInserting Runs in Stack")
+	LOGGER.info("\nInserting Runs in Stack")
 	runsinstack = getRunsInStack(params['stackid'])
 	for run in runsinstack:
 		newrunsq = appiondata.ApRunsInStackData()
@@ -548,9 +552,9 @@ def commitSubStack(params, newname=False, centered=False, oldstackparts=None, so
 		if params['commit'] is True:
 			newrunsq.insert()
 		else:
-			apDisplay.printWarning("Not committing to the database")
+			LOGGER.warning("Not committing to the database")
 
-	apDisplay.printMsg("finished")
+	LOGGER.info("finished")
 	return
 
 def stackPartListToSQLInsertString(stackpartlist, stackid, stackrunid):
@@ -609,7 +613,7 @@ def commitMaskedStack(params, oldstackparts, newname=False):
 	stackdata=stackq.query(results=1)
 
 	if stackdata:
-		apDisplay.printWarning("A stack with these parameters already exists")
+		LOGGER.warning("A stack with these parameters already exists")
 		return
 	stackq['oldstack'] = oldstackdata
 	stackq['hidden'] = False
@@ -625,7 +629,7 @@ def commitMaskedStack(params, oldstackparts, newname=False):
 	stackq.insert()
 
 	#Insert particles
-	apDisplay.printMsg("Inserting stack particles")
+	LOGGER.info("Inserting stack particles")
 	count = 0
 	newpartnum = 1
 	total = len(oldstackparts)
@@ -645,11 +649,11 @@ def commitMaskedStack(params, oldstackparts, newname=False):
 		newpartnum += 1
 	sys.stderr.write("\n")
 	if newpartnum == 0:
-		apDisplay.printError("No particles were inserted for the stack")
+		LOGGER.error("No particles were inserted for the stack")
 
-	apDisplay.printMsg("Inserted "+str(newpartnum-1)+" stack particles into the database")
+	LOGGER.info("Inserted "+str(newpartnum-1)+" stack particles into the database")
 
-	apDisplay.printMsg("Inserting Runs in Stack")
+	LOGGER.info("Inserting Runs in Stack")
 	runsinstack = getRunsInStack(params['stackid'])
 	for run in runsinstack:
 		newrunsq = appiondata.ApRunsInStackData()
@@ -658,9 +662,9 @@ def commitMaskedStack(params, oldstackparts, newname=False):
 		if params['commit'] is True:
 			newrunsq.insert()
 		else:
-			apDisplay.printWarning("Not commiting to the database")
+			LOGGER.warning("Not commiting to the database")
 
-	apDisplay.printMsg("finished")
+	LOGGER.info("finished")
 	return
 
 def getStackBinningFromStackId(stackId):
@@ -680,15 +684,15 @@ def getStackPixelSizeFromStackId(stackId, msg=True):
 		### Quicker method
 		stackapix = stackdata['pixelsize']*1e10
 		if msg is True:
-			apDisplay.printMsg("Stack "+str(stackId)+" pixel size: "+str(round(stackapix,3)))
+			LOGGER.info("Stack "+str(stackId)+" pixel size: "+str(round(stackapix,3)))
 		return stackapix
-	apDisplay.printWarning("Getting stack pixel size from leginon DB, not tested on defocal pairs")
+	LOGGER.warning("Getting stack pixel size from leginon DB, not tested on defocal pairs")
 	stackpart = getOneParticleFromStackId(stackId, msg=msg)
 	imgapix = apDatabase.getPixelSize(stackpart['particle']['image'])
 	stackbin = getStackBinningFromStackId(stackId)
 	stackapix = imgapix*stackbin
 	if msg is True:
-		apDisplay.printMsg("Stack "+str(stackId)+" pixel size: "+str(round(stackapix,3)))
+		LOGGER.info("Stack "+str(stackId)+" pixel size: "+str(round(stackapix,3)))
 	return stackapix
 
 #===============
@@ -719,7 +723,7 @@ def getStackBoxsize(stackId, msg=True):
 	stackbin = runsindata[0]['stackRun']['stackParams']['bin']
 	stackboxsize = int(rawboxsize/stackbin)
 	if msg is True:
-		apDisplay.printMsg("Stack "+str(stackId)+" box size: "+str(stackboxsize))
+		LOGGER.info("Stack "+str(stackId)+" box size: "+str(stackboxsize))
 	return stackboxsize
 
 #===============
@@ -745,7 +749,7 @@ def getStackIdFromPath(stackpath):
 	stackq['path'] = pathq
 	stackdatas = stackq.query()
 	if len(stackdatas) > 1:
-		apDisplay.printError("More than one stack has path: "+stackpath)
+		LOGGER.error("More than one stack has path: "+stackpath)
 	return stackdatas[0].dbid
 
 #===============
@@ -777,9 +781,9 @@ def getStackIdFromRunName(runname, sessionname, msg=True):
 	else:
 		for runsindata in runsindatas:
 			print runsindata
-		apDisplay.printError("Found too many stacks for specified criteria")
+		LOGGER.error("Found too many stacks for specified criteria")
 
-	apDisplay.printMsg("Found stack id %d with runname %s from session %s"%(stackid, runname, sessionname))
+	LOGGER.info("Found stack id %d with runname %s from session %s"%(stackid, runname, sessionname))
 	return stackid
 
 #===============
@@ -807,9 +811,9 @@ def getStackIdFromSubStackName(substackname, sessionname, msg=True):
 	else:
 		for runsindata in runsindatas:
 			print runsindata
-		apDisplay.printError("Found too many sub-stacks for specified criteria")
+		LOGGER.error("Found too many sub-stacks for specified criteria")
 
-	apDisplay.printMsg("Found stack id %d with substackname %s from session %s"%(stackid, substackname, sessionname))
+	LOGGER.info("Found stack id %d with substackname %s from session %s"%(stackid, substackname, sessionname))
 	return stackid
 
 #===============
@@ -844,9 +848,9 @@ def getStackParticleFromParticleId(particleid, stackid, noDie=False):
 	if not stackpnum:
 		if noDie is True:
 			return
-		apDisplay.printError("partnum="+str(particleid)+" was not found in stackid="+str(stackid))
+		LOGGER.error("partnum="+str(particleid)+" was not found in stackid="+str(stackid))
 	if len(stackpnum) > 1:
-		apDisplay.printError("There's a problem with this stack. More than one particle with the same number.")
+		LOGGER.error("There's a problem with this stack. More than one particle with the same number.")
 	return stackpnum[0]
 
 #===============
@@ -864,7 +868,7 @@ def getImageParticles(imagedata, stackid, noDie=True):
 	if not stackpartdata:
 		if noDie is True:
 			return particles, None
-		apDisplay.printError("no stack particles were found for stackid=%d and image"%(stackid))
+		LOGGER.error("no stack particles were found for stackid=%d and image"%(stackid))
 	for stackpart in stackpartdata:
 		particles.append(stackpart['particle'])
 	return particles,stackpartdata
@@ -921,7 +925,7 @@ def getExistingRefineStack(stackrefdata,format,phaseflipped,last_part=None,bin=1
 			refinestackfile = os.path.join(refinestackdata['preprefine']['path']['path'],refinestackdata['filename'])
 			if os.path.isfile(refinestackfile):
 				break
-		apDisplay.printMsg('Found an existing refinestack of the same format and params: %s' % ( refinestackfile))
+		LOGGER.info('Found an existing refinestack of the same format and params: %s' % ( refinestackfile))
 	return refinestackfile
 		
 ####

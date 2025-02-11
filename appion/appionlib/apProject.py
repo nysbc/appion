@@ -1,9 +1,8 @@
 # FUNCTIONS THAT WORK ON TEMPLATES
 
 #pythonlib
-import os
-import sys
 import time
+import logging
 #appion
 from appionlib import apDisplay
 from appionlib import apStack
@@ -12,13 +11,15 @@ import sinedon
 import leginon.projectdata
 import leginon.leginondata
 
+LOGGER=logging.getLogger(__name__)
+
 #========================
 def getProjectIdFromSessionData(sessiondata):
 	projq = leginon.projectdata.projectexperiments()
 	projq['session'] = sessiondata
 	projdatas = projq.query(results=1)
 	if not projdatas:
-		apDisplay.printError("could not find project for session "+sessiondata['name'])	
+		LOGGER.error("could not find project for session "+sessiondata['name'])	
 	projdata = projdatas[0]
 	projectid = projdata['project'].dbid
 	return projectid
@@ -46,7 +47,7 @@ def getProjectIdFromSessionName(sessionname):
 	### get project
 	projectid = getProjectIdFromSessionData(sessiondata)
 
-	apDisplay.printMsg("Found project id="+str(projectid)+" for session "+sessionname
+	LOGGER.info("Found project id="+str(projectid)+" for session "+sessionname
 		+" in "+apDisplay.timeString(time.time()-t0))
 	return projectid
 
@@ -58,7 +59,7 @@ def getSessionDataFromSessionName(sessionname):
 	sessionq['name'] = sessionname
 	sessiondatas = sessionq.query(results=1)
 	if not sessiondatas:
-		apDisplay.printWarning("could not find session "+sessionname)
+		LOGGER.warning("could not find session "+sessionname)
 		return None
 	sessiondata = sessiondatas[0]
 	return sessiondata
@@ -90,9 +91,9 @@ def getAppionDBFromProjectId(projectid, die=True):
 	procdatas = processingdbq.query(results=1)
 	if not procdatas:
 		if die is True:
-			apDisplay.printError("could not find appion db name for project %d "%(projectid))
+			LOGGER.error("could not find appion db name for project %d "%(projectid))
 		else:
-			apDisplay.printWarning("could not find appion db name for project %d "%(projectid))
+			LOGGER.warning("could not find appion db name for project %d "%(projectid))
 			return None
 	procdata = procdatas[0]
 	dbname = procdata['appiondb']

@@ -18,7 +18,7 @@ class FilterLoop(appionLoop2.AppionLoop):
 		"""
 		put in any additional parser options
 		"""
-		apDisplay.printError("you did not create a 'setupParserOptions' function in your script")
+		self.logger.error("you did not create a 'setupParserOptions' function in your script")
 		raise NotImplementedError()
 
 	#=====================
@@ -26,7 +26,7 @@ class FilterLoop(appionLoop2.AppionLoop):
 		"""
 		put in any additional conflicting parameters
 		"""
-		apDisplay.printError("you did not create a 'checkConflicts' function in your script")
+		self.logger.error("you did not create a 'checkConflicts' function in your script")
 		raise NotImplementedError()
 
 	#=====================
@@ -45,7 +45,7 @@ class FilterLoop(appionLoop2.AppionLoop):
 			imgdata, sinedon dictionary with image info
 			filtarray, filtered array ready for processing
 		"""
-		apDisplay.printError("you did not create a 'processImage' function in your script")
+		self.logger.error("you did not create a 'processImage' function in your script")
 		raise NotImplementedError()
 
 	#=====================
@@ -53,7 +53,7 @@ class FilterLoop(appionLoop2.AppionLoop):
 		"""
 		put in any additional commit parameters
 		"""
-		apDisplay.printError("you did not create a 'commitToDatabase' function in your script")
+		self.logger.error("you did not create a 'commitToDatabase' function in your script")
 		raise NotImplementedError()
 
 	#=====================
@@ -74,7 +74,7 @@ class FilterLoop(appionLoop2.AppionLoop):
 		"""
 		self.filtimgpath = os.path.join(self.params['rundir'], imgdata['filename']+'.dwn.mrc')
 		if os.path.isfile(self.filtimgpath) and self.params['continue'] is True:
-			apDisplay.printMsg("reading filtered image from mrc file")
+			self.logger.info("reading filtered image from mrc file")
 			self.filtarray = apImage.mrcToArray(self.filtimgpath, msg=False)
 		else:
 			self.imgFilter.readParamsDict(self.params)
@@ -123,7 +123,7 @@ class FilterLoop(appionLoop2.AppionLoop):
 		"""
 		hack to override appionScript close
 		"""
-		#apDisplay.printMsg("Waiting 10 seconds for threads to complete")
+		#self.logger.info("Waiting 10 seconds for threads to complete")
 		#time.sleep(10)
 		if self.params['keepall'] is False and self.params['limit'] is None:
 			pattern = os.path.join(self.params['rundir'], self.params['sessionname']+'*.dwn.mrc')

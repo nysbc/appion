@@ -8,7 +8,7 @@ from struct import unpack
 import re
 import subprocess
 import glob
-from appionlib import apDisplay
+import logging
 
 """
 This is based on the spyder.py setup
@@ -32,11 +32,11 @@ def fileFilter(infile, exists=True):
 	checks that the input imagic file exists, and returns the filename
 	without the extension
 	"""
-
+	logger=logging.getLogger(__name__)
 	fname,ext=os.path.splitext(infile)
 	if exists is True:
 		if not (os.path.exists(fname+".hed") and os.path.exists(fname+".img")):
-			apDisplay.printError("input file: '%s' does not exist in imagic format"%infile)
+			logger.error("input file: '%s' does not exist in imagic format"%infile)
 	fname = re.sub(os.getcwd()+"/", "", os.path.abspath(fname))
 	return fname
 
@@ -44,16 +44,17 @@ def fileFilter(infile, exists=True):
 #=====================
 class ImagicSession:
 	def __init__(self, imagicexe, nproc=1, imagicprocdir="", verbose=False, log=True):
+		self.logger=logging.getLogger(__name__)
 		# find imagic root	
 		if os.environ.has_key('IMAGIC_ROOT'):
 			self.imagicroot = os.environ['IMAGIC_ROOT']
 		else:
-			apDisplay.printError("$IMAGIC_ROOT directory is not specified, please specify this in your .cshrc / .bashrc")
+			self.logger.error("$IMAGIC_ROOT directory is not specified, please specify this in your .cshrc / .bashrc")
 
 		# make sure executable exists
 		self.imagicexe = os.path.join(self.imagicroot,imagicexe)
 		if not os.path.exists(self.imagicexe):
-			apDisplay.printError("imagic executable: '%s' not found"%self.imagicexe)
+			self.logger.error("imagic executable: '%s' not found"%self.imagicexe)
 
 		sys.stderr.write("\033[35m"+"executing IMAGIC command: %s\033[0m\n"%self.imagicexe)
 
@@ -61,7 +62,7 @@ class ImagicSession:
 		if nproc > 1:
 			mpiexec = os.path.join(self.imagicroot,"openmpi/bin/mpirun")
 			if not os.path.exists(mpiexec):
-				apDisplay.printError("imagic MPI executable: '%s' not found"%self.imagicexe)
+				self.logger.error("imagic MPI executable: '%s' not found"%self.imagicexe)
 			os.environ['IMAGIC_BATCH']="1"
 			self.imagicexe = ("%s -np %i -x IMAGIC_BATCH %s"%(mpiexec, nproc, self.imagicexe))
 
@@ -127,7 +128,7 @@ class ImagicSession:
 			v = re.search('\d\d\d\d\d\d',versionstr[0]).group(0)
 			return int(v)
 		else:
-			apDisplay.printError("Could not get version number from imagic root directory")
+			self.logger.error("Could not get version number from imagic root directory")
 
 	#=====================
 	def wait(self):

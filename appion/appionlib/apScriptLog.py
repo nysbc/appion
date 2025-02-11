@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 from appionlib import appiondata
 from appionlib import apParam
-from appionlib import apDisplay
+import logging
+
+LOGGER=logging.getLogger(__name__)
 
 def getScriptProgramRunFromRunname(runname,pathdata,jobdata=None):
 	q = appiondata.ScriptProgramRun(runname=runname,rundir=pathdata,job=jobdata)
@@ -14,10 +16,10 @@ def getScriptProgramRunFromRunname(runname,pathdata,jobdata=None):
 			q = appiondata.ScriptProgramRun(runname=runname,job=jobdata)
 			if len(results) == 1:
 				return results[0]
-			apDisplay.printError('No ScriptProgramRun is found for runname %s' % (runname))
+			LOGGER.error('No ScriptProgramRun is found for runname %s' % (runname))
 		else:
-			apDisplay.printWarning('%d ScriptProgramRuns are found for runname %s' % (len(results),runname))
-			apDisplay.printWarning('Use most recent one')
+			LOGGER.warning('%d ScriptProgramRuns are found for runname %s' % (len(results),runname))
+			LOGGER.warning('Use most recent one')
 			return results[0]
 
 def getScriptParamValuesFromRun(prog_run):
