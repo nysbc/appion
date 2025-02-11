@@ -45,6 +45,7 @@ class AppionLoop(appionScript.AppionScript):
 		self.scaleUp=0
 		self.scaleDown=0
 		self.todolist=False
+		self.logger=logging.getLogger(__name__)
 
 	#=====================
 	def setWaitSleepMin(self,minutes):
@@ -104,7 +105,7 @@ class AppionLoop(appionScript.AppionScript):
 		self.badprocess = False
 		self.stats['startloop'] = time.time()
 		while self.notdone:
-			apDisplay.printColor("\nBeginning Main Loop", "green")
+			self.logger.info("Beginning Main Loop")
 			imgnum = 0
 			while imgnum < len(self.imgtree) and self.notdone is True:
 				self.stats['startimage'] = time.time()
@@ -119,7 +120,7 @@ class AppionLoop(appionScript.AppionScript):
 				### set the pixel size
 				self.params['apix'] = apDatabase.getPixelSize(imgdata)
 				if not self.params['background']:
-					apDisplay.printMsg("Pixel size: "+str(self.params['apix']))
+					self.logger.info("Pixel size: %s " % str(self.params['apix']))
 
 				### START any custom functions HERE:
 				results = self.loopProcessImage(imgdata)
@@ -128,16 +129,15 @@ class AppionLoop(appionScript.AppionScript):
 				if self.badprocess is False:
 					if self.params['commit'] is True:
 						if not self.params['background']:
-							apDisplay.printColor(" ==== Committing data to database ==== ", "blue")
+							self.logger.info("Committing data to database")
 						self.loopCommitToDatabase(imgdata)
 						self.commitResultsToDatabase(imgdata, results)
 					else:
-						apDisplay.printWarning("not committing results to database, all data will be lost")
-						apDisplay.printMsg("to preserve data start script over and add 'commit' flag")
+						self.logger.warning("Not committing results to database, all data will be lost.  To preserve data start script over and add 'commit' flag")
 						self.writeResultsToFiles(imgdata, results)
 					self.loopCleanUp(imgdata)
 				else:
-					apDisplay.printWarning("IMAGE FAILED; nothing inserted into database")
+					self.logger.warning("IMAGE FAILED; nothing inserted into database")
 					self.badprocess = False
 					self.stats['lastpeaks'] = 0
 				### FINISH with custom functions
@@ -174,7 +174,7 @@ class AppionLoop(appionScript.AppionScript):
 
 		# This just print. It does not really do anything
 		if self.params['limit'] is not None and self.stats['totalcount'] > self.params['limit']:
-			apDisplay.printWarning("reached image limit of "+str(self.params['limit'])+"; now stopping")
+			self.logger.warning("reached image limit of "+str(self.params['limit'])+"; now stopping")
 
 	#=====================
 	def loopProcessImage(self, imgdata):
@@ -202,7 +202,7 @@ class AppionLoop(appionScript.AppionScript):
 		"""
 		put in any additional parser options
 		"""
-		apDisplay.printError("you did not create a 'setupParserOptions' function in your script")
+		self.logger.error("you did not create a 'setupParserOptions' function in your script")
 		raise NotImplementedError()
 
 	#=====================
@@ -210,7 +210,7 @@ class AppionLoop(appionScript.AppionScript):
 		"""
 		put in any additional conflicting parameters
 		"""
-		apDisplay.printError("you did not create a 'checkConflicts' function in your script")
+		self.logger.error("you did not create a 'checkConflicts' function in your script")
 		raise NotImplementedError()
 
 	#=====================
@@ -244,7 +244,7 @@ class AppionLoop(appionScript.AppionScript):
 		this is the main component of the script
 		where all the processing is done
 		"""
-		apDisplay.printError("you did not create a 'processImage' function in your script")
+		self.logger.error("you did not create a 'processImage' function in your script")
 		raise NotImplementedError()
 
 	#=====================
@@ -252,7 +252,7 @@ class AppionLoop(appionScript.AppionScript):
 		"""
 		put in any additional commit parameters
 		"""
-		apDisplay.printError("you did not create a 'commitToDatabase' function in your script")
+		self.logger.error("you did not create a 'commitToDatabase' function in your script")
 		raise NotImplementedError()
 
 	#=====================
@@ -318,25 +318,25 @@ class AppionLoop(appionScript.AppionScript):
 		appionScript.AppionScript.checkGlobalConflicts(self)
 
 		if self.params['runname'] is None:
-			apDisplay.printError("please enter a runname, example: 'runname=run1'")
+			self.logger.error("please enter a runname, example: 'runname=run1'")
 		if self.params['runname'] == 'templates':
-			apDisplay.printError("templates is a reserved runname, please use another runname")
+			self.logger.error("templates is a reserved runname, please use another runname")
 		if self.params['runname'] == 'models':
-			apDisplay.printError("models is a reserved runname, please use another runname")
+			self.logger.error("models is a reserved runname, please use another runname")
 		if self.params['rundir']is not None and self.params['runname'] != os.path.basename(self.params['rundir']):
-			apDisplay.printError("runname and rundir basename are different: "
+			self.logger.error("runname and rundir basename are different: "
 				+self.params['runname']+" vs. "+os.path.basename(self.params['rundir']))
 		if self.params['mrcnames'] and self.params['preset']:
-			apDisplay.printError("preset can not be specified if particular images have been specified")
+			self.logger.error("preset can not be specified if particular images have been specified")
 		if (self.params['sessionname'] is None and self.params['expid'] is None) and self.params['mrcnames'] is None:
-			apDisplay.printError("please specify an mrc name or session")
+			self.logger.error("please specify an mrc name or session")
 		if self.params['sessionname'] is None and self.params['expid'] is not None:
 			self.params['sessionname'] = apDatabase.getSessionDataFromSessionId(self.params['expid'])['name']
 		if self.params['sessionname'] is not None and self.params['projectid'] is not None:
 			### Check that project and images are in sync
 			imgproject = apProject.getProjectIdFromSessionName(self.params['sessionname'])
 			if imgproject and imgproject != self.params['projectid']:
-				apDisplay.printError("project id and session do not correlate")
+				self.logger.error("project id and session do not correlate")
 
 	#=====================
 	def setupGlobalParserOptions(self):
@@ -473,14 +473,14 @@ class AppionLoop(appionScript.AppionScript):
 		f=self._lockDoneDict()
 		f.seek(0)
 
-		apDisplay.printMsg("Attempting to read old done dictionary: "+os.path.basename(self.donedictfile))
+		self.logger.info("Attempting to read old done dictionary: "+os.path.basename(self.donedictfile))
 		try:
 			self.donedict=json.load(f)
 			f.seek(0)
 		except:
 			f.seek(0)
 			f.truncate()
-			apDisplay.printMsg("Failed to read old done dictionary; creating new done dictionary: "+os.path.basename(self.donedictfile))
+			self.logger.error("Failed to read old done dictionary; creating new done dictionary: "+os.path.basename(self.donedictfile))
 			self.donedict = {}
 			self.donedict['commit'] = self.params['commit']
 			json.dump(self.donedict, f)
@@ -490,18 +490,18 @@ class AppionLoop(appionScript.AppionScript):
 			try:
 				if self.donedict['commit'] == self.params['commit']:
 					### all is well
-					apDisplay.printMsg("Found "+str(len(self.donedict))+" done dictionary entries")
+					self.logger.info("Found "+str(len(self.donedict))+" done dictionary entries")
 					#Unlock DoneDict file
 					self._unlockDoneDict(f)
 					return
 				elif self.donedict['commit'] is True and self.params['commit'] is not True:
 					### die
-					apDisplay.printError("Commit flag was enabled and is now disabled, create a new runname")
+					self.logger.error("Commit flag was enabled and is now disabled, create a new runname")
 				else:
 					### set up fresh dictionary
-					apDisplay.printWarning("'--commit' flag was changed, creating new done dictionary")
+					self.logger.warning("'--commit' flag was changed, creating new done dictionary")
 			except KeyError:
-				apDisplay.printMsg("Found "+str(len(self.donedict))+" done dictionary entries")
+				self.logger.info("Found "+str(len(self.donedict))+" done dictionary entries")
 
 		#Unlock DoneDict file
 		self._unlockDoneDict(f)
@@ -510,21 +510,21 @@ class AppionLoop(appionScript.AppionScript):
 
 	#=====================
 	def _lockDoneDict(self):
-		apDisplay.printWarning('locking %s' % self.donedictfile)
+		self.logger.warning('locking %s' % self.donedictfile)
 		if not os.path.isfile(self.donedictfile):
 			try:
-				apDisplay.printWarning('creating %s' % self.donedictfile)
+				self.logger.warning('creating %s' % self.donedictfile)
 				f=open(self.donedictfile, 'a', 0666)
 				f.close()
 			except:
-				apDisplay.printWarning('%s already exists' % self.donedictfile)
+				self.logger.warning('%s already exists' % self.donedictfile)
 		f=open(self.donedictfile, 'r+')
 		flock(f, LOCK_EX)
 		return f
 
 	#=====================
 	def _unlockDoneDict(self, f):
-		apDisplay.printWarning('unlocking %s' % self.donedictfile)
+		self.logger.warning('unlocking %s' % self.donedictfile)
 		flock(f, LOCK_UN)
 		f.close()
 		return
@@ -586,32 +586,32 @@ class AppionLoop(appionScript.AppionScript):
 				self.imgtree = apDatabase.getAllImagesFromDB(self.params['sessionname'])
 		else:
 			if self.params['mrcnames'] is not None:
-				apDisplay.printMsg("MRC List: "+str(len(self.params['mrcnames']))+" : "+str(self.params['mrcnames']))
-			apDisplay.printMsg("Session: "+str(self.params['sessionname'])+" : "+str(self.params['preset']))
-			apDisplay.printError("no files specified")
+				self.logger.info("MRC List: "+str(len(self.params['mrcnames']))+" : "+str(self.params['mrcnames']))
+			self.logger.info("Session: "+str(self.params['sessionname'])+" : "+str(self.params['preset']))
+			self.logger.error("no files specified")
 		precount = len(self.imgtree)
-		apDisplay.printMsg("Found "+str(precount)+" images in "+apDisplay.timeString(time.time()-startt))
+		self.logger.info("Found "+str(precount)+" images in "+apDisplay.timeString(time.time()-startt))
 
 		### REMOVE PROCESSED IMAGES
-		apDisplay.printMsg("Remove processed images")
+		self.logger.info("Remove processed images")
 		self._removeProcessedImages()
 
 		### SET IMAGE ORDER
 		if self.params['shuffle'] is True:
 			self.imgtree = self._shuffleTree(self.imgtree)
-			apDisplay.printMsg("Process images shuffled")
+			self.logger.info("Process images shuffled")
 		elif self.params['reverse'] is True:
-			apDisplay.printMsg("Process images new to old")
+			self.logger.info("Process images new to old")
 		else:
 			# by default images are new to old
-			apDisplay.printMsg("Process images old to new")
+			self.logger.info("Process images old to new")
 			self.imgtree.sort(self._reverseSortImgTree)
 
 		### LIMIT NUMBER
 		if self.params['limit'] is not None:
 			lim = self.params['limit']
 			if len(self.imgtree) > lim:
-				apDisplay.printMsg("Limiting number of images to "+str(lim))
+				self.logger.info("Limiting number of images to "+str(lim))
 				self.imgtree = self.imgtree[:lim]
 		if len(self.imgtree) > 0:
 			self.params['apix'] = apDatabase.getPixelSize(self.imgtree[0])
@@ -643,13 +643,13 @@ class AppionLoop(appionScript.AppionScript):
 				sys.stderr.write(".")
 			self.stats['lastimageskipped'] = True
 			self.stats['skipcount'] += 1
-			apDisplay.printDebug( "_alreadyProcessed adding to count, skipcount" )
+			self.logger.debug( "_alreadyProcessed adding to count, skipcount" )
 			self.stats['count'] += 1
 			return True
 		except:
 			self.stats['waittime'] = 0
 			if self.stats['lastimageskipped']:
-				apDisplay.printMsg("\nskipped"+str(self.stats['skipcount'])+" images so far")
+				self.logger.info("\nskipped"+str(self.stats['skipcount'])+" images so far")
 			self.stats['lastimageskipped']=False
 			return False
 		return False
@@ -662,10 +662,10 @@ class AppionLoop(appionScript.AppionScript):
 		"""
 		if self.params['parallel']:
 			if self.lockParallel(imgdata.dbid):
-				apDisplay.printMsg('%s locked by another parallel run in the rundir' % (apDisplay.shortenImageName(imgdata['filename'])))
+				self.logger.info('%s locked by another parallel run in the rundir' % (apDisplay.shortenImageName(imgdata['filename'])))
 				return False
 		#calc images left
-		apDisplay.printDebug('_startLoop imagecount=%d, count=%d' % (self.stats['imagecount'], self.stats['count']))
+		self.logger.debug('_startLoop imagecount=%d, count=%d' % (self.stats['imagecount'], self.stats['count']))
 		self.stats['imagesleft'] = self.stats['imagecount'] - self.stats['count']
 
 		#only if an image was processed last
@@ -684,7 +684,7 @@ class AppionLoop(appionScript.AppionScript):
 		# skip if image doesn't exist:
 		imgpath = os.path.join(imgdata['session']['image path'], imgdata['filename']+'.mrc')
 		if not os.path.isfile(imgpath):
-			apDisplay.printWarning(imgpath+" not found, skipping")
+			self.logger.warning(imgpath+" not found, skipping")
 			if self.params['parallel']:
 				self.unlockParallel(imgdata.dbid)
 			return False
@@ -700,13 +700,9 @@ class AppionLoop(appionScript.AppionScript):
 		if self.reprocessImage(imgdata) is True:
 			if self.params['background'] is True:
 				sys.stderr.write(",")
-			else:
-				"""apDisplay.printMsg("reprocessing "+apDisplay.shortenImageName(imgdata['filename']))"""
 		else:
 			if self.params['background'] is True:
 				sys.stderr.write(".")
-			else:
-				"""apDisplay.printMsg("processing "+apDisplay.shortenImageName(imgdata['filename']))"""
 
 		return True
 
@@ -723,14 +719,14 @@ class AppionLoop(appionScript.AppionScript):
 		"""	
 		### COP OUT
 		if self.params['background'] is True:
-			apDisplay.printDebug( 'printSummary backgroun adding to stats count and totalcount')
+			self.logger.debug( 'printSummary backgroun adding to stats count and totalcount')
 			return
 
 		### THIS NEEDS TO BECOME MUCH MORE GENERAL, e.g. Peaks
 		tdiff = time.time()-self.stats['startimage']
 		if not self.params['continue'] or tdiff > 0.1:
 			count = self.stats['totalcount'] + 1
-			apDisplay.printDebug('printSummary set local count to stats totalcount=%d' % (count))
+			self.logger.debug('printSummary set local count to stats totalcount=%d' % (count))
 			#if(count != self.stats['lastcount']):
 			sys.stderr.write("\n\tSUMMARY: "+self.functionname+"\n")
 			self._printLine()
@@ -759,14 +755,12 @@ class AppionLoop(appionScript.AppionScript):
 					timestdev = math.sqrt(float(count*timesumsq - timesum**2) / float(count*(count-1)))
 					timeremain = (float(timeavg)+float(timestdev))*(self.stats['imagesleft']-1)
 					sys.stderr.write("\tAVG TIME: \t"+apDisplay.timeString(timeavg,timestdev)+"\n")
-					#print "\t(- TOTAL:",apDisplay.timeString(timesum)," -)"
 					if(self.stats['imagesleft']-1  > 0):
 						sys.stderr.write("\t(- REMAINING TIME: "+apDisplay.timeString(timeremain)+" for "
 							+str(self.stats['imagesleft']-1)+" images -)\n")
 				except ValueError:
-					apDisplay.printWarning('Value Error in printSummary at count=%d' % count)
-			#print "\tMEM: ",(mem.active()-startmem)/1024,"M (",(mem.active()-startmem)/(1024*count),"M)"
-			apDisplay.printDebug( 'printSummary adding to stats count')
+					self.logger.warning('Value Error in printSummary at count=%d' % count)
+			self.logger.debug( 'printSummary adding to stats count')
 			self._printLine()
 
 	#=====================
@@ -887,8 +881,8 @@ class AppionLoop(appionScript.AppionScript):
 		self.stats['skipcount'] = 0
 		newimgtree = []
 		count = 0
-		apDisplay.printDebug("_removeProcessedImages reset count=0")
-		apDisplay.printDebug("previously tested rejected images are count as done")
+		self.logger.debug("_removeProcessedImages reset count=0")
+		self.logger.debug("previously tested rejected images are count as done")
 		self.stats['count'] = 0
 		t0 = time.time()
 		for imgdata in self.imgtree:
@@ -901,7 +895,7 @@ class AppionLoop(appionScript.AppionScript):
 				if reason == 'reproc':
 					reproccount += 1
 				elif reason == 'reject' or reason == 'tilt':
-					apDisplay.printDebug('writing rejected images to donedict. Can not revert')
+					self.logger.debug('writing rejected images to donedict. Can not revert')
 					self._writeDoneDict(imgname)
 					rejectcount += 1
 
@@ -917,15 +911,15 @@ class AppionLoop(appionScript.AppionScript):
 				newimgtree.append(imgdata)
 			donecount = self.stats['skipcount'] - reproccount - rejectcount
 		sys.stderr.write("\n")
-		apDisplay.printMsg("finished skipping in %s"%(apDisplay.timeString(time.time()-t0)))
+		self.logger.info("finished skipping in %s"%(apDisplay.timeString(time.time()-t0)))
 		if self.stats['skipcount'] > 0:
 			# reset imgtree to values without skipped ones.
 			self.imgtree = newimgtree
 			self.stats['count'] = 0
-			apDisplay.printDebug( 'removeProcessed reset imgtree len=%d and count=%d' % (len(self.imgtree), self.stats['count']))
+			self.logger.debug( 'removeProcessed reset imgtree len=%d and count=%d' % (len(self.imgtree), self.stats['count']))
 			sys.stderr.write("\n")
-			apDisplay.printWarning("skipped "+str(self.stats['skipcount'])+" of "+str(startlen)+" images")
-			apDisplay.printMsg("[[ "+str(reproccount)+" no reprocess "
+			self.logger.warning("skipped "+str(self.stats['skipcount'])+" of "+str(startlen)+" images")
+			self.logger.info("[[ "+str(reproccount)+" no reprocess "
 				+" | "+str(rejectcount)+" rejected "
 				+" | "+str(tiltcount)+" wrong tilt "
 				+" | "+str(donecount)+" in donedict ]]")
@@ -942,8 +936,7 @@ class AppionLoop(appionScript.AppionScript):
 		"""
 		### SKIP MESSAGE
 		if(self.stats['skipcount'] > 0):
-			apDisplay.printWarning("skipped total of "+str(self.stats['skipcount'])+" images.")
-			apDisplay.printMsg("to process them again, remove \'continue\' option and run "+self.functionname+" again.")
+			self.logger.warning("skipped total of "+str(self.stats['skipcount'])+" images. To process them again, remove \'continue\' option and run "+self.functionname+" again.")
 			self.stats['skipcount'] = 0
 
 		### SHOULD IT WAIT?
@@ -955,7 +948,7 @@ class AppionLoop(appionScript.AppionScript):
 			return False
 
 		### CHECK FOR IMAGES, IF MORE THAN self.process_batch_count (default 10) JUST GO AHEAD
-		apDisplay.printMsg("Finished all images, checking for more\n")
+		self.logger.info("Finished all images, checking for more\n")
 		if not self.todolist:
 			self._getAllImages()
 		else:
@@ -971,14 +964,14 @@ class AppionLoop(appionScript.AppionScript):
 
 		### WAIT
 		if(self.stats['waittime'] > 180):
-			apDisplay.printWarning("waited longer than three hours for new images with no results, so I am quitting")
+			self.logger.warning("waited longer than three hours for new images with no results, so I am quitting")
 			return False
 		apParam.closeFunctionLog(functionname=self.functionname, logfile=self.logfile, msg=False, stats=self.stats)
 		sys.stderr.write("\nAll images processed. Waiting %d minutes for new images (waited %.2f min so far)." % (int(self.sleep_minutes),float(self.stats['waittime'])))
 		twait0 = time.time()
 		repeats = int(self.sleep_minutes * 60 / 20)
 		for i in range(repeats):
-			apDisplay.printMsg("Sleeping 20 seconds")
+			self.logger.info("Sleeping 20 seconds")
 			time.sleep(20)
 			#print a dot every 30 seconds
 			sys.stderr.write(".")
@@ -998,7 +991,7 @@ class AppionLoop(appionScript.AppionScript):
 	def setBadImage(self,imgdata):
 		# set current image as bad image
 		self.bad_images.append(imgdata.dbid)
-		apDisplay.printWarning("Program did not produce valid results. Should hide the image if the problem persists")
+		self.logger.warning("Program did not produce valid results. Should hide the image if the problem persists")
 		sys.stderr.write("Failed %s \n" % (imgdata['filename'],))
 
 	#=====================
