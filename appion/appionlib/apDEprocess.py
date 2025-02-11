@@ -2,7 +2,7 @@
 
 import numpy
 import logging
-from pyami import mrc,imagefun
+from pyami import mrc
 from appionlib import apDDprocess
 import os
 LOGGER=logging.getLogger(__name__)

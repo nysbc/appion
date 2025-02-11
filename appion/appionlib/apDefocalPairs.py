@@ -6,7 +6,6 @@ import logging
 #pyami
 import pyami.peakfinder as peakfinder
 import pyami.correlator as correlator
-from pyami import mrc
 #leginon
 import leginon.leginondata
 #appion

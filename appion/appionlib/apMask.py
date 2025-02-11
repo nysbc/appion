@@ -1,7 +1,6 @@
 #pythonlib
 import os
 import numpy
-import pyami.quietscipy
 import scipy.ndimage as nd
 #sinedon
 import sinedon.data as data

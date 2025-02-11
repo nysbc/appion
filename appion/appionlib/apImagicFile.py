@@ -5,7 +5,6 @@
 #python
 import os
 import sys
-import re
 import time
 import math
 import shutil

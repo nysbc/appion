@@ -9,7 +9,6 @@ import numpy
 ### appion
 import sinedon.directq
 from pyami import mrc
-from pyami import mem
 from appionlib import apDatabase
 from appionlib import apParticle
 from appionlib import apDisplay

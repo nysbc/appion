@@ -2,10 +2,10 @@
 
 import os
 import numpy
-import datetime
-from pyami import mrc,imagefun
-from leginon import leginondata,ddinfo
-from appionlib import apDDprocess,apDisplay
+from pyami import mrc
+from leginon import leginondata
+from appionlib import apDDprocess
+import time
 
 # testing options
 save_jpg = False

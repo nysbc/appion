@@ -3,7 +3,7 @@
 import os
 import numpy
 from pyami import mrc
-from appionlib import apDDprocess,apDisplay
+from appionlib import apDDprocess
 
 from pyami import numraw
 from pyami import numpil

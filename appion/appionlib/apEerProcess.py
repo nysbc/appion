@@ -1,11 +1,5 @@
 #!/usr/bin/env python
-
-import os
-import numpy
-from pyami import mrc
-from appionlib import apFalcon3Process,apDisplay
-
-from pyami import numpil
+from appionlib import apFalcon3Process
 
 # testing options
 save_jpg = False
