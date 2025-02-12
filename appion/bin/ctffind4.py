@@ -2,9 +2,7 @@
 
 #pythonlib
 import os
-import re
 import math
-import time
 import shutil
 import subprocess
 #appion
@@ -21,9 +19,10 @@ from appionlib.apCtf import ctfdb
 from appionlib.apCtf import ctfinsert
 from appionlib.apCtf import ctffind4AvgRotPlot
 import stat
-import getpass
 from time import sleep
 from multiprocessing import Pool
+import logging
+import sys
 
 class ctfEstimateLoop(appionLoop2.AppionLoop):
 	"""
@@ -479,6 +478,13 @@ class ctfEstimateLoop(appionLoop2.AppionLoop):
 		return origPath, binning
 
 def main():
+	logger=logging.getLogger()
+	logHandler=logging.StreamHandler(sys.stdout)
+	logFormatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(funcName)s - %(process)d - %(message)s")
+	logHandler.setFormatter(logFormatter)
+	logger.setLevel("INFO")
+	logHandler.setlevel("INFO")
+	logger.addHandler(logHandler)
 	imgLoop = ctfEstimateLoop()
 	imgLoop.run()
 

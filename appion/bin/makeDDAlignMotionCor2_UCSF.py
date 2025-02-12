@@ -1,14 +1,18 @@
 #!/usr/bin/env python
 import os
-import shutil
 from appionlib import apDDMotionCorrMaker
-from appionlib import apDDFrameAligner
-from appionlib import apDDprocess
-from appionlib import apDatabase
-from appionlib import apDisplay
 from multiprocessing import Pool
+import logging
+import sys
 
 def main():
+	logger=logging.getLogger()
+	logHandler=logging.StreamHandler(sys.stdout)
+	logFormatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(funcName)s - %(process)d - %(message)s")
+	logHandler.setFormatter(logFormatter)
+	logger.setLevel("INFO")
+	logHandler.setlevel("INFO")
+	logger.addHandler(logHandler)
 	makeStack = apDDMotionCorrMaker.MotionCor2UCSFAlignStackLoop()
 	makeStack.run()
 
