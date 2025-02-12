@@ -905,9 +905,6 @@ class AppionLoop(appionScript.AppionScript):
 		pauses and then checks for more images to process
 		return boolean for loop not done
 		"""
-		markerFilePath=os.path.join(self.params['rundir'] , "DONE")
-		if os.path.exists(markerFilePath):
-			return False
 		### SKIP MESSAGE
 		if(self.stats['skipcount'] > 0):
 			apDisplay.printWarning("skipped total of "+str(self.stats['skipcount'])+" images.")
@@ -969,11 +966,6 @@ class AppionLoop(appionScript.AppionScript):
 		ttotal = time.time() - self.stats['startloop'] - self.stats['waittime']
 		apDisplay.printColor("COMPLETE LOOP:\t"+apDisplay.timeString(ttotal)+
 			" for "+str(self.stats["count"]-1)+" images","green")
-        # Add a marker file here.
-		markerFilePath=os.path.join(self.params['rundir'] , "DONE")
-		if not os.path.exists(markerFilePath):
-			with open(markerFilePath, "w") as f:
-				f.write("Loop completed at: %s" % time.asctime())
 		appionScript.AppionScript.close(self)
 
 
