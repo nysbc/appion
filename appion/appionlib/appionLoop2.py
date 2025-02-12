@@ -636,11 +636,7 @@ class AppionLoop(appionScript.AppionScript):
 		try:
 			self.donedict[imgname]
 			if not self.stats['lastimageskipped']:
-				sys.stderr.write("skipping already processed images\n")
-			elif self.stats['skipcount'] % 80 == 0:
-				sys.stderr.write(".\n")
-			else:
-				sys.stderr.write(".")
+				self.logger.info("skipping already processed images\n")
 			self.stats['lastimageskipped'] = True
 			self.stats['skipcount'] += 1
 			self.logger.debug( "_alreadyProcessed adding to count, skipcount" )
@@ -674,8 +670,6 @@ class AppionLoop(appionScript.AppionScript):
 				self.logger.info( "\nStarting image %d ( skip:%d, remain:%d ) id:%d, file: %s"
 					%(self.stats['count'], self.stats['skipcount'], self.stats['imagesleft'], 
 					imgdata.dbid, os.path.basename(imgdata['filename']),))
-			elif self.stats['count'] % 80 == 0:
-				sys.stderr.write("\n")
 			self.stats['lastcount'] = self.stats['count']
 			if apDisplay.isDebugOn():
 				self._checkMemLeak()
@@ -695,13 +689,6 @@ class AppionLoop(appionScript.AppionScript):
 			return False
 
 		self.stats['waittime'] = 0
-
-		if self.reprocessImage(imgdata) is True:
-			if self.params['background'] is True:
-				sys.stderr.write(",")
-		else:
-			if self.params['background'] is True:
-				sys.stderr.write(".")
 
 		return True
 
@@ -727,23 +714,21 @@ class AppionLoop(appionScript.AppionScript):
 			count = self.stats['totalcount'] + 1
 			self.logger.debug('printSummary set local count to stats totalcount=%d' % (count))
 			#if(count != self.stats['lastcount']):
-			sys.stderr.write("\n\tSUMMARY: "+self.functionname+"\n")
-			self._printLine()
+			self.logger.info("\n\tSUMMARY: "+self.functionname+"\n")
 			if(self.stats['lastpeaks'] != None):
 				self.stats['peaksum'] += self.stats['lastpeaks']
 				self.stats['peaksumsq'] += self.stats['lastpeaks']**2
-				sys.stderr.write("\tPEAKS:    \t%d peaks of %d\n"%(self.stats['lastpeaks'],self.stats['peaksum']))
+				self.logger.info("\tPEAKS:    \t%d peaks of %d\n"%(self.stats['lastpeaks'],self.stats['peaksum']))
 				if(count > 1):
 					peaksum   = self.stats['peaksum']
 					peaksumsq = self.stats['peaksumsq']
 					peakstdev = math.sqrt(float(count*peaksumsq - peaksum**2) / float(count*(count-1)))
 					peakavg = float(peaksum)/float(count)
-					sys.stderr.write("\tAVG PEAKS:\t%.1f +/- %.1f peaks\n"%(peakavg,peakstdev))
+					self.logger.info("\tAVG PEAKS:\t%.1f +/- %.1f peaks\n"%(peakavg,peakstdev))
 					lowestpeaks = int((peakavg-peakstdev*0.5)*self.stats['imagesleft'])+peaksum
 					highestpeaks = int((peakavg+peakstdev*0.5)*self.stats['imagesleft'])+peaksum
-					sys.stderr.write("\t(- ESTIMATE: %d to %d total peaks -)\n"%(lowestpeaks,highestpeaks))
-				self._printLine()
-			sys.stderr.write("\tTIME:     \t"+apDisplay.timeString(tdiff)+"\n")
+					self.logger.info("\t(- ESTIMATE: %d to %d total peaks -)\n"%(lowestpeaks,highestpeaks))
+			self.logger.info("\tTIME:     \t"+apDisplay.timeString(tdiff)+"\n")
 			self.stats['timesum'] = self.stats['timesum'] + tdiff
 			self.stats['timesumsq'] = self.stats['timesumsq'] + (tdiff**2)
 			timesum = self.stats['timesum']
@@ -753,14 +738,13 @@ class AppionLoop(appionScript.AppionScript):
 					timeavg = float(timesum)/float(count)
 					timestdev = math.sqrt(float(count*timesumsq - timesum**2) / float(count*(count-1)))
 					timeremain = (float(timeavg)+float(timestdev))*(self.stats['imagesleft']-1)
-					sys.stderr.write("\tAVG TIME: \t"+apDisplay.timeString(timeavg,timestdev)+"\n")
+					self.logger.info("\tAVG TIME: \t"+apDisplay.timeString(timeavg,timestdev)+"\n")
 					if(self.stats['imagesleft']-1  > 0):
-						sys.stderr.write("\t(- REMAINING TIME: "+apDisplay.timeString(timeremain)+" for "
+						self.logger.info("\t(- REMAINING TIME: "+apDisplay.timeString(timeremain)+" for "
 							+str(self.stats['imagesleft']-1)+" images -)\n")
 				except ValueError:
 					self.logger.warning('Value Error in printSummary at count=%d' % count)
 			self.logger.debug( 'printSummary adding to stats count')
-			self._printLine()
 
 	#=====================
 	def _checkMemLeak(self):
@@ -886,8 +870,6 @@ class AppionLoop(appionScript.AppionScript):
 		t0 = time.time()
 		for imgdata in self.imgtree:
 			count += 1
-			if count % 10 == 0:
-				sys.stderr.write(".")
 			skip, reason = self.skipTestOnImage(imgdata)
 			imgname = imgdata['filename']
 			if skip is True:
@@ -900,32 +882,22 @@ class AppionLoop(appionScript.AppionScript):
 
 			if skip is True:
 				if self.stats['skipcount'] == 0:
-					sys.stderr.write("skipping processed images\n")
-				elif self.stats['skipcount'] % 80 == 0:
-					sys.stderr.write(".\n")
-				else:
-					sys.stderr.write(".")
+					self.logger.info("skipping processed images\n")
 				self.stats['skipcount'] += 1
 			else:
 				newimgtree.append(imgdata)
 			donecount = self.stats['skipcount'] - reproccount - rejectcount
-		sys.stderr.write("\n")
 		self.logger.info("finished skipping in %s"%(apDisplay.timeString(time.time()-t0)))
 		if self.stats['skipcount'] > 0:
 			# reset imgtree to values without skipped ones.
 			self.imgtree = newimgtree
 			self.stats['count'] = 0
 			self.logger.debug( 'removeProcessed reset imgtree len=%d and count=%d' % (len(self.imgtree), self.stats['count']))
-			sys.stderr.write("\n")
 			self.logger.warning("skipped "+str(self.stats['skipcount'])+" of "+str(startlen)+" images")
 			self.logger.info("[[ "+str(reproccount)+" no reprocess "
 				+" | "+str(rejectcount)+" rejected "
 				+" | "+str(tiltcount)+" wrong tilt "
 				+" | "+str(donecount)+" in donedict ]]")
-
-	#=====================
-	def _printLine(self):
-		sys.stderr.write("\t------------------------------------------\n")
 
 	#=====================
 	def _waitForMoreImages(self):
@@ -966,16 +938,13 @@ class AppionLoop(appionScript.AppionScript):
 			self.logger.warning("waited longer than three hours for new images with no results, so I am quitting")
 			return False
 		apParam.closeFunctionLog(functionname=self.functionname, logfile=self.logfile, msg=False, stats=self.stats)
-		sys.stderr.write("\nAll images processed. Waiting %d minutes for new images (waited %.2f min so far)." % (int(self.sleep_minutes),float(self.stats['waittime'])))
+		self.logger.info("\nAll images processed. Waiting %d minutes for new images (waited %.2f min so far)." % (int(self.sleep_minutes),float(self.stats['waittime'])))
 		twait0 = time.time()
 		repeats = int(self.sleep_minutes * 60 / 20)
 		for i in range(repeats):
 			self.logger.info("Sleeping 20 seconds")
 			time.sleep(20)
-			#print a dot every 30 seconds
-			sys.stderr.write(".")
 		self.stats['waittime'] += round((time.time()-twait0)/60.0,2)
-		sys.stderr.write("\n")
 
 		### GET NEW IMAGES
 		if not self.todolist:
@@ -991,7 +960,7 @@ class AppionLoop(appionScript.AppionScript):
 		# set current image as bad image
 		self.bad_images.append(imgdata.dbid)
 		self.logger.warning("Program did not produce valid results. Should hide the image if the problem persists")
-		sys.stderr.write("Failed %s \n" % (imgdata['filename'],))
+		self.logger.info("Failed %s \n" % (imgdata['filename'],))
 
 	#=====================
 	def close(self):
