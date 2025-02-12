@@ -56,7 +56,7 @@ class ImagicSession:
 		if not os.path.exists(self.imagicexe):
 			self.logger.error("imagic executable: '%s' not found"%self.imagicexe)
 
-		sys.stderr.write("\033[35m"+"executing IMAGIC command: %s\033[0m\n"%self.imagicexe)
+		self.logger.info("\033[35m"+"executing IMAGIC command: %s\033[0m\n"%self.imagicexe)
 
 		### for multiprocessor
 		if nproc > 1:
@@ -148,14 +148,12 @@ class ImagicSession:
 		### check number 2
 		if self.imagicproc.poll() is None:
 			waiting = True
-			sys.stderr.write("waiting for IMAGIC")
+			self.logger.info("waiting for IMAGIC")
 		else:
 			self.imagicproc.wait()
 			return
 		### continuous check
 		while self.imagicproc.poll() is None:
-			if waittime > 10:
-				sys.stderr.write(".")
 			time.sleep(waittime)
 			waittime *= 1.1
 			self.logf.flush()
@@ -163,9 +161,7 @@ class ImagicSession:
 			tdiff = time.time()-self.starttime
 			if tdiff > 20:
 				tstr = self.timeString(tdiff)
-				sys.stderr.write("\nIMAGIC completed in "+tstr+"\n")
-			else:
-				sys.stderr.write("\n")
+				self.logger.info("\nIMAGIC completed in "+tstr+"\n")
 		self.imagicproc.wait()
 
 	#=====================
@@ -173,10 +169,10 @@ class ImagicSession:
 		" each item is a line sent to IMAGIC"
 		loadavg = os.getloadavg()[0]
 		if loadavg > 2.0:
-			sys.stderr.write("Load average is high "+str(round(loadavg,2))+"\n")
+			self.logger.info("Load average is high "+str(round(loadavg,2))+"\n")
 			loadcubed = loadavg*loadavg*loadavg
 			time.sleep(loadcubed)
-		sys.stderr.write("\033[35m"+"executing command: "+str(args)+"\033[0m\n")
+		self.logger.info("\033[35m"+"executing command: "+str(args)+"\033[0m\n")
 		for item in args:
 			self.imagicin.write(str(item) + '\n')
 		self.imagicin.flush()

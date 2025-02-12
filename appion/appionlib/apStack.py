@@ -212,7 +212,7 @@ def getOnlyStackData(stackid, msg=True):
 	if not stackdata:
 		LOGGER.error("Stack ID: "+str(stackid)+" does not exist in the database")
 	if msg is True:
-		sys.stderr.write("Old stack info: ")
+		LOGGER.info("Old stack info: ")
 		LOGGER.info("'"+stackdata['description']+"'")
 	return stackdata
 
@@ -534,7 +534,6 @@ def commitSubStack(params, newname=False, centered=False, oldstackparts=None, so
 			sqlcmd=sqlstart+",".join(sqlinsert)
 			sinedon.directq.complexMysqlQuery('appiondata',sqlcmd)
 
-	sys.stderr.write("\n")
 	if newpartnum == 0:
 		LOGGER.error("No particles were inserted for the stack")
 
@@ -635,8 +634,7 @@ def commitMaskedStack(params, oldstackparts, newname=False):
 	for part in oldstackparts:
 		count += 1
 		if count % 100 == 0:
-			sys.stderr.write("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b")
-			sys.stderr.write(str(count)+" of "+(str(total))+" complete")
+			LOGGER.info(str(count)+" of "+(str(total))+" complete")
 
 		# Insert particle
 		newstackq = appiondata.ApStackParticleData()
@@ -646,7 +644,6 @@ def commitMaskedStack(params, oldstackparts, newname=False):
 		if params['commit'] is True:
 			newstackq.insert()
 		newpartnum += 1
-	sys.stderr.write("\n")
 	if newpartnum == 0:
 		LOGGER.error("No particles were inserted for the stack")
 

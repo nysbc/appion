@@ -7,6 +7,7 @@ import math
 from struct import unpack
 import re
 import subprocess
+import logging
 
 """
 Downloaded from:
@@ -44,6 +45,7 @@ def fileFilter(fname, dataext=".spi"):
 class SpiderSession:
 	def __init__(self, spiderexec=None, dataext='.spi', projext=".bat", logo=True, 
 	 nproc=1, spiderprocdir="", term=False, verbose=False, log=True):
+		self.logger=logging.getLogger(__name__)
 		# spider executable		
 		if spiderexec is None:
 			if os.environ.has_key('SPIDER_LOC'):
@@ -135,7 +137,7 @@ class SpiderSession:
 		self.logf.flush()
 		f = open("spider.log", "r")
 		for i in range(7):
-			sys.stderr.write(f.readline())
+			self.logger.info(f.readline())
 		f.close()
 
 	def version(self):
@@ -174,14 +176,12 @@ class SpiderSession:
 		### check number 2
 		if self.spiderproc.poll() is None:
 			waiting = True
-			sys.stderr.write("waiting for spider")
+			self.logger.info("waiting for spider")
 		else:
 			self.spiderproc.wait()
 			return
 		### continuous check
 		while self.spiderproc.poll() is None:
-			if waittime > 10:
-				sys.stderr.write(".")
 			time.sleep(waittime)
 			waittime *= 1.1
 			self.logf.flush()
@@ -189,19 +189,17 @@ class SpiderSession:
 			tdiff = time.time()-self.starttime
 			if tdiff > 20:
 				tstr = self.timeString(tdiff)
-				sys.stderr.write("\nSPIDER completed in "+tstr+"\n")
-			else:
-				sys.stderr.write("\n")
+				self.logger.info("\nSPIDER completed in "+tstr+"\n")
 		self.spiderproc.wait()
 
 	def toSpider(self, *args):
 		" each item is a line sent to Spider"
 		loadavg = os.getloadavg()[0]
 		if loadavg > 2.0:
-			sys.stderr.write("Load average is high "+str(round(loadavg,2))+"\n")
+			self.logger.info("Load average is high "+str(round(loadavg,2))+"\n")
 			loadcubed = loadavg*loadavg*loadavg
 			time.sleep(loadcubed)
-		sys.stderr.write("\033[35m"+"executing command: "+str(args)+"\033[0m\n")
+		self.logger.info("\033[35m"+"executing command: "+str(args)+"\033[0m\n")
 		for item in args:
 			self.spiderin.write(str(item) + '\n')
 		self.spiderin.flush()
@@ -243,7 +241,7 @@ class SpiderSession:
 		#	self.logf.write(line)
 		self.logf.close()
 		if self.logo is True:
-			sys.stderr.write(self.spidererr.readline())
+			self.logger.info(self.spidererr.readline())
 	 
 # --------------------------------------------------------------
 if __name__ == '__main__':
