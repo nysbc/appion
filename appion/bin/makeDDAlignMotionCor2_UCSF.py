@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import os
-import shutil
 from appionlib import apDDMotionCorrMaker
 from appionlib import apDDFrameAligner
 from appionlib import apDDprocess
@@ -11,6 +10,7 @@ import os
 from time import sleep
 import pickle
 from fcntl import flock, LOCK_EX, LOCK_UN
+import logging
 
 def imageLoop():
 	makeStack = apDDMotionCorrMaker.MotionCor2UCSFAlignStackLoop()
@@ -63,11 +63,18 @@ def main():
 			continue
 
 if __name__ == '__main__':
+	logger=logging.getLogger()
+	logHandler=logging.StreamHandler(sys.stdout)
+	logFormatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(funcName)s - %(process)d - %(message)s")
+	logHandler.setFormatter(logFormatter)
+	logger.setLevel("INFO")
+	logHandler.setlevel("INFO")
+	logger.addHandler(logHandler)
 	procs=int(os.getenv("APPION_MOTIONCOR2_PROCS",16))
 	p=Pool(procs)
-	apDisplay.printMsg("Starting task queue creation loop")
+	logger.info("Starting task queue creation loop")
 	p.apply_async(imageLoop)
-	apDisplay.printMsg("Starting Appion with %d parallel processes" % procs)
+	logger.info("Starting Appion with %d parallel processes" % procs)
 	for _ in range(procs):
 		p.apply_async(main)
 	p.close()

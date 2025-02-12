@@ -2,9 +2,7 @@
 
 #pythonlib
 import os
-import re
 import math
-import time
 import shutil
 import subprocess
 #appion
@@ -461,7 +459,14 @@ class ctfEstimateLoop(appionLoop2.AppionLoop):
 			origPath = os.path.join(self.ddstackpath,source_imgdata['filename']+"_st.mrc")
 		return origPath, binning
 
-if __name__ == '__main__':
+def main():
+	logger=logging.getLogger()
+	logHandler=logging.StreamHandler(sys.stdout)
+	logFormatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(funcName)s - %(process)d - %(message)s")
+	logHandler.setFormatter(logFormatter)
+	logger.setLevel("INFO")
+	logHandler.setlevel("INFO")
+	logger.addHandler(logHandler)
 	imgLoop = ctfEstimateLoop()
 	imgLoop.run()
 
