@@ -1,11 +1,11 @@
 import subprocess
-import shutil
 import sys
 import os
 import socket # For hostname
 import requests
 import json
 import pwd
+import logging
 
 class ProcessingHost (object):
     def __init__ (self):
@@ -19,6 +19,7 @@ class ProcessingHost (object):
         self.additionalHeaders = []
         self.preExecLines = []
         self.destinationsURL = None
+        self.logger=logging.getLogger(__name__)
         
     ##generateHeaders (jobObject)
     #Takes a job object or no arguments. If jobObject is supplied it uses it to 
@@ -166,7 +167,7 @@ class ProcessingHost (object):
             for line in commandList:
                 jobFile.write(line + '\n')
         except IOError, e:
-            sys.stderr.write("Could not write to job file" + jobFile.name + ": " + str(e))
+            self.logger.exception("Could not write to job file" + jobFile.name + ": ")
             return False
         #Job file was successfully written 
         return True
@@ -191,7 +192,7 @@ class ProcessingHost (object):
             try:
                 os.makedirs(outputDir, 0775)
             except OSError, e:
-                sys.stderr.write("Couldn't create output directory " + outputDir + ": " + str(e))
+                self.logger.exception("Couldn't create output directory " + outputDir + ": ")
                 return False
 		
         #Set the absolute path name to the jobfile
@@ -201,7 +202,7 @@ class ProcessingHost (object):
             #open the job file for writing
             jobFile = open(jobfileName, 'w')
         except IOError, e:
-            sys.stderr.write("Could not open file to create job file: " + str(e) + "\n")
+            self.logger.exception("Could not open file to create job file: ")
             return False
 		
         self.createJobFile(jobFile)
@@ -220,7 +221,7 @@ class ProcessingHost (object):
             try:
                 returnValue = self.executeCommand(commandString)
             except (OSError, ValueError), e:
-                sys.stderr.write("Failed to execute job " + jobObject.getName() + ": " + str(e))
+                self.logger.exception("Failed to execute job " + jobObject.getName() + ": ")
                 return False
             #translate whatever is returned by executeCommand() to a JobID	   
             jobID = self.translateOutput(returnValue)

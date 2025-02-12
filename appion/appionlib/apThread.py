@@ -8,8 +8,8 @@ import Queue
 import subprocess
 import os
 ## appion
-from appionlib import apDisplay
 from appionlib import apParam
+import logging
 
 #===========
 class AppionJob(threading.Thread):
@@ -92,6 +92,7 @@ def threadCommands(commandlist, nproc=None, pausetime=1.0):
 	caveats:
 		only work on a single machine
 	"""
+	logger=logging.getLogger(__name__)
 	### set number of processes at a time
 	if nproc is None:
 		nproc = apParam.getNumProcessors()
@@ -111,7 +112,7 @@ def threadCommands(commandlist, nproc=None, pausetime=1.0):
 		job.run()
 
 	### continue until no commands are left
-	sys.stderr.write("threading commands")
+	logger.info("threading commands")
 	while len(localcmdlist) > 0 or len(joblist) > 0:
 		for job in joblist:
 			if job.poll() is not None:
@@ -122,10 +123,8 @@ def threadCommands(commandlist, nproc=None, pausetime=1.0):
 					job = AppionJob(cmd)
 					joblist.append(job)
 					job.run()
-		sys.stderr.write(".")
 		time.sleep(pausetime)
 		#print joblist
-	sys.stderr.write("\n")
 
 #===========
 def writeThreadLog(msg):

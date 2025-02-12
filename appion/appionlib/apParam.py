@@ -624,7 +624,7 @@ def runCmd(cmd, package="", verbose=False, showcmd=True, logfile=None, fail=Fals
 	"""
 	waited = False
 	if showcmd is True:
-		sys.stderr.write(apDisplay.colorString(str(package)+": ","magenta")+cmd+"\n")
+		LOGGER.info(str(package)+": "+cmd)
 	t0 = time.time()
 	try:
 		if logfile is not None:
@@ -648,7 +648,6 @@ def runCmd(cmd, package="", verbose=False, showcmd=True, logfile=None, fail=Fals
 			while proc.poll() is None:
 				if waittime > 10:
 					waited = True
-					sys.stderr.write(".")
 				waittime *= 1.1
 				time.sleep(waittime)
 	except:
