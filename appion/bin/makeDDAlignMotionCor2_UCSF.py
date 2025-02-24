@@ -16,6 +16,7 @@ if __name__ == '__main__':
 	startPower=3
 	endPower=6
 	notdone=True
+	imgCount=0
 	while notdone:
 		procs=2**startPower
 		for tmpPower in range(startPower+1,endPower+1):
