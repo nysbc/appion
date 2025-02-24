@@ -13,8 +13,8 @@ def main(numProcs):
 	return makeStack.run(True,numProcs)
 
 if __name__ == '__main__':
-	startPower=3
-	endPower=6
+	startPower=2
+	endPower=4
 	notdone=True
 	imgCount=0
 	while notdone:
