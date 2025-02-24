@@ -95,7 +95,7 @@ class DDFrameAligner(object):
 		'''
 		# Construct the command line with defaults
 		cmd = self.makeFrameAlignmentCommand()
-		cmd = "srun --gres=gpu:1 --time=2:00 %s" % cmd
+		cmd = "/usr/bin/srun --gres=gpu:1 --time=2:00 %s" % cmd
 
 		# run as subprocess
 		apDisplay.printMsg('Running: %s'% cmd)
