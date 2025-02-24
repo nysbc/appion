@@ -28,12 +28,12 @@ if __name__ == '__main__':
 			results.append(p.apply_async(main, (procs,)))
 		p.close()
 		p.join()
+		returnData=[r.get(1) for r in results]
 		try:
-			imgCounts=[r.get(1) for r in results]
-			imgCounts=[int(r[0]) for r in results if r]
+			imgCounts=[int(r[0]) for r in returnData if r[0]]
 		except:
 			imgCounts=[]
-		notDones=[r[1] for r in results if r]
+		notDones=[r[1] for r in returnData if r[1]]
 		if imgCounts:
 			imgCount=max(imgCounts)
 		else:
