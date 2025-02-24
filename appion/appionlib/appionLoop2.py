@@ -55,7 +55,7 @@ class AppionLoop(appionScript.AppionScript):
 		self.process_batch_count = count
 
 	#=====================
-	def run(self):
+	def run(self,autoscale=False,numProcs=8):
 		"""
 		processes all images
 		"""
@@ -113,6 +113,8 @@ class AppionLoop(appionScript.AppionScript):
 				#END LOOP OVER IMAGES
 			if self.notdone is True:
 				self.notdone = self._waitForMoreImages()
+			if (len(self.imgtree) > 2**numProcs) and autoscale:
+				return len(self.imgtree)
 			#END NOTDONE LOOP
 
 		self.postLoopFunctions()

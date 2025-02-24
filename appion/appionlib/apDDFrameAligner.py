@@ -95,12 +95,13 @@ class DDFrameAligner(object):
 		'''
 		# Construct the command line with defaults
 		cmd = self.makeFrameAlignmentCommand()
+		cmd = "srun --gres=gpu:1 --time=2:00 %s" % cmd
 
 		# run as subprocess
 		apDisplay.printMsg('Running: %s'% cmd)
 		self.proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True)
 		(stdoutdata, stderrdata) = self.proc.communicate()
-                self.badprocess = self.proc.returncode != 0
+		self.badprocess = self.proc.returncode != 0
 
 		# write log file
 		output = stdoutdata
@@ -213,7 +214,7 @@ class MotionCorr_Purdue(MotionCorr1):
 			
 class MotionCor2_UCSF(DDFrameAligner):
 	def __init__(self):
-		self.executable = 'motioncor2'
+		self.executable = os.getenv("APPION_MOTIONCOR2_EXE","motioncor2")
 		DDFrameAligner.__init__(self)
 
 	def setKV(self, kv):
