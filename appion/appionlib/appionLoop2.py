@@ -64,6 +64,7 @@ class AppionLoop(appionScript.AppionScript):
 		### get images from database
 		self._getAllImages()
 		if ((len(self.imgtree) > numProcs) or (len(self.imgtree) < (numProcs - numProcs/2))) and autoscale and (len(self.imgtree) > 2**startPower):
+			apDisplay.printMsg("Autoscaling event triggered.  %d processes." % numProcs)
 			return (len(self.imgtree), True)
 		os.chdir(self.params['rundir'])
 		self.stats['startimage'] = time.time()
@@ -116,6 +117,7 @@ class AppionLoop(appionScript.AppionScript):
 			if self.notdone is True:
 				self.notdone = self._waitForMoreImages()
 			if ((len(self.imgtree) > numProcs) or (len(self.imgtree) < (numProcs - numProcs/2))) and autoscale and (len(self.imgtree) > 2**startPower):
+				apDisplay.printMsg("Autoscaling event triggered.  %d processes." % numProcs)
 				return (len(self.imgtree), self.notdone)
 			#END NOTDONE LOOP
 
