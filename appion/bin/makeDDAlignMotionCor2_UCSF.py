@@ -22,7 +22,7 @@ if __name__ == '__main__':
 	while notdone:
 		procs=2**startPower
 		for tmpPower in range(startPower+1,endPower+1):
-			if imgCount > 2**tmpPower:
+			if imgCount >= 2**tmpPower:
 				procs=2**tmpPower
 		p=Pool(procs)
 		results=[]
@@ -32,6 +32,7 @@ if __name__ == '__main__':
 		p.close()
 		p.join()
 		returnData=[r.get(1) for r in results]
+		returnData=[r for r in returnData if r]
 		try:
 			imgCounts=[int(r[0]) for r in returnData if r[0]]
 		except:
