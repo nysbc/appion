@@ -39,6 +39,7 @@ class AppionLoop(appionScript.AppionScript):
 		self.bad_images = []
 		self.sleep_minutes = 6
 		self.process_batch_count = 10
+		self.notdone=True
 
 	#=====================
 	def setWaitSleepMin(self,minutes):
@@ -54,8 +55,18 @@ class AppionLoop(appionScript.AppionScript):
 		'''
 		self.process_batch_count = count
 
+	def autoscale(self,numImgs,numProcs,minProcs,maxProcs):
+		if numImgs > numProcs and numProcs != maxProcs:
+			apDisplay.printMsg("Autoscaling event triggered. Scaling up. %d processes.  %d images" % (numProcs,numImgs))
+			return (numImgs, self.notdone)
+		elif numImgs < numProcs-(numProcs/2) and numProcs != minProcs:
+			apDisplay.printMsg("Autoscaling event triggered. Scaling down. %d processes.  %d images" % (numProcs,numImgs))
+			return (numImgs, self.notdone)
+		else:
+			return False
+
 	#=====================
-	def run(self,autoscale=False,numProcs=8,startPower=2, endPower=4):
+	def run(self,autoscale=False,numProcs=8,minProcs=4, maxProcs=16):
 		"""
 		processes all images
 		"""
@@ -63,9 +74,11 @@ class AppionLoop(appionScript.AppionScript):
 			self.cleanParallelLock()
 		### get images from database
 		self._getAllImages()
-		if ((len(self.imgtree) > numProcs) or (len(self.imgtree) < (numProcs - numProcs/2))) and autoscale and (len(self.imgtree) > 2**startPower) and (len(self.imgtree) < 2**endPower):
-			apDisplay.printMsg("Autoscaling event triggered.  %d processes.  %d images" % (numProcs,len(self.imgtree)))
-			return (len(self.imgtree), True)
+		if autoscale:
+			scaleState=self.autoscale(len(self.imgtree), numProcs, minProcs, maxProcs)
+			if scaleState:
+				return scaleState
+		
 		os.chdir(self.params['rundir'])
 		self.stats['startimage'] = time.time()
 		self.preLoopFunctions()
@@ -116,9 +129,10 @@ class AppionLoop(appionScript.AppionScript):
 				#END LOOP OVER IMAGES
 			if self.notdone is True:
 				self.notdone = self._waitForMoreImages()
-			if ((len(self.imgtree) > numProcs) or (len(self.imgtree) < (numProcs - numProcs/2))) and autoscale and (len(self.imgtree) > 2**startPower) and (len(self.imgtree) < 2**endPower):
-				apDisplay.printMsg("Autoscaling event triggered.  %d processes.  %d images" % (numProcs,len(self.imgtree)))
-				return (len(self.imgtree), self.notdone)
+			if autoscale:
+				scaleState=self.autoscale(len(self.imgtree), numProcs, minProcs, maxProcs)
+				if scaleState:
+					return scaleState
 			#END NOTDONE LOOP
 
 		self.postLoopFunctions()

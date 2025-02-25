@@ -8,13 +8,15 @@ from appionlib import apDatabase
 from appionlib import apDisplay
 from multiprocessing import Pool
 
-def main(numProcs,startPower,endPower):
+def main(numProcs,minProcs,maxProcs):
 	makeStack = apDDMotionCorrMaker.MotionCor2UCSFAlignStackLoop()
-	return makeStack.run(True,numProcs,startPower,endPower)
+	return makeStack.run(True,numProcs,minProcs,maxProcs)
 
 if __name__ == '__main__':
 	startPower=2
 	endPower=4
+	minProcs=2**startPower
+	maxProcs=2**endPower
 	notdone=True
 	imgCount=0
 	while notdone:
@@ -26,7 +28,7 @@ if __name__ == '__main__':
 		results=[]
 		apDisplay.printMsg("Starting Appion with %d parallel processes" % procs)
 		for _ in range(procs):
-			results.append(p.apply_async(main, (procs,startPower,endPower)))
+			results.append(p.apply_async(main, (procs,minProcs,maxProcs)))
 		p.close()
 		p.join()
 		returnData=[r.get(1) for r in results]
