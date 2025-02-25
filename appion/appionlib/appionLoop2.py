@@ -64,7 +64,7 @@ class AppionLoop(appionScript.AppionScript):
 		### get images from database
 		self._getAllImages()
 		if ((len(self.imgtree) > 2**numProcs) or (len(self.imgtree) < (2**numProcs - 2**(numProcs-1)))) and autoscale:
-			return (len(self.imgtree), self.notdone)
+			return (len(self.imgtree), True)
 		os.chdir(self.params['rundir'])
 		self.stats['startimage'] = time.time()
 		self.preLoopFunctions()
