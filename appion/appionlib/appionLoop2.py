@@ -55,7 +55,7 @@ class AppionLoop(appionScript.AppionScript):
 		self.process_batch_count = count
 
 	#=====================
-	def run(self,autoscale=False,numProcs=8,startPower=2):
+	def run(self,autoscale=False,numProcs=8,startPower=2, endPower=4):
 		"""
 		processes all images
 		"""
@@ -63,8 +63,8 @@ class AppionLoop(appionScript.AppionScript):
 			self.cleanParallelLock()
 		### get images from database
 		self._getAllImages()
-		if ((len(self.imgtree) > numProcs) or (len(self.imgtree) < (numProcs - numProcs/2))) and autoscale and (len(self.imgtree) > 2**startPower):
-			apDisplay.printMsg("Autoscaling event triggered.  %d processes." % numProcs)
+		if ((len(self.imgtree) > numProcs) or (len(self.imgtree) < (numProcs - numProcs/2))) and autoscale and (len(self.imgtree) > 2**startPower) and (len(self.imgtree) < 2**endPower):
+			apDisplay.printMsg("Autoscaling event triggered.  %d processes.  %d images" % (numProcs,len(self.imgtree)))
 			return (len(self.imgtree), True)
 		os.chdir(self.params['rundir'])
 		self.stats['startimage'] = time.time()
@@ -116,8 +116,8 @@ class AppionLoop(appionScript.AppionScript):
 				#END LOOP OVER IMAGES
 			if self.notdone is True:
 				self.notdone = self._waitForMoreImages()
-			if ((len(self.imgtree) > numProcs) or (len(self.imgtree) < (numProcs - numProcs/2))) and autoscale and (len(self.imgtree) > 2**startPower):
-				apDisplay.printMsg("Autoscaling event triggered.  %d processes." % numProcs)
+			if ((len(self.imgtree) > numProcs) or (len(self.imgtree) < (numProcs - numProcs/2))) and autoscale and (len(self.imgtree) > 2**startPower) and (len(self.imgtree) < 2**endPower):
+				apDisplay.printMsg("Autoscaling event triggered.  %d processes.  %d images" % (numProcs,len(self.imgtree)))
 				return (len(self.imgtree), self.notdone)
 			#END NOTDONE LOOP
 
