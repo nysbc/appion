@@ -8,9 +8,9 @@ from appionlib import apDatabase
 from appionlib import apDisplay
 from multiprocessing import Pool, Manager
 
-def main(numProcs,minProcs,maxProcs):
+def main(numProcs,minProcs,maxProcs,q):
 	makeStack = apDDMotionCorrMaker.MotionCor2UCSFAlignStackLoop()
-	return makeStack.run(True,numProcs,minProcs,maxProcs)
+	return makeStack.run(True,numProcs,minProcs,maxProcs,q)
 
 if __name__ == '__main__':
 	startPower=2
