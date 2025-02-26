@@ -75,8 +75,9 @@ class AppionLoop(appionScript.AppionScript):
 		"""
 		processes all images
 		"""
-		procQueue.put(os.getpid())
-		sleep(30)
+		if procQueue:
+			procQueue.put(os.getpid())
+			sleep(30)
 		if not self.params['parallel']:
 			self.cleanParallelLock()
 		### get images from database
