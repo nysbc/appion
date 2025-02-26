@@ -19,6 +19,7 @@ from pyami import mem
 from pyami import fileutil
 from fcntl import flock, LOCK_EX, LOCK_UN
 import subprocess
+from time import sleep
 
 class AppionLoop(appionScript.AppionScript):
 	#=====================
@@ -55,30 +56,35 @@ class AppionLoop(appionScript.AppionScript):
 		'''
 		self.process_batch_count = count
 
-	def autoscale(self,numImgs,numProcs,minProcs,maxProcs):
+	def autoscale(self,numImgs,numProcs,minProcs,maxProcs,procQueue=None):
 		if numImgs > numProcs and numProcs != maxProcs:
 			apDisplay.printMsg("Autoscaling event triggered. Scaling up. %d processes.  %d images" % (numProcs,numImgs))
+			if procQueue:
+				procQueue.get()
 			return (numImgs, self.notdone)
 		elif numImgs < numProcs-(numProcs/2) and numProcs != minProcs:
 			apDisplay.printMsg("Autoscaling event triggered. Scaling down. %d processes.  %d images" % (numProcs,numImgs))
+			if procQueue:
+				procQueue.get()
 			return (numImgs, self.notdone)
 		else:
 			return False
 
 	#=====================
-	def run(self,autoscale=False,numProcs=8,minProcs=4, maxProcs=16):
+	def run(self,autoscale=False,numProcs=8,minProcs=4, maxProcs=16, procQueue=None):
 		"""
 		processes all images
 		"""
+		procQueue.put(os.getpid())
+		sleep(30)
 		if not self.params['parallel']:
 			self.cleanParallelLock()
 		### get images from database
 		self._getAllImages()
 		if autoscale:
-			scaleState=self.autoscale(len(self.imgtree), numProcs, minProcs, maxProcs)
+			scaleState=self.autoscale(len(self.imgtree), numProcs, minProcs, maxProcs,procQueue)
 			if scaleState:
 				return scaleState
-		
 		os.chdir(self.params['rundir'])
 		self.stats['startimage'] = time.time()
 		self.preLoopFunctions()
@@ -90,6 +96,10 @@ class AppionLoop(appionScript.AppionScript):
 			apDisplay.printColor("\nBeginning Main Loop", "green")
 			imgnum = 0
 			while imgnum < len(self.imgtree) and self.notdone is True:
+				if autoscale and procQueue:
+					if not procQueue.full():
+						procQueue.get()
+						return (len(self.imgtree), self.notdone)
 				self.stats['startimage'] = time.time()
 				imgdata = self.imgtree[imgnum]
 				imgnum += 1
@@ -130,7 +140,7 @@ class AppionLoop(appionScript.AppionScript):
 			if self.notdone is True:
 				self.notdone = self._waitForMoreImages()
 			if autoscale:
-				scaleState=self.autoscale(len(self.imgtree), numProcs, minProcs, maxProcs)
+				scaleState=self.autoscale(len(self.imgtree), numProcs, minProcs, maxProcs,procQueue)
 				if scaleState:
 					return scaleState
 			#END NOTDONE LOOP
