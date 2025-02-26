@@ -6,7 +6,7 @@ from appionlib import apDDFrameAligner
 from appionlib import apDDprocess
 from appionlib import apDatabase
 from appionlib import apDisplay
-from multiprocessing import Pool, Queue
+from multiprocessing import Pool, Manager
 
 def main(numProcs,minProcs,maxProcs):
 	makeStack = apDDMotionCorrMaker.MotionCor2UCSFAlignStackLoop()
@@ -25,7 +25,8 @@ if __name__ == '__main__':
 			if imgCount >= 2**tmpPower:
 				procs=2**tmpPower
 		p=Pool(procs)
-		q=Queue(procs)
+		m=Manager()
+		q=m.Queue(procs)
 		results=[]
 		apDisplay.printMsg("Starting Appion with %d parallel processes" % procs)
 		for _ in range(procs):
