@@ -21,7 +21,7 @@ if __name__ == '__main__':
 	imgCount=0
 	while notdone:
 		procs=2**startPower
-		for tmpPower in range(startPower,endPower):
+		for tmpPower in range(startPower+1,endPower+1):
 			if imgCount >= 2**tmpPower:
 				procs=2**tmpPower
 		p=Pool(procs)
