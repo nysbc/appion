@@ -41,6 +41,8 @@ class AppionLoop(appionScript.AppionScript):
 		self.sleep_minutes = 6
 		self.process_batch_count = 10
 		self.notdone=True
+		self.scaleUp=0
+		self.scaleDown=0
 
 	#=====================
 	def setWaitSleepMin(self,minutes):
@@ -58,12 +60,17 @@ class AppionLoop(appionScript.AppionScript):
 
 	def autoscale(self,numImgs,numProcs,minProcs,maxProcs,procQueue=None):
 		if numImgs > numProcs and numProcs != maxProcs:
-			apDisplay.printMsg("Autoscaling event triggered. Scaling up. %d processes.  %d images" % (numProcs,numImgs))
-			if procQueue:
-				procQueue.get()
-			return (numImgs, self.notdone)
+			self.scaleUp+=1
 		elif numImgs < numProcs-(numProcs/2) and numProcs != minProcs:
-			apDisplay.printMsg("Autoscaling event triggered. Scaling down. %d processes.  %d images" % (numProcs,numImgs))
+			self.scaleDown+=1
+		if self.scaleUp == 1 or self.scaleDown == 3:
+			if self.scaleUp == 1:
+				direction="up"
+			elif self.scaleDown == 3:
+				direction="down"
+			else:
+				direction="now"
+			apDisplay.printMsg("Autoscaling event triggered. Scaling %s. %d processes.  %d images" % (direction, numProcs,numImgs))
 			if procQueue:
 				procQueue.get()
 			return (numImgs, self.notdone)
