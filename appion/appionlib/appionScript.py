@@ -539,10 +539,10 @@ class AppionScript(basicScript.BasicScript):
 	def lockParallel(self,dbid):
 		lock_file = '%s%d' % (self.lockname,dbid)
 		try:
-			fd = os.open(lock_file, os.O_CREAT|os.O_EXCL|os.O_RDWR)
+			fd = os.open(lock_file, os.O_CREAT|os.O_RDWR)
 			self.lockfile = os.fdopen(fd, 'r+')
 			flock(self.lockfile, LOCK_EX | LOCK_NB)
-		except:
+		except IOError:
 			return True
 		return False
 
