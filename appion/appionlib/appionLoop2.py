@@ -17,7 +17,7 @@ from appionlib import appionScript
 #leginon
 from pyami import mem
 from pyami import fileutil
-from fcntl import flock, LOCK_EX, LOCK_UN
+from fcntl import flock, LOCK_EX, LOCK_UN, LOCK_SH
 import subprocess
 from time import sleep
 
@@ -43,6 +43,7 @@ class AppionLoop(appionScript.AppionScript):
 		self.notdone=True
 		self.scaleUp=0
 		self.scaleDown=0
+		self.todolist=False
 
 	#=====================
 	def setWaitSleepMin(self,minutes):
@@ -77,18 +78,33 @@ class AppionLoop(appionScript.AppionScript):
 		else:
 			return False
 
+	def refreshTodoList(self):
+		pendingListPath = os.path.join(self.params['rundir'], "todo.json")
+		apDisplay.printWarning('locking %s' % pendingListPath)
+		if not os.path.isfile(pendingListPath):
+		f=open(pendingListPath, 'r+')
+		flock(f, LOCK_SH)
+		self.imgtree=json.load(f)
+		apDisplay.printWarning('unlocking %s' % pendingListPath)
+		flock(f, LOCK_UN)
+		f.close()
+
 	#=====================
-	def run(self,autoscale=False,numProcs=8,minProcs=4, maxProcs=16, procQueue=None):
+	def run(self,autoscale=False,numProcs=8,minProcs=4, maxProcs=16, procQueue=None,todolist=False):
 		"""
 		processes all images
 		"""
+		self.todolist=todolist
 		if procQueue:
 			procQueue.put(os.getpid())
 			sleep(30)
 		if not self.params['parallel']:
 			self.cleanParallelLock()
 		### get images from database
-		self._getAllImages()
+		if not self.todolist:
+			self._getAllImages()
+		else:
+			self.refreshTodoList()
 		if autoscale:
 			scaleState=self.autoscale(len(self.imgtree), numProcs, minProcs, maxProcs,procQueue)
 			if scaleState:
@@ -622,6 +638,7 @@ class AppionLoop(appionScript.AppionScript):
 
 		# When all images are processed or rejected or done,		# self.imgtree becomes zero and the loop stops
 		self.stats['imagecount'] = len(self.imgtree)
+		return self.imgtree
 
 	#=====================
 	def _reverseSortImgTree(self, a, b):
@@ -959,7 +976,10 @@ class AppionLoop(appionScript.AppionScript):
 
 		### CHECK FOR IMAGES, IF MORE THAN self.process_batch_count (default 10) JUST GO AHEAD
 		apDisplay.printMsg("Finished all images, checking for more\n")
-		self._getAllImages()
+		if not self.todolist:
+			self._getAllImages()
+		else:
+			self.refreshTodoList()
 		### reset counts
 		self.stats['imagecount'] = len(self.imgtree)
 		self.stats['imagesleft'] = self.stats['imagecount'] - self.stats['count']
