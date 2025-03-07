@@ -7,13 +7,14 @@ from appionlib import apDDprocess
 from appionlib import apDatabase
 from appionlib import apDisplay
 from multiprocessing import Pool, Manager
+import os
 
 def main():
 	makeStack = apDDMotionCorrMaker.MotionCor2UCSFAlignStackLoop()
 	return makeStack.run()
 
 if __name__ == '__main__':
-	procs=16
+	procs=int(os.getenv("APPION_PROCS",16))
 	p=Pool(procs)
 	apDisplay.printMsg("Starting Appion with %d parallel processes" % procs)
 	for _ in range(procs):
