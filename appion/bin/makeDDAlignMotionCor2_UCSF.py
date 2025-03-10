@@ -36,6 +36,7 @@ def imageLoop():
 			f=open(pendingListPath, 'r+')
 			apDisplay.printWarning('[imageLoop] locking %s' % pendingListPath)
 			flock(f, LOCK_EX)
+			apDisplay.printWarning('[imageLoop] lock acquired for %s' % pendingListPath)
 			f.seek(0)
 			f.truncate()
 			apDisplay.printWarning('[imageLoop] saving todo list')
