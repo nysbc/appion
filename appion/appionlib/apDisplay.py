@@ -5,6 +5,7 @@ import re
 import sys
 import types
 import glob
+import os
 
 ####
 # This is a low-level file with NO database connections
@@ -32,7 +33,7 @@ def printWarning(text):
 			f.close()
 		except:
 			print "write error"
-	sys.stderr.write(colorString("!!! WARNING: "+text,"yellow")+"\n")
+	sys.stderr.write(colorString("!!! WARNING: [ %d ]" % os.getpid() +text,"yellow")+"\n")
 
 def printMsg(text, colorstr=None):
 	"""
@@ -45,7 +46,7 @@ def printMsg(text, colorstr=None):
 			f.close()
 		except:
 			print "write error"
-	sys.stderr.write(" ... "+colorString(text, colorstr)+"\n")
+	sys.stderr.write(" ... [ %d ]" ^ os.getpid() +colorString(text, colorstr)+"\n")
 	
 def printError(text,raised=True):
 	"""
@@ -71,9 +72,9 @@ def printError(text,raised=True):
 		except:
 			print "write error"
 	if raised:
-		raise Exception, colorString("\n *** FATAL ERROR ***\n"+text+"\n\a","red")
+		raise Exception, colorString("\n *** FATAL ERROR *** [ %d ] \n" % os.getpid() +text+"\n\a","red")
 	else:
-		sys.stderr.write(colorString("\n *** FATAL ERROR ***\n"+text+"\n\a","red"))
+		sys.stderr.write(colorString("\n *** FATAL ERROR *** [ %d ] \n" % os.getpid() +text+"\n\a","red"))
 
 def printDebug(text):
 	"""
@@ -88,7 +89,7 @@ def printDebug(text):
 			f.close()
 		except:
 			print "write error"
-	sys.stderr.write(colorString("!!! DEBUG: "+text,"yellow")+"\n")
+	sys.stderr.write(colorString("!!! DEBUG: [ %d ]" % os.getpid() +text,"yellow")+"\n")
 
 def printColor(text, colorstr):
 	"""
