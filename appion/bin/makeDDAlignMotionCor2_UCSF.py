@@ -42,6 +42,7 @@ def imageLoop():
 			apDisplay.printWarning('[imageLoop] saving todo list')
 			try:
 				apDisplay.printWarning('[imageLoop] json.dump')
+				apDisplay.printWarning('[imageLoop] %s' % str(imgtree))
 				json.dump(imgtree, f)
 				apDisplay.printWarning('[imageLoop] f.flush')
 				f.flush()
