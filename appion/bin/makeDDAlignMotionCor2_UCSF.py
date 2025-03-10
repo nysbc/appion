@@ -33,7 +33,7 @@ def imageLoop():
 					continue
 			else:
 				apDisplay.printWarning('[imageLoop] %s already exists' % pendingListPath)
-			f=open(pendingListPath, 'r+')
+			f=open(pendingListPath, 'rb+')
 			apDisplay.printWarning('[imageLoop] locking %s' % pendingListPath)
 			flock(f, LOCK_EX)
 			apDisplay.printWarning('[imageLoop] lock acquired for %s' % pendingListPath)

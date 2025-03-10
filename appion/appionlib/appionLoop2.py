@@ -82,7 +82,7 @@ class AppionLoop(appionScript.AppionScript):
 	def refreshTodoList(self):
 		pendingListPath = os.path.join(self.params['rundir'], "todo.pkl")
 		if os.path.isfile(pendingListPath):
-			f=open(pendingListPath, 'r+')
+			f=open(pendingListPath, 'rb+')
 			apDisplay.printWarning('[refreshTodoList] locking %s' % pendingListPath)
 			flock(f, LOCK_SH)
 			apDisplay.printWarning('[refreshTodoList] lock acquired for %s' % pendingListPath)
