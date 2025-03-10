@@ -33,8 +33,6 @@ def imageLoop():
 					apDisplay.printWarning('%s already exists' % pendingListPath)
 			f=open(pendingListPath, 'r+')
 			flock(f, LOCK_EX)
-			pendingList=json.load(f)
-
 			f.seek(0)
 			f.truncate()
 			json.dump(imgtree, f)
