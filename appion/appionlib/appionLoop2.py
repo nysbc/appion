@@ -83,7 +83,7 @@ class AppionLoop(appionScript.AppionScript):
 		if os.path.isfile(pendingListPath):
 			f=open(pendingListPath, 'r+')
 			apDisplay.printWarning('[refreshTodoList] locking %s' % pendingListPath)
-			flock(f, LOCK_SH)
+			flock(f, LOCK_EX)
 			apDisplay.printWarning('[refreshTodoList] lock acquired for %s' % pendingListPath)
 			try:
 				self.imgtree=json.load(f)
