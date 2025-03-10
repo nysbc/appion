@@ -82,7 +82,7 @@ class AppionLoop(appionScript.AppionScript):
 		pendingListPath = os.path.join(self.params['rundir'], "todo.json")
 		apDisplay.printWarning('locking %s' % pendingListPath)
 		if not os.path.isfile(pendingListPath):
-		f=open(pendingListPath, 'r+')
+			f=open(pendingListPath, 'r+')
 		flock(f, LOCK_SH)
 		self.imgtree=json.load(f)
 		apDisplay.printWarning('unlocking %s' % pendingListPath)
