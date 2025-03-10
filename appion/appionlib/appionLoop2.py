@@ -80,12 +80,15 @@ class AppionLoop(appionScript.AppionScript):
 
 	def refreshTodoList(self):
 		pendingListPath = os.path.join(self.params['rundir'], "todo.json")
-		apDisplay.printWarning('locking %s' % pendingListPath)
 		if os.path.isfile(pendingListPath):
 			f=open(pendingListPath, 'r+')
+			apDisplay.printWarning('[refreshTodoList] locking %s' % pendingListPath)
 			flock(f, LOCK_SH)
-			self.imgtree=json.load(f)
-			apDisplay.printWarning('unlocking %s' % pendingListPath)
+			try:
+				self.imgtree=json.load(f)
+			except:
+				apDisplay.printWarning('[refreshTodoList] failed to load todo list at %s' % pendingListPath)
+			apDisplay.printWarning('[refreshTodoList] unlocking %s' % pendingListPath)
 			flock(f, LOCK_UN)
 			f.close()
 

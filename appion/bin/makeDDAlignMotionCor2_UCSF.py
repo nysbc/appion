@@ -23,21 +23,25 @@ def imageLoop():
 			emptyCount+=1
 		else:
 			emptyCount=0
-			apDisplay.printWarning('locking %s' % pendingListPath)
 			if not os.path.isfile(pendingListPath):
 				try:
-					apDisplay.printWarning('creating %s' % pendingListPath)
+					apDisplay.printWarning('[imageLoop] creating %s' % pendingListPath)
 					f=open(pendingListPath, 'a', 0666)
 					f.close()
 				except:
-					apDisplay.printWarning('%s already exists' % pendingListPath)
+					apDisplay.printWarning("[imageLoop]: File creation failed.  Restarting loop.")
+					continue
+			else:
+				apDisplay.printWarning('[imageLoop] %s already exists' % pendingListPath)
 			f=open(pendingListPath, 'r+')
+			apDisplay.printWarning('[imageLoop] locking %s' % pendingListPath)
 			flock(f, LOCK_EX)
 			f.seek(0)
 			f.truncate()
+			apDisplay.printWarning('[imageLoop] saving todo list')
 			json.dump(imgtree, f)
 			f.flush()
-			apDisplay.printWarning('unlocking %s' % pendingListPath)
+			apDisplay.printWarning('[imageLoop] unlocking %s' % pendingListPath)
 			flock(f, LOCK_UN)
 			f.close()
 		sleep(60)
