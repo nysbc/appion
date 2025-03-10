@@ -18,6 +18,7 @@ def imageLoop():
 	pendingListPath = os.path.join(makeStack.params['rundir'], "todo.pkl")
 	# End loop after 60 consecutive empty pending job lists.
 	while emptyCount < 60:
+		makeStack._reloadDoneDict()
 		imgtree=makeStack._getAllImages()
 		if len(imgtree) == 0:
 			emptyCount+=1
