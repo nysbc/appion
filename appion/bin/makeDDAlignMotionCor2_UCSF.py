@@ -9,13 +9,13 @@ from appionlib import apDisplay
 from multiprocessing import Pool, Manager
 import os
 from time import sleep
-import json
+import pickle
 from fcntl import flock, LOCK_EX, LOCK_UN
 
 def imageLoop():
 	makeStack = apDDMotionCorrMaker.MotionCor2UCSFAlignStackLoop()
 	emptyCount = 0
-	pendingListPath = os.path.join(makeStack.params['rundir'], "todo.json")
+	pendingListPath = os.path.join(makeStack.params['rundir'], "todo.pkl")
 	# End loop after 60 consecutive empty pending job lists.
 	while emptyCount < 60:
 		imgtree=makeStack._getAllImages()
@@ -41,9 +41,9 @@ def imageLoop():
 			f.truncate()
 			apDisplay.printWarning('[imageLoop] saving todo list')
 			try:
-				apDisplay.printWarning('[imageLoop] json.dump')
+				apDisplay.printWarning('[imageLoop] pickle.dump')
 				apDisplay.printWarning('[imageLoop] %s' % str(imgtree))
-				json.dump(imgtree, f)
+				pickle.dump(imgtree, f)
 				apDisplay.printWarning('[imageLoop] f.flush')
 				f.flush()
 			except Exception as e:

@@ -7,6 +7,7 @@ import time
 import math
 import random
 import json
+import pickle
 #appion
 from appionlib import apDisplay
 from appionlib import apDatabase
@@ -83,10 +84,10 @@ class AppionLoop(appionScript.AppionScript):
 		if os.path.isfile(pendingListPath):
 			f=open(pendingListPath, 'r+')
 			apDisplay.printWarning('[refreshTodoList] locking %s' % pendingListPath)
-			flock(f, LOCK_EX)
+			flock(f, LOCK_SH)
 			apDisplay.printWarning('[refreshTodoList] lock acquired for %s' % pendingListPath)
 			try:
-				self.imgtree=json.load(f)
+				self.imgtree=pickle.load(f)
 			except:
 				apDisplay.printWarning('[refreshTodoList] failed to load todo list at %s' % pendingListPath)
 			apDisplay.printWarning('[refreshTodoList] unlocking %s' % pendingListPath)
