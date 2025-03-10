@@ -41,7 +41,9 @@ def imageLoop():
 			f.truncate()
 			apDisplay.printWarning('[imageLoop] saving todo list')
 			try:
+				apDisplay.printWarning('[imageLoop] json.dump')
 				json.dump(imgtree, f)
+				apDisplay.printWarning('[imageLoop] f.flush')
 				f.flush()
 			except Exception as e:
 				apDisplay.printError(e)
@@ -60,7 +62,6 @@ if __name__ == '__main__':
 	p=Pool(procs)
 	apDisplay.printMsg("Starting task queue creation loop")
 	p.apply_async(imageLoop)
-	sleep(30)
 	apDisplay.printMsg("Starting Appion with %d parallel processes" % procs)
 	for _ in range(procs):
 		p.apply_async(main)
