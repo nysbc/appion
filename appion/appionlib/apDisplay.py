@@ -46,7 +46,7 @@ def printMsg(text, colorstr=None):
 			f.close()
 		except:
 			print "write error"
-	sys.stderr.write(" ... [ %d ]" ^ os.getpid() +colorString(text, colorstr)+"\n")
+	sys.stderr.write(" ... [ %d ]" % os.getpid() +colorString(text, colorstr)+"\n")
 	
 def printError(text,raised=True):
 	"""
