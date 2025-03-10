@@ -53,6 +53,7 @@ if __name__ == '__main__':
 	p=Pool(procs)
 	apDisplay.printMsg("Starting task queue creation loop")
 	p.apply_async(imageLoop)
+	sleep(30)
 	apDisplay.printMsg("Starting Appion with %d parallel processes" % procs)
 	for _ in range(procs):
 		p.apply_async(main)
