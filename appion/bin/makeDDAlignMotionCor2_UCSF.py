@@ -40,8 +40,12 @@ def imageLoop():
 			f.seek(0)
 			f.truncate()
 			apDisplay.printWarning('[imageLoop] saving todo list')
-			json.dump(imgtree, f)
-			f.flush()
+			try:
+				json.dump(imgtree, f)
+				f.flush()
+			except Exception as e:
+				apDisplay.printError(e)
+				return
 			apDisplay.printWarning('[imageLoop] unlocking %s' % pendingListPath)
 			flock(f, LOCK_UN)
 			f.close()
