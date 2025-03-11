@@ -60,25 +60,6 @@ class AppionLoop(appionScript.AppionScript):
 		'''
 		self.process_batch_count = count
 
-	def autoscale(self,numImgs,numProcs,minProcs,maxProcs,procQueue=None):
-		if numImgs > numProcs and numProcs != maxProcs:
-			self.scaleUp+=1
-		elif numImgs < numProcs-(numProcs/2) and numProcs != minProcs:
-			self.scaleDown+=1
-		if self.scaleUp == 1 or self.scaleDown == 3:
-			if self.scaleUp == 1:
-				direction="up"
-			elif self.scaleDown == 3:
-				direction="down"
-			else:
-				direction="now"
-			apDisplay.printMsg("Autoscaling event triggered. Scaling %s. %d processes.  %d images" % (direction, numProcs,numImgs))
-			if procQueue:
-				procQueue.get()
-			return (numImgs, self.notdone)
-		else:
-			return False
-
 	def refreshTodoList(self):
 		pendingListPath = os.path.join(self.params['rundir'], "todo.pkl")
 		if os.path.isfile(pendingListPath):
@@ -88,7 +69,7 @@ class AppionLoop(appionScript.AppionScript):
 			apDisplay.printWarning('[refreshTodoList] lock acquired for %s' % pendingListPath)
 			try:
 				self.imgtree=pickle.load(f)
-				apDisplay.printWarning('[imageLoop] %s' % str(self.imgtree))
+				apDisplay.printWarning('[refreshTodoList] %s' % str(self.imgtree))
 			except:
 				apDisplay.printWarning('[refreshTodoList] failed to load todo list at %s' % pendingListPath)
 				self.imgtree=[]
@@ -97,14 +78,11 @@ class AppionLoop(appionScript.AppionScript):
 			f.close()
 
 	#=====================
-	def run(self,autoscale=False,numProcs=8,minProcs=4, maxProcs=16, procQueue=None,todolist=False):
+	def run(self,todolist=False):
 		"""
 		processes all images
 		"""
 		self.todolist=todolist
-		if procQueue:
-			procQueue.put(os.getpid())
-			sleep(30)
 		if not self.params['parallel']:
 			self.cleanParallelLock()
 		### get images from database
@@ -112,10 +90,6 @@ class AppionLoop(appionScript.AppionScript):
 			self._getAllImages()
 		else:
 			self.refreshTodoList()
-		if autoscale:
-			scaleState=self.autoscale(len(self.imgtree), numProcs, minProcs, maxProcs,procQueue)
-			if scaleState:
-				return scaleState
 		os.chdir(self.params['rundir'])
 		self.stats['startimage'] = time.time()
 		self.preLoopFunctions()
@@ -127,10 +101,6 @@ class AppionLoop(appionScript.AppionScript):
 			apDisplay.printColor("\nBeginning Main Loop", "green")
 			imgnum = 0
 			while imgnum < len(self.imgtree) and self.notdone is True:
-				if autoscale and procQueue:
-					if not procQueue.full():
-						procQueue.get()
-						return (len(self.imgtree), self.notdone)
 				self.stats['startimage'] = time.time()
 				imgdata = self.imgtree[imgnum]
 				imgnum += 1
@@ -170,10 +140,6 @@ class AppionLoop(appionScript.AppionScript):
 				#END LOOP OVER IMAGES
 			if self.notdone is True:
 				self.notdone = self._waitForMoreImages()
-			if autoscale:
-				scaleState=self.autoscale(len(self.imgtree), numProcs, minProcs, maxProcs,procQueue)
-				if scaleState:
-					return scaleState
 			#END NOTDONE LOOP
 
 		self.postLoopFunctions()
