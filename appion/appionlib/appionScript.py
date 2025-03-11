@@ -545,6 +545,7 @@ class AppionScript(basicScript.BasicScript):
 		except IOError:
 			return True
 		self.lockfile.write(os.getpid())
+		self.lockfile.flush()
 		return False
 
 	def unlockParallel(self,dbid):
