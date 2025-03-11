@@ -106,11 +106,8 @@ class AppionLoop(appionScript.AppionScript):
 				imgnum += 1
 				apDisplay.printMsg("imgnum %d" % imgnum)
 				### CHECK IF IT IS OKAY TO START PROCESSING IMAGE
-				try:
-					if not self._startLoop(imgdata):
-						continue
-				except Exception as e:
-					apDisplay.printMsg("whoopsie %e" % str(e))
+				if not self._startLoop(imgdata):
+					continue
 				apDisplay.printMsg("starting loop for this image")
 
 				### set the pixel size
@@ -666,7 +663,9 @@ class AppionLoop(appionScript.AppionScript):
 		self.stats['imagesleft'] = self.stats['imagecount'] - self.stats['count']
 
 		#only if an image was processed last
+		apDisplay.printMsg("debug 1")
 		if(self.stats['lastcount'] != self.stats['count']):
+			apDisplay.printMsg("debug 2")
 			if self.params['background'] is False:
 				apDisplay.printColor( "\nStarting image %d ( skip:%d, remain:%d ) id:%d, file: %s"
 					%(self.stats['count'], self.stats['skipcount'], self.stats['imagesleft'], 
