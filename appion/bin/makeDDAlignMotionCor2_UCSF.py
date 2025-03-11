@@ -59,7 +59,7 @@ def main():
 	makeStack = apDDMotionCorrMaker.MotionCor2UCSFAlignStackLoop()
 	while True:
 		try:
-			r=makeStack.run(todolist=False)
+			r=makeStack.run(todolist=True)
 			return r
 		except Exception as e:
 			print(e)
@@ -69,7 +69,7 @@ if __name__ == '__main__':
 	procs=int(os.getenv("APPION_MOTIONCOR2_PROCS",16))
 	p=Pool(procs)
 	apDisplay.printMsg("Starting task queue creation loop")
-	#p.apply_async(imageLoop)
+	p.apply_async(imageLoop)
 	apDisplay.printMsg("Starting Appion with %d parallel processes" % procs)
 	for _ in range(procs):
 		p.apply_async(main)
