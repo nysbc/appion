@@ -83,8 +83,6 @@ class AppionLoop(appionScript.AppionScript):
 		processes all images
 		"""
 		self.todolist=todolist
-		if not self.params['parallel']:
-			self.cleanParallelLock()
 		### get images from database
 		if not self.todolist:
 			self._getAllImages()
