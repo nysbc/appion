@@ -88,6 +88,8 @@ class AppionLoop(appionScript.AppionScript):
 			self._getAllImages()
 		else:
 			self.refreshTodoList()
+			# Insert a sleep based on the pid to avoid lock contention
+			sleep(os.getpid() % 16)
 		os.chdir(self.params['rundir'])
 		self.stats['startimage'] = time.time()
 		self.preLoopFunctions()
@@ -952,6 +954,8 @@ class AppionLoop(appionScript.AppionScript):
 			self._getAllImages()
 		else:
 			self.refreshTodoList()
+			# Insert a sleep based on the pid to avoid lock contention
+			sleep(os.getpid() % 16)
 		### reset counts
 		self.stats['imagecount'] = len(self.imgtree)
 		self.stats['imagesleft'] = self.stats['imagecount'] - self.stats['count']
