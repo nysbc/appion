@@ -59,7 +59,7 @@ def main():
 	makeStack = apDDMotionCorrMaker.MotionCor2UCSFAlignStackLoop()
 	while True:
 		try:
-			r=makeStack.run(todolist=True)
+			r=makeStack.run(todolist=False)
 			return r
 		except:
 			continue
