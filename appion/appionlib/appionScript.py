@@ -540,7 +540,8 @@ class AppionScript(basicScript.BasicScript):
 		lock_file = '%s%d' % (self.lockname,dbid)
 		try:
 			fd = os.open(lock_file, os.O_CREAT|os.O_RDWR)
-			self.lockfile = os.fdopen(fd, 'r+')
+			self.lockfile = os.fdopen(fd, 'w')
+			self.lockfile.write(os.getpid())
 			flock(self.lockfile, LOCK_EX | LOCK_NB)
 		except IOError:
 			return True

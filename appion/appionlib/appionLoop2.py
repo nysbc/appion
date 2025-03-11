@@ -660,7 +660,6 @@ class AppionLoop(appionScript.AppionScript):
 				return False
 		#calc images left
 		apDisplay.printDebug('_startLoop imagecount=%d, count=%d' % (self.stats['imagecount'], self.stats['count']))
-		apDisplay.printMsg("debug 1")
 		self.stats['imagesleft'] = self.stats['imagecount'] - self.stats['count']
 
 		#only if an image was processed last
