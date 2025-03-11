@@ -552,6 +552,7 @@ class AppionScript(basicScript.BasicScript):
 		self.lockfile.truncate()
 		self.lockfile.write(os.getpid())
 		self.lockfile.flush()
+		apDisplay.printMsg("lock acquired for %d" % dbid)
 		return False
 
 	def unlockParallel(self,dbid):
