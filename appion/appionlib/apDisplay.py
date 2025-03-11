@@ -29,6 +29,7 @@ def printWarning(text):
 	"""
 	if len(inspect.stack()) >= 2:
 		cf=inspect.stack()[1]
+		cf=inspect.getmodule(cf[0])
 	if writeOut is True:
 		try:
 			f = open(outFile, "a")
@@ -44,6 +45,7 @@ def printMsg(text, colorstr=None):
 	"""
 	if len(inspect.stack()) >= 2:
 		cf=inspect.stack()[1]
+		cf=inspect.getmodule(cf[0])
 	if writeOut is True:
 		try:
 			f = open(outFile, "a")
@@ -71,6 +73,7 @@ def printError(text,raised=True):
 	'''
 	if len(inspect.stack()) >= 2:
 		cf=inspect.stack()[1]
+		cf=inspect.getmodule(cf[0])
 	if writeOut is True:
 		try:
 			f = open(outFile, "a")
@@ -89,6 +92,7 @@ def printDebug(text):
 	"""
 	if len(inspect.stack()) >= 2:
 		cf=inspect.stack()[1]
+		cf=inspect.getmodule(cf[0])
 	if not debug:
 		return
 	if writeOut is True:
