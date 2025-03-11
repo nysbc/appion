@@ -541,10 +541,10 @@ class AppionScript(basicScript.BasicScript):
 		try:
 			fd = os.open(lock_file, os.O_CREAT|os.O_RDWR)
 			self.lockfile = os.fdopen(fd, 'w')
-			self.lockfile.write(os.getpid())
 			flock(self.lockfile, LOCK_EX | LOCK_NB)
 		except IOError:
 			return True
+		self.lockfile.write(os.getpid())
 		return False
 
 	def unlockParallel(self,dbid):
