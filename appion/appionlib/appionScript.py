@@ -550,7 +550,7 @@ class AppionScript(basicScript.BasicScript):
 			return True
 		self.lockfile.seek(0)
 		self.lockfile.truncate()
-		self.lockfile.write(os.getpid())
+		self.lockfile.write(str(os.getpid()))
 		self.lockfile.flush()
 		apDisplay.printMsg("lock acquired for %d" % dbid)
 		return False
