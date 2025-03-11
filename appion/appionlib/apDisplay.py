@@ -6,6 +6,7 @@ import sys
 import types
 import glob
 import os
+import inspect
 
 ####
 # This is a low-level file with NO database connections
@@ -26,6 +27,8 @@ def printWarning(text):
 	"""
 	standardized warning message
 	"""
+	if len(inspect.stack()) >= 2:
+		cf=inspect.stack()[1]
 	if writeOut is True:
 		try:
 			f = open(outFile, "a")
@@ -33,12 +36,14 @@ def printWarning(text):
 			f.close()
 		except:
 			print "write error"
-	sys.stderr.write(colorString("!!! WARNING: [ %d ]" % os.getpid() +text,"yellow")+"\n")
+	sys.stderr.write(colorString("!!! WARNING: [ %d ] [ %s ] " % (os.getpid(), cf) +text,"yellow")+"\n")
 
 def printMsg(text, colorstr=None):
 	"""
 	standardized log message
 	"""
+	if len(inspect.stack()) >= 2:
+		cf=inspect.stack()[1]
 	if writeOut is True:
 		try:
 			f = open(outFile, "a")
@@ -46,7 +51,7 @@ def printMsg(text, colorstr=None):
 			f.close()
 		except:
 			print "write error"
-	sys.stderr.write(" ... [ %d ]" % os.getpid() +colorString(text, colorstr)+"\n")
+	sys.stderr.write(" ... [ %d ] [ %s ] " % (os.getpid(), cf) +colorString(text, colorstr)+"\n")
 	
 def printError(text,raised=True):
 	"""
@@ -64,6 +69,8 @@ def printError(text,raised=True):
 		except OSError as e:
 			printWarning('unlock %s failed: %s.' % (lockfile, e))
 	'''
+	if len(inspect.stack()) >= 2:
+		cf=inspect.stack()[1]
 	if writeOut is True:
 		try:
 			f = open(outFile, "a")
@@ -72,14 +79,16 @@ def printError(text,raised=True):
 		except:
 			print "write error"
 	if raised:
-		raise Exception, colorString("\n *** FATAL ERROR *** [ %d ] \n" % os.getpid() +text+"\n\a","red")
+		raise Exception, colorString("\n *** FATAL ERROR *** [ %d ] [ %s ] \n" % (os.getpid(), cf) +text+"\n\a","red")
 	else:
-		sys.stderr.write(colorString("\n *** FATAL ERROR *** [ %d ] \n" % os.getpid() +text+"\n\a","red"))
+		sys.stderr.write(colorString("\n *** FATAL ERROR *** [ %d ] [ %s ] \n" % (os.getpid(), cf) +text+"\n\a","red"))
 
 def printDebug(text):
 	"""
 	standardized debug message
 	"""
+	if len(inspect.stack()) >= 2:
+		cf=inspect.stack()[1]
 	if not debug:
 		return
 	if writeOut is True:
@@ -89,7 +98,7 @@ def printDebug(text):
 			f.close()
 		except:
 			print "write error"
-	sys.stderr.write(colorString("!!! DEBUG: [ %d ]" % os.getpid() +text,"yellow")+"\n")
+	sys.stderr.write(colorString("!!! DEBUG: [ %d ] [ %s ] " % (os.getpid(), cf) +text,"yellow")+"\n")
 
 def printColor(text, colorstr):
 	"""
