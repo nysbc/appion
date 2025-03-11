@@ -61,7 +61,8 @@ def main():
 		try:
 			r=makeStack.run(todolist=False)
 			return r
-		except:
+		except Exception as e:
+			print(e)
 			continue
 
 if __name__ == '__main__':
