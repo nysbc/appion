@@ -104,10 +104,11 @@ class AppionLoop(appionScript.AppionScript):
 				self.stats['startimage'] = time.time()
 				imgdata = self.imgtree[imgnum]
 				imgnum += 1
-
+				apDisplay.printMsg("imgnum %d" % imgnum)
 				### CHECK IF IT IS OKAY TO START PROCESSING IMAGE
 				if not self._startLoop(imgdata):
 					continue
+				apDisplay.printMsg("starting loop for this image")
 
 				### set the pixel size
 				self.params['apix'] = apDatabase.getPixelSize(imgdata)
