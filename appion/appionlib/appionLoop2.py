@@ -106,8 +106,11 @@ class AppionLoop(appionScript.AppionScript):
 				imgnum += 1
 				apDisplay.printMsg("imgnum %d" % imgnum)
 				### CHECK IF IT IS OKAY TO START PROCESSING IMAGE
-				if not self._startLoop(imgdata):
-					continue
+				try:
+					if not self._startLoop(imgdata):
+						continue
+				except Exception as e:
+					apDisplay.printMsg("whoopsie %e" % str(e))
 				apDisplay.printMsg("starting loop for this image")
 
 				### set the pixel size
