@@ -76,6 +76,9 @@ class AppionLoop(appionScript.AppionScript):
 			apDisplay.printWarning('[refreshTodoList] unlocking %s' % pendingListPath)
 			flock(f, LOCK_UN)
 			f.close()
+		else:
+			self.imgtree=[]
+		self.stats['imagecount'] = len(self.imgtree)
 
 	#=====================
 	def run(self,todolist=False):
