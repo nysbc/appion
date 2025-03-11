@@ -57,7 +57,12 @@ def imageLoop():
 
 def main():
 	makeStack = apDDMotionCorrMaker.MotionCor2UCSFAlignStackLoop()
-	return makeStack.run(todolist=True)
+	while True:
+		try:
+			r=makeStack.run(todolist=True)
+			return r
+		except:
+			continue
 
 if __name__ == '__main__':
 	procs=int(os.getenv("APPION_MOTIONCOR2_PROCS",16))
