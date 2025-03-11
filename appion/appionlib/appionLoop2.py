@@ -69,7 +69,7 @@ class AppionLoop(appionScript.AppionScript):
 			apDisplay.printWarning('[refreshTodoList] lock acquired for %s' % pendingListPath)
 			try:
 				self.imgtree=pickle.load(f)
-				apDisplay.printWarning('[refreshTodoList] %s' % str(self.imgtree))
+				#apDisplay.printWarning('[refreshTodoList] %s' % str(self.imgtree))
 			except:
 				apDisplay.printWarning('[refreshTodoList] failed to load todo list at %s' % pendingListPath)
 				self.imgtree=[]
@@ -977,7 +977,10 @@ class AppionLoop(appionScript.AppionScript):
 		sys.stderr.write("\n")
 
 		### GET NEW IMAGES
-		self._getAllImages()
+		if not self.todolist:
+			self._getAllImages()
+		else:
+			self.refreshTodoList()
 		### reset counts
 		self.stats['imagecount'] = len(self.imgtree)
 		self.stats['imagesleft'] = self.stats['imagecount'] - self.stats['count']

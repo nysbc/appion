@@ -43,7 +43,7 @@ def imageLoop():
 			apDisplay.printWarning('[imageLoop] saving todo list')
 			try:
 				apDisplay.printWarning('[imageLoop] pickle.dump')
-				apDisplay.printWarning('[imageLoop] %s' % str(imgtree))
+				#apDisplay.printWarning('[imageLoop] %s' % str(imgtree))
 				pickle.dump(imgtree, f)
 				apDisplay.printWarning('[imageLoop] f.flush')
 				f.flush()
