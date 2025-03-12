@@ -62,22 +62,27 @@ class AppionLoop(appionScript.AppionScript):
 
 	def refreshTodoList(self):
 		pendingListPath = os.path.join(self.params['rundir'], "todo.pkl")
-		if os.path.isfile(pendingListPath):
-			f=open(pendingListPath, 'rb+')
-			apDisplay.printWarning('locking %s' % pendingListPath)
-			flock(f, LOCK_SH)
-			apDisplay.printWarning('lock acquired for %s' % pendingListPath)
-			try:
-				self.imgtree=pickle.load(f)
-				#apDisplay.printWarning('%s' % str(self.imgtree))
-			except:
-				apDisplay.printWarning('failed to load todo list at %s' % pendingListPath)
-				self.imgtree=[]
-			apDisplay.printWarning('unlocking %s' % pendingListPath)
-			flock(f, LOCK_UN)
-			f.close()
-		else:
+		self.imgtree=[]
+		waits=0
+		self.stats['imagecount']=0
+		while not os.path.isfile(pendingListPath):
+			if waits > 20:
+				return
+			sleep(60)
+			waits+=1
+		f=open(pendingListPath, 'rb+')
+		apDisplay.printWarning('locking %s' % pendingListPath)
+		flock(f, LOCK_SH)
+		apDisplay.printWarning('lock acquired for %s' % pendingListPath)
+		try:
+			self.imgtree=pickle.load(f)
+			#apDisplay.printWarning('%s' % str(self.imgtree))
+		except:
+			apDisplay.printWarning('failed to load todo list at %s' % pendingListPath)
 			self.imgtree=[]
+		apDisplay.printWarning('unlocking %s' % pendingListPath)
+		flock(f, LOCK_UN)
+		f.close()
 		self.stats['imagecount'] = len(self.imgtree)
 
 	#=====================
@@ -90,11 +95,7 @@ class AppionLoop(appionScript.AppionScript):
 		if not self.todolist:
 			self._getAllImages()
 		else:
-			waits=0
-			while len(self.imgtree) == 0 and waits < 4:
-				sleep(15)
-				self.refreshTodoList()
-				waits+=1
+			self.refreshTodoList()
 		os.chdir(self.params['rundir'])
 		self.stats['startimage'] = time.time()
 		self.preLoopFunctions()
