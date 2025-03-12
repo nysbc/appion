@@ -64,16 +64,16 @@ class AppionLoop(appionScript.AppionScript):
 		pendingListPath = os.path.join(self.params['rundir'], "todo.pkl")
 		if os.path.isfile(pendingListPath):
 			f=open(pendingListPath, 'rb+')
-			apDisplay.printWarning('[refreshTodoList] locking %s' % pendingListPath)
+			apDisplay.printWarning('locking %s' % pendingListPath)
 			flock(f, LOCK_SH)
-			apDisplay.printWarning('[refreshTodoList] lock acquired for %s' % pendingListPath)
+			apDisplay.printWarning('lock acquired for %s' % pendingListPath)
 			try:
 				self.imgtree=pickle.load(f)
-				#apDisplay.printWarning('[refreshTodoList] %s' % str(self.imgtree))
+				#apDisplay.printWarning('%s' % str(self.imgtree))
 			except:
-				apDisplay.printWarning('[refreshTodoList] failed to load todo list at %s' % pendingListPath)
+				apDisplay.printWarning('failed to load todo list at %s' % pendingListPath)
 				self.imgtree=[]
-			apDisplay.printWarning('[refreshTodoList] unlocking %s' % pendingListPath)
+			apDisplay.printWarning('unlocking %s' % pendingListPath)
 			flock(f, LOCK_UN)
 			f.close()
 		else:

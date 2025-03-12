@@ -24,35 +24,32 @@ def imageLoop():
 			emptyCount+=1
 		else:
 			emptyCount=0
-			if not os.path.isfile(pendingListPath):
-				try:
-					apDisplay.printWarning('[imageLoop] creating %s' % pendingListPath)
-					f=open(pendingListPath, 'a', 0666)
-					f.close()
-				except:
-					apDisplay.printWarning("[imageLoop]: File creation failed.  Restarting loop.")
-					continue
-			else:
-				apDisplay.printWarning('[imageLoop] %s already exists' % pendingListPath)
-			f=open(pendingListPath, 'rb+')
-			apDisplay.printWarning('[imageLoop] locking %s' % pendingListPath)
-			flock(f, LOCK_EX)
-			apDisplay.printWarning('[imageLoop] lock acquired for %s' % pendingListPath)
-			f.seek(0)
-			f.truncate()
-			apDisplay.printWarning('[imageLoop] saving todo list')
+		if not os.path.isfile(pendingListPath):
 			try:
-				apDisplay.printWarning('[imageLoop] pickle.dump')
-				#apDisplay.printWarning('[imageLoop] %s' % str(imgtree))
-				pickle.dump(imgtree, f)
-				apDisplay.printWarning('[imageLoop] f.flush')
-				f.flush()
-			except Exception as e:
-				apDisplay.printError(e)
-				return
-			apDisplay.printWarning('[imageLoop] unlocking %s' % pendingListPath)
-			flock(f, LOCK_UN)
-			f.close()
+				apDisplay.printWarning('creating %s'% pendingListPath)
+				f=open(pendingListPath, 'a', 0666)
+				f.close()
+			except:
+				apDisplay.printWarning("File creation failed.  Restarting loop.")
+				continue
+		else:
+			apDisplay.printWarning('%s already exists'% pendingListPath)
+		f=open(pendingListPath, 'rb+')
+		apDisplay.printWarning('locking %s'% pendingListPath)
+		flock(f, LOCK_EX)
+		apDisplay.printWarning('lock acquired for %s'% pendingListPath)
+		f.seek(0)
+		f.truncate()
+		apDisplay.printWarning('saving todo list')
+		try:
+			pickle.dump(imgtree, f)
+			f.flush()
+		except Exception as e:
+			apDisplay.printError(e)
+			return
+		apDisplay.printWarning('unlocking %s'% pendingListPath)
+		flock(f, LOCK_UN)
+		f.close()
 		sleep(60)
 
 def main():
@@ -62,7 +59,7 @@ def main():
 			r=makeStack.run(todolist=True)
 			return r
 		except Exception as e:
-			print(e)
+			apDisplay.printWarning("exception has occurred: %s" % str(e))
 			continue
 
 if __name__ == '__main__':
