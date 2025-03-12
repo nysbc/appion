@@ -995,7 +995,7 @@ class AppionLoop(appionScript.AppionScript):
 		self.stats['imagesleft'] = self.stats['imagecount'] - self.stats['count']
 		return True
 
-	def setBadImage(self,imgdata):close()
+	def setBadImage(self,imgdata):
 		# set current image as bad image
 		self.bad_images.append(imgdata.dbid)
 		apDisplay.printWarning("Program did not produce valid results. Should hide the image if the problem persists")
