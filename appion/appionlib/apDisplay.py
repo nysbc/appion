@@ -28,7 +28,10 @@ def getCallingFunctionAndModule():
 	cf=""
 	if len(inspect.stack()) >= 3:
 		cm=inspect.stack()[2]
-		cf=cm.function
+		try:
+			cf=cm[3]
+		except IndexError:
+			cf=""
 		cm=inspect.getmodule(cm[0])
 		try:
 			cm=cm.__name__
