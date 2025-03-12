@@ -90,7 +90,11 @@ class AppionLoop(appionScript.AppionScript):
 		if not self.todolist:
 			self._getAllImages()
 		else:
-			self.refreshTodoList()
+			waits=0
+			while len(self.imgtree) == 0 and waits < 4:
+				sleep(15)
+				self.refreshTodoList()
+				waits+=1
 		os.chdir(self.params['rundir'])
 		self.stats['startimage'] = time.time()
 		self.preLoopFunctions()
@@ -990,7 +994,7 @@ class AppionLoop(appionScript.AppionScript):
 		self.stats['imagesleft'] = self.stats['imagecount'] - self.stats['count']
 		return True
 
-	def setBadImage(self,imgdata):
+	def setBadImage(self,imgdata):close()
 		# set current image as bad image
 		self.bad_images.append(imgdata.dbid)
 		apDisplay.printWarning("Program did not produce valid results. Should hide the image if the problem persists")
