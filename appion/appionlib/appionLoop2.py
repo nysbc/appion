@@ -955,6 +955,8 @@ class AppionLoop(appionScript.AppionScript):
 			self._getAllImages()
 		else:
 			self.refreshTodoList()
+			# If we don't do this the progress bar starts reporting negative values for the number of remaining images.
+			self.stats['count'] = 0
 		### reset counts
 		self.stats['imagecount'] = len(self.imgtree)
 		self.stats['imagesleft'] = self.stats['imagecount'] - self.stats['count']
