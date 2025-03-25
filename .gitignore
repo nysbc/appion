@@ -29,4 +29,5 @@ slack/build
 #Eclipse project files
 .project
 .pydevproject
+*.code-workspace
 
