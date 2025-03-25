@@ -21,6 +21,7 @@ from pyami import fileutil
 from fcntl import flock, LOCK_EX, LOCK_UN, LOCK_SH
 import subprocess
 from time import sleep
+import logging
 
 class AppionLoop(appionScript.AppionScript):
 	#=====================

@@ -18,6 +18,9 @@ from appionlib import apDDprocess
 from appionlib.apCtf import ctfdb
 from appionlib.apCtf import ctfinsert
 from appionlib.apCtf import ctffind4AvgRotPlot
+from time import time
+import logging
+import sys
 
 class ctfEstimateLoop(appionLoop2.AppionLoop):
 	"""

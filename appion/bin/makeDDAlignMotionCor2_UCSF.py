@@ -11,6 +11,7 @@ from time import sleep
 import pickle
 from fcntl import flock, LOCK_EX, LOCK_UN
 import logging
+import sys
 
 def imageLoop():
 	makeStack = apDDMotionCorrMaker.MotionCor2UCSFAlignStackLoop()
