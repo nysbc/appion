@@ -1,9 +1,8 @@
-def genMotionCor1Log(outbuffer: list, logPath: str, throw: int, totalRenderedFrames: int, binning: float = 1.0, motionCorVersion: str = "2.1.5.0") -> None:
-    ''' 
-    Takes the output log from motioncor2/motioncor3 and converts it to a motioncor1-formatted log.
-    This is necessary because the myamiweb web UI reads motioncor1 logs directly / doesn't query the database for information about shifts.
-    See here: https://github.com/leginon-org/leginon/blob/34bf9ab9a7a7ec8ae2d9a6ab818a4538cb925787/myamiweb/processing/inc/particledata.inc#L2505-L2533
+def parseLog(outbuffer: list, motionCorVersion: str = "2.1.5.0") -> dict:
     '''
+    Parses the output log from motioncor2/motioncor3 and converts it into a dict.
+    '''
+    logData={}
     # Convert semantic version to int.  Use a dummy version if the version can't be cast into a float.
     try:
         motionCorVersion=motionCorVersion.split(".")
@@ -17,8 +16,7 @@ def genMotionCor1Log(outbuffer: list, logPath: str, throw: int, totalRenderedFra
         if not outbuffer:
             raise RuntimeError("Alignment shift line not found in stdout.")
         line=outbuffer.pop()
-
-    shifts = []
+    logData["shifts"] = []
     while ("Global shifts are corrected" not in line) and outbuffer:
         # Remove empty lines
         while not line and outbuffer:
@@ -31,26 +29,33 @@ def genMotionCor1Log(outbuffer: list, logPath: str, throw: int, totalRenderedFra
             try:
                 shx = float(line.split()[-2])
                 shy = float(line.split()[-1])
-                shifts.append((shx, shy))
+                logData["shifts"].append((shx, shy))
             except Exception as e:
                 raise RuntimeError("Could not parse shifts in log.") from e
         line=outbuffer.pop()
- 
+    return logData
+
+def genMotionCor1Log(logData: dict, logPath: str, throw: int, totalRenderedFrames: int, binning: float = 1.0) -> None:
+    ''' 
+    Takes the output log from motioncor2/motioncor3 and converts it to a motioncor1-formatted log.
+    This is necessary because the myamiweb web UI reads motioncor1 logs directly / doesn't query the database for information about shifts.
+    See here: https://github.com/leginon-org/leginon/blob/34bf9ab9a7a7ec8ae2d9a6ab818a4538cb925787/myamiweb/processing/inc/particledata.inc#L2505-L2533
+    '''
     # Convert motioncor2 output to motioncor1 format
-    shifts_adjusted = []
-    midval = len(shifts)/2
-    midshx = shifts[midval][0]
-    midshy = shifts[midval][1]
-    for shift in shifts:
+    adjusted_shifts = []
+    midval = len(logData["shifts"])/2
+    midshx = logData["shifts"][midval][0]
+    midshy = logData["shifts"][midval][1]
+    for shift in logData["shifts"]:
         # Convert to the convention used in motioncorr
         # so that shift is in pixels of the aligned image.
         shxa = -(shift[0] - midshx) / binning
         shya = -(shift[1] - midshy) / binning
-        shifts_adjusted.append((shxa, shya))
+        adjusted_shifts.append((shxa, shya))
 
     # motioncorr1 format, needs conversion from motioncorr2 format
     with open(logPath,"w") as f:
         f.write("Sum Frame #%.3d - #%.3d (Reference Frame #%.3d):\n" % (0, totalRenderedFrames, totalRenderedFrames/2))
         # Eer nframe is not predictable.
-        for idx, adjusted_shift in enumerate(shifts_adjusted):
+        for idx, adjusted_shift in enumerate(adjusted_shifts):
             f.write("......Add Frame #%.3d with xy shift: %.5f %.5f\n" % (idx+throw, adjusted_shift[0], adjusted_shift[1]))
