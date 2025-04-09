@@ -2,52 +2,91 @@ from shutil import which
 import os
 import pexpect
 from logParser import parseLog
+from io import BytesIO
 
-def ctffind(input : str, is_movie : str, num_frame_avg : str, output : str, pixel_size : str, kv : str, cs : str, ampcontrast : str, 
-            fieldsize : str, resmin : str, resmax : str, defmin : str, defmax : str, 
-            defstep : str, known_astig : str, exhaustive_astig_search : str, astig : str, 
-            astig_angle : str, restrain_astig : str, expect_astig : str, phase : str,
-            min_phase_shift : str,  max_phase_shift : str, phase_search_step : str, expert_opts: str, 
+def ctffind(input : str, output : str, is_movie : str = "", num_frame_avg : str = "", 
+            pixel_size : str = "", kv : str = "", cs : str = "", ampcontrast : str = "", 
+            fieldsize : str = "", resmin : str = "", resmax : str = "", defmin : str = "", defmax : str = "", 
+            defstep : str = "", known_astig : str = "", exhaustive_astig_search : str = "", astig : str = "", 
+            astig_angle : str = "", restrain_astig : str = "", expect_astig : str = "", phase : str = "no",
+            min_phase_shift : str = "",  max_phase_shift : str = "", phase_search_step : str = "", expert_opts: str = "no", 
             executable : str = "ctffind4") -> tuple:
     cmd=which(executable)
     if not cmd:
         raise RuntimeError("%s binary is not in path.  Cannot execute." % executable)
     prompts={
-			'Input image file name': os.path.abspath(str(input)),
-			'Input is a movie (stack of frames)' : str(is_movie),
-			'Number of frames to average together' : str(num_frame_avg),
-			'Output diagnostic image file name' : os.path.abspath(str(output)),
-			'Pixel size' : str(pixel_size),
-			'Acceleration voltage' : str(kv),
-			'Spherical aberration' : str(cs),
-			'Amplitude contrast' : str(ampcontrast),
-			'Size of amplitude spectrum to compute' : str(fieldsize),
-			'Minimum resolution' : str(resmin),
-			'Maximum resolution' : str(resmax),
-			'Minimum defocus' : str(defmin),
-			'Maximum defocus' : str(defmax),
-			'Defocus search step' : str(defstep),
-			'Do you know what astigmatism is present?' : str(known_astig),
-			'Slower, more exhaustive search?' : str(exhaustive_astig_search),
-			'Known astigmatism' : str(astig),
-			'Known astigmatism angle': str(astig_angle),
-			'Use a restraint on astigmatism?' : str(restrain_astig),
-			'Expected (tolerated) astigmatism': str(expect_astig),
-			'Find additional phase shift?' : str(phase),
-			'Minimum phase shift (rad)' : str(min_phase_shift),
-			'Maximum phase shift (rad)' : str(max_phase_shift),
-			'Phase shift search step' : str(phase_search_step),
-			'Do you want to set expert options?' : str(expert_opts)
+			r'Input image file name': os.path.abspath(str(input)),
+			r'Input is a movie \(stack of frames\)' : str(is_movie),
+			r'Number of frames to average together' : str(num_frame_avg),
+			r'Output diagnostic image file name' : os.path.abspath(str(output)),
+			r'Pixel size' : str(pixel_size),
+			r'Acceleration voltage' : str(kv),
+			r'Spherical aberration' : str(cs),
+			r'Amplitude contrast' : str(ampcontrast),
+			r'Size of amplitude spectrum to compute' : str(fieldsize),
+			r'Minimum resolution' : str(resmin),
+			r'Maximum resolution' : str(resmax),
+			r'Minimum defocus' : str(defmin),
+			r'Maximum defocus' : str(defmax),
+			r'Defocus search step' : str(defstep),
+			r'Do you know what astigmatism is present\?' : str(known_astig),
+			r'Slower, more exhaustive search\?' : str(exhaustive_astig_search),
+			r'Known astigmatism' : str(astig),
+			r'Known astigmatism angle': str(astig_angle),
+			r'Use a restraint on astigmatism\?' : str(restrain_astig),
+			r'Expected \(tolerated\) astigmatism': str(expect_astig),
+			r'Find additional phase shift\?' : str(phase),
+			r'Minimum phase shift \(rad\)' : str(min_phase_shift),
+			r'Maximum phase shift \(rad\)' : str(max_phase_shift),
+			r'Phase shift search step' : str(phase_search_step),
+			r'Do you want to set expert options\?' : str(expert_opts)
 		}
     promptPatterns=list(prompts.keys())
+    promptPatterns.append(pexpect.EOF)
     task=pexpect.spawn(cmd)
-    while promptPatterns:
+    stdout=BytesIO()
+    task.logfile=stdout
+    while len(promptPatterns) >= 1:
         idx=task.expect(promptPatterns)
+        # EOF matched
+        if idx == len(promptPatterns)-1:
+            break
         task.sendline(str(prompts[promptPatterns[idx]]))
         promptPatterns.pop(idx)
-    rawoutput = task.read()
-    output=rawoutput.split("\n")
-    output=parseLog(output)
+    stdout=stdout.getvalue().decode("utf-8").split("\n")
+    resultspath=""
+    for line in stdout:
+         if line.startswith("Summary of results"):
+              resultspath=line.split(":")[1].strip()
+    with open(resultspath, "r") as f:
+         rawoutput=f.readlines()
+    output=parseLog(rawoutput)
     return output, rawoutput
+
+if __name__ == '__main__':
+    output, rawoutput = ctffind(input="/h2/jpellman/18169/n25apr07b_HFDAct3g4_016gr_00100sq_05hl_054esn-a.mrc", 
+            is_movie="no",
+            num_frame_avg=7,
+            output="/h2/jpellman/18169/n25apr07b_HFDAct3g4_016gr_00100sq_05hl_054esn-a-pow.mrc",
+            pixel_size=0.827,
+            kv = 300.0,
+			cs = 2.7,
+			ampcontrast = 0.07,
+			fieldsize = 1024,
+			resmin = 50.0,
+			resmax = 4.0,
+			defmin = 1000.0,
+			defmax = 39742.5,
+			defstep = 1000.0,
+			known_astig = "no",
+			exhaustive_astig_search = "no",
+			restrain_astig = "yes",
+			expect_astig = "500.0",
+			phase = "no",
+			expert_opts = "no")
+    print(output)
+    print(rawoutput)
+
+
     
         
