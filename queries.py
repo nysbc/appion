@@ -23,28 +23,24 @@ def makeDark(input):
     return "/tmp/tmp.mrc"
 
 def getImageDefectMap(correctorplandata, cameradata):
-    plan = {}
-    bad_rows = list(correctorplandata.bad_rows)
-    bad_cols = list(correctorplandata.bad_cols)
-    if correctorplandata.bad_pixels:
-        bad_pixels  = list(correctorplandata.bad_pixels)
-    else:
-        bad_pixels = []
+    bad_rows = correctorplandata.bad_rows
+    bad_rows = eval(bad_rows) if bad_rows else []
+    bad_cols = correctorplandata.bad_cols
+    bad_cols = eval(bad_cols) if bad_cols else []
+    bad_pixels = correctorplandata.bad_pixels
+    bad_pixels = eval(bad_pixels) if bad_pixels else []
     dx = cameradata.subd_dimension_x
     dy = cameradata.subd_dimension_y
     map_array = numpy.zeros((dy,dx),dtype=numpy.int8)
-    for r in bad_rows:
-        map_array[r,:] = 1
-    for c in bad_cols:
-        map_array[:,c] = 1
-    for p in bad_pixels:
-        px, py = p
+    map_array[bad_rows,:] = 1
+    map_array[:,bad_cols] = 1
+    for px, py in bad_pixels:
         map_array[py,px] = 1
     return map_array
 
 imageid=29123390
 imgdata=AcquisitionImageData.objects.get(def_id=imageid)
-correctorplandata=imgdata.ref_correctorplandata_corrector_plan
+correctorplandata=CorrectorPlanData(def_id=imgdata.ref_correctorplandata_corrector_plan)
 sessiondata=imgdata.ref_sessiondata_session
 cameradata=imgdata.ref_cameraemdata_camera
 # keyword args for motioncor2 function
@@ -78,3 +74,7 @@ print(cameradata.subd_pixel_size_x)
 print(cameradata.frame_flip)
 print(cameradata.frame_rotate)
 print(kwargs)
+
+print()
+bad_pixels="" if not correctorplandata.bad_pixels else correctorplandata.bad_pixels
+print(bad_pixels)
