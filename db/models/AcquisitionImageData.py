@@ -1,6 +1,7 @@
 from django.db import models
 from .SessionData import SessionData
 from .CameraEMData import CameraEMData
+from .CorrectorPlanData import CorrectorPlanData
 
 class AcquisitionImageData(models.Model):
     def_id = models.AutoField(db_column="DEF_id", primary_key=True)
@@ -35,8 +36,12 @@ class AcquisitionImageData(models.Model):
         null=True,
         on_delete=models.DO_NOTHING,
     )
-    ref_correctorplandata_corrector_plan = models.IntegerField(
-        db_column="REF|CorrectorPlanData|corrector plan", blank=True, null=True
+    ref_correctorplandata_corrector_plan = models.ForeignKey(
+        CorrectorPlanData,
+        db_column="REF|CorrectorPlanData|corrector plan",
+        blank=True,
+        null=True,
+        on_delete=models.DO_NOTHING,
     )
     correction_channel = models.IntegerField(
         db_column="correction channel", blank=True, null=True

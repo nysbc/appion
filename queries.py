@@ -75,7 +75,7 @@ def testImageDefectMap():
 
 imageid=29123390
 imgdata=AcquisitionImageData.objects.get(def_id=imageid)
-correctorplandata=CorrectorPlanData.objects.get(def_id=imgdata.ref_correctorplandata_corrector_plan)
+correctorplandata=imgdata.ref_correctorplandata_corrector_plan
 sessiondata=imgdata.ref_sessiondata_session
 cameradata=imgdata.ref_cameraemdata_camera
 # keyword args for motioncor2 function
