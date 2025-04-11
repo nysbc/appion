@@ -23,6 +23,55 @@ def makeDarkMrc(input):
     """
     return "/tmp/tmp.mrc"
 
+# def getSingleFrameDarkArray(self):
+#     try:
+#         darkdata = self.getRefImageData('dark')
+#         nframes = self.getNumberOfFrameSavedFromImageData(darkdata)
+#         return darkdata['image'] / nframes
+#     except:
+#         dimension = self.getDefaultDimension()
+#         return numpy.zeros((dimension['y'],dimension['x']))
+        
+# def setupDarkNormMrcs(frameprocess_dir, use_full_raw_area=False):
+#     '''
+#     Creates local reference files for gain/dark-correcting the stack of frames
+#     '''
+#     # apDisplay.printMsg('Will setupDarkNormMrcs make dark/gain? %s' % (self.correct_dark_gain,))
+#     if not self.correct_dark_gain or self.getRefImageData('norm') is None: 
+#         self.dark_path = None
+#         self.norm_path = None
+#         return
+#     sys.stdout.write('\a')
+#     sys.stdout.flush()
+#     # if use_full_raw_area is True:
+#     #     apDisplay.displayError('use_full_raw_area when image is cropped is not implemented for gpu')
+#     get_new_refs = self.__conditionChanged(1,use_full_raw_area)
+#     # apDisplay.printMsg('decide to get new refs based on condition change ? %s' % (get_new_refs,))
+#     # o.k. to set attribute now that condition change is checked
+#     # at least write dark and norm image once
+#     if get_new_refs or not hasattr(self,'dark_path'):
+#         # set camera info for loading frames
+#         self.setCameraInfo(1,use_full_raw_area)
+
+#         # output dark
+#         unscaled_darkarray = self.getSingleFrameDarkArray()
+#         self.dark_path = os.path.join(frameprocess_dir,'dark-%s-%d-%d.mrc' % (self.hostname,self.gpuid, os.getpid()))
+#         mrc.write(dark_path,unscaled_darkarray)
+
+#         # output norm
+#         normdata = self.getRefImageData('norm')
+#         if normdata['bright']:
+#             apDisplay.printWarning('From Bright Reference %s' % (normdata['bright']['filename'],))
+#         if self.use_frame_aligner_flat:
+#             normarray = normdata['image']
+#             self.norm_path = os.path.join(frameprocess_dir,'norm-%s-%d-%d.mrc' % (self.hostname,self.gpuid,os.getpid()))
+#             apDisplay.printWarning('Save Norm Reference %s to %s' % (normdata['filename'],self.norm_path))
+#             try:
+#                 mrc.write(normarray,self.norm_path)
+#             except Exception as e:
+#                 apDisplay.printError('Norm array not saved. Possible problem of reading from %s' % normdata.getpath())
+
+# DefectMap
 def getImageDefectMap(correctorplandata : CorrectorPlanData, cameradata : CameraEMData):
     bad_rows = correctorplandata.bad_rows
     bad_rows = eval(bad_rows) if bad_rows else []
@@ -71,6 +120,7 @@ def testImageDefectMap():
     map=getImageDefectMap(correctorplandata,cameradata)
     print(map)
 
+
 # A typical run.
 
 imageid=29123390
@@ -102,6 +152,10 @@ else:
 kwargs["Dark"]=imgdata.ref_darkimagedata_dark
 if not kwargs["Dark"]:
     kwargs["Dark"]=makeDarkMrc(input)
+
+# kV
+scopeemdata=imgdata.ref_scopeemdata_scope
+kwargs["kV"] = scopeemdata.high_tension/1000.0
 
 print(imgdata.ref_correctorplandata_corrector_plan)
 print(imgdata.ref_scopeemdata_scope)

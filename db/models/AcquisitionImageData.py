@@ -2,6 +2,7 @@ from django.db import models
 from .SessionData import SessionData
 from .CameraEMData import CameraEMData
 from .CorrectorPlanData import CorrectorPlanData
+from .ScopeEMData import ScopeEMData
 
 class AcquisitionImageData(models.Model):
     def_id = models.AutoField(db_column="DEF_id", primary_key=True)
@@ -26,8 +27,12 @@ class AcquisitionImageData(models.Model):
     ref_queuedata_queue = models.IntegerField(
         db_column="REF|QueueData|queue", blank=True, null=True
     )
-    ref_scopeemdata_scope = models.IntegerField(
-        db_column="REF|ScopeEMData|scope", blank=True, null=True
+    ref_scopeemdata_scope = models.ForeignKey(
+        ScopeEMData,
+        db_column="REF|ScopeEMData|scope",
+        blank=True,
+        null=True,
+        on_delete=models.DO_NOTHING,
     )
     ref_cameraemdata_camera = models.ForeignKey(
         CameraEMData,
