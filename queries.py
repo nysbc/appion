@@ -71,6 +71,42 @@ def makeDarkMrc(input):
 #             except Exception as e:
 #                 apDisplay.printError('Norm array not saved. Possible problem of reading from %s' % normdata.getpath())
 
+
+# A typical run.
+
+imageid=29123390
+imgdata=AcquisitionImageData.objects.get(def_id=imageid)
+correctorplandata=imgdata.ref_correctorplandata_corrector_plan
+sessiondata=imgdata.ref_sessiondata_session
+cameradata=imgdata.ref_cameraemdata_camera
+# keyword args for motioncor2 function
+kwargs={}
+
+# InMrc, InTiff, InEer
+# Get the path to the input image.
+if imgdata.mrc_image.endswith(".mrc"):
+    kwargs["InMrc"]=os.path.join(sessiondata.image_path,imgdata.mrc_image)
+elif imgdata.mrc_image.endswith(".tif") or imgdata.filename.endswith(".tiff"):
+    kwargs["InTiff"]=os.path.join(sessiondata.image_path,imgdata.mrc_image)
+elif imgdata.mrc_image.endswith(".eer"):
+    kwargs["InEer"]=os.path.join(sessiondata.image_path,imgdata.mrc_image)
+else:
+    raise RuntimeError("Unsupported file format for input path: %s." % imgdata.filename)
+
+# Gain
+# Get the reference image
+if gainInput:
+    kwargs["Gain"]="/tmp/tmp.mrc"
+else:
+    gaindata=AcquisitionImageData.objects.get(def_id=imgdata.ref_normimagedata_norm)
+    kwargs["Gain"]=os.path.join(sessiondata.image_path,gaindata.mrc_image)
+
+# Dark - TODO
+# Get the dark image.  Create it if it does not exist.
+kwargs["Dark"]=imgdata.ref_darkimagedata_dark
+if not kwargs["Dark"]:
+    kwargs["Dark"]=makeDarkMrc(input)
+
 # DefectMap
 def getImageDefectMap(correctorplandata : CorrectorPlanData, cameradata : CameraEMData):
     bad_rows = correctorplandata.bad_rows
@@ -120,47 +156,26 @@ def testImageDefectMap():
     map=getImageDefectMap(correctorplandata,cameradata)
     print(map)
 
+# FmIntFile - TODO
 
-# A typical run.
+# FmDose - TODO
 
-imageid=29123390
-imgdata=AcquisitionImageData.objects.get(def_id=imageid)
-correctorplandata=imgdata.ref_correctorplandata_corrector_plan
-sessiondata=imgdata.ref_sessiondata_session
-cameradata=imgdata.ref_cameraemdata_camera
-# keyword args for motioncor2 function
-kwargs={}
-
-# Get the path to the input image.
-if imgdata.mrc_image.endswith(".mrc"):
-    kwargs["InMrc"]=os.path.join(sessiondata.image_path,imgdata.mrc_image)
-elif imgdata.mrc_image.endswith(".tif") or imgdata.filename.endswith(".tiff"):
-    kwargs["InTiff"]=os.path.join(sessiondata.image_path,imgdata.mrc_image)
-elif imgdata.mrc_image.endswith(".eer"):
-    kwargs["InEer"]=os.path.join(sessiondata.image_path,imgdata.mrc_image)
-else:
-    raise RuntimeError("Unsupported file format for input path: %s." % imgdata.filename)
-
-# Get the reference image
-if gainInput:
-    kwargs["Gain"]="/tmp/tmp.mrc"
-else:
-    gaindata=AcquisitionImageData.objects.get(def_id=imgdata.ref_normimagedata_norm)
-    kwargs["Gain"]=os.path.join(sessiondata.image_path,gaindata.mrc_image)
-
-# Get the dark image.  Create it if it does not exist.
-kwargs["Dark"]=imgdata.ref_darkimagedata_dark
-if not kwargs["Dark"]:
-    kwargs["Dark"]=makeDarkMrc(input)
+# PixSize - TODO
 
 # kV
 scopeemdata=imgdata.ref_scopeemdata_scope
 kwargs["kV"] = scopeemdata.high_tension/1000.0
 
-print(imgdata.ref_correctorplandata_corrector_plan)
-print(imgdata.ref_scopeemdata_scope)
+# Trunc - TODO
+total_frames = 0
+sumframelist = [0]
+kwargs['Trunc'] = total_frames - sumframelist[-1] - 1
+
+# RotGain - TODO
+
+# FlipGain - TODO
+
 print(cameradata.subd_pixel_size_x)
 print(cameradata.frame_flip)
 print(cameradata.frame_rotate)
 print(kwargs)
-testImageDefectMap()
