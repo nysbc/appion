@@ -24,7 +24,7 @@ class CorrectorPlanData(models.Model):
     bad_rows = models.TextField(db_column="SEQ|bad_rows", blank=True, null=True)
     bad_cols = models.TextField(db_column="SEQ|bad_cols", blank=True, null=True)
     bad_pixels = models.TextField(db_column="SEQ|bad_pixels", blank=True, null=True)
-    clip_limits = models.TextField(db_column="SEQ|clip_limits", blank=True, null=True)
+    #clip_limits = models.TextField(db_column="SEQ|clip_limits", blank=True, null=True)
     despike = models.BooleanField(blank=True, null=True)
     despike_size = models.IntegerField(db_column="despike size", blank=True, null=True)
     despike_threshold = models.FloatField(db_column="despike threshold", blank=True, null=True)
