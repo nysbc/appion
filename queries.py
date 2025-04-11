@@ -130,7 +130,7 @@ def getImageDefectMap(correctorplandata : CorrectorPlanData, cameradata : Camera
     return defect_map
 
 def makeDefectMrc(defect_map_path : str, defect_map : numpy.ndarray, frame_flip : int = 0, frame_rotate : int = 0, modified : bool = True) -> None:
-    # flip and rotate map_array.  Therefore, do the oposite of
+    # flip and rotate map_array.  Therefore, do the opposite of
     # frames
     if frame_flip:
         if frame_rotate and frame_rotate == 2:
@@ -163,8 +163,21 @@ def testImageDefectMap():
 testImageDefectMap()
 
 # FmIntFile - TODO
-
 # FmDose - TODO
+# This depends on whether or not we're using an EER formatted-input.
+# see https://github.com/nysbc/appion-slurm/blob/f376758762771073c0450d2bc3badc0fed6f8e66/appion/appionlib/apDDFrameAligner.py#L395-L399
+
+# totaldose is user-specified when the doseweight flag is passed
+# If this flag isn't specified, the database is queried.
+totaldose=None
+if not totaldose:
+    totaldose = imgdata.ref_presetdata_preset.dose / 1e20
+total_raw_frames=1
+if "InEer" not in kwargs.keys():
+    kwargs['FmDose'] = totaldose/total_raw_frames
+else:
+    kwargs['FmDose'] = 0
+    kwargs['FmInt'] = "/path/to/generated/file"
 
 # PixSize
 def getPixelSize(imgdata):

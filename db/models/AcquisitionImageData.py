@@ -2,6 +2,7 @@ from django.db import models
 from .SessionData import SessionData
 from .CameraEMData import CameraEMData
 from .CorrectorPlanData import CorrectorPlanData
+from .PresetData import PresetData
 from .ScopeEMData import ScopeEMData
 
 class AcquisitionImageData(models.Model):
@@ -61,8 +62,12 @@ class AcquisitionImageData(models.Model):
     ref_normimagedata_norm = models.IntegerField(
         db_column="REF|NormImageData|norm", blank=True, null=True
     )
-    ref_presetdata_preset = models.IntegerField(
-        db_column="REF|PresetData|preset", blank=True, null=True
+    ref_presetdata_preset = models.ForeignKey(
+        PresetData,
+        db_column="REF|PresetData|preset",
+        blank=True,
+        null=True,
+        on_delete=models.DO_NOTHING,
     )
     ref_acquisitionimagetargetdata_target = models.IntegerField(
         db_column="REF|AcquisitionImageTargetData|target", blank=True, null=True
