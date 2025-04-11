@@ -16,6 +16,10 @@ import mrcfile
 
 # Functions / dummy variables for user inputs
 gainInput=False
+force_cpu_flat=False
+has_bad_pixels=False
+is_align=False
+has_non_zero_dark=False
 
 def makeDarkMrc(input):
     """
@@ -171,11 +175,17 @@ total_frames = 0
 sumframelist = [0]
 kwargs['Trunc'] = total_frames - sumframelist[-1] - 1
 
-# RotGain - TODO
 
-# FlipGain - TODO
+# RotGain
+# FlipGain
+frame_aligner_flat = not (has_bad_pixels or not is_align or has_non_zero_dark)
+if not force_cpu_flat and frame_aligner_flat:
+    kwargs['RotGain'] = cameradata.frame_rotate
+    kwargs['FlipGain'] = cameradata.frame_flip
+else:
+
+    kwargs['RotGain'] = 0
+    kwargs['FlipGain'] = 0
 
 print(cameradata.subd_pixel_size_x)
-print(cameradata.frame_flip)
-print(cameradata.frame_rotate)
 print(kwargs)
