@@ -160,6 +160,7 @@ def testImageDefectMap():
     cameradata=CameraEMData.objects.get(def_id=595080)
     map=getImageDefectMap(correctorplandata,cameradata)
     print(map)
+testImageDefectMap()
 
 # FmIntFile - TODO
 
@@ -191,7 +192,7 @@ def getPixelSize(imgdata):
         if pixelsizedata.def_timestamp < oldestpixelsizedata.def_timestamp:
             oldestpixelsizedata = pixelsizedata
     if pixelsizedata.def_timestamp > imgdata.def_timestamp:
-        #logger.warning("There is no pixel size calibration data for this image, using oldest value")
+        #logger.warning("There is no pixel size calibration data for this image, using oldest value.")
         pixelsizedata = oldestpixelsizedata
     binning = imgdata.ref_cameraemdata_camera.subd_binning_x
     pixelsize = pixelsizedata.pixelsize * binning
@@ -204,8 +205,56 @@ scopeemdata=imgdata.ref_scopeemdata_scope
 kwargs["kV"] = scopeemdata.high_tension/1000.0
 
 # Trunc - TODO
-total_frames = 0
-sumframelist = [0]
+
+def getShiftsBetweenFrames(logfile):
+    '''
+    Return a list of shift distance by frames. item 0 is fake. item 1 is distance between
+    frame 0 and frame 1
+    '''
+    if not os.path.isfile(logfile):
+        raise RuntimeError('No alignment log file %s found for thresholding drift' % logfile)
+    shifts=[]
+    #positions = ddinfo.readPositionsFromAlignLog(logfile)
+    #shifts = ddinfo.calculateFrameShiftFromPositions(positions)
+    #logger.debug('Got %d shifts' % (len(shifts)-1))
+    return shifts
+
+def getFrameList(pixelsize : float, total_frames : int, nframe : int = None, startframe : int = None, driftlimit : int = None):
+    '''
+    Get list of frames
+    '''
+    framelist=[]
+    # frame list according to start frame and number of frames
+    if nframe is None:
+        if startframe is None:
+            framelist = range(total_frames)
+        else:
+            framelist = range(startframe,total_frames)
+    else:
+        framelist = range(startframe,startframe+nframe)
+    if driftlimit is not None:
+        # drift limit considered
+        threshold = driftlimit / pixelsize
+        stillframes = []
+        shifts = getShiftsBetweenFrames()
+		# pick out passed frames
+        for i in range(len(shifts[:-1])):
+			# keep the frame if at least one shift around the frame is small enough
+            if min(shifts[i],shifts[i+1]) < threshold:
+                # index is off by 1 because of the duplication
+                stillframes.append(i)
+        if stillframes:
+            framelist = list(set(framelist).intersection(set(stillframes)))
+            framelist.sort()
+        #apDisplay.printMsg('Limit frames used to %s' % (framelist,))
+    return framelist
+
+# TODO total_frames varies depending upon the camera used.
+# Need to account for different camera types.
+# Search for getNumberOfFrameSavedFromImageData to see how different cameras
+# populate this variable.
+total_frames = imgdata.ref_cameraemdata_camera.nframes
+sumframelist = getFrameList(kwargs['PixSize'], total_frames)
 kwargs['Trunc'] = total_frames - sumframelist[-1] - 1
 
 # RotGain
