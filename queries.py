@@ -11,6 +11,7 @@ from db.models import CameraEMData
 from db.models import AcquisitionImageData
 from db.models import CorrectorPlanData
 from db.models import ScopeEMData
+from db.models import PixelSizeCalibrationData
 import numpy
 import mrcfile
 
@@ -164,7 +165,39 @@ def testImageDefectMap():
 
 # FmDose - TODO
 
-# PixSize - TODO
+# PixSize
+def getPixelSize(imgdata):
+    """
+    use image data object to get pixel size
+    multiplies by binning and also by 1e10 to return image pixel size in angstroms
+    shouldn't have to lookup db already should exist in imgdict
+
+    return image pixel size in Angstroms
+    """
+    magnification = imgdata.ref_scopeemdata_scope.magnification
+    tem = imgdata.ref_scopeemdata_scope.ref_instrumentdata_tem
+    ccdcamera = imgdata.ref_cameraemdata_camera.ref_instrumentdata_ccdcamera
+    pixelsizedatas = PixelSizeCalibrationData.objects.filter(magnification=magnification, ref_instrumentdata_tem=tem, ref_instrumentdata_ccdcamera=ccdcamera)
+    if not pixelsizedatas:
+        raise RuntimeError("No pixelsize information was found for image %s with mag %d, tem id %d, ccdcamera id %d."
+                        % (imgdata.filename, magnification, tem.def_id, ccdcamera))
+    
+    idx = 0
+    pixelsizedata = pixelsizedatas[idx]
+    oldestpixelsizedata = pixelsizedata
+    while pixelsizedata.def_timestamp > imgdata.def_timestamp and idx < len(pixelsizedatas):
+        idx += 1
+        pixelsizedata = pixelsizedatas[idx]
+        if pixelsizedata.def_timestamp < oldestpixelsizedata.def_timestamp:
+            oldestpixelsizedata = pixelsizedata
+    if pixelsizedata.def_timestamp > imgdata.def_timestamp:
+        #logger.warning("There is no pixel size calibration data for this image, using oldest value")
+        pixelsizedata = oldestpixelsizedata
+    binning = imgdata.ref_cameraemdata_camera.subd_binning_x
+    pixelsize = pixelsizedata.pixelsize * binning
+    return(pixelsize*1e10)
+kwargs['PixSize']=getPixelSize(imgdata)
+print(cameradata.subd_pixel_size_x)
 
 # kV
 scopeemdata=imgdata.ref_scopeemdata_scope
@@ -174,7 +207,6 @@ kwargs["kV"] = scopeemdata.high_tension/1000.0
 total_frames = 0
 sumframelist = [0]
 kwargs['Trunc'] = total_frames - sumframelist[-1] - 1
-
 
 # RotGain
 # FlipGain
@@ -187,5 +219,4 @@ else:
     kwargs['RotGain'] = 0
     kwargs['FlipGain'] = 0
 
-print(cameradata.subd_pixel_size_x)
 print(kwargs)
