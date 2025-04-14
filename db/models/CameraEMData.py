@@ -1,5 +1,6 @@
 from django.db import models
 from .SessionData import SessionData
+from .InstrumentData import InstrumentData
 
 class CameraEMData(models.Model):
     def_id = models.AutoField(db_column="DEF_id", primary_key=True)
@@ -70,6 +71,9 @@ class CameraEMData(models.Model):
     align_frames = models.IntegerField(
         db_column="align frames", blank=True, null=True
     )
+    eer_frames = models.BooleanField(
+        db_column="eer frames", blank=True, null=True
+    )
     align_filter = models.TextField(
         db_column="align filter", blank=True, null=True
     )
@@ -98,12 +102,53 @@ class CameraEMData(models.Model):
     system_corrected = models.IntegerField(
         db_column="system corrected", blank=True, null=True
     )
-    ref_instrumentdata_ccdcamera = models.IntegerField(
-        db_column="REF|InstrumentData|ccdcamera", blank=True, null=True
+    ref_instrumentdata_ccdcamera = models.ForeignKey(
+        InstrumentData,
+        db_column="REF|InstrumentData|ccdcamera",
+        blank=True,
+        null=True,
+        on_delete=models.DO_NOTHING,
     )
     seq_use_frames = models.TextField(
         db_column="SEQ|use frames", blank=True, null=True
     )
+
+	# ('dimension', dict),
+	# ('binning', dict),
+	# ('binned multiplier', float),
+	# ('offset', dict),
+	# ('exposure time', float),
+	# ('exposure type', str),
+	# ('exposure timestamp', float),
+	# ('intensity averaged', bool),
+	# ('inserted', bool),
+	# ('dump', bool),
+	# ('pixel size', dict),
+	# ('energy filtered', bool),
+	# ('energy filter', bool),
+	# ('energy filter width', float),
+	# ('nframes', int),
+	# ('save frames', bool),
+	# ('align frames', bool),
+	# ('tiff frames', bool),
+	# ('eer frames', bool),
+	# ('align filter', str),
+	# ('frames name', str),
+	# ('use frames', tuple),
+	# ('frame time', float),
+	# ('request nframes', int),
+	# ('frame flip', bool),
+	# ('frame rotate', int),
+	# ('temperature', float),
+	# ('temperature status', str),
+	# ('readout delay', int),
+	# ('gain index', int),
+	# ('system corrected', bool), # deprecated in v3.6
+	# ('sum gain corrected', bool),
+	# ('frame gain corrected', bool),
+	# ('system dark subtracted', bool),
+	# ('use cds', bool),
+	# ('fast save', bool),
 
     def __str__(self) -> str:
         session = "<no session>"

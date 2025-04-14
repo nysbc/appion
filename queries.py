@@ -22,61 +22,6 @@ has_bad_pixels=False
 is_align=False
 has_non_zero_dark=False
 
-def makeDarkMrc(input):
-    """
-    Returns a string containing the path to the dark image.
-    """
-    return "/tmp/tmp.mrc"
-
-# def getSingleFrameDarkArray(self):
-#     try:
-#         darkdata = self.getRefImageData('dark')
-#         nframes = self.getNumberOfFrameSavedFromImageData(darkdata)
-#         return darkdata['image'] / nframes
-#     except:
-#         dimension = self.getDefaultDimension()
-#         return numpy.zeros((dimension['y'],dimension['x']))
-        
-# def setupDarkNormMrcs(frameprocess_dir, use_full_raw_area=False):
-#     '''
-#     Creates local reference files for gain/dark-correcting the stack of frames
-#     '''
-#     # apDisplay.printMsg('Will setupDarkNormMrcs make dark/gain? %s' % (self.correct_dark_gain,))
-#     if not self.correct_dark_gain or self.getRefImageData('norm') is None: 
-#         self.dark_path = None
-#         self.norm_path = None
-#         return
-#     sys.stdout.write('\a')
-#     sys.stdout.flush()
-#     # if use_full_raw_area is True:
-#     #     apDisplay.displayError('use_full_raw_area when image is cropped is not implemented for gpu')
-#     get_new_refs = self.__conditionChanged(1,use_full_raw_area)
-#     # apDisplay.printMsg('decide to get new refs based on condition change ? %s' % (get_new_refs,))
-#     # o.k. to set attribute now that condition change is checked
-#     # at least write dark and norm image once
-#     if get_new_refs or not hasattr(self,'dark_path'):
-#         # set camera info for loading frames
-#         self.setCameraInfo(1,use_full_raw_area)
-
-#         # output dark
-#         unscaled_darkarray = self.getSingleFrameDarkArray()
-#         self.dark_path = os.path.join(frameprocess_dir,'dark-%s-%d-%d.mrc' % (self.hostname,self.gpuid, os.getpid()))
-#         mrc.write(dark_path,unscaled_darkarray)
-
-#         # output norm
-#         normdata = self.getRefImageData('norm')
-#         if normdata['bright']:
-#             apDisplay.printWarning('From Bright Reference %s' % (normdata['bright']['filename'],))
-#         if self.use_frame_aligner_flat:
-#             normarray = normdata['image']
-#             self.norm_path = os.path.join(frameprocess_dir,'norm-%s-%d-%d.mrc' % (self.hostname,self.gpuid,os.getpid()))
-#             apDisplay.printWarning('Save Norm Reference %s to %s' % (normdata['filename'],self.norm_path))
-#             try:
-#                 mrc.write(normarray,self.norm_path)
-#             except Exception as e:
-#                 apDisplay.printError('Norm array not saved. Possible problem of reading from %s' % normdata.getpath())
-
-
 # A typical run.
 
 imageid=29123390
@@ -106,11 +51,58 @@ else:
     gaindata=AcquisitionImageData.objects.get(def_id=imgdata.ref_normimagedata_norm)
     kwargs["Gain"]=os.path.join(sessiondata.image_path,gaindata.mrc_image)
 
+        # # output norm
+        # normdata = self.getRefImageData('norm')
+        # if normdata['bright']:
+        #     apDisplay.printWarning('From Bright Reference %s' % (normdata['bright']['filename'],))
+        # if self.use_frame_aligner_flat:
+        #     normarray = normdata['image']
+        #     self.norm_path = os.path.join(frameprocess_dir,'norm-%s-%d-%d.mrc' % (self.hostname,self.gpuid,os.getpid()))
+        #     apDisplay.printWarning('Save Norm Reference %s to %s' % (normdata['filename'],self.norm_path))
+        #     try:
+        #         mrc.write(normarray,self.norm_path)
+        #     except Exception as e:
+        #         apDisplay.printError('Norm array not saved. Possible problem of reading from %s' % normdata.getpath())
+
 # Dark - TODO
+# def makeDarkMrc(dark_path, nframes, dimension=None):
+#     '''
+#     Creates local dark reference file for correcting the stack of frames
+#     '''
+#     # set camera info for loading frames
+#     #self.setCameraInfo(1,use_full_raw_area)
+
+#     # output dark
+#     try:
+#         unscaled_darkarray = darkdata.mrc_image / nframes
+#     except:
+        
+    
+
 # Get the dark image.  Create it if it does not exist.
-kwargs["Dark"]=imgdata.ref_darkimagedata_dark
-if not kwargs["Dark"]:
-    kwargs["Dark"]=makeDarkMrc(input)
+if not imgdata.ref_darkimagedata_dark:
+    camera_name=imgdata.ref_cameraemdata_camera.ref_instrumentdata_ccdcamera.name
+    # Why is this switch statement necessary?  Why not save default dimensions into database instead of
+    # hardcoding them in here?  (Original Appion has these hardcoded as part of object initialization.)
+    if camera_name == "GatanK2":
+        dimensions = (3710,3838)
+    elif 'GatanK3':
+        dimensions = (8184,11520)
+    elif 'DE':
+        dimensions = (4096,3072)
+    elif camera_name in ['TIA','Falcon','Falcon3','Falcon4','Falcon4EC'] or imgdata.ref_cameraemdata_camera.eer_frames:
+        dimensions = (4096,4096)
+    else:
+        dimensions = None
+    unscaled_darkarray =  numpy.zeros((dimensions[1],dimensions[0]), dtype=numpy.int8)
+else:
+    darkdata = AcquisitionImageData.objects.get(def_id=imgdata.ref_darkimagedata_dark)
+    # TODO Don't think that darkdata.mrc_image is a numpy array, so we'll need to fix this.
+    unscaled_darkarray = darkdata.mrc_image / darkdata.ref_cameraemdata_camera.nframes
+dark_path="/tmp/dark.mrc"
+print(unscaled_darkarray)
+mrcfile.write(dark_path, unscaled_darkarray, overwrite=True)
+kwargs["Dark"]=dark_path
 
 # DefectMap
 def getImageDefectMap(correctorplandata : CorrectorPlanData, cameradata : CameraEMData):
@@ -190,7 +182,7 @@ def getPixelSize(imgdata):
     """
     magnification = imgdata.ref_scopeemdata_scope.magnification
     tem = imgdata.ref_scopeemdata_scope.ref_instrumentdata_tem
-    ccdcamera = imgdata.ref_cameraemdata_camera.ref_instrumentdata_ccdcamera
+    ccdcamera = imgdata.ref_cameraemdata_camera.ref_instrumentdata_ccdcamera.def_id
     pixelsizedatas = PixelSizeCalibrationData.objects.filter(magnification=magnification, ref_instrumentdata_tem=tem, ref_instrumentdata_ccdcamera=ccdcamera)
     if not pixelsizedatas:
         raise RuntimeError("No pixelsize information was found for image %s with mag %d, tem id %d, ccdcamera id %d."
