@@ -14,6 +14,7 @@ from db.models import ScopeEMData
 from db.models import PixelSizeCalibrationData
 import numpy
 import mrcfile
+import math
 
 # Functions / dummy variables for user inputs
 gainInput="/tmp/tmp.mrc"
@@ -224,8 +225,9 @@ kwargs['PixSize']=getPixelSize(imgdata)
 scopeemdata=imgdata.ref_scopeemdata_scope
 kwargs["kV"] = scopeemdata.high_tension/1000.0
 
-# Trunc - TODO
+# Trunc
 
+# Forming the path to the log file is a problem for future me.
 def getShiftsBetweenFrames(logfile):
     '''
     Return a list of shift distance by frames. item 0 is fake. item 1 is distance between
@@ -234,12 +236,34 @@ def getShiftsBetweenFrames(logfile):
     if not os.path.isfile(logfile):
         raise RuntimeError('No alignment log file %s found for thresholding drift' % logfile)
     shifts=[]
-    #positions = ddinfo.readPositionsFromAlignLog(logfile)
-    #shifts = ddinfo.calculateFrameShiftFromPositions(positions)
-    #logger.debug('Got %d shifts' % (len(shifts)-1))
+    # Reads from dosefgpu_driftcorr log file the shifts applied to each frame
+    with open(logfile, 'r') as f:
+        text = f.read()
+    lines = text[text.find('Sum Frame'):text.find('Save Sum')].split('\n')[1:-2]
+    positions = []
+    for line in lines:
+        shift_bits = line.split('shift:')
+        # Issue #4234
+        if len(shift_bits) <=1:
+            continue
+        position_strings = shift_bits[1].split()
+        position_x = float(position_strings[0])
+        position_y = float(position_strings[1])
+        positions.append((position_x,position_y))
+	# place holder for running first frame shift duplication
+    running=1
+    offset = int((running-1)/2)
+    shifts = offset*[None,]
+    for p in range(len(positions)-1):
+        shift = math.hypot(positions[p][0]-positions[p+1][0],positions[p][1]-positions[p+1][1])
+        shifts.append(shift)
+    # duplicate first and last shift for the end points if running
+    for i in range(offset):
+        shifts.append(shifts[-1])
+        shifts[i] = shifts[offset]
     return shifts
 
-def getFrameList(pixelsize : float, total_frames : int, nframe : int = None, startframe : int = None, driftlimit : int = None):
+def getFrameList(pixelsize : float, total_frames : int, nframe : int = None, startframe : int = None, driftlimit : int = None, logfile : str = ""):
     '''
     Get list of frames
     '''
@@ -256,7 +280,7 @@ def getFrameList(pixelsize : float, total_frames : int, nframe : int = None, sta
         # drift limit considered
         threshold = driftlimit / pixelsize
         stillframes = []
-        shifts = getShiftsBetweenFrames()
+        shifts = getShiftsBetweenFrames(logfile)
 		# pick out passed frames
         for i in range(len(shifts[:-1])):
 			# keep the frame if at least one shift around the frame is small enough
