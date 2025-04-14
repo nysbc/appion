@@ -86,11 +86,11 @@ if not imgdata.ref_darkimagedata_dark:
     # hardcoding them in here?  (Original Appion has these hardcoded as part of object initialization.)
     if camera_name == "GatanK2":
         dimensions = (3710,3838)
-    elif 'GatanK3':
+    elif camera_name == 'GatanK3':
         dimensions = (8184,11520)
-    elif 'DE':
+    elif camera_name == 'DE':
         dimensions = (4096,3072)
-    elif camera_name in ['TIA','Falcon','Falcon3','Falcon4','Falcon4EC'] or imgdata.ref_cameraemdata_camera.eer_frames:
+    elif camera_name in ['TIA','Falcon','Falcon3','Falcon4'] or (camera_name == 'Falcon4EC' and imgdata.ref_cameraemdata_camera.eer_frames):
         dimensions = (4096,4096)
     else:
         dimensions = None
@@ -153,8 +153,8 @@ def testImageDefectMap():
     print(map)
 testImageDefectMap()
 
-# FmIntFile - TODO
-# FmDose - TODO
+# FmIntFile
+# FmDose
 
 def makeFmIntFile(fmintpath, nraw, size, raw_dose):
     '''
@@ -288,11 +288,15 @@ def getFrameList(pixelsize : float, total_frames : int, nframe : int = None, sta
         #apDisplay.printMsg('Limit frames used to %s' % (framelist,))
     return framelist
 
-# TODO total_frames varies depending upon the camera used.
-# Need to account for different camera types.
-# Search for getNumberOfFrameSavedFromImageData to see how different cameras
-# populate this variable.
-total_frames = imgdata.ref_cameraemdata_camera.nframes
+camera_name=imgdata.ref_cameraemdata_camera.ref_instrumentdata_ccdcamera.name
+if camera_name in ["GatanK2","GatanK3"]:
+    total_frames = max(1,int(imgdata.ref_cameraemdata_camera.exposure_time / imgdata.ref_cameraemdata_camera.frame_time))
+elif 'DE':
+    total_frames = imgdata.ref_cameraemdata_camera.nframes
+elif camera_name in ['TIA','Falcon','Falcon3','Falcon4'] or (camera_name == 'Falcon4EC' and imgdata.ref_cameraemdata_camera.eer_frames):
+    total_frames = imgdata.ref_cameraemdata_camera.nframes
+else:
+    total_frames = imgdata.ref_cameraemdata_camera.nframes
 sumframelist = getFrameList(kwargs['PixSize'], total_frames)
 kwargs['Trunc'] = total_frames - sumframelist[-1] - 1
 
