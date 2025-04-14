@@ -50,28 +50,28 @@ class CameraEMData(models.Model):
     intensity_averaged = models.BooleanField(
         db_column="intensity averaged", blank=True, null=True
     )
-    inserted = models.IntegerField(blank=True, null=True)
-    dump = models.IntegerField(blank=True, null=True)
+    inserted = models.BooleanField(blank=True, null=True)
+    dump = models.BooleanField(blank=True, null=True)
     subd_pixel_size_x = models.FloatField(
         db_column="SUBD|pixel size|x", blank=True, null=True
     )
     subd_pixel_size_y = models.FloatField(
         db_column="SUBD|pixel size|y", blank=True, null=True
     )
-    energy_filtered = models.IntegerField(
+    energy_filtered = models.BooleanField(
         db_column="energy filtered", blank=True, null=True
     )
-    energy_filter = models.IntegerField(
+    energy_filter = models.BooleanField(
         db_column="energy filter", blank=True, null=True
     )
     energy_filter_width = models.FloatField(
         db_column="energy filter width", blank=True, null=True
     )
     nframes = models.IntegerField(blank=True, null=True)
-    save_frames = models.IntegerField(
+    save_frames = models.BooleanField(
         db_column="save frames", blank=True, null=True
     )
-    align_frames = models.IntegerField(
+    align_frames = models.BooleanField(
         db_column="align frames", blank=True, null=True
     )
     tiff_frames = models.BooleanField(
@@ -108,7 +108,7 @@ class CameraEMData(models.Model):
     gain_index = models.IntegerField(
         db_column="gain index", blank=True, null=True
     )
-    system_corrected = models.IntegerField(
+    system_corrected = models.BooleanField(
         db_column="system corrected", blank=True, null=True
     )
     ref_instrumentdata_ccdcamera = models.ForeignKey(
