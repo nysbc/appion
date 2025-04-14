@@ -47,6 +47,9 @@ class CameraEMData(models.Model):
     exposure_timestamp = models.FloatField(
         db_column="exposure timestamp", blank=True, null=True
     )
+    intensity_averaged = models.BooleanField(
+        db_column="intensity averaged", blank=True, null=True
+    )
     inserted = models.IntegerField(blank=True, null=True)
     dump = models.IntegerField(blank=True, null=True)
     subd_pixel_size_x = models.FloatField(
@@ -71,6 +74,9 @@ class CameraEMData(models.Model):
     align_frames = models.IntegerField(
         db_column="align frames", blank=True, null=True
     )
+    tiff_frames = models.BooleanField(
+        db_column="tiff frames", blank=True, null=True
+    )
     eer_frames = models.BooleanField(
         db_column="eer frames", blank=True, null=True
     )
@@ -79,6 +85,9 @@ class CameraEMData(models.Model):
     )
     frames_name = models.TextField(
         db_column="frames name", blank=True, null=True
+    )
+    seq_use_frames = models.TextField(
+        db_column="SEQ|use frames", blank=True, null=True
     )
     frame_time = models.FloatField(
         db_column="frame time", blank=True, null=True
@@ -109,46 +118,24 @@ class CameraEMData(models.Model):
         null=True,
         on_delete=models.DO_NOTHING,
     )
-    seq_use_frames = models.TextField(
-        db_column="SEQ|use frames", blank=True, null=True
+    request_nframes = models.IntegerField(
+        db_column="request nframes", blank=True, null=True
     )
-
-	# ('dimension', dict),
-	# ('binning', dict),
-	# ('binned multiplier', float),
-	# ('offset', dict),
-	# ('exposure time', float),
-	# ('exposure type', str),
-	# ('exposure timestamp', float),
-	# ('intensity averaged', bool),
-	# ('inserted', bool),
-	# ('dump', bool),
-	# ('pixel size', dict),
-	# ('energy filtered', bool),
-	# ('energy filter', bool),
-	# ('energy filter width', float),
-	# ('nframes', int),
-	# ('save frames', bool),
-	# ('align frames', bool),
-	# ('tiff frames', bool),
-	# ('eer frames', bool),
-	# ('align filter', str),
-	# ('frames name', str),
-	# ('use frames', tuple),
-	# ('frame time', float),
-	# ('request nframes', int),
-	# ('frame flip', bool),
-	# ('frame rotate', int),
-	# ('temperature', float),
-	# ('temperature status', str),
-	# ('readout delay', int),
-	# ('gain index', int),
-	# ('system corrected', bool), # deprecated in v3.6
-	# ('sum gain corrected', bool),
-	# ('frame gain corrected', bool),
-	# ('system dark subtracted', bool),
-	# ('use cds', bool),
-	# ('fast save', bool),
+    sum_gain_corrected = models.BooleanField(
+        db_column="sum gain corrected", blank=True, null=True
+    )
+    frame_gain_corrected = models.BooleanField(
+        db_column="frame gain corrected", blank=True, null=True
+    )
+    system_dark_subtracted = models.BooleanField(
+        db_column="system dark subtracted", blank=True, null=True
+    )
+    use_cds = models.BooleanField(
+        db_column="use cds", blank=True, null=True
+    )
+    fast_save = models.BooleanField(
+        db_column="fast save", blank=True, null=True
+    )
 
     def __str__(self) -> str:
         session = "<no session>"
