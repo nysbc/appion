@@ -82,7 +82,7 @@ else:
 # Get the dark image.  Create it if it does not exist.
 if not imgdata.ref_darkimagedata_dark:
     camera_name=imgdata.ref_cameraemdata_camera.ref_instrumentdata_ccdcamera.name
-    # Why is this switch statement necessary?  Why not save default dimensions into database instead of
+    # Why is this switch statement necessary?  Why not save default dimensions into the database instead of
     # hardcoding them in here?  (Original Appion has these hardcoded as part of object initialization.)
     if camera_name == "GatanK2":
         dimensions = (3710,3838)
@@ -94,13 +94,12 @@ if not imgdata.ref_darkimagedata_dark:
         dimensions = (4096,4096)
     else:
         dimensions = None
-    unscaled_darkarray =  numpy.zeros((dimensions[1],dimensions[0]), dtype=numpy.int8)
+    unscaled_darkarray =  numpy.zeros((dimensions[1],dimensions[0]), dtype=numpy.float32)
 else:
     darkdata = AcquisitionImageData.objects.get(def_id=imgdata.ref_darkimagedata_dark)
     # TODO Don't think that darkdata.mrc_image is a numpy array, so we'll need to fix this.
     unscaled_darkarray = darkdata.mrc_image / darkdata.ref_cameraemdata_camera.nframes
 dark_path="/tmp/dark.mrc"
-print(unscaled_darkarray)
 mrcfile.write(dark_path, unscaled_darkarray, overwrite=True)
 kwargs["Dark"]=dark_path
 
@@ -156,20 +155,55 @@ testImageDefectMap()
 
 # FmIntFile - TODO
 # FmDose - TODO
+
+def makeFmIntFile(fmintpath, nraw, size, raw_dose):
+    '''
+    calculate and set frame dose and create FmIntFile
+    '''
+    modulo = nraw % size
+    int_div = nraw // size
+    lines = []
+    total_rendered_frames = int_div
+    if modulo != 0:
+        total_rendered_frames += 1
+        lines.append('%d\t%d\t%.3f\n' % (modulo, modulo, raw_dose))
+    lines.append('%d\t%d\t%.3f\n' % (int_div*size+modulo, size, raw_dose))
+    with open(fmintpath,'w') as f:
+        f.write(''.join(lines))
+    return total_rendered_frames
+
 # This depends on whether or not we're using an EER formatted-input.
 # see https://github.com/nysbc/appion-slurm/blob/f376758762771073c0450d2bc3badc0fed6f8e66/appion/appionlib/apDDFrameAligner.py#L395-L399
+
+
+# rendered_frame_size is a user input
+rendered_frame_size = 1
+total_raw_frames = imgdata.ref_cameraemdata_camera.nframes
+if total_raw_frames is None:
+    # older data or k2
+    total_raw_frames =  int(imgdata.ref_cameraemdata_camera.exposure_time / imgdata.ref_cameraemdata_camera.frame_time)
+# avoid 0 for dark image scaling and frame list creation
+if total_raw_frames == 0:
+    total_raw_frames = 1
 
 # totaldose is user-specified when the doseweight flag is passed
 # If this flag isn't specified, the database is queried.
 totaldose=None
 if not totaldose:
     totaldose = imgdata.ref_presetdata_preset.dose / 1e20
-total_raw_frames=1
+if totaldose > 0:
+    raw_dose = totaldose / total_raw_frames
+else:
+    raw_dose = 0.03 #make fake dose similar to Falcon4EC 7 e/p/s
+
 if "InEer" not in kwargs.keys():
     kwargs['FmDose'] = totaldose/total_raw_frames
 else:
-    kwargs['FmDose'] = 0
-    kwargs['FmInt'] = "/path/to/generated/file"
+    kwargs['FmDose'] = raw_dose*rendered_frame_size
+    fmintpath=os.path.abspath("/tmp/intfile.txt")
+    # total_rendered_frames is used when writing out the motioncorr log
+    total_rendered_frames = makeFmIntFile(fmintpath, total_raw_frames, rendered_frame_size, raw_dose)
+    kwargs['FmInt'] = fmintpath
 
 # PixSize
 def getPixelSize(imgdata):
