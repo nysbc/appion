@@ -16,9 +16,16 @@ class ApDDStackRunData(models.Model):
         null=True,
         on_delete=models.DO_NOTHING,
     )
-    ref_ApPathData_path = models.ForeignKey(
+    ref_appathdata_path = models.ForeignKey(
         ApPathData,
         db_column="REF|ApPathData|path",
+        blank=True,
+        null=True,
+        on_delete=models.DO_NOTHING,
+    )
+    ref_sessiondata_session = models.ForeignKey(
+        SessionData,
+        db_column="REF|SessionData|session",
         blank=True,
         null=True,
         on_delete=models.DO_NOTHING,

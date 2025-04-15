@@ -1,7 +1,4 @@
 from django.db import models
-from ..models import SessionData
-from ApDDStackParamsData import ApDDStackParamsData
-from ApPathData import ApPathData
 
 class ApPathData(models.Model):
     def_id = models.AutoField(db_column="DEF_id", primary_key=True)
