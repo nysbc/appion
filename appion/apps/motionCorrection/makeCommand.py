@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-   Copyright [yyyy] [name of copyright owner]
+   Copyright 2002-2015 Scripps Research Institute, 2015-2025 New York Structural Biology Center
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
