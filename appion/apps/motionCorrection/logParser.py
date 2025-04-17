@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2002-2015 Scripps Research Institute, 2015-2025 New York Structural Biology Center
+
 def parseLog(outbuffer: list) -> dict:
     '''
     Parses the output log from motioncor2/motioncor3 and converts it into a dict.

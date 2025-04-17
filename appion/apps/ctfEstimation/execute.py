@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2025 New York Structural Biology Center
+
 from shutil import which
 import os
 import pexpect
