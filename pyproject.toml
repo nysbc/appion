@@ -21,7 +21,8 @@ dependencies = [
   "numpy",
   "mrcfile",
   "dask",
-  "dask-jobqueue"
+  "dask-jobqueue",
+  "pexpect"
 ]
 requires-python = ">= 3.9"
 
