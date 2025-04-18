@@ -1,0 +1,30 @@
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[project]
+name = "appion"
+version = "4.0"
+readme = "README.md"
+description = "A data quality workflow for assessing images produced with Cryo-EM.  Performs motion correction and CTF estimation using user-provided inputs and information stored in a database that uses the Leginon data model."
+license = "Apache-2.0"
+authors = [
+	{ name = "John Pellman", email = "john+github@libjpel.so"}, 
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: POSIX :: Linux",
+]
+dependencies = [
+  "django >= 4.2.20",
+  "numpy",
+  "mrcfile",
+  "dask",
+  "dask-jobqueue"
+]
+requires-python = ">= 3.9"
+
+[project.urls]
+Homepage = "https://github.com/nysbc/appion-slurm/"
+Issues = "https://github.com/nysbc/appion-slurm/issues"
