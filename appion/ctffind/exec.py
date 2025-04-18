@@ -4,7 +4,7 @@
 from shutil import which
 import os
 import pexpect
-from logParser import parseLog
+from log import parseLog
 from io import BytesIO
 
 def ctffind(input : str, output : str, is_movie : str = "", num_frame_avg : str = "", 

@@ -3,7 +3,7 @@
 
 from shutil import which
 import subprocess
-from logParser import parseLog
+from log import parseLog
 
 VALIDPARAMS=set(["InMrc","InTiff","InEer","OutMrc","ArcDir",
                     "FullSum","DefectFile","InAln","OutAln",
