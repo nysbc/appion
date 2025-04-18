@@ -2,6 +2,11 @@
 # Copyright 2002-2015 Scripps Research Institute, 2015-2025 New York Structural Biology Center
 
 # Settings file must be specified via the DJANGO_SETTINGS_MODULE environment variable.
+# Possible solution for storing settings that will make our life easier:
+# https://code.djangoproject.com/wiki/SplitSettings#ini-stylefilefordeployment
+# My current thinking is that we can make it so that Django/sinedon
+# can read the current sinedon.cfg file and use that to populate settings.py.
+
 import django
 django.setup()
 import os
