@@ -30,4 +30,5 @@ slack/build
 .project
 .pydevproject
 *.code-workspace
+*.swap
 
