@@ -10,26 +10,37 @@
 import django
 django.setup()
 import os
-from sinedon.models.leginon import SessionData 
 from sinedon.models.leginon import CameraEMData
 from sinedon.models.leginon import AcquisitionImageData
 from sinedon.models.leginon import CorrectorPlanData
-from sinedon.models.leginon import ScopeEMData
 from sinedon.models.leginon import PixelSizeCalibrationData
 import numpy
 import mrcfile
 import math
+from glob import glob
+
+# InMrc, InTiff, InEer functions
+def getInputPath(session_image_path : str, filename : str) -> str:
+    fpath = os.path.join(session_image_path,filename+"*").replace("leginon","frames")
+    fpath=glob(fpath)
+    if fpath:
+        fpath=fpath[0]
+    else:
+        fpath=""
+    if fpath.endswith(".mrc"):
+        return "InMrc", fpath
+    elif fpath.endswith(".tif") or fpath.endswith(".tiff"):
+        return "InTiff", fpath
+    elif fpath.endswith(".eer"):
+        return "InEer", fpath
+    else:
+        raise RuntimeError("Unsupported file format for input path: %s." % fpath)
 
 # DefectMap functions
-def getImageDefectMap(correctorplandata : CorrectorPlanData, cameradata : CameraEMData):
-    bad_rows = correctorplandata.bad_rows
+def getImageDefectMap(bad_rows : str, bad_cols : str, bad_pixels : str, dx : int, dy : int):
     bad_rows = eval(bad_rows) if bad_rows else []
-    bad_cols = correctorplandata.bad_cols
     bad_cols = eval(bad_cols) if bad_cols else []
-    bad_pixels = correctorplandata.bad_pixels
     bad_pixels = eval(bad_pixels) if bad_pixels else []
-    dx = cameradata.subd_dimension_x
-    dy = cameradata.subd_dimension_y
     defect_map = numpy.zeros((dy,dx),dtype=numpy.int8)
     defect_map[bad_rows,:] = 1
     defect_map[:,bad_cols] = 1
@@ -76,7 +87,7 @@ def makeFmIntFile(fmintpath, nraw, size, raw_dose):
 
 # PixSize functions
 
-def getPixelSize(imgdata):
+def getPixelSize(pixelsizedatas, binning, imgdata_timestamp):
     """
     use image data object to get pixel size
     multiplies by binning and also by 1e10 to return image pixel size in angstroms
@@ -84,33 +95,24 @@ def getPixelSize(imgdata):
 
     return image pixel size in Angstroms
     """
-    magnification = imgdata.ref_scopeemdata_scope.magnification
-    tem = imgdata.ref_scopeemdata_scope.ref_instrumentdata_tem
-    ccdcamera = imgdata.ref_cameraemdata_camera.ref_instrumentdata_ccdcamera.def_id
-    pixelsizedatas = PixelSizeCalibrationData.objects.filter(magnification=magnification, ref_instrumentdata_tem=tem, ref_instrumentdata_ccdcamera=ccdcamera)
-    if not pixelsizedatas:
-        raise RuntimeError("No pixelsize information was found for image %s with mag %d, tem id %d, ccdcamera id %d."
-                        % (imgdata.filename, magnification, tem.def_id, ccdcamera))
-    
     idx = 0
     pixelsizedata = pixelsizedatas[idx]
     oldestpixelsizedata = pixelsizedata
-    while pixelsizedata.def_timestamp > imgdata.def_timestamp and idx < len(pixelsizedatas):
+    while pixelsizedata.def_timestamp > imgdata_timestamp and idx < len(pixelsizedatas):
         idx += 1
         pixelsizedata = pixelsizedatas[idx]
         if pixelsizedata.def_timestamp < oldestpixelsizedata.def_timestamp:
             oldestpixelsizedata = pixelsizedata
-    if pixelsizedata.def_timestamp > imgdata.def_timestamp:
+    if pixelsizedata.def_timestamp > imgdata_timestamp:
         #logger.warning("There is no pixel size calibration data for this image, using oldest value.")
         pixelsizedata = oldestpixelsizedata
-    binning = imgdata.ref_cameraemdata_camera.subd_binning_x
     pixelsize = pixelsizedata.pixelsize * binning
-    return(pixelsize*1e10)
+    return pixelsize*1e10
 
 # Trunc Functions
 
 # Forming the path to the log file is a problem for future me.
-def getShiftsBetweenFrames(logfile):
+def getShiftsBetweenFrames(logfile : str) -> list:
     '''
     Return a list of shift distance by frames. item 0 is fake. item 1 is distance between
     frame 0 and frame 1
@@ -175,10 +177,29 @@ def getFrameList(pixelsize : float, total_frames : int, nframe : int = None, sta
         #apDisplay.printMsg('Limit frames used to %s' % (framelist,))
     return framelist
 
+def getTrunc(camera_name : str, exposure_time : float, frame_time : float, nframes : int, pixelsize: float, eer_frames : bool):
+    if camera_name in ["GatanK2","GatanK3"]:
+        total_frames = max(1,int(exposure_time / frame_time))
+    elif 'DE':
+        total_frames = nframes
+    elif camera_name in ['TIA','Falcon','Falcon3','Falcon4'] or (camera_name == 'Falcon4EC' and eer_frames):
+        total_frames = nframes
+    else:
+        total_frames = nframes
+    sumframelist = getFrameList(pixelsize, total_frames)
+    return total_frames - sumframelist[-1] - 1
+
+# RotGain and FlipGain functions
+def getRotFlipGain(frame_rotate : int, frame_flip: int, force_cpu_flat : bool, frame_aligner_flat: bool) -> tuple:
+    if not force_cpu_flat and frame_aligner_flat:
+        return frame_rotate, frame_flip
+    else:
+        return 0, 0
+    
 # Retrieves parameters from the database or calculates them.
-def fetchParams(imageid : int, gainInput : str = "/tmp/tmp.mrc", force_cpu_flat : bool = False, has_bad_pixels : bool = False, 
+def getParams(imageid : int, gainInput : str = "/tmp/tmp.mrc", force_cpu_flat : bool = False, has_bad_pixels : bool = False, 
                              is_align : bool = False, has_non_zero_dark : bool = False, rendered_frame_size : int = 1,
-                             totaldose : bool = False) -> dict:
+                             totaldose : float = False) -> dict:
     imgdata=AcquisitionImageData.objects.get(def_id=imageid)
     correctorplandata=imgdata.ref_correctorplandata_corrector_plan
     sessiondata=imgdata.ref_sessiondata_session
@@ -188,14 +209,8 @@ def fetchParams(imageid : int, gainInput : str = "/tmp/tmp.mrc", force_cpu_flat 
 
     # InMrc, InTiff, InEer
     # Get the path to the input image.
-    if imgdata.mrc_image.endswith(".mrc"):
-        kwargs["InMrc"]=os.path.join(sessiondata.image_path,imgdata.mrc_image)
-    elif imgdata.mrc_image.endswith(".tif") or imgdata.filename.endswith(".tiff"):
-        kwargs["InTiff"]=os.path.join(sessiondata.image_path,imgdata.mrc_image)
-    elif imgdata.mrc_image.endswith(".eer"):
-        kwargs["InEer"]=os.path.join(sessiondata.image_path,imgdata.mrc_image)
-    else:
-        raise RuntimeError("Unsupported file format for input path: %s." % imgdata.filename)
+    paramKey, fpath = getInputPath(sessiondata.image_path,imgdata.filename)
+    kwargs[paramKey] = fpath
 
     # Gain
     # Get the reference image
@@ -240,6 +255,11 @@ def fetchParams(imageid : int, gainInput : str = "/tmp/tmp.mrc", force_cpu_flat 
     kwargs["Dark"]=dark_path
 
     # DefectMap
+    dx = cameradata.subd_dimension_x
+    dy = cameradata.subd_dimension_y
+    bad_pixels = correctorplandata.bad_pixels
+    bad_rows = correctorplandata.bad_rows
+    bad_cols = correctorplandata.bad_cols
  
     # TODO - conditional that triggers generation of the Defect Map?
 
@@ -259,7 +279,10 @@ def fetchParams(imageid : int, gainInput : str = "/tmp/tmp.mrc", force_cpu_flat 
     # totaldose is user-specified when the doseweight flag is passed
     # If this flag isn't specified, the database is queried.
     if not totaldose:
-        totaldose = imgdata.ref_presetdata_preset.dose / 1e20
+        dose = imgdata.ref_presetdata_preset.dose
+        if not dose:
+            dose = 0.0
+        totaldose = dose / 1e20
     if totaldose > 0:
         raw_dose = totaldose / total_raw_frames
     else:
@@ -275,37 +298,30 @@ def fetchParams(imageid : int, gainInput : str = "/tmp/tmp.mrc", force_cpu_flat 
         kwargs['FmInt'] = fmintpath
 
     # PixSize
-    kwargs['PixSize']=getPixelSize(imgdata)
+    magnification = imgdata.ref_scopeemdata_scope.magnification
+    tem = imgdata.ref_scopeemdata_scope.ref_instrumentdata_tem
+    ccdcamera = imgdata.ref_cameraemdata_camera.ref_instrumentdata_ccdcamera.def_id
+    pixelsizedatas = PixelSizeCalibrationData.objects.filter(magnification=magnification, ref_instrumentdata_tem=tem, ref_instrumentdata_ccdcamera=ccdcamera)
+    if not pixelsizedatas:
+        raise RuntimeError("No pixelsize information was found for image %s with mag %d, tem id %d, ccdcamera id %d."
+                        % (imgdata.filename, magnification, tem.def_id, ccdcamera))
+    binning = imgdata.ref_cameraemdata_camera.subd_binning_x
+    kwargs['PixSize'] = getPixelSize(pixelsizedatas, binning, imgdata.def_timestamp)
 
     # kV
-    scopeemdata=imgdata.ref_scopeemdata_scope
-    kwargs["kV"] = scopeemdata.high_tension/1000.0
+    kwargs["kV"] = imgdata.ref_scopeemdata_scope.high_tension/1000.0
 
     # Trunc
     camera_name=imgdata.ref_cameraemdata_camera.ref_instrumentdata_ccdcamera.name
-    if camera_name in ["GatanK2","GatanK3"]:
-        total_frames = max(1,int(imgdata.ref_cameraemdata_camera.exposure_time / imgdata.ref_cameraemdata_camera.frame_time))
-    elif 'DE':
-        total_frames = imgdata.ref_cameraemdata_camera.nframes
-    elif camera_name in ['TIA','Falcon','Falcon3','Falcon4'] or (camera_name == 'Falcon4EC' and imgdata.ref_cameraemdata_camera.eer_frames):
-        total_frames = imgdata.ref_cameraemdata_camera.nframes
-    else:
-        total_frames = imgdata.ref_cameraemdata_camera.nframes
-    sumframelist = getFrameList(kwargs['PixSize'], total_frames)
-    kwargs['Trunc'] = total_frames - sumframelist[-1] - 1
+    exposure_time=imgdata.ref_cameraemdata_camera.exposure_time
+    frame_time=imgdata.ref_cameraemdata_camera.frame_time
+    nframes=imgdata.ref_cameraemdata_camera.nframes
+    eer_frames=bool(imgdata.ref_cameraemdata_camera.eer_frames)
+    kwargs['Trunc'] = getTrunc(camera_name, exposure_time, frame_time, nframes, kwargs["PixSize"], eer_frames)
 
     # RotGain
     # FlipGain
     frame_aligner_flat = not (has_bad_pixels or not is_align or has_non_zero_dark)
-    if not force_cpu_flat and frame_aligner_flat:
-        kwargs['RotGain'] = cameradata.frame_rotate
-        kwargs['FlipGain'] = cameradata.frame_flip
-    else:
-        kwargs['RotGain'] = 0
-        kwargs['FlipGain'] = 0
-    return kwargs
+    kwargs['RotGain'], kwargs['FlipGain'] = getRotFlipGain(cameradata.frame_rotate, cameradata.frame_flip, force_cpu_flat, frame_aligner_flat)
 
-if __name__ == '__main__':
-    imageid = 29123390
-    kwargs = fetchParams(imageid)
-    print(kwargs)
+    return kwargs

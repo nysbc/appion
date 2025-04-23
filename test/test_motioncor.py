@@ -1,4 +1,4 @@
-from appion.motioncor import fetchParams
+from appion.motioncor import getParams
 import os
 import json
 
@@ -26,5 +26,18 @@ for imageid in validationData.keys():
             totaldose = 0.0
     else:
         totaldose = 0.0
-    kwargs=fetchParams(int(imageid), force_cpu_flat=force_cpu_flat,is_align=is_align,rendered_frame_size=rendered_frame_size, totaldose=totaldose)
-    print(kwargs)
+    # Globbing the input file can fail because users may have deleted their data after transfer.
+    try:
+        kwargs=getParams(int(imageid), force_cpu_flat=force_cpu_flat,is_align=is_align,rendered_frame_size=rendered_frame_size, totaldose=totaldose)
+    except Exception as e:
+        print(e)
+        continue
+    if "InMrc" in kwargs.keys():
+        print(validationData[imageid]["motioncorflags"]["InMrc"])
+        assert kwargs["InMrc"] == validationData[imageid]["motioncorflags"]["InMrc"]
+    elif "InTiff" in kwargs.keys():
+        print(validationData[imageid]["motioncorflags"]["InTiff"])
+        assert kwargs["InTiff"] == validationData[imageid]["motioncorflags"]["InTiff"]
+    elif "InEer" in kwargs.keys():
+        print(validationData[imageid]["motioncorflags"]["InEer"])
+        assert kwargs["InEer"] == validationData[imageid]["motioncorflags"]["InEer"]
