@@ -41,10 +41,10 @@ for c in motioncorcmds:
             # Symlinks
             links+=re.findall("\.\.\. link (.+) to (.+)\.", line)
             # Motioncor2 Params
-            motioncorflags+=[re.findall("(?:-)([A-Z]\w+) ([\S]+)", line)]
+            motioncorflags+=[re.findall("(?:-)([A-Zk]\w+) ([\S]+)", line)]
 
 appionflags=[dict(flaglist) for flaglist in appionflags if flaglist]
-links=dict([(dst, src) for src, dst in links])
+links=dict([(dst, src) for src, dst in links if os.path.exists(src)])
 motioncorflags=[dict(flaglist) for flaglist in motioncorflags if flaglist]
 
 validationDataJoin1={}
