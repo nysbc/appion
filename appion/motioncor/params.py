@@ -36,6 +36,28 @@ def getInputPath(session_image_path : str, filename : str) -> str:
     else:
         raise RuntimeError("Unsupported file format for input path: %s." % fpath)
 
+# Dark functions
+
+def makeDark(dark_id : int, dark_path : str, camera_name : str, eer_frames : bool):
+    if not dark_id:
+        # Why is this switch statement necessary?  Why not save default dimensions into the database instead of
+        # hardcoding them in here?  (Original Appion has these hardcoded as part of object initialization.)
+        if camera_name == "GatanK2":
+            dimensions = (3710,3838)
+        elif camera_name == 'GatanK3':
+            dimensions = (8184,11520)
+        elif camera_name == 'DE':
+            dimensions = (4096,3072)
+        elif camera_name in ['TIA','Falcon','Falcon3','Falcon4'] or (camera_name == 'Falcon4EC' and eer_frames):
+            dimensions = (4096,4096)
+        else:
+            dimensions = None
+        unscaled_darkarray =  numpy.zeros((dimensions[1],dimensions[0]), dtype=numpy.float32)
+    else:
+        darkdata = AcquisitionImageData.objects.get(def_id=dark_id)
+        unscaled_darkarray = mrcfile.read(darkdata.mrc_image) / darkdata.ref_cameraemdata_camera.nframes
+    mrcfile.write(dark_path, unscaled_darkarray, overwrite=True)
+
 # DefectMap functions
 def getImageDefectMap(bad_rows : str, bad_cols : str, bad_pixels : str, dx : int, dy : int):
     bad_rows = eval(bad_rows) if bad_rows else []
@@ -67,7 +89,39 @@ def makeDefectMrc(defect_map_path : str, defect_map : numpy.ndarray, frame_flip 
         defect_map = numpy.flipud(defect_map)
     mrcfile.write(defect_map_path, defect_map, overwrite=True)
 
-# FmIntFile functions
+# FmIntFile/FmDose functions
+
+def getFmDose(total_raw_frames: int, exposure_time, frame_time, dose, rendered_frame_size, totaldose, is_eer, fmintpath : str = ""):
+    # This depends on whether or not we're using an EER formatted-input.
+    # see https://github.com/nysbc/appion-slurm/blob/f376758762771073c0450d2bc3badc0fed6f8e66/appion/appionlib/apDDFrameAligner.py#L395-L399
+
+    if total_raw_frames is None:
+        # older data or k2
+        total_raw_frames =  int(exposure_time / frame_time)
+    # avoid 0 for dark image scaling and frame list creation
+    if total_raw_frames == 0:
+        total_raw_frames = 1
+
+    # totaldose is user-specified when the doseweight flag is passed
+    # If this flag isn't specified, the database is queried.
+    if not totaldose:
+        if not dose:
+            dose = 0.0
+        totaldose = dose / 1e20
+    if totaldose > 0:
+        raw_dose = totaldose / total_raw_frames
+    else:
+        raw_dose = 0.03 #make fake dose similar to Falcon4EC 7 e/p/s
+
+    if not is_eer:
+        return totaldose/total_raw_frames
+    else:
+        makeFmIntFile(fmintpath, total_raw_frames, rendered_frame_size, raw_dose)
+        return raw_dose*rendered_frame_size
+
+def getTotalRenderedFrames(nraw, size):
+    # total_rendered_frames is used when writing out the motioncorr log
+    return nraw // size
 
 def makeFmIntFile(fmintpath, nraw, size, raw_dose):
     '''
@@ -76,14 +130,13 @@ def makeFmIntFile(fmintpath, nraw, size, raw_dose):
     modulo = nraw % size
     int_div = nraw // size
     lines = []
-    total_rendered_frames = int_div
+    total_rendered_frames = getTotalRenderedFrames(nraw, size)
     if modulo != 0:
         total_rendered_frames += 1
         lines.append('%d\t%d\t%.3f\n' % (modulo, modulo, raw_dose))
     lines.append('%d\t%d\t%.3f\n' % (int_div*size+modulo, size, raw_dose))
     with open(fmintpath,'w') as f:
         f.write(''.join(lines))
-    return total_rendered_frames
 
 # PixSize functions
 
@@ -91,7 +144,6 @@ def getPixelSize(pixelsizedatas, binning, imgdata_timestamp):
     """
     use image data object to get pixel size
     multiplies by binning and also by 1e10 to return image pixel size in angstroms
-    shouldn't have to lookup db already should exist in imgdict
 
     return image pixel size in Angstroms
     """
@@ -104,7 +156,7 @@ def getPixelSize(pixelsizedatas, binning, imgdata_timestamp):
         if pixelsizedata.def_timestamp < oldestpixelsizedata.def_timestamp:
             oldestpixelsizedata = pixelsizedata
     if pixelsizedata.def_timestamp > imgdata_timestamp:
-        #logger.warning("There is no pixel size calibration data for this image, using oldest value.")
+        # There is no pixel size calibration data for this image. Use oldest value.
         pixelsizedata = oldestpixelsizedata
     pixelsize = pixelsizedata.pixelsize * binning
     return pixelsize*1e10
@@ -197,28 +249,71 @@ def getRotFlipGain(frame_rotate : int, frame_flip: int, force_cpu_flat : bool, f
         return 0, 0
     
 # Retrieves parameters from the database or calculates them.
-def getParams(imageid : int, gainInput : str = "/tmp/tmp.mrc", force_cpu_flat : bool = False, has_bad_pixels : bool = False, 
+def getParams(imageid : int, gain_input : str = "/tmp/gain.mrc", dark_input : str = "/tmp/dark.mrc", fmintfile="/tmp/fmintfile.txt", force_cpu_flat : bool = False, has_bad_pixels : bool = False, 
                              is_align : bool = False, has_non_zero_dark : bool = False, rendered_frame_size : int = 1,
                              totaldose : float = False) -> dict:
     imgdata=AcquisitionImageData.objects.get(def_id=imageid)
     correctorplandata=imgdata.ref_correctorplandata_corrector_plan
     sessiondata=imgdata.ref_sessiondata_session
     cameradata=imgdata.ref_cameraemdata_camera
-    # keyword args for motioncor2 function
+    # Additional parameters derived from the database
+    # Input image parameters
+    session_image_path=sessiondata.image_path
+    image_filename=imgdata.filename
+    # Dark inputs
+    dark_id=imgdata.ref_darkimagedata_dark
+    camera_name=imgdata.ref_cameraemdata_camera.ref_instrumentdata_ccdcamera.name
+    eer_frames=imgdata.ref_cameraemdata_camera.eer_frames
+    # DefectMap inputs
+    dx = cameradata.subd_dimension_x
+    dy = cameradata.subd_dimension_y
+    if correctorplandata:
+        bad_pixels = correctorplandata.bad_pixels
+        bad_rows = correctorplandata.bad_rows
+        bad_cols = correctorplandata.bad_cols
+    else:
+        bad_pixels=None
+        bad_rows=None
+        bad_cols=None
+    # FmDose, FmIntFile inputs
+    total_raw_frames = imgdata.ref_cameraemdata_camera.nframes
+    exposure_time = imgdata.ref_cameraemdata_camera.exposure_time
+    frame_time = imgdata.ref_cameraemdata_camera.frame_time
+    dose = imgdata.ref_presetdata_preset.dose
+    # PixSize inputs
+    magnification=imgdata.ref_scopeemdata_scope.magnification
+    tem=imgdata.ref_scopeemdata_scope.ref_instrumentdata_tem.def_id
+    ccdcamera=imgdata.ref_cameraemdata_camera.ref_instrumentdata_ccdcamera.def_id
+    binning=imgdata.ref_cameraemdata_camera.subd_binning_x
+    imgdata_timestamp=imgdata.def_timestamp
+    # kV inputs
+    high_tension=imgdata.ref_scopeemdata_scope.high_tension
+    # Trunc inputs
+    #camera_name is already defined for Dark
+    #exposure_time is already defined for FmDose/FmIntFile
+    #frame_time is already defined for FmDose/FmIntFile
+    nframes=imgdata.ref_cameraemdata_camera.nframes
+    #eer_frames is already defined for Dark
+    # FlipGain/RotGain inputs
+    frame_rotate=cameradata.frame_rotate
+    frame_flip=cameradata.frame_flip
+    frame_aligner_flat=not (has_bad_pixels or not is_align or has_non_zero_dark)
+
+    # Keyword args for motioncor2 function
     kwargs={}
 
     # InMrc, InTiff, InEer
     # Get the path to the input image.
-    paramKey, fpath = getInputPath(sessiondata.image_path,imgdata.filename)
+    paramKey, fpath = getInputPath(session_image_path,image_filename)
     kwargs[paramKey] = fpath
 
     # Gain
     # Get the reference image
-    if gainInput:
-        kwargs["Gain"]=gainInput
+    if gain_input:
+        kwargs["Gain"]=gain_input
     else:
         gaindata=AcquisitionImageData.objects.get(def_id=imgdata.ref_normimagedata_norm)
-        kwargs["Gain"]=os.path.join(sessiondata.image_path,gaindata.mrc_image)
+        kwargs["Gain"]=os.path.join(session_image_path,gaindata.mrc_image)
 
     # TODO - what exactly is the bright reference?  It isn't passed as a param into motioncor2, but
     # Appion still prints out its path.  To what end / why?
@@ -232,96 +327,44 @@ def getParams(imageid : int, gainInput : str = "/tmp/tmp.mrc", force_cpu_flat : 
     # self.setCameraInfo(1,use_full_raw_area)
         
     # Get the dark image.  Create it if it does not exist.
-    if not imgdata.ref_darkimagedata_dark:
-        camera_name=imgdata.ref_cameraemdata_camera.ref_instrumentdata_ccdcamera.name
-        # Why is this switch statement necessary?  Why not save default dimensions into the database instead of
-        # hardcoding them in here?  (Original Appion has these hardcoded as part of object initialization.)
-        if camera_name == "GatanK2":
-            dimensions = (3710,3838)
-        elif camera_name == 'GatanK3':
-            dimensions = (8184,11520)
-        elif camera_name == 'DE':
-            dimensions = (4096,3072)
-        elif camera_name in ['TIA','Falcon','Falcon3','Falcon4'] or (camera_name == 'Falcon4EC' and imgdata.ref_cameraemdata_camera.eer_frames):
-            dimensions = (4096,4096)
-        else:
-            dimensions = None
-        unscaled_darkarray =  numpy.zeros((dimensions[1],dimensions[0]), dtype=numpy.float32)
-    else:
-        darkdata = AcquisitionImageData.objects.get(def_id=imgdata.ref_darkimagedata_dark)
-        unscaled_darkarray = mrcfile.read(darkdata.mrc_image) / darkdata.ref_cameraemdata_camera.nframes
-    dark_path="/tmp/dark.mrc"
-    mrcfile.write(dark_path, unscaled_darkarray, overwrite=True)
-    kwargs["Dark"]=dark_path
+    makeDark(dark_id, dark_input, camera_name, eer_frames)
+    kwargs["Dark"]=dark_input
 
     # DefectMap
-    dx = cameradata.subd_dimension_x
-    dy = cameradata.subd_dimension_y
-    bad_pixels = correctorplandata.bad_pixels
-    bad_rows = correctorplandata.bad_rows
-    bad_cols = correctorplandata.bad_cols
  
     # TODO - conditional that triggers generation of the Defect Map?
 
     # FmIntFile
     # FmDose
-
-    # This depends on whether or not we're using an EER formatted-input.
-    # see https://github.com/nysbc/appion-slurm/blob/f376758762771073c0450d2bc3badc0fed6f8e66/appion/appionlib/apDDFrameAligner.py#L395-L399
-    total_raw_frames = imgdata.ref_cameraemdata_camera.nframes
-    if total_raw_frames is None:
-        # older data or k2
-        total_raw_frames =  int(imgdata.ref_cameraemdata_camera.exposure_time / imgdata.ref_cameraemdata_camera.frame_time)
-    # avoid 0 for dark image scaling and frame list creation
-    if total_raw_frames == 0:
-        total_raw_frames = 1
-
-    # totaldose is user-specified when the doseweight flag is passed
-    # If this flag isn't specified, the database is queried.
-    if not totaldose:
-        dose = imgdata.ref_presetdata_preset.dose
-        if not dose:
-            dose = 0.0
-        totaldose = dose / 1e20
-    if totaldose > 0:
-        raw_dose = totaldose / total_raw_frames
+    if "InEer" in kwargs.keys():
+        kwargs["FmDose"] = getFmDose(total_raw_frames, exposure_time, frame_time, dose, rendered_frame_size, totaldose, True, fmintfile)
+        kwargs["FmIntFile"] = fmintfile
     else:
-        raw_dose = 0.03 #make fake dose similar to Falcon4EC 7 e/p/s
-
-    if "InEer" not in kwargs.keys():
-        kwargs['FmDose'] = totaldose/total_raw_frames
-    else:
-        kwargs['FmDose'] = raw_dose*rendered_frame_size
-        fmintpath=os.path.abspath("/tmp/intfile.txt")
-        # total_rendered_frames is used when writing out the motioncorr log
-        total_rendered_frames = makeFmIntFile(fmintpath, total_raw_frames, rendered_frame_size, raw_dose)
-        kwargs['FmInt'] = fmintpath
+        kwargs["FmDose"] = getFmDose(total_raw_frames, exposure_time, frame_time, dose, rendered_frame_size, totaldose, False)
 
     # PixSize
-    magnification = imgdata.ref_scopeemdata_scope.magnification
-    tem = imgdata.ref_scopeemdata_scope.ref_instrumentdata_tem
-    ccdcamera = imgdata.ref_cameraemdata_camera.ref_instrumentdata_ccdcamera.def_id
-    pixelsizedatas = PixelSizeCalibrationData.objects.filter(magnification=magnification, ref_instrumentdata_tem=tem, ref_instrumentdata_ccdcamera=ccdcamera)
-    if not pixelsizedatas:
+    pixelsizecalibrationdata = PixelSizeCalibrationData.objects.filter(magnification=magnification, 
+                                                             ref_instrumentdata_tem=tem, 
+                                                             ref_instrumentdata_ccdcamera=ccdcamera)
+    if not pixelsizecalibrationdata:
         raise RuntimeError("No pixelsize information was found for image %s with mag %d, tem id %d, ccdcamera id %d."
-                        % (imgdata.filename, magnification, tem.def_id, ccdcamera))
-    binning = imgdata.ref_cameraemdata_camera.subd_binning_x
-    kwargs['PixSize'] = getPixelSize(pixelsizedatas, binning, imgdata.def_timestamp)
+                        % (image_filename, 
+                           magnification, 
+                           tem, 
+                           ccdcamera))
+    kwargs['PixSize'] = getPixelSize(pixelsizecalibrationdata, binning, imgdata_timestamp)
 
     # kV
-    kwargs["kV"] = imgdata.ref_scopeemdata_scope.high_tension/1000.0
+    kwargs["kV"] = high_tension/1000.0
 
     # Trunc
-    camera_name=imgdata.ref_cameraemdata_camera.ref_instrumentdata_ccdcamera.name
-    exposure_time=imgdata.ref_cameraemdata_camera.exposure_time
-    frame_time=imgdata.ref_cameraemdata_camera.frame_time
-    nframes=imgdata.ref_cameraemdata_camera.nframes
-    eer_frames=bool(imgdata.ref_cameraemdata_camera.eer_frames)
     kwargs['Trunc'] = getTrunc(camera_name, exposure_time, frame_time, nframes, kwargs["PixSize"], eer_frames)
 
     # RotGain
     # FlipGain
-    frame_aligner_flat = not (has_bad_pixels or not is_align or has_non_zero_dark)
-    kwargs['RotGain'], kwargs['FlipGain'] = getRotFlipGain(cameradata.frame_rotate, cameradata.frame_flip, force_cpu_flat, frame_aligner_flat)
+    kwargs['RotGain'], kwargs['FlipGain'] = getRotFlipGain(frame_rotate, 
+                                                           frame_flip, 
+                                                           force_cpu_flat, 
+                                                           frame_aligner_flat)
 
     return kwargs
