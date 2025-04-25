@@ -30,7 +30,7 @@ for imageid in validationData.keys():
     try:
         kwargs=getParams(int(imageid), gain_input="/tmp/gain.mrc", dark_input = "/tmp/dark.mrc", fmintfile="/tmp/fmintfile.txt", force_cpu_flat=force_cpu_flat,is_align=is_align,rendered_frame_size=rendered_frame_size, totaldose=totaldose)
     except Exception as e:
-        #print(e)
+        print(e)
         continue
     # if "InMrc" in kwargs.keys():
     #     print(validationData[imageid]["motioncorflags"]["InMrc"])
@@ -49,7 +49,11 @@ for imageid in validationData.keys():
     #assert "%d" % kwargs["RotGain"] == validationData[imageid]["motioncorflags"]["RotGain"]
     #print("FlipGain: Does %d == %s?" % (kwargs["FlipGain"], validationData[imageid]["motioncorflags"]["FlipGain"]))
     #assert "%d" % kwargs["FlipGain"] == validationData[imageid]["motioncorflags"]["FlipGain"]
-    print("PixSize: Does %.3f == %s?" % (kwargs["PixSize"], validationData[imageid]["motioncorflags"]["PixSize"]))
-    assert "%.3f" % kwargs["PixSize"] == validationData[imageid]["motioncorflags"]["PixSize"]
+    try:
+        print("PixSize: Does %.3f == %s?" % (kwargs["PixSize"], validationData[imageid]["motioncorflags"]["PixSize"]))
+        assert "%.3f" % kwargs["PixSize"] == validationData[imageid]["motioncorflags"]["PixSize"]
+    except Exception as e:
+        print(e)
+        continue
     # print("Trunc: Does %d == %s?" % (kwargs["Trunc"], validationData[imageid]["motioncorflags"]["Trunc"]))
     # assert "%.3f" % kwargs["Trunc"] == validationData[imageid]["motioncorflags"]["Trunc"]

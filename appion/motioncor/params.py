@@ -9,6 +9,7 @@
 
 import django
 django.setup()
+from django.db.models import F
 import os
 from sinedon.models.leginon import CameraEMData
 from sinedon.models.leginon import AcquisitionImageData
@@ -147,18 +148,24 @@ def getPixelSize(pixelsizedatas, binning, imgdata_timestamp):
 
     return image pixel size in Angstroms
     """
-    idx = 0
-    pixelsizedata = pixelsizedatas[idx]
+    i = 0
+    pixelsizedata = pixelsizedatas[i]
     oldestpixelsizedata = pixelsizedata
-    while pixelsizedata.def_timestamp > imgdata_timestamp and idx < len(pixelsizedatas):
-        idx += 1
-        pixelsizedata = pixelsizedatas[idx]
-        if pixelsizedata.def_timestamp < oldestpixelsizedata.def_timestamp:
+    while pixelsizedata.def_timestamp > imgdata_timestamp and i < len(pixelsizedatas):
+        i += 1
+        pixelsizedata = pixelsizedatas[i]
+        if pixelsizedata.def_timestamp < oldestpixelsizedata.timestamp:
             oldestpixelsizedata = pixelsizedata
     if pixelsizedata.def_timestamp > imgdata_timestamp:
+        pixelsizedata = oldestpixelsizedata
+    #for pixelsizedata in pixelsizedatas:
+    #    if pixelsizedata.def_timestamp < oldestpixelsizedata.def_timestamp:
+    #        oldestpixelsizedata=pixelsizedata
+    #    print("%.3f, %s" % ((pixelsizedata.pixelsize * 1e10 * binning), pixelsizedata.def_timestamp))
+    if pixelsizedata.def_timestamp < imgdata_timestamp:
         # There is no pixel size calibration data for this image. Use oldest value.
         pixelsizedata = oldestpixelsizedata
-    pixelsize = pixelsizedata.pixelsize * binning
+    pixelsize = oldestpixelsizedata.pixelsize * binning
     return pixelsize*1e10
 
 # Trunc Functions
@@ -249,7 +256,7 @@ def getRotFlipGain(frame_rotate : int, frame_flip: int, force_cpu_flat : bool, f
         return 0, 0
     
 # Retrieves parameters from the database or calculates them.
-def getParams(imageid : int, gain_input : str = "/tmp/gain.mrc", dark_input : str = "/tmp/dark.mrc", fmintfile="/tmp/fmintfile.txt", force_cpu_flat : bool = False, has_bad_pixels : bool = False, 
+def getParams(imageid : int, gain_input : str = "/tmp/gain.mrc", dark_input : str = "/tmp/dark.mrc", fmintfile : str ="/tmp/fmintfile.txt", force_cpu_flat : bool = False, has_bad_pixels : bool = False, 
                              is_align : bool = False, has_non_zero_dark : bool = False, rendered_frame_size : int = 1,
                              totaldose : float = False) -> dict:
     imgdata=AcquisitionImageData.objects.get(def_id=imageid)
@@ -345,7 +352,7 @@ def getParams(imageid : int, gain_input : str = "/tmp/gain.mrc", dark_input : st
     # PixSize
     pixelsizecalibrationdata = PixelSizeCalibrationData.objects.filter(magnification=magnification, 
                                                              ref_instrumentdata_tem=tem, 
-                                                             ref_instrumentdata_ccdcamera=ccdcamera)
+                                                             ref_instrumentdata_ccdcamera=ccdcamera).order_by(F("def_timestamp").desc())
     if not pixelsizecalibrationdata:
         raise RuntimeError("No pixelsize information was found for image %s with mag %d, tem id %d, ccdcamera id %d."
                         % (image_filename, 
