@@ -71,7 +71,7 @@ def getImageDefectMap(bad_rows : str, bad_cols : str, bad_pixels : str, dx : int
         defect_map[py,px] = 1
     return defect_map
 
-def makeDefectMrc(defect_map_path : str, defect_map : numpy.ndarray, frame_flip : int = 0, frame_rotate : int = 0, modified : bool = True) -> None:
+def makeDefectMrc(defect_map_path : str, defect_map : numpy.ndarray, frame_flip : int = 0, frame_rotate : int = 0) -> None:
     # flip and rotate map_array.  Therefore, do the opposite of
     # frames
     if frame_flip:
@@ -335,7 +335,11 @@ def getParams(imageid : int, gain_input : str = "/tmp/gain.mrc", dark_input : st
     kwargs["Dark"]=dark_input
 
     # DefectMap
- 
+    if bad_pixels or bad_cols or bad_rows:
+        defect_map=getImageDefectMap(bad_rows, bad_cols, bad_pixels, dx, dy)
+        defect_map_path="/tmp/defect.mrc"
+        makeDefectMrc(defect_map_path, defect_map, frame_flip, frame_rotate)
+        
     # TODO - conditional that triggers generation of the Defect Map?
 
     # FmIntFile
