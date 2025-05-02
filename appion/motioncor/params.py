@@ -92,7 +92,7 @@ def makeDefectMrc(defect_map_path : str, defect_map : numpy.ndarray, frame_flip 
 
 # FmIntFile/FmDose functions
 
-def getFmDose(total_raw_frames: int, exposure_time, frame_time, dose, rendered_frame_size, totaldose, is_eer, fmintpath : str = ""):
+def getFmDose(total_raw_frames: int, exposure_time, frame_time, dose, rendered_frame_size, totaldose, is_eer):
     # This depends on whether or not we're using an EER formatted-input.
     # see https://github.com/nysbc/appion-slurm/blob/f376758762771073c0450d2bc3badc0fed6f8e66/appion/appionlib/apDDFrameAligner.py#L395-L399
 
@@ -117,7 +117,6 @@ def getFmDose(total_raw_frames: int, exposure_time, frame_time, dose, rendered_f
     if not is_eer:
         return totaldose/total_raw_frames
     else:
-        makeFmIntFile(fmintpath, total_raw_frames, rendered_frame_size, raw_dose)
         return raw_dose*rendered_frame_size
 
 def getTotalRenderedFrames(nraw, size):
@@ -145,27 +144,22 @@ def getPixelSize(pixelsizedatas, binning, imgdata_timestamp):
     """
     use image data object to get pixel size
     multiplies by binning and also by 1e10 to return image pixel size in angstroms
+    Assumes that pixelsizedata is in descending order sorted by timestamp.
 
     return image pixel size in Angstroms
     """
     i = 0
     pixelsizedata = pixelsizedatas[i]
     oldestpixelsizedata = pixelsizedata
-    while pixelsizedata.def_timestamp > imgdata_timestamp and i < len(pixelsizedatas):
+    while pixelsizedata["timestamp"] > imgdata_timestamp and i < len(pixelsizedatas):
         i += 1
         pixelsizedata = pixelsizedatas[i]
-        if pixelsizedata.def_timestamp < oldestpixelsizedata.timestamp:
+        if pixelsizedata["timestamp"] < oldestpixelsizedata["timestamp"]:
             oldestpixelsizedata = pixelsizedata
-    if pixelsizedata.def_timestamp > imgdata_timestamp:
-        pixelsizedata = oldestpixelsizedata
-    #for pixelsizedata in pixelsizedatas:
-    #    if pixelsizedata.def_timestamp < oldestpixelsizedata.def_timestamp:
-    #        oldestpixelsizedata=pixelsizedata
-    #    print("%.3f, %s" % ((pixelsizedata.pixelsize * 1e10 * binning), pixelsizedata.def_timestamp))
-    if pixelsizedata.def_timestamp < imgdata_timestamp:
+    if pixelsizedata["timestamp"] > imgdata_timestamp:
         # There is no pixel size calibration data for this image. Use oldest value.
         pixelsizedata = oldestpixelsizedata
-    pixelsize = oldestpixelsizedata.pixelsize * binning
+    pixelsize = oldestpixelsizedata["pixelsize"] * binning
     return pixelsize*1e10
 
 # Trunc Functions
@@ -235,6 +229,9 @@ def getFrameList(pixelsize : float, total_frames : int, nframe : int = None, sta
             framelist.sort()
         #apDisplay.printMsg('Limit frames used to %s' % (framelist,))
     return framelist
+
+def getKV(high_tension):
+    return high_tension/1000.0
 
 def getTrunc(camera_name : str, exposure_time : float, frame_time : float, nframes : int, pixelsize: float, eer_frames : bool):
     if camera_name in ["GatanK2","GatanK3"]:
@@ -344,7 +341,8 @@ def getParams(imageid : int, gain_input : str = "/tmp/gain.mrc", dark_input : st
     # FmIntFile
     # FmDose
     if "InEer" in kwargs.keys():
-        kwargs["FmDose"] = getFmDose(total_raw_frames, exposure_time, frame_time, dose, rendered_frame_size, totaldose, True, fmintfile)
+        kwargs["FmDose"] = getFmDose(total_raw_frames, exposure_time, frame_time, dose, rendered_frame_size, totaldose, True)
+        makeFmIntFile(fmintfile, total_raw_frames, rendered_frame_size, kwargs["FmDose"] / rendered_frame_size)
         kwargs["FmIntFile"] = fmintfile
     else:
         kwargs["FmDose"] = getFmDose(total_raw_frames, exposure_time, frame_time, dose, rendered_frame_size, totaldose, False)
@@ -359,13 +357,16 @@ def getParams(imageid : int, gain_input : str = "/tmp/gain.mrc", dark_input : st
                            magnification, 
                            tem, 
                            ccdcamera))
-    kwargs['PixSize'] = getPixelSize(pixelsizecalibrationdata, binning, imgdata_timestamp)
+    pixelsizedata=[{"timestamp": p.def_timestamp, "pixelsize" : p.pixelsize } for p in pixelsizecalibrationdata]
+    kwargs['PixSize'] = getPixelSize(pixelsizedata, binning, imgdata_timestamp)
 
     # kV
-    kwargs["kV"] = high_tension/1000.0
+    kwargs["kV"] = getKV(high_tension)
 
     # Trunc
     kwargs['Trunc'] = getTrunc(camera_name, exposure_time, frame_time, nframes, kwargs["PixSize"], eer_frames)
+    if not kwargs['Trunc']:
+        del kwargs['Trunc']
 
     # RotGain
     # FlipGain
