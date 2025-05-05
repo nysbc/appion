@@ -5,6 +5,8 @@ from sinedon.models.appion import ApDDAlignImagePairData
 from sinedon.models.appion import ApDDFrameTrajectoryData
 from sinedon.models.appion import ApDDAlignStatsData
 from sinedon.models.leginon import AcquisitionImageData
+from sinedon.models.leginon import ObjIceThicknessData
+from sinedon.models.leginon import ZeroLossIceThicknessData
 
 # ApDDAlignImagePairData
 # We can only really add insert ref IDs here b/c the raw and aligned images are in a different database from the Appion results.
@@ -37,31 +39,31 @@ def commitAlignStats(aligned_image_def_id, rundata_def_id, shifts, nframes, pixs
 def transferALSThickness(unaligned,aligned):
 # transfers aperture limited scattering measurements and parameters from the unaligned image to the aligned image
 # should it be here or in a different place???
-	obthdata = leginondata.ObjIceThicknessData(image=unaligned).query(results=1)
-        if obthdata:
-                results = obthdata[0]
-               	newobjth = leginondata.ObjIceThicknessData()
-               	newobjth['vacuum intensity'] = results['vacuum intensity']
-               	newobjth['mfp'] = results['mfp']
-               	newobjth['intensity'] = results['intensity']
-                newobjth['thickness'] = results['thickness']
-                newobjth['image'] = aligned;
-	        newobjth.insert()
+    obthdata = ObjIceThicknessData.objects.get(ref_acquisitionimagedata_image=unaligned)
+    if obthdata:
+        results = obthdata[0]
+        newobjth = ObjIceThicknessData(vacuum_intensity = results.vacuum_intensity,
+                                       mfp = results.mfp,
+                                       intensity = results.intensity,
+                                       thickness = results.thickness,
+                                       ref_acquisitionimagedata_image = aligned)
+        newobjth.save()
+		
 
 def transferZLPThickness(unaligned,aligned):
-# transfers zero loss peak measurements and parameters from the unaligned image to the aligned image
-# should it be here or in a different place???
-	zlpthdata = leginondata.ZeroLossIceThicknessData(image=unaligned).query(results=1)
-        if zlpthdata:
-                results = zlpthdata[0]
-		newzlossth = leginondata.ZeroLossIceThicknessData()
-                newzlossth['no slit mean'] = results['no slit mean']
-                newzlossth['no slit sd'] = results['no slit sd']
- 		newzlossth['slit mean'] = results['slit mean']
-		newzlossth['slit sd'] = results['slit sd']
-		newzlossth['thickness'] = results['thickness']
-		newzlossth['image'] = aligned
-		newzlossth.insert()
+    # transfers zero loss peak measurements and parameters from the unaligned image to the aligned image
+    # should it be here or in a different place???
+    zlpthdata = ZeroLossIceThicknessData.objects.get(ref_acquisitionimagedata_image=unaligned)
+    if zlpthdata:
+        results = zlpthdata[0]
+        newzlossth = ZeroLossIceThicknessData(no_slit_mean = results.no_slit_mean,
+											  no_slit_sd = results.no_slit_sd,
+											  slit_mean = results.slit_mean,
+											  slit_sd = results.slit_sd,
+											  thickness = results.thickness,
+											  ref_acquisitionimagedata_image = aligned
+        )
+        newzlossth.save()
 
 # ApDDAlignStatsData	
 def saveAlignStats(aligned_image_def_id, rundata_def_id, positions, nframes, pixsize, trajdata=None):
