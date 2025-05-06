@@ -22,7 +22,10 @@ dependencies = [
   "mrcfile",
   "dask",
   "dask-jobqueue",
-  "pexpect"
+  "pexpect",
+  "py-cpuinfo",
+  "distro",
+  "psutil"
 ]
 requires-python = ">= 3.9"
 

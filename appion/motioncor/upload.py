@@ -142,35 +142,43 @@ def saveFrameTrajectory(image_def_id, rundata_def_id, xy, limit=20, reference_in
     return trajdata.def_id
 
 #ApDDStackParamsData
-	def insertFunctionRun(self):
-		if self.params['stackid']:
-			stackdata = apStack.getOnlyStackData(self.params['stackid'])
-		else:
-			stackdata = None
-		qparams = appiondata.ApDDStackParamsData(preset=self.params['preset'],align=self.isAlign(),bin=self.params['bin'],stack=stackdata)
-		qpath = appiondata.ApPathData(path=os.path.abspath(self.params['rundir']))
-		sessiondata = self.getSessionData()
-		q = appiondata.ApDDStackRunData(runname=self.params['runname'],params=qparams,session=sessiondata,path=qpath)
-		results = q.query()
-		if results:
-			return results[0]
-		else:
-			if self.params['commit'] is True:
-				q.insert()
-				return q
+def insertFunctionRun(stackid, preset, align, bin, runname, rundir):
+    if stackid:
+        stackdata = appiondata.ApStackData.direct_query(stackid)
+    else:
+        stackdata = None
+    qparams = appiondata.ApDDStackParamsData(preset=preset,align=align,bin=bin,stack=stackdata)
+    qpath = appiondata.ApPathData(path=os.path.abspath(rundir))
+    sessiondata = getSessionData()
+    q = appiondata.ApDDStackRunData(runname=runname,params=qparams,session=sessiondata,path=qpath)
+    results = q.query()
+    if not results:
+        q.save()
+		
+def getSessionData(self):
+    sessiondata = None
+    if self.params.get('sessionname') is not None:
+        sessiondata = apDatabase.getSessionDataFromSessionName(self.params['sessionname'])
+    if sessiondata is None and self.params.get('expid') is not None:
+        sessiondata = apDatabase.getSessionDataFromSessionId(self.params['expid'])
+    if sessiondata is None and self.params.get('stackid') is not None:
+        from appionlib import apStack
+        sessiondata = apStack.getSessionDataFromStackId(self.params['stackid'])
+    if sessiondata is None and self.params.get('reconid') is not None:
+        from appionlib import apStack
+        self.params['stackid'] = apStack.getStackIdFromRecon(self.params['reconid'], msg=False)
+        sessiondata = apStack.getSessionDataFromStackId(self.params['stackid'])
+    if sessiondata is None:
+        ### works with only canonical session names
+        s = re.search('/([0-9][0-9][a-z][a-z][a-z][0-9][0-9][^/]*)/', self.params['rundir'])
+        if s:
+            self.params['sessionname'] = s.groups()[0]
+            sessiondata = apDatabase.getSessionDataFromSessionName(self.params['sessionname'])
+    self.sessiondata=sessiondata
+    return sessiondata
 			
 # ApDDStackRunData
-	def setDDStackRun(self,ddstackrunid=None):
-		if ddstackrunid:
-			# This works with image set
-			ddstackrun = appiondata.ApDDStackRunData.direct_query(ddstackrunid)
-		else:
-			if self.getIsAligned():
-				# This works if self.image is set
-				ddstackrun = self.getAlignImagePairData(None,query_source=False)['ddstackrun']
-			else:
-				apDisplay.printError('Image not from aligned ddstack run.  Can not determine stack location without ddstack id')
-		self.ddstackrun = ddstackrun
+# TODO
 		
 # ApPathData
 
