@@ -5,6 +5,8 @@ from sinedon.models.appion import ScriptProgramRun
 from sinedon.models.appion import ScriptParamName
 from sinedon.models.appion import ScriptParamValue
 from sinedon.models.appion import ApAssessmentRunData
+from sinedon.models.appion import ApAppionJobData
+from sinedon.models.projects import processingdb
 import platform
 import importlib.metadata
 import os, pwd
@@ -13,6 +15,7 @@ import socket
 import distro
 import psutil
 from argparse import ArgumentParser
+from django.conf import settings
 
 
 def uploadScriptProgramName(name):
@@ -129,80 +132,32 @@ def uploadApAssessmentRunData(ref_sessiondata_session, assessment="unassessed"):
 
 # ApAppionJobData
 
-if __name__ == "__main__":
-	# parse options
-	projectid = None
-	if len(sys.argv) < 3:
-		print "Usage: %s jobid status [projectid]" % (sys.argv[0],)
-		sys.exit()
+# Appion database is initialized by myamiweb / web viewer.
+def getAppionDatabase(projectid):
+    project = processingdb.objects.get(ref_projects_project=projectid)
+    return project.appiondb
 
-	jobid = sys.argv[1]
-	status = sys.argv[2]
+def updateApAppionJobData(jobid, status):
+    appionjob = ApAppionJobData.objects.get(def_id=jobid)
+    appionjob.status = status
+    appionjob.save()
 
-	if len(sys.argv) > 3:
-		projectid = sys.argv[3]
-
-	# set new db
-	if projectid is not None:
-		pjc = sinedon.getConfig('projectdata')
-		q = "SELECT appiondb FROM processingdb WHERE `REF|projects|project`='%s'" % (projectid,)
-		dbc = sinedon.sqldb.connect(**pjc)
-		cursor = dbc.cursor()
-		result = cursor.execute(q)
-		if result:
-			newdbname, = cursor.fetchone()
-			sinedon.setConfig('appiondata', db=newdbname)
-		cursor.close()
-		dbc.close()
-
-	# connect to database
-	c = sinedon.getConfig('appiondata')
-
-	dbc = sinedon.sqldb.connect(**c)
-	cursor = dbc.cursor()
-
-	# execute update
-	q = "UPDATE ApAppionJobData SET `status` = '%s' WHERE `DEF_id` = '%s'" %(status,jobid)
-	cursor.execute(q)
-
-	# close
-	cursor.close()
-	dbc.close()
-
+def uploadApAppionJobData(ref_appathdata_path, jobtype, runname, user, hostname, ref_sessiondata_session, jobtype):
 	#=====================
-	def getClusterJobData(self):
-		if self.clusterjobdata is not None:
-			return self.clusterjobdata
-		if not 'commit' in self.params or self.params['commit'] is False:
-			return None
-		pathq = appiondata.ApPathData(path=os.path.abspath(self.params['rundir']))
-		clustq = appiondata.ApAppionJobData()
-		clustq['path'] = pathq
-		clustq['jobtype'] = self.functionname.lower()
-		clustdatas = clustq.query()
+		clust = ApAppionJobData()
+		clust['path'] = ref_appathdata_path
+		clust['jobtype'] = jobtype
+		clustdatas = clust.query()
 		if not clustdatas:
 			### insert a cluster job
-			clustq['name'] = self.params['runname']+".appionsub.job"
-			clustq['clusterpath'] = pathq
-			clustq['user'] = apParam.getUsername()
-			clustq['cluster'] = apParam.getHostname()
-			clustq['status'] = "R"
-			clustq['session'] = self.getSessionData()
+			clust['name'] = runname+".appionsub.job"
+			clust['clusterpath'] = ref_appathdata_path
+			clust['user'] = user
+			clust['cluster'] = hostname
+			clust['status'] = "R"
+			clust['session'] = ref_sessiondata_session
 			### need a proper way to create a jobtype
-			clustq['jobtype']=self.params['jobtype']
-			if not clustq['jobtype']:
-				clustq['jobtype'] = self.functionname.lower()
-			clustq.insert()
-			self.clusterjobdata = clustq
-			return clustq
-		elif len(clustdatas) == 1:
-			### we have an entry
-			### we need to say that we are running
-			apWebScript.setJobToRun(clustdatas[0].dbid)
-			self.clusterjobdata = clustdatas[0]
-			return clustdatas[0]
-		else:
-			### special case: more than one job with given path
-			apDisplay.printWarning("More than one cluster job has this path")
-			self.clusterjobdata = clustdatas[0]
-			return clustdatas[0]
+			clust['jobtype']=jobtype
+			if not clust['jobtype']:
+				clust['jobtype'] = self.functionname.lower()
+			clust.insert()

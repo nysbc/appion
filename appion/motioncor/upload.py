@@ -7,6 +7,7 @@ from sinedon.models.appion import ApDDAlignStatsData
 from sinedon.models.leginon import AcquisitionImageData
 from sinedon.models.leginon import ObjIceThicknessData
 from sinedon.models.leginon import ZeroLossIceThicknessData
+from django.conf import settings
 
 # ApDDAlignImagePairData
 # We can only really add insert ref IDs here b/c the raw and aligned images are in a different database from the Appion results.
