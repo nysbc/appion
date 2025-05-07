@@ -7,6 +7,10 @@ from sinedon.models.appion import ApDDAlignStatsData
 from sinedon.models.leginon import AcquisitionImageData
 from sinedon.models.leginon import ObjIceThicknessData
 from sinedon.models.leginon import ZeroLossIceThicknessData
+from sinedon.models.appion import ApDDStackParamsData
+from sinedon.models.appion import ApPathData
+from sinedon.models.appion import ApDDStackRunData
+from sinedon.models.appion import ApStackData
 from django.conf import settings
 
 # ApDDAlignImagePairData
@@ -29,7 +33,7 @@ def commitImagePairData(raw_image_def_id, aligned_image_def_id, rundata_def_id):
 # Pass in shifts from dict returned by parseLog
 def commitAlignStats(aligned_image_def_id, rundata_def_id, shifts, nframes, pixsize):
     # Issue #6155 need new query to get timestamp
-	# JP: Where does a timestamp come in to play?
+	# JP: Where does a timestamp come into play?
     #aligned_imgdata = AcquisitionImageData.objects.get(def_id=aligned_image_def_id)
     xy={}
     xy['x']=[shift[0] for shift in shifts]
@@ -143,292 +147,39 @@ def saveFrameTrajectory(image_def_id, rundata_def_id, xy, limit=20, reference_in
     return trajdata.def_id
 
 #ApDDStackParamsData
-def insertFunctionRun(stackid, preset, align, bin, runname, rundir):
-    if stackid:
-        stackdata = appiondata.ApStackData.direct_query(stackid)
-    else:
-        stackdata = None
-    qparams = appiondata.ApDDStackParamsData(preset=preset,align=align,bin=bin,stack=stackdata)
-    qpath = appiondata.ApPathData(path=os.path.abspath(rundir))
-    sessiondata = getSessionData()
-    q = appiondata.ApDDStackRunData(runname=runname,params=qparams,session=sessiondata,path=qpath)
-    results = q.query()
-    if not results:
-        q.save()
-		
-def getSessionData(self):
-    sessiondata = None
-    if self.params.get('sessionname') is not None:
-        sessiondata = apDatabase.getSessionDataFromSessionName(self.params['sessionname'])
-    if sessiondata is None and self.params.get('expid') is not None:
-        sessiondata = apDatabase.getSessionDataFromSessionId(self.params['expid'])
-    if sessiondata is None and self.params.get('stackid') is not None:
-        from appionlib import apStack
-        sessiondata = apStack.getSessionDataFromStackId(self.params['stackid'])
-    if sessiondata is None and self.params.get('reconid') is not None:
-        from appionlib import apStack
-        self.params['stackid'] = apStack.getStackIdFromRecon(self.params['reconid'], msg=False)
-        sessiondata = apStack.getSessionDataFromStackId(self.params['stackid'])
-    if sessiondata is None:
-        ### works with only canonical session names
-        s = re.search('/([0-9][0-9][a-z][a-z][a-z][0-9][0-9][^/]*)/', self.params['rundir'])
-        if s:
-            self.params['sessionname'] = s.groups()[0]
-            sessiondata = apDatabase.getSessionDataFromSessionName(self.params['sessionname'])
-    self.sessiondata=sessiondata
-    return sessiondata
+def uploadPathData(preset, align, bin, ref_apddstackrundata_unaligned_ddstackrun, method, ref_apstackdata_stack=None, ref_apdealignerparamsdata_de_aligner=None):
+	ddstackparamsdata = ApDDStackParamsData.objects.get(preset=preset, align=align, bin=bin, 
+                                 ref_apddstackrundata_unaligned_ddstackrun=ref_apddstackrundata_unaligned_ddstackrun, 
+                                         ref_apstackdata_stack=ref_apstackdata_stack,
+                                         method=method,
+                                         ref_apdealignerparamsdata_de_aligner=ref_apdealignerparamsdata_de_aligner)
+	if not ddstackparamsdata:
+		ddstackparamsdata = ApDDStackParamsData(preset=preset, align=align, bin=bin, 
+									ref_apddstackrundata_unaligned_ddstackrun=ref_apddstackrundata_unaligned_ddstackrun, 
+											ref_apstackdata_stack=ref_apstackdata_stack,
+											method=method,
+											ref_apdealignerparamsdata_de_aligner=ref_apdealignerparamsdata_de_aligner)
+		ddstackparamsdata.save()
 			
 # ApDDStackRunData
-# TODO
+def uploadDDStackRunData(preset, align, bin, runname, rundir, ref_sessiondata_session, stackid = None):
+      # Maybe remove this since we don't use ApStackData?
+		if stackid:
+			stackdata = ApStackData.objects.get(stackid=stackid)
+			stack = stackdata.def_id
+		else:
+			stack = None
+		params = ApDDStackParamsData.objects.get(preset=preset,align=align,bin=bin,stack=stack)
+		path = ApPathData.objects.get(path=os.path.abspath(rundir))
+		results = ApDDStackRunData.objects.get(runname=runname,ref_apddstackparamsdata_params=params,ref_sessiondata_session=ref_sessiondata_session,ref_appathdata_path=path)
+		if not results:
+			ddstackrundata = ApDDStackRunData(runname=runname,ref_apddstackparamsdata_params=params,ref_sessiondata_session=ref_sessiondata_session,ref_appathdata_path=path)
+			ddstackrundata.save()
+
 		
 # ApPathData
-
-def commitSubStack(params, newname=False, centered=False, oldstackparts=None, sorted=False, radial_averaged=False, included=None):
-	"""
-	commit a substack to database
-
-	required params:
-		stackid
-		description
-		commit
-		rundir
-		keepfile
-	'included' param is a list of included particles, starting at 0
-	"""
-
-	t0 = time.time()
-	oldstackdata = getOnlyStackData(params['stackid'], msg=False)
-	apDisplay.printColor("got old stackdata in "+apDisplay.timeString(time.time()-t0),"cyan")
-
-	t0 = time.time()
-	#create new stack data
-	stackq = appiondata.ApStackData()
-	stackq['path'] = appiondata.ApPathData(path=os.path.abspath(params['rundir']))
-	stackq['name'] = oldstackdata['name']
-
-	# use new stack name if provided
-	if newname:
-		stackq['name'] = newname
-
-	stackdata=stackq.query(results=1)
-
-	if stackdata:
-		apDisplay.printWarning("A stack with these parameters already exists")
-		return
-	stackq['oldstack'] = oldstackdata
-	stackq['hidden'] = False
-	stackq['substackname'] = params['runname']
-	stackq['description'] = params['description']
-	stackq['pixelsize'] = oldstackdata['pixelsize']
-	stackq['boxsize'] = oldstackdata['boxsize']
-	if 'correctbeamtilt' in params.keys():
-		stackq['beamtilt_corrected'] = params['correctbeamtilt']
-	if sorted is True:
-		stackq['junksorted'] = True
-	if radial_averaged is True:
-		stackq['radial_averaged'] = True
-	if centered is True:
-		stackq['centered'] = True
-		if 'mask' in params:
-			stackq['mask'] = params['mask']
-		if 'maxshift' in params:
-			stackq['maxshift'] = params['maxshift']
-
-	## insert now before datamanager cleans up referenced data
-	stackq.insert()
-	apDisplay.printMsg("created new stackdata in %s\n"%(apDisplay.timeString(time.time()-t0)))
-
-	newstackid = stackq.dbid
-
-	t0 = time.time()
-	# get list of included particles
-	apDisplay.printMsg("Getting list of particles to include")
-
-	if included:
-		listfilelines = [p+1 for p in included]
-	else:
-		### read list
-		listfilelines = []
-		listfile = params['keepfile']
-
-		f=open(listfile,'r')
-		for line in f:
-			sline = line.strip()
-			if re.match("[0-9]+", sline):
-				listfilelines.append(int(sline.split()[0])+1)
-			else:
-				apDisplay.printWarning("Line in listfile is not int: "+str(line))
-		f.close()
-		listfilelines.sort()
-
-	apDisplay.printMsg("Completed in "+apDisplay.timeString(time.time()-t0)+"\n")
-
-	## index old stack particles by number
-	apDisplay.printMsg("Retrieving original stack information")
-	t0 = time.time()
-	part_by_number = {}
-	
-	# get stack data from original particles
-	if not oldstackparts:
-		sqlcmd = "SELECT * FROM ApStackParticleData " + \
-			"WHERE `REF|ApStackData|stack` = %i"%(params['stackid'])
-		# This result gives dictionary, not data object
-		oldstackparts = sinedon.directq.complexMysqlQuery('appiondata',sqlcmd)
-
-	for part in oldstackparts:
-		part_by_number[part['particleNumber']] = part
-
-	apDisplay.printMsg("Completed in "+apDisplay.timeString(time.time()-t0)+"\n")
-	
-	apDisplay.printMsg("Assembling database insertion command")
-	t0 = time.time()
-	count = 0
-	newpartnum = 1
-
-	partlistvals = []	 
-	for origpartnum in listfilelines:
-		count += 1
-		oldstackpartdata = part_by_number[origpartnum]
-		sqlParams = ['particleNumber','REF|ApStackData|stack']
-		vals = [newpartnum,newstackid]
-		for k,v in oldstackpartdata.iteritems():
-			# First need to convert the keys to column names
-			k = sinedon.directq.datakeyToSqlColumnName(oldstackpartdata,k)
-			if k in ['DEF_id', 
-				'DEF_timestamp', 
-				'particleNumber', 
-				'REF|ApStackData|stack']:
-				continue
-			sqlParams.append(k)
-			# oldstackpartdata can either be sinedon data object
-			# as passed through the function call
-			# or a pure dictionary from directq.complexMysqlQuery
-			# In the latter case v is just a long integer, not
-			# data reference.
-			if 'REF|' in k and hasattr(v,'dbid'):
-				# if it is a sinedon data object
-				v = v.dbid
-			vals.append(v)
-		valstr = "('"+"','".join(str(x) for x in vals)+"')"
-		# sql understand Null without string quote, not 'None'
-		valstr = valstr.replace("'None'","Null")
-		partlistvals.append(valstr)
-
-		newpartnum += 1
-
-	apDisplay.printMsg("Inserting particle information into database")
-
-	sqlstart = "INSERT INTO `ApStackParticleData` (`" + \
-		"`,`".join(sqlParams)+ "`) VALUES "
-	# break up command into groups of 100K inserts
-	# this is a workaround for the max_allowed_packet at 16MB
-	n = 100000
-	sqlinserts = [partlistvals[i:i+n] \
-		for i in range(0, len(partlistvals), n)]
-
-	if params['commit'] is True:
-		for sqlinsert in sqlinserts:
-			sqlcmd=sqlstart+",".join(sqlinsert)
-			sinedon.directq.complexMysqlQuery('appiondata',sqlcmd)
-
-	sys.stderr.write("\n")
-	if newpartnum == 0:
-		apDisplay.printError("No particles were inserted for the stack")
-
-	apDisplay.printColor("Inserted "+str(newpartnum-1)+ \
-		" stack particles into the database in "+ \
-		apDisplay.timeString(time.time()-t0),"cyan")
-
-	apDisplay.printMsg("\nInserting Runs in Stack")
-	runsinstack = getRunsInStack(params['stackid'])
-	for run in runsinstack:
-		newrunsq = appiondata.ApRunsInStackData()
-		newrunsq['stack'] = stackq
-		newrunsq['stackRun'] = run['stackRun']
-		if params['commit'] is True:
-			newrunsq.insert()
-		else:
-			apDisplay.printWarning("Not committing to the database")
-
-	apDisplay.printMsg("finished")
-	return
-
-#===============
-def commitMaskedStack(params, oldstackparts, newname=False):
-	"""
-	commit a substack to database
-
-	required params:
-		stackid
-		description
-		commit
-		rundir
-		mask
-	"""
-	oldstackdata = getOnlyStackData(params['stackid'], msg=False)
-
-	#create new stack data
-	stackq = appiondata.ApStackData()
-	stackq['path'] = appiondata.ApPathData(path=os.path.abspath(params['rundir']))
-	stackq['name'] = oldstackdata['name']
-
-	# use new stack name if provided
-	if newname:
-		stackq['name'] = newname
-
-	stackdata=stackq.query(results=1)
-
-	if stackdata:
-		apDisplay.printWarning("A stack with these parameters already exists")
-		return
-	stackq['oldstack'] = oldstackdata
-	stackq['hidden'] = False
-	stackq['substackname'] = params['runname']
-	stackq['description'] = params['description']
-	stackq['pixelsize'] = oldstackdata['pixelsize']
-	stackq['boxsize'] = oldstackdata['boxsize']
-	stackq['mask'] = params['mask']
-	if 'correctbeamtilt' in params.keys():
-		stackq['beamtilt_corrected'] = params['correctbeamtilt']
-
-	## insert now before datamanager cleans up referenced data
-	stackq.insert()
-
-	#Insert particles
-	apDisplay.printMsg("Inserting stack particles")
-	count = 0
-	newpartnum = 1
-	total = len(oldstackparts)
-	for part in oldstackparts:
-		count += 1
-		if count % 100 == 0:
-			sys.stderr.write("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b")
-			sys.stderr.write(str(count)+" of "+(str(total))+" complete")
-
-		# Insert particle
-		newstackq = appiondata.ApStackParticleData()
-		newstackq.update(part)
-		newstackq['particleNumber'] = newpartnum
-		newstackq['stack'] = stackq
-		if params['commit'] is True:
-			newstackq.insert()
-		newpartnum += 1
-	sys.stderr.write("\n")
-	if newpartnum == 0:
-		apDisplay.printError("No particles were inserted for the stack")
-
-	apDisplay.printMsg("Inserted "+str(newpartnum-1)+" stack particles into the database")
-
-	apDisplay.printMsg("Inserting Runs in Stack")
-	runsinstack = getRunsInStack(params['stackid'])
-	for run in runsinstack:
-		newrunsq = appiondata.ApRunsInStackData()
-		newrunsq['stack'] = stackq
-		newrunsq['stackRun'] = run['stackRun']
-		if params['commit'] is True:
-			newrunsq.insert()
-		else:
-			apDisplay.printWarning("Not commiting to the database")
-
-	apDisplay.printMsg("finished")
-	return
+def uploadPathData(path):
+	appath = ApPathData.objects.get(path=path)
+	if not appath:
+		appath = ApPathData(path=path)
+		appath.save()
