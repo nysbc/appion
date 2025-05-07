@@ -142,22 +142,17 @@ def updateApAppionJobData(jobid, status):
     appionjob.status = status
     appionjob.save()
 
-def uploadApAppionJobData(ref_appathdata_path, jobtype, runname, user, hostname, ref_sessiondata_session, jobtype):
-	#=====================
-		clust = ApAppionJobData()
-		clust['path'] = ref_appathdata_path
-		clust['jobtype'] = jobtype
-		clustdatas = clust.query()
-		if not clustdatas:
-			### insert a cluster job
-			clust['name'] = runname+".appionsub.job"
-			clust['clusterpath'] = ref_appathdata_path
-			clust['user'] = user
-			clust['cluster'] = hostname
-			clust['status'] = "R"
-			clust['session'] = ref_sessiondata_session
-			### need a proper way to create a jobtype
-			clust['jobtype']=jobtype
-			if not clust['jobtype']:
-				clust['jobtype'] = self.functionname.lower()
-			clust.insert()
+def uploadApAppionJobData(ref_appathdata_path, jobtype, runname, user, hostname, ref_sessiondata_session):
+    #=====================
+    clust = ApAppionJobData.objects.get(ref_appathdata_path = ref_appathdata_path,
+                                        jobtype = jobtype)
+    if not clust:
+        ### insert a cluster job
+        clust = ApAppionJobData(name = runname+".appionsub.job",
+                                ref_appathdata_clusterpath = ref_appathdata_path,
+                                user = user,
+                                cluster = hostname,
+                                status = "R",
+                                ref_sessiondata_session = ref_sessiondata_session,
+                                jobtype=jobtype)
+        clust.save()
