@@ -17,31 +17,21 @@ from django.conf import settings
 # We can only really add insert ref IDs here b/c the raw and aligned images are in a different database from the Appion results.
 # If it weren't for this, we'd probably pass objects directly.
 def uploadAlignedImage(raw_image_def_id, aligned_image_def_id, rundata_def_id, logData, kwargs):
-    commitImagePairData(raw_image_def_id, aligned_image_def_id, rundata_def_id)
+    saveImagePairData(raw_image_def_id, aligned_image_def_id, rundata_def_id)
     aligned_image=AcquisitionImageData.objects.get(def_id=aligned_image_def_id)
     nframes=aligned_image.ref_cameraemdata_camera.nframes
-    commitAlignStats(aligned_image_def_id, rundata_def_id, logData["shifts"], nframes, kwargs["PixSize"])
-    transferALSThickness(raw_image_def_id,aligned_image_def_id)
-    transferZLPThickness(raw_image_def_id,aligned_image_def_id)
+    saveAlignStats(aligned_image_def_id, rundata_def_id, logData["shifts"], nframes, kwargs["PixSize"])
+    copyALSThicknessParams(raw_image_def_id,aligned_image_def_id)
+    copyZLPThicknessParams(raw_image_def_id,aligned_image_def_id)
 
-def commitImagePairData(raw_image_def_id, aligned_image_def_id, rundata_def_id):
+def saveImagePairData(raw_image_def_id, aligned_image_def_id, rundata_def_id):
     pairdata = ApDDAlignImagePairData(ref_acquisitionimagedata_source=raw_image_def_id,
                                     ref_acquisitionimagedata_result=aligned_image_def_id,
                                     ref_apddstackrundata_ddstackrun=rundata_def_id)
     pairdata.save()
-
-# Pass in shifts from dict returned by parseLog
-def commitAlignStats(aligned_image_def_id, rundata_def_id, shifts, nframes, pixsize):
-    # Issue #6155 need new query to get timestamp
-	# JP: Where does a timestamp come into play?
-    #aligned_imgdata = AcquisitionImageData.objects.get(def_id=aligned_image_def_id)
-    xy={}
-    xy['x']=[shift[0] for shift in shifts]
-    xy['y']=[shift[1] for shift in shifts]
-    trajdata_def_id = saveFrameTrajectory(aligned_image_def_id, rundata_def_id, xy)
-    saveAlignStats(aligned_image_def_id, rundata_def_id, shifts, nframes, pixsize, trajdata=trajdata_def_id)
+    return pairdata.def_id
 			
-def transferALSThickness(unaligned,aligned):
+def copyALSThicknessParams(unaligned,aligned):
 # transfers aperture limited scattering measurements and parameters from the unaligned image to the aligned image
 # should it be here or in a different place???
     obthdata = ObjIceThicknessData.objects.get(ref_acquisitionimagedata_image=unaligned)
@@ -53,9 +43,11 @@ def transferALSThickness(unaligned,aligned):
                                        thickness = results.thickness,
                                        ref_acquisitionimagedata_image = aligned)
         newobjth.save()
+        return newobjth.def_id
+    return None
 		
 
-def transferZLPThickness(unaligned,aligned):
+def copyZLPThicknessParams(unaligned,aligned):
     # transfers zero loss peak measurements and parameters from the unaligned image to the aligned image
     # should it be here or in a different place???
     zlpthdata = ZeroLossIceThicknessData.objects.get(ref_acquisitionimagedata_image=unaligned)
@@ -69,13 +61,21 @@ def transferZLPThickness(unaligned,aligned):
 											  ref_acquisitionimagedata_image = aligned
         )
         newzlossth.save()
+        return newzlossth.def_id
+    return None
 
-# ApDDAlignStatsData	
-def saveAlignStats(aligned_image_def_id, rundata_def_id, positions, nframes, pixsize, trajdata=None):
-    '''
-    save appiondata ApDDAlignStatsData
-    '''
-    max_drifts, median = getFrameStats(positions, nframes)
+# ApDDAlignStatsData
+# Pass in shifts from dict returned by parseLog
+# Run saveFrameTrajectory beforehand to get trajdata_def_id.
+def saveAlignStats(aligned_image_def_id, rundata_def_id, trajdata_def_id, shifts, nframes, pixsize):
+    # Issue #6155 need new query to get timestamp
+	# JP: Where does a timestamp come into play?
+    #aligned_imgdata = AcquisitionImageData.objects.get(def_id=aligned_image_def_id)
+    xy={}
+    xy['x']=[shift[0] for shift in shifts]
+    xy['y']=[shift[1] for shift in shifts]
+    pixel_shifts = calcFrameShiftFromPositions(shifts, nframes - len(positions)+1)
+    max_drifts, median = calcFrameStats(pixel_shifts, nframes)
     drifts={}
     for i, drift_tuple in enumerate(max_drifts):
         key = 'top_shift%d' % (i+1,)
@@ -85,15 +85,15 @@ def saveAlignStats(aligned_image_def_id, rundata_def_id, positions, nframes, pix
 										apix=pixsize,
                                         ddstackrun=rundata_def_id,
                                         median_shift_value=median,
-                                        trajectory=trajdata,
+                                        trajectory=shifts,
                                         **drifts)
     alignstatsdata.save()
+    return alignstatsdata.def_id
 
-def getFrameStats(positions, nframes):
+def calcFrameStats(pixel_shifts, nframes):
     '''
     get alignment frame stats for faster graphing.
     '''
-    pixel_shifts = calculateFrameShiftFromPositions(positions, nframes - len(positions)+1)
     if not pixel_shifts:
         raise ValueError('no pixel shift found for calculating stats')
     if len(pixel_shifts) < 3:
@@ -109,7 +109,7 @@ def getFrameStats(positions, nframes):
     m3index = pixel_shifts.index(max3)
     return [(max1,m1index),(max2,m2index),(max3,m3index)], median
 
-def calculateFrameShiftFromPositions(positions,running=1):
+def calcFrameShiftFromPositions(positions,running=1):
 	# place holder for running first frame shift duplication
 	offset = int((running-1)/2)
 	shifts = offset*[None,]
@@ -124,10 +124,13 @@ def calculateFrameShiftFromPositions(positions,running=1):
 	
 # ApDDFrameTrajectoryData
 
-def saveFrameTrajectory(image_def_id, rundata_def_id, xy, limit=20, reference_index=None, particle=None):
+def saveFrameTrajectory(image_def_id, rundata_def_id, shifts, limit=20, reference_index=None, particle=None):
     '''
     Save appiondata ApDDFrameTrajectoryData
     '''
+    xy={}
+    xy['x']=[shift[0] for shift in shifts]
+    xy['y']=[shift[1] for shift in shifts]
     n_positions = len(xy['x'])
     limit = min([n_positions,limit])
     if limit < 2:
@@ -147,7 +150,7 @@ def saveFrameTrajectory(image_def_id, rundata_def_id, xy, limit=20, reference_in
     return trajdata.def_id
 
 #ApDDStackParamsData
-def uploadPathData(preset, align, bin, ref_apddstackrundata_unaligned_ddstackrun, method, ref_apstackdata_stack=None, ref_apdealignerparamsdata_de_aligner=None):
+def savePathData(preset, align, bin, ref_apddstackrundata_unaligned_ddstackrun, method, ref_apstackdata_stack=None, ref_apdealignerparamsdata_de_aligner=None):
 	ddstackparamsdata = ApDDStackParamsData.objects.get(preset=preset, align=align, bin=bin, 
                                  ref_apddstackrundata_unaligned_ddstackrun=ref_apddstackrundata_unaligned_ddstackrun, 
                                          ref_apstackdata_stack=ref_apstackdata_stack,
@@ -160,26 +163,29 @@ def uploadPathData(preset, align, bin, ref_apddstackrundata_unaligned_ddstackrun
 											method=method,
 											ref_apdealignerparamsdata_de_aligner=ref_apdealignerparamsdata_de_aligner)
 		ddstackparamsdata.save()
+	return ddstackparamsdata.def_id
 			
 # ApDDStackRunData
-def uploadDDStackRunData(preset, align, bin, runname, rundir, ref_sessiondata_session, stackid = None):
-      # Maybe remove this since we don't use ApStackData?
-		if stackid:
-			stackdata = ApStackData.objects.get(stackid=stackid)
-			stack = stackdata.def_id
-		else:
-			stack = None
-		params = ApDDStackParamsData.objects.get(preset=preset,align=align,bin=bin,stack=stack)
-		path = ApPathData.objects.get(path=os.path.abspath(rundir))
-		results = ApDDStackRunData.objects.get(runname=runname,ref_apddstackparamsdata_params=params,ref_sessiondata_session=ref_sessiondata_session,ref_appathdata_path=path)
-		if not results:
-			ddstackrundata = ApDDStackRunData(runname=runname,ref_apddstackparamsdata_params=params,ref_sessiondata_session=ref_sessiondata_session,ref_appathdata_path=path)
-			ddstackrundata.save()
+def saveDDStackRunData(preset, align, bin, runname, rundir, ref_sessiondata_session, stackid = None):
+	# Maybe remove this since we don't use ApStackData?
+	if stackid:
+		stackdata = ApStackData.objects.get(stackid=stackid)
+		stack = stackdata.def_id
+	else:
+		stack = None
+	params = ApDDStackParamsData.objects.get(preset=preset,align=align,bin=bin,stack=stack)
+	path = ApPathData.objects.get(path=os.path.abspath(rundir))
+	results = ApDDStackRunData.objects.get(runname=runname,ref_apddstackparamsdata_params=params,ref_sessiondata_session=ref_sessiondata_session,ref_appathdata_path=path)
+	if not results:
+		ddstackrundata = ApDDStackRunData(runname=runname,ref_apddstackparamsdata_params=params,ref_sessiondata_session=ref_sessiondata_session,ref_appathdata_path=path)
+		ddstackrundata.save()
+	return ddstackrundata.def_id
 
 		
 # ApPathData
-def uploadPathData(path):
+def savePathData(path):
 	appath = ApPathData.objects.get(path=path)
 	if not appath:
 		appath = ApPathData(path=path)
 		appath.save()
+	return appath.def_id

@@ -11,9 +11,7 @@ import django
 django.setup()
 from django.db.models import F
 import os
-from sinedon.models.leginon import CameraEMData
 from sinedon.models.leginon import AcquisitionImageData
-from sinedon.models.leginon import CorrectorPlanData
 from sinedon.models.leginon import PixelSizeCalibrationData
 import numpy
 import mrcfile
@@ -39,7 +37,7 @@ def getInputPath(session_image_path : str, filename : str) -> str:
 
 # Dark functions
 
-def makeDark(dark_id : int, dark_path : str, camera_name : str, eer_frames : bool):
+def saveDark(dark_id : int, dark_path : str, camera_name : str, eer_frames : bool):
     if not dark_id:
         # Why is this switch statement necessary?  Why not save default dimensions into the database instead of
         # hardcoding them in here?  (Original Appion has these hardcoded as part of object initialization.)
@@ -60,7 +58,7 @@ def makeDark(dark_id : int, dark_path : str, camera_name : str, eer_frames : boo
     mrcfile.write(dark_path, unscaled_darkarray, overwrite=True)
 
 # DefectMap functions
-def getImageDefectMap(bad_rows : str, bad_cols : str, bad_pixels : str, dx : int, dy : int):
+def calcImageDefectMap(bad_rows : str, bad_cols : str, bad_pixels : str, dx : int, dy : int):
     bad_rows = eval(bad_rows) if bad_rows else []
     bad_cols = eval(bad_cols) if bad_cols else []
     bad_pixels = eval(bad_pixels) if bad_pixels else []
@@ -71,7 +69,7 @@ def getImageDefectMap(bad_rows : str, bad_cols : str, bad_pixels : str, dx : int
         defect_map[py,px] = 1
     return defect_map
 
-def makeDefectMrc(defect_map_path : str, defect_map : numpy.ndarray, frame_flip : int = 0, frame_rotate : int = 0) -> None:
+def saveDefectMrc(defect_map_path : str, defect_map : numpy.ndarray, frame_flip : int = 0, frame_rotate : int = 0) -> None:
     # flip and rotate map_array.  Therefore, do the opposite of
     # frames
     if frame_flip:
@@ -92,7 +90,7 @@ def makeDefectMrc(defect_map_path : str, defect_map : numpy.ndarray, frame_flip 
 
 # FmIntFile/FmDose functions
 
-def getFmDose(total_raw_frames: int, exposure_time, frame_time, dose, rendered_frame_size, totaldose, is_eer):
+def calcFmDose(total_raw_frames: int, exposure_time, frame_time, dose, rendered_frame_size, totaldose, is_eer):
     # This depends on whether or not we're using an EER formatted-input.
     # see https://github.com/nysbc/appion-slurm/blob/f376758762771073c0450d2bc3badc0fed6f8e66/appion/appionlib/apDDFrameAligner.py#L395-L399
 
@@ -119,18 +117,18 @@ def getFmDose(total_raw_frames: int, exposure_time, frame_time, dose, rendered_f
     else:
         return raw_dose*rendered_frame_size
 
-def getTotalRenderedFrames(nraw, size):
+def calcTotalRenderedFrames(nraw, size):
     # total_rendered_frames is used when writing out the motioncorr log
     return nraw // size
 
-def makeFmIntFile(fmintpath, nraw, size, raw_dose):
+def saveFmIntFile(fmintpath, nraw, size, raw_dose):
     '''
     calculate and set frame dose and create FmIntFile
     '''
     modulo = nraw % size
     int_div = nraw // size
     lines = []
-    total_rendered_frames = getTotalRenderedFrames(nraw, size)
+    total_rendered_frames = calcTotalRenderedFrames(nraw, size)
     if modulo != 0:
         total_rendered_frames += 1
         lines.append('%d\t%d\t%.3f\n' % (modulo, modulo, raw_dose))
@@ -140,7 +138,7 @@ def makeFmIntFile(fmintpath, nraw, size, raw_dose):
 
 # PixSize functions
 
-def getPixelSize(pixelsizedatas, binning, imgdata_timestamp):
+def calcPixelSize(pixelsizedatas, binning, imgdata_timestamp):
     """
     use image data object to get pixel size
     multiplies by binning and also by 1e10 to return image pixel size in angstroms
@@ -165,7 +163,8 @@ def getPixelSize(pixelsizedatas, binning, imgdata_timestamp):
 # Trunc Functions
 
 # Forming the path to the log file is a problem for future me.
-def getShiftsBetweenFrames(logfile : str) -> list:
+# Why not just pass in the data extracted from the original log?
+def readShiftsBetweenFrames(logfile : str = "") -> list:
     '''
     Return a list of shift distance by frames. item 0 is fake. item 1 is distance between
     frame 0 and frame 1
@@ -200,7 +199,7 @@ def getShiftsBetweenFrames(logfile : str) -> list:
         shifts[i] = shifts[offset]
     return shifts
 
-def getFrameList(pixelsize : float, total_frames : int, nframe : int = None, startframe : int = None, driftlimit : int = None, logfile : str = ""):
+def filterFrameList(pixelsize : float, total_frames : int, shifts : list, nframe : int = None, startframe : int = None, driftlimit : int = None):
     '''
     Get list of frames
     '''
@@ -217,7 +216,6 @@ def getFrameList(pixelsize : float, total_frames : int, nframe : int = None, sta
         # drift limit considered
         threshold = driftlimit / pixelsize
         stillframes = []
-        shifts = getShiftsBetweenFrames(logfile)
         # pick out passed frames
         for i in range(len(shifts[:-1])):
             # keep the frame if at least one shift around the frame is small enough
@@ -230,10 +228,10 @@ def getFrameList(pixelsize : float, total_frames : int, nframe : int = None, sta
         #apDisplay.printMsg('Limit frames used to %s' % (framelist,))
     return framelist
 
-def getKV(high_tension):
+def calcKV(high_tension):
     return high_tension/1000.0
 
-def getTrunc(camera_name : str, exposure_time : float, frame_time : float, nframes : int, pixelsize: float, eer_frames : bool):
+def calcTrunc(camera_name : str, exposure_time : float, sumframelist : list, frame_time : float, nframes : int, eer_frames : bool):
     if camera_name in ["GatanK2","GatanK3"]:
         total_frames = max(1,int(exposure_time / frame_time))
     elif 'DE':
@@ -242,17 +240,16 @@ def getTrunc(camera_name : str, exposure_time : float, frame_time : float, nfram
         total_frames = nframes
     else:
         total_frames = nframes
-    sumframelist = getFrameList(pixelsize, total_frames)
     return total_frames - sumframelist[-1] - 1
 
 # RotGain and FlipGain functions
-def getRotFlipGain(frame_rotate : int, frame_flip: int, force_cpu_flat : bool, frame_aligner_flat: bool) -> tuple:
+def calcRotFlipGain(frame_rotate : int, frame_flip: int, force_cpu_flat : bool, frame_aligner_flat: bool) -> tuple:
     if not force_cpu_flat and frame_aligner_flat:
         return frame_rotate, frame_flip
     else:
         return 0, 0
     
-def getImageMetadata(imageid: int, has_bad_pixels : bool = False, is_align : bool = False, has_non_zero_dark : bool = False):
+def readImageMetadata(imageid: int, has_bad_pixels : bool = False, is_align : bool = False, has_non_zero_dark : bool = False):
     imgmetadata={}
     imgdata=AcquisitionImageData.objects.get(def_id=imageid)
     correctorplandata=imgdata.ref_correctorplandata_corrector_plan
@@ -317,7 +314,7 @@ def getImageMetadata(imageid: int, has_bad_pixels : bool = False, is_align : boo
     return imgmetadata
 
 # Retrieves parameters from the database or calculates them.
-def getParams(imgmetadata : dict, gain_input : str = "/tmp/gain.mrc", dark_input : str = "/tmp/dark.mrc", defect_map_path : str ="/tmp/defect.mrc", fmintfile : str ="/tmp/fmintfile.txt", force_cpu_flat : bool = False,
+def calcParams(imgmetadata : dict, gain_input : str = "/tmp/gain.mrc", dark_input : str = "/tmp/dark.mrc", defect_map_path : str ="/tmp/defect.mrc", fmintfile : str ="/tmp/fmintfile.txt", force_cpu_flat : bool = False,
                              rendered_frame_size : int = 1,
                              totaldose : float = False) -> dict:
 
@@ -348,38 +345,40 @@ def getParams(imgmetadata : dict, gain_input : str = "/tmp/gain.mrc", dark_input
     # self.setCameraInfo(1,use_full_raw_area)
         
     # Get the dark image.  Create it if it does not exist.
-    makeDark(imgmetadata['dark_id'], dark_input, imgmetadata['camera_name'], imgmetadata['eer_frames'])
+    saveDark(imgmetadata['dark_id'], dark_input, imgmetadata['camera_name'], imgmetadata['eer_frames'])
     kwargs["Dark"]=dark_input
 
     # DefectMap
     if imgmetadata['bad_pixels'] or imgmetadata['bad_cols'] or imgmetadata['bad_rows']:
-        defect_map=getImageDefectMap(imgmetadata['bad_rows'], imgmetadata['bad_cols'], imgmetadata['bad_pixels'], imgmetadata['dx'], imgmetadata['dy'])
-        makeDefectMrc(defect_map_path, defect_map, imgmetadata['frame_flip'], imgmetadata['frame_rotate'])
+        defect_map=calcImageDefectMap(imgmetadata['bad_rows'], imgmetadata['bad_cols'], imgmetadata['bad_pixels'], imgmetadata['dx'], imgmetadata['dy'])
+        saveDefectMrc(defect_map_path, defect_map, imgmetadata['frame_flip'], imgmetadata['frame_rotate'])
 
     # FmIntFile
     # FmDose
     if "InEer" in kwargs.keys():
-        kwargs["FmDose"] = getFmDose(imgmetadata['total_raw_frames'], imgmetadata['exposure_time'], imgmetadata['frame_time'], imgmetadata['dose'], rendered_frame_size, totaldose, True)
-        makeFmIntFile(fmintfile, imgmetadata['total_raw_frames'], rendered_frame_size, kwargs["FmDose"] / rendered_frame_size)
+        kwargs["FmDose"] = calcFmDose(imgmetadata['total_raw_frames'], imgmetadata['exposure_time'], imgmetadata['frame_time'], imgmetadata['dose'], rendered_frame_size, totaldose, True)
+        saveFmIntFile(fmintfile, imgmetadata['total_raw_frames'], rendered_frame_size, kwargs["FmDose"] / rendered_frame_size)
         kwargs["FmIntFile"] = fmintfile
     else:
-        kwargs["FmDose"] = getFmDose(imgmetadata['total_raw_frames'], imgmetadata['exposure_time'], imgmetadata['frame_time'], imgmetadata['dose'], rendered_frame_size, totaldose, False)
+        kwargs["FmDose"] = calcFmDose(imgmetadata['total_raw_frames'], imgmetadata['exposure_time'], imgmetadata['frame_time'], imgmetadata['dose'], rendered_frame_size, totaldose, False)
 
     # PixSize
 
-    kwargs['PixSize'] = getPixelSize(imgmetadata['pixelsizedata'], imgmetadata['binning'], imgmetadata['imgdata_timestamp'])
+    kwargs['PixSize'] = calcPixelSize(imgmetadata['pixelsizedata'], imgmetadata['binning'], imgmetadata['imgdata_timestamp'])
 
     # kV
-    kwargs["kV"] = getKV(imgmetadata['high_tension'])
+    kwargs["kV"] = calcKV(imgmetadata['high_tension'])
 
     # Trunc
-    kwargs['Trunc'] = getTrunc(imgmetadata['camera_name'], imgmetadata['exposure_time'], imgmetadata['frame_time'], imgmetadata['nframes'], kwargs["PixSize"], imgmetadata['eer_frames'])
+    shifts = readShiftsBetweenFrames()
+    sumframelist = filterFrameList(kwargs["PixSize"], imgmetadata['nframes'], shifts)
+    kwargs['Trunc'] = calcTrunc(imgmetadata['camera_name'], imgmetadata['exposure_time'], sumframelist, imgmetadata['frame_time'], imgmetadata['nframes'], imgmetadata['eer_frames'])
     if not kwargs['Trunc']:
         del kwargs['Trunc']
 
     # RotGain
     # FlipGain
-    kwargs['RotGain'], kwargs['FlipGain'] = getRotFlipGain(imgmetadata['frame_rotate'], 
+    kwargs['RotGain'], kwargs['FlipGain'] = calcRotFlipGain(imgmetadata['frame_rotate'], 
                                                            imgmetadata['frame_flip'], 
                                                            force_cpu_flat, 
                                                            imgmetadata['frame_aligner_flat'])
