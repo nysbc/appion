@@ -252,63 +252,81 @@ def getRotFlipGain(frame_rotate : int, frame_flip: int, force_cpu_flat : bool, f
     else:
         return 0, 0
     
-# Retrieves parameters from the database or calculates them.
-def getParams(imageid : int, gain_input : str = "/tmp/gain.mrc", dark_input : str = "/tmp/dark.mrc", fmintfile : str ="/tmp/fmintfile.txt", force_cpu_flat : bool = False, has_bad_pixels : bool = False, 
-                             is_align : bool = False, has_non_zero_dark : bool = False, rendered_frame_size : int = 1,
-                             totaldose : float = False) -> dict:
+def getImageMetadata(imageid: int, has_bad_pixels : bool = False, is_align : bool = False, has_non_zero_dark : bool = False):
+    imgmetadata={}
     imgdata=AcquisitionImageData.objects.get(def_id=imageid)
     correctorplandata=imgdata.ref_correctorplandata_corrector_plan
     sessiondata=imgdata.ref_sessiondata_session
     cameradata=imgdata.ref_cameraemdata_camera
     # Additional parameters derived from the database
     # Input image parameters
-    session_image_path=sessiondata.image_path
-    image_filename=imgdata.filename
+    imgmetadata['session_image_path']=sessiondata.image_path
+    imgmetadata['image_filename']=imgdata.filename
     # Dark inputs
-    dark_id=imgdata.ref_darkimagedata_dark
-    camera_name=imgdata.ref_cameraemdata_camera.ref_instrumentdata_ccdcamera.name
-    eer_frames=imgdata.ref_cameraemdata_camera.eer_frames
+    imgmetadata['dark_id']=imgdata.ref_darkimagedata_dark
+    imgmetadata['camera_name']=imgdata.ref_cameraemdata_camera.ref_instrumentdata_ccdcamera.name
+    imgmetadata['eer_frames']=imgdata.ref_cameraemdata_camera.eer_frames
     # DefectMap inputs
-    dx = cameradata.subd_dimension_x
-    dy = cameradata.subd_dimension_y
+    imgmetadata['dx'] = cameradata.subd_dimension_x
+    imgmetadata['dy'] = cameradata.subd_dimension_y
     if correctorplandata:
-        bad_pixels = correctorplandata.bad_pixels
-        bad_rows = correctorplandata.bad_rows
-        bad_cols = correctorplandata.bad_cols
+        imgmetadata['bad_pixels'] = correctorplandata.bad_pixels
+        imgmetadata['bad_rows'] = correctorplandata.bad_rows
+        imgmetadata['bad_cols'] = correctorplandata.bad_cols
     else:
-        bad_pixels=None
-        bad_rows=None
-        bad_cols=None
+        imgmetadata['bad_pixels']=None
+        imgmetadata['bad_rows']=None
+        imgmetadata['bad_cols']=None
     # FmDose, FmIntFile inputs
-    total_raw_frames = imgdata.ref_cameraemdata_camera.nframes
-    exposure_time = imgdata.ref_cameraemdata_camera.exposure_time
-    frame_time = imgdata.ref_cameraemdata_camera.frame_time
-    dose = imgdata.ref_presetdata_preset.dose
+    imgmetadata['total_raw_frames'] = imgdata.ref_cameraemdata_camera.nframes
+    imgmetadata['exposure_time'] = imgdata.ref_cameraemdata_camera.exposure_time
+    imgmetadata['frame_time'] = imgdata.ref_cameraemdata_camera.frame_time
+    imgmetadata['dose'] = imgdata.ref_presetdata_preset.dose
     # PixSize inputs
-    magnification=imgdata.ref_scopeemdata_scope.magnification
-    tem=imgdata.ref_scopeemdata_scope.ref_instrumentdata_tem.def_id
-    ccdcamera=imgdata.ref_cameraemdata_camera.ref_instrumentdata_ccdcamera.def_id
-    binning=imgdata.ref_cameraemdata_camera.subd_binning_x
-    imgdata_timestamp=imgdata.def_timestamp
+    imgmetadata['magnification']=imgdata.ref_scopeemdata_scope.magnification
+    imgmetadata['tem']=imgdata.ref_scopeemdata_scope.ref_instrumentdata_tem.def_id
+    imgmetadata['ccdcamera']=imgdata.ref_cameraemdata_camera.ref_instrumentdata_ccdcamera.def_id
+    imgmetadata['binning']=imgdata.ref_cameraemdata_camera.subd_binning_x
+    imgmetadata['imgdata_timestamp']=imgdata.def_timestamp
     # kV inputs
-    high_tension=imgdata.ref_scopeemdata_scope.high_tension
+    imgmetadata['high_tension']=imgdata.ref_scopeemdata_scope.high_tension
     # Trunc inputs
     #camera_name is already defined for Dark
     #exposure_time is already defined for FmDose/FmIntFile
     #frame_time is already defined for FmDose/FmIntFile
-    nframes=imgdata.ref_cameraemdata_camera.nframes
+    imgmetadata['nframes']=imgdata.ref_cameraemdata_camera.nframes
     #eer_frames is already defined for Dark
     # FlipGain/RotGain inputs
-    frame_rotate=cameradata.frame_rotate
-    frame_flip=cameradata.frame_flip
-    frame_aligner_flat=not (has_bad_pixels or not is_align or has_non_zero_dark)
+    imgmetadata['frame_rotate']=cameradata.frame_rotate
+    imgmetadata['frame_flip']=cameradata.frame_flip
+    imgmetadata['frame_aligner_flat']=not (has_bad_pixels or not is_align or has_non_zero_dark)
+    # PixSize inputs
+    pixelsizecalibrationdata = PixelSizeCalibrationData.objects.filter(magnification=imgmetadata['magnification'], 
+                                                             ref_instrumentdata_tem=imgmetadata['tem'], 
+                                                             ref_instrumentdata_ccdcamera=imgmetadata['ccdcamera']).order_by(F("def_timestamp").desc())
+    if not pixelsizecalibrationdata:
+        raise RuntimeError("No pixelsize information was found for image %s with mag %d, tem id %d, ccdcamera id %d."
+                        % (imgmetadata['image_filename'], 
+                           imgmetadata['magnification'], 
+                           imgmetadata['tem'], 
+                           imgmetadata['ccdcamera']))
+    imgmetadata['pixelsizedata']=[{"timestamp": p.def_timestamp, "pixelsize" : p.pixelsize } for p in pixelsizecalibrationdata]
+    # Gain inputs
+    gaindata=AcquisitionImageData.objects.get(def_id=imgdata.ref_normimagedata_norm)
+    imgmetadata['gain_input']=os.path.join(imgmetadata['session_image_path'],gaindata.mrc_image)
+    return imgmetadata
+
+# Retrieves parameters from the database or calculates them.
+def getParams(imgmetadata : dict, gain_input : str = "/tmp/gain.mrc", dark_input : str = "/tmp/dark.mrc", defect_map_path : str ="/tmp/defect.mrc", fmintfile : str ="/tmp/fmintfile.txt", force_cpu_flat : bool = False,
+                             rendered_frame_size : int = 1,
+                             totaldose : float = False) -> dict:
 
     # Keyword args for motioncor2 function
     kwargs={}
 
     # InMrc, InTiff, InEer
     # Get the path to the input image.
-    paramKey, fpath = getInputPath(session_image_path,image_filename)
+    paramKey, fpath = getInputPath(imgmetadata['session_image_path'],imgmetadata['image_filename'])
     kwargs[paramKey] = fpath
 
     # Gain
@@ -316,8 +334,7 @@ def getParams(imageid : int, gain_input : str = "/tmp/gain.mrc", dark_input : st
     if gain_input:
         kwargs["Gain"]=gain_input
     else:
-        gaindata=AcquisitionImageData.objects.get(def_id=imgdata.ref_normimagedata_norm)
-        kwargs["Gain"]=os.path.join(session_image_path,gaindata.mrc_image)
+        kwargs["Gain"]=imgmetadata['gain_input']
 
     # TODO - what exactly is the bright reference?  It isn't passed as a param into motioncor2, but
     # Appion still prints out its path.  To what end / why?
@@ -331,52 +348,40 @@ def getParams(imageid : int, gain_input : str = "/tmp/gain.mrc", dark_input : st
     # self.setCameraInfo(1,use_full_raw_area)
         
     # Get the dark image.  Create it if it does not exist.
-    makeDark(dark_id, dark_input, camera_name, eer_frames)
+    makeDark(imgmetadata['dark_id'], dark_input, imgmetadata['camera_name'], imgmetadata['eer_frames'])
     kwargs["Dark"]=dark_input
 
     # DefectMap
-    if bad_pixels or bad_cols or bad_rows:
-        defect_map=getImageDefectMap(bad_rows, bad_cols, bad_pixels, dx, dy)
-        defect_map_path="/tmp/defect.mrc"
-        makeDefectMrc(defect_map_path, defect_map, frame_flip, frame_rotate)
-        
-    # TODO - conditional that triggers generation of the Defect Map?
+    if imgmetadata['bad_pixels'] or imgmetadata['bad_cols'] or imgmetadata['bad_rows']:
+        defect_map=getImageDefectMap(imgmetadata['bad_rows'], imgmetadata['bad_cols'], imgmetadata['bad_pixels'], imgmetadata['dx'], imgmetadata['dy'])
+        makeDefectMrc(defect_map_path, defect_map, imgmetadata['frame_flip'], imgmetadata['frame_rotate'])
 
     # FmIntFile
     # FmDose
     if "InEer" in kwargs.keys():
-        kwargs["FmDose"] = getFmDose(total_raw_frames, exposure_time, frame_time, dose, rendered_frame_size, totaldose, True)
-        makeFmIntFile(fmintfile, total_raw_frames, rendered_frame_size, kwargs["FmDose"] / rendered_frame_size)
+        kwargs["FmDose"] = getFmDose(imgmetadata['total_raw_frames'], imgmetadata['exposure_time'], imgmetadata['frame_time'], imgmetadata['dose'], rendered_frame_size, totaldose, True)
+        makeFmIntFile(fmintfile, imgmetadata['total_raw_frames'], rendered_frame_size, kwargs["FmDose"] / rendered_frame_size)
         kwargs["FmIntFile"] = fmintfile
     else:
-        kwargs["FmDose"] = getFmDose(total_raw_frames, exposure_time, frame_time, dose, rendered_frame_size, totaldose, False)
+        kwargs["FmDose"] = getFmDose(imgmetadata['total_raw_frames'], imgmetadata['exposure_time'], imgmetadata['frame_time'], imgmetadata['dose'], rendered_frame_size, totaldose, False)
 
     # PixSize
-    pixelsizecalibrationdata = PixelSizeCalibrationData.objects.filter(magnification=magnification, 
-                                                             ref_instrumentdata_tem=tem, 
-                                                             ref_instrumentdata_ccdcamera=ccdcamera).order_by(F("def_timestamp").desc())
-    if not pixelsizecalibrationdata:
-        raise RuntimeError("No pixelsize information was found for image %s with mag %d, tem id %d, ccdcamera id %d."
-                        % (image_filename, 
-                           magnification, 
-                           tem, 
-                           ccdcamera))
-    pixelsizedata=[{"timestamp": p.def_timestamp, "pixelsize" : p.pixelsize } for p in pixelsizecalibrationdata]
-    kwargs['PixSize'] = getPixelSize(pixelsizedata, binning, imgdata_timestamp)
+
+    kwargs['PixSize'] = getPixelSize(imgmetadata['pixelsizedata'], imgmetadata['binning'], imgmetadata['imgdata_timestamp'])
 
     # kV
-    kwargs["kV"] = getKV(high_tension)
+    kwargs["kV"] = getKV(imgmetadata['high_tension'])
 
     # Trunc
-    kwargs['Trunc'] = getTrunc(camera_name, exposure_time, frame_time, nframes, kwargs["PixSize"], eer_frames)
+    kwargs['Trunc'] = getTrunc(imgmetadata['camera_name'], imgmetadata['exposure_time'], imgmetadata['frame_time'], imgmetadata['nframes'], kwargs["PixSize"], imgmetadata['eer_frames'])
     if not kwargs['Trunc']:
         del kwargs['Trunc']
 
     # RotGain
     # FlipGain
-    kwargs['RotGain'], kwargs['FlipGain'] = getRotFlipGain(frame_rotate, 
-                                                           frame_flip, 
+    kwargs['RotGain'], kwargs['FlipGain'] = getRotFlipGain(imgmetadata['frame_rotate'], 
+                                                           imgmetadata['frame_flip'], 
                                                            force_cpu_flat, 
-                                                           frame_aligner_flat)
+                                                           imgmetadata['frame_aligner_flat'])
 
     return kwargs

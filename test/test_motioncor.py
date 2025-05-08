@@ -1,4 +1,4 @@
-from appion.motioncor import getParams
+from appion.motioncor import getParams, getImageMetadata
 import os
 import json
 
@@ -28,7 +28,8 @@ for imageid in validationData.keys():
         totaldose = 0.0
     # Globbing the input file can fail because users may have deleted their data after transfer.
     try:
-        kwargs=getParams(int(imageid), gain_input="/tmp/gain.mrc", dark_input = "/tmp/dark.mrc", fmintfile="/tmp/fmintfile.txt", force_cpu_flat=force_cpu_flat,is_align=is_align,rendered_frame_size=rendered_frame_size, totaldose=totaldose)
+        imgmetadata=getImageMetadata(int(imageid), is_align=is_align)
+        kwargs=getParams(imgmetadata, gain_input="/tmp/gain.mrc", dark_input = "/tmp/dark.mrc", fmintfile="/tmp/fmintfile.txt", force_cpu_flat=force_cpu_flat,rendered_frame_size=rendered_frame_size, totaldose=totaldose)
     except Exception as e:
         print(e)
         continue
