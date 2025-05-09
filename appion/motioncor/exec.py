@@ -3,7 +3,7 @@
 
 from shutil import which
 import subprocess
-from log import parseLog
+from log import parseMotionCorLog
 
 VALIDPARAMS=set(["InMrc","InTiff","InEer","OutMrc","ArcDir",
                     "FullSum","DefectFile","InAln","OutAln",
@@ -47,5 +47,5 @@ def motioncor(dryrun : bool = False, motionCorVersion: str = "2.1.5.0", executab
         proc=subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=True, text=True, encoding="utf-8")
         rawoutput=proc.stdout
         output=rawoutput.split("\n")
-        output=parseLog(output)
+        output=parseMotionCorLog(output)
     return output, rawoutput

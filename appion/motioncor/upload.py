@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2002-2015 Scripps Research Institute, 2015-2025 New York Structural Biology Center
+
 import os
 import numpy
 import math

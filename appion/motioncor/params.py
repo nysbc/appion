@@ -248,6 +248,7 @@ def calcRotFlipGain(frame_rotate : int, frame_flip: int, force_cpu_flat : bool, 
     else:
         return 0, 0
     
+# Retrieves metadata from the database that is used to calculate inputs to motioncor2/motioncor3
 def readImageMetadata(imageid: int, has_bad_pixels : bool = False, is_align : bool = False, has_non_zero_dark : bool = False):
     imgmetadata={}
     imgdata=AcquisitionImageData.objects.get(def_id=imageid)
@@ -312,10 +313,10 @@ def readImageMetadata(imageid: int, has_bad_pixels : bool = False, is_align : bo
     imgmetadata['gain_input']=os.path.join(imgmetadata['session_image_path'],gaindata.mrc_image)
     return imgmetadata
 
-# Retrieves parameters from the database or calculates them.
-def calcParams(imgmetadata : dict, gain_input : str = "/tmp/gain.mrc", dark_input : str = "/tmp/dark.mrc", defect_map_path : str ="/tmp/defect.mrc", fmintfile : str ="/tmp/fmintfile.txt", force_cpu_flat : bool = False,
-                             rendered_frame_size : int = 1,
-                             totaldose : float = False) -> dict:
+def calcParams(imgmetadata : dict, gain_input : str = "/tmp/gain.mrc", 
+               dark_input : str = "/tmp/dark.mrc", defect_map_path : str ="/tmp/defect.mrc", 
+               fmintfile : str ="/tmp/fmintfile.txt", force_cpu_flat : bool = False,
+               rendered_frame_size : int = 1, totaldose : float = False) -> dict:
 
     # Keyword args for motioncor2 function
     kwargs={}

@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright 2002-2015 Scripps Research Institute, 2015-2025 New York Structural Biology Center
 
-def parseLog(outbuffer: list) -> dict:
+def parseMotionCorLog(outbuffer: list) -> dict:
     '''
     Parses the output log from motioncor2/motioncor3 and converts it into a dict.
     '''
@@ -36,7 +36,7 @@ def parseLog(outbuffer: list) -> dict:
         line=outbuffer.pop(0)
     return logData
 
-def genMotionCorrLog(logData: dict, outputLogPath: str, throw: int, totalRenderedFrames: int, binning: float = 1.0) -> None:
+def writeMotionCorrLog(logData: dict, outputLogPath: str, throw: int, totalRenderedFrames: int, binning: float = 1.0) -> None:
     ''' 
     Takes the output log from motioncor2/motioncor3 and converts it to a motioncorr-formatted log.
     This is necessary because the myamiweb web UI reads motioncorr logs directly / doesn't query the database for information about shifts.
