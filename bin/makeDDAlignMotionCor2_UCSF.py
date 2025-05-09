@@ -5,21 +5,11 @@
 class MotionCor2UCSFAlignStackLoop(apDDMotionCorrMaker.MotionCorrAlignStackLoop):
 	#=======================
 	def setupParserOptions(self):
-		# String
-		parser.add_option("--tempdir", dest="tempdir",
-			help="Local path for storing temporary stack output, e.g. --tempdir=/tmp/appion/makeddstack",
-			metavar="PATH")
 		# Integer
-		parser.add_option("--stackid", dest="stackid", type="int",
-			help="ID for particle stack to restrict ddstack making(optional)", metavar="INT")
 		parser.add_option("--ddstartframe", dest="startframe", type="int", default=0,
 			help="starting frame for summing the frames. The first frame is 0")
-		parser.add_option("--ddnframe", dest="nframe", type="int",
-			help="total frames to consider for direct detector frame sum")
 		parser.add_option("--alignlabel", dest="alignlabel", default='a',
 			help="label to be appended to the presetname, e.g. --label=a gives ed-a as the aligned preset for preset ed", metavar="CHAR")
-		parser.remove_option("--uncorrected")
-		parser.remove_option("--reprocess")
 		parser.add_option("--bin",dest="bin",metavar="#",type=float,default="1.0",
 			help="Binning factor relative to the dd stack. MotionCor2 takes float value (optional)")
 
@@ -34,31 +24,19 @@ class MotionCor2UCSFAlignStackLoop(apDDMotionCorrMaker.MotionCorrAlignStackLoop)
 			action="store_true", help="dose weight the frame stack, according to Tim / Niko's curves")
 		parser.add_option("--totaldose",dest="totaldose",metavar="float",type=float,
                         help="total dose for the full movie stack in e/A^2. If not specified, will get value from database")
-		parser.add_option("--rawarea", dest="rawarea", default=False,
-			action="store_true", help="use full area of the raw frame, not leginon image area")
-		parser.add_option("--useGS", dest="useGS", default=False,
-			action="store_true", help="Use Gram-Schmidt process to scale dark image")
-		parser.add_option("--square", dest="square", default=False,
-			action="store_true", help="Output square images")
-		parser.add_option("--no-cyclechannels", dest="cyclechannels", default=True,
-			action="store_false", help="Use only one reference channel for gain/dark correction")
-		parser.add_option("--compress", dest="compress", default=False,
-			action="store_true", help="Compress raw frames after stack making")
-		parser.add_option("--override_db", dest="override_db", default=False,
-			action="store_true", help="Override database for bad rows, columns, and image flips")
+
+		#parser.add_option("--override_db", dest="override_db", default=False,
+		#	action="store_true", help="Override database for bad rows, columns, and image flips")
 		# String
-		parser.add_option("--framepath", dest="framepath",
-			help="Force Session Frame Path to this", metavar="PATH")
+
 		# Integer
-		parser.add_option("--refimgid", dest="refimgid", type="int",
-			help="Specify a corrected image to do gain/dark correction with", metavar="INT")
+
 
 		parser.add_option("--trim", dest="trim", type="int", default=0,
 			help="Trim edge off after frame stack gain/dark correction", metavar="INT")
 		parser.add_option("--align", dest="align", default=False,
 			action="store_true", help="Make Aligned frame stack")
-		parser.add_option("--defergpu", dest="defergpu", default=False,
-			action="store_true", help="Make unaligned frame stack first on computer without gpu alignment program")
+
 		parser.add_option("--gpuid", dest="gpuid", type="int", default=0,
 			help="GPU device id used in gpu processing", metavar="INT")
 
@@ -99,8 +77,8 @@ class MotionCor2UCSFAlignStackLoop(apDDMotionCorrMaker.MotionCorrAlignStackLoop)
 		parser.add_option("--Bft_local",dest="Bft_local",metavar="#",type=float,default=150.0,
                         help=" Global B-Factor for alignment, default 150.0.")
 
-		parser.add_option("--force_cpu_flat", dest="force_cpu_flat", default=False,
-			action="store_true", help="Use cpu to make frame flat field corrrection")
+		#parser.add_option("--force_cpu_flat", dest="force_cpu_flat", default=False,
+		#	action="store_true", help="Use cpu to make frame flat field corrrection")
 
 		parser.add_option("--rendered_frame_size", dest="rendered_frame_size", type="int", default=1,
 			help="Sum this number of saved frames as a rendered frame in alignment", metavar="INT")
@@ -123,39 +101,22 @@ class MotionCor2UCSFAlignStackLoop(apDDMotionCorrMaker.MotionCorrAlignStackLoop)
 			help="Session name associated with processing run, e.g. --session=06mar12a", metavar="SESSION")
 		parser.add_option("--preset", dest="preset",
 			help="Image preset associated with processing run, e.g. --preset=en", metavar="PRESET")
-		parser.add_option("-m", "--mrclist", dest="mrcnames",
-			help="List of mrc files to process, e.g. --mrclist=..003en,..002en,..006en", metavar="MRCNAME")
-		parser.add_option("--reprocess", dest="reprocess", type="float",
-			help="Only process images that pass this reprocess criteria")
-		parser.add_option("--limit", dest="limit", type="int",
-			help="Only process <limit> number of images")
+
+		#parser.add_option("--reprocess", dest="reprocess", type="float",
+		#	help="Only process images that pass this reprocess criteria")
 		parser.add_option("--tiltangle", dest="tiltangle", 
 			default="all", type="choice", choices=self.tiltoptions,
 			help="Only process images with specific tilt angles, options: "+str(self.tiltoptions))
 
-		parser.add_option("--startimgid", dest="startimgid", type="int",
-			help="Only process images at and after <startimgid> ")
-		parser.add_option("--endimgid", dest="endimgid", type="int",
-			help="Only process images at and before <endimgid> ")
 		### True / False options
 		parser.add_option("--continue", dest="continue", default=True,
 			action="store_true", help="Continue processing run from last image")
-		parser.add_option("--no-continue", dest="continue", default=True,
-			action="store_false", help="Do not continue processing run from last image")
-		parser.add_option("--background", dest="background", default=False,
-			action="store_true", help="Run in background mode, i.e. reduce the number of messages printed")
-		parser.add_option("--uncorrected", dest="uncorrected", default=False,
-			action="store_true", help="Assume images are not bright/dark field corrected and correct them")
+		#parser.add_option("--no-continue", dest="continue", default=True,
+		#	action="store_false", help="Do not continue processing run from last image")
 		parser.add_option("--no-wait", dest="wait", default=True,
 			action="store_false", help="Do not wait for more images after completing loop")
 		parser.add_option("--no-rejects", dest="norejects", default=False,
 			action="store_true", help="Do not process hidden or rejected images")
-		parser.add_option("--sib-assess", dest="sibassess", default=False,
-			action="store_true", help="Use image assessment from sibling image")		
-		parser.add_option("--best-images", dest="bestimages", default=False,
-			action="store_true", help="Only process exemplar or keep images")
-		parser.add_option("--shuffle", dest="shuffle", default=False,
-			action="store_true", help="Shuffle the images before processing, i.e. process images out of order")
 		parser.add_option("--reverse", dest="reverse", default=False,
 			action="store_true", help="Process the images from newest to oldest")
 		parser.add_option("--parallel", dest="parallel", default=False,
