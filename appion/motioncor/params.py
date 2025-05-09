@@ -19,19 +19,18 @@ import math
 from glob import glob
 
 # InMrc, InTiff, InEer functions
-def getInputPath(session_image_path : str, filename : str) -> str:
-    fpath = os.path.join(session_image_path,filename+"*").replace("leginon","frames")
+def readInputPath(session_image_path : str, filename : str) -> str:
+    fpath = os.path.join(session_image_path,filename+".*")
     fpath=glob(fpath)
-    if fpath:
-        fpath=fpath[0]
-    else:
-        fpath=""
+    return fpath[0] if fpath else ""
+
+def calcInputType(fpath):
     if fpath.endswith(".mrc"):
-        return "InMrc", fpath
+        return "InMrc"
     elif fpath.endswith(".tif") or fpath.endswith(".tiff"):
-        return "InTiff", fpath
+        return "InTiff"
     elif fpath.endswith(".eer"):
-        return "InEer", fpath
+        return "InEer"
     else:
         raise RuntimeError("Unsupported file format for input path: %s." % fpath)
 
@@ -323,8 +322,9 @@ def calcParams(imgmetadata : dict, gain_input : str = "/tmp/gain.mrc", dark_inpu
 
     # InMrc, InTiff, InEer
     # Get the path to the input image.
-    paramKey, fpath = getInputPath(imgmetadata['session_image_path'],imgmetadata['image_filename'])
-    kwargs[paramKey] = fpath
+    fpath = readInputPath(imgmetadata['session_image_path'].replace("leginon","frames"),imgmetadata['image_filename'])
+    inputType = calcInputType(fpath)
+    kwargs[inputType] = fpath
 
     # Gain
     # Get the reference image
@@ -370,7 +370,8 @@ def calcParams(imgmetadata : dict, gain_input : str = "/tmp/gain.mrc", dark_inpu
     kwargs["kV"] = calcKV(imgmetadata['high_tension'])
 
     # Trunc
-    shifts = readShiftsBetweenFrames()
+    #shifts = readShiftsBetweenFrames()
+    shifts=[]
     sumframelist = filterFrameList(kwargs["PixSize"], imgmetadata['nframes'], shifts)
     kwargs['Trunc'] = calcTrunc(imgmetadata['camera_name'], imgmetadata['exposure_time'], sumframelist, imgmetadata['frame_time'], imgmetadata['nframes'], imgmetadata['eer_frames'])
     if not kwargs['Trunc']:
