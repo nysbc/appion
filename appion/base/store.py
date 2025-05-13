@@ -18,11 +18,11 @@ from argparse import ArgumentParser
 from django.conf import settings
 
 
-def uploadScriptProgramName(name):
+def saveScriptProgramName(name):
     progname = ScriptProgramName(name=name)
     progname.save()
 
-def uploadScriptUsername():
+def saveScriptUsername():
     getpwuid=pwd.getpwuid(os.getuid())
     username = ScriptUserName(name=getpwuid[0],
                             uid = getpwuid[2],
@@ -31,7 +31,7 @@ def uploadScriptUsername():
                             unixshell = getpwuid[6])
     username.save()
 
-def uploadScriptHostName():
+def saveScriptHostName():
     cpu_info = get_cpu_info()
     hostname = ScriptHostName(name = platform.node(),
 							  ip = socket.gethostbyaddr(platform.node())[2][0], # Not really accurate/useful since a host can have multiple IPs and we don't know which one we care about here.
@@ -45,7 +45,7 @@ def uploadScriptHostName():
 							  )
     hostname.save()
 
-def uploadScriptProgramRun(runname, ref_scriptprogramname_progname, ref_scriptusername_username, ref_scripthostname_hostname, ref_appathdata_rundir, ref_apappionjobdata_job, ref_appathdata_appion_path):
+def saveScriptProgramRun(runname, ref_scriptprogramname_progname, ref_scriptusername_username, ref_scripthostname_hostname, ref_appathdata_rundir, ref_apappionjobdata_job, ref_appathdata_appion_path):
     getpwuid=pwd.getpwuid(os.getuid())
     progrun = ScriptProgramRun(runname=runname,
 							   revision=importlib.metadata.version('appion'),
@@ -60,12 +60,12 @@ def uploadScriptProgramRun(runname, ref_scriptprogramname_progname, ref_scriptus
     progrun.save()
 
 # Run parse_args() to get a namespace object and then transfrom that into a dict with vars()
-def uploadScriptParams(args : dict, ref_scriptprogramname_progname, ref_scriptprogramrun_progrun, parser : ArgumentParser):
+def saveScriptParams(args : dict, ref_scriptprogramname_progname, ref_scriptprogramrun_progrun, parser : ArgumentParser):
     for paramname in args.keys():
         paramname = ScriptParamName(name=paramname,
 									ref_scriptprogramname_progname=ref_scriptprogramname_progname)
         paramname.save()
-        usage=usageFromParamDest(args, parser, paramname, args[paramname])
+        usage=calcUsageFromParamDest(args, parser, paramname, args[paramname])
         if usage:
             paramvalue = ScriptParamValue(value=str(args[paramname]),
                                         usage = usage,
@@ -74,7 +74,7 @@ def uploadScriptParams(args : dict, ref_scriptprogramname_progname, ref_scriptpr
             )
             paramvalue.save()
 			
-def usageFromParamDest(args, parser, dest, value):
+def calcUsageFromParamDest(args, parser, dest, value):
     """
     For a given optparse destination (dest, e.g., 'commit')
         and value (e.g., 'False') this will generate the command line
@@ -117,7 +117,7 @@ def usageFromParamDest(args, parser, dest, value):
 
 # ApAssessmentRunData
 
-def uploadApAssessmentRunData(ref_sessiondata_session, assessment="unassessed"):
+def saveApAssessmentRunData(ref_sessiondata_session, assessment="unassessed"):
     """
     Insert the assessment status
         keep = True
@@ -133,7 +133,7 @@ def uploadApAssessmentRunData(ref_sessiondata_session, assessment="unassessed"):
 # ApAppionJobData
 
 # Appion database is initialized by myamiweb / web viewer.
-def getAppionDatabase(projectid):
+def readAppionDatabaseName(projectid):
     project = processingdb.objects.get(ref_projects_project=projectid)
     return project.appiondb
 
@@ -142,7 +142,7 @@ def updateApAppionJobData(jobid, status):
     appionjob.status = status
     appionjob.save()
 
-def uploadApAppionJobData(ref_appathdata_path, jobtype, runname, user, hostname, ref_sessiondata_session):
+def saveApAppionJobData(ref_appathdata_path, jobtype, runname, user, hostname, ref_sessiondata_session):
     #=====================
     clust = ApAppionJobData.objects.get(ref_appathdata_path = ref_appathdata_path,
                                         jobtype = jobtype)

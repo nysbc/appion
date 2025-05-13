@@ -3,7 +3,7 @@
 
 import os
 import numpy
-import math
+import mrcfile
 from sinedon.models.appion import ApDDAlignImagePairData
 from sinedon.models.appion import ApDDFrameTrajectoryData
 from sinedon.models.appion import ApDDAlignStatsData
@@ -13,8 +13,8 @@ from sinedon.models.leginon import ZeroLossIceThicknessData
 from sinedon.models.appion import ApDDStackParamsData
 from sinedon.models.appion import ApPathData
 from sinedon.models.appion import ApDDStackRunData
-from sinedon.models.appion import ApStackData
-from django.conf import settings
+import sinedon.setup
+sinedon.setup()
 
 # ApDDAlignImagePairData
 # We can only really add insert ref IDs here b/c the raw and aligned images are in a different database from the Appion results.
@@ -67,18 +67,19 @@ def copyZLPThicknessParams(unaligned,aligned):
         return newzlossth.def_id
     return None
 
+
+def uploadAlignStats(shifts, nframes):
+    pixel_shifts = calcFrameShiftFromPositions(shifts, nframes - len(shifts)+1)
+    max_drifts, median = calcFrameStats(pixel_shifts, nframes)
+    return max_drifts, median
+
 # ApDDAlignStatsData
 # Pass in shifts from dict returned by parseLog
 # Run saveFrameTrajectory beforehand to get trajdata_def_id.
-def saveAlignStats(aligned_image_def_id, rundata_def_id, trajdata_def_id, shifts, nframes, pixsize):
+def saveAlignStats(aligned_image_def_id, rundata_def_id, trajdata_def_id, max_drifts, median, pixsize):
     # Issue #6155 need new query to get timestamp
 	# JP: Where does a timestamp come into play?
     #aligned_imgdata = AcquisitionImageData.objects.get(def_id=aligned_image_def_id)
-    xy={}
-    xy['x']=[shift[0] for shift in shifts]
-    xy['y']=[shift[1] for shift in shifts]
-    pixel_shifts = calcFrameShiftFromPositions(shifts, nframes - len(positions)+1)
-    max_drifts, median = calcFrameStats(pixel_shifts, nframes)
     drifts={}
     for i, drift_tuple in enumerate(max_drifts):
         key = 'top_shift%d' % (i+1,)
@@ -88,42 +89,10 @@ def saveAlignStats(aligned_image_def_id, rundata_def_id, trajdata_def_id, shifts
 										apix=pixsize,
                                         ddstackrun=rundata_def_id,
                                         median_shift_value=median,
-                                        trajectory=shifts,
+                                        trajectory=trajdata_def_id,
                                         **drifts)
     alignstatsdata.save()
     return alignstatsdata.def_id
-
-def calcFrameStats(pixel_shifts, nframes):
-    '''
-    get alignment frame stats for faster graphing.
-    '''
-    if not pixel_shifts:
-        raise ValueError('no pixel shift found for calculating stats')
-    if len(pixel_shifts) < 3:
-        raise ValueError('Not enough pixel shifts found for stats calculation')
-    pixel_shifts_sort = list(pixel_shifts)
-    pixel_shifts_sort.sort()
-    median = numpy.median(numpy.array(pixel_shifts_sort))
-    max1 = pixel_shifts_sort[-1]
-    max2 = pixel_shifts_sort[-2]
-    max3 = pixel_shifts_sort[-3]
-    m1index = pixel_shifts.index(max1)
-    m2index = pixel_shifts.index(max2)
-    m3index = pixel_shifts.index(max3)
-    return [(max1,m1index),(max2,m2index),(max3,m3index)], median
-
-def calcFrameShiftFromPositions(positions,running=1):
-	# place holder for running first frame shift duplication
-	offset = int((running-1)/2)
-	shifts = offset*[None,]
-	for p in range(len(positions)-1):
-		shift = math.hypot(positions[p][0]-positions[p+1][0],positions[p][1]-positions[p+1][1])
-		shifts.append(shift)
-	# duplicate first and last shift for the end points if running
-	for i in range(offset):
-		shifts.append(shifts[-1])
-		shifts[i] = shifts[offset]
-	return shifts
 	
 # ApDDFrameTrajectoryData
 
@@ -153,7 +122,7 @@ def saveFrameTrajectory(image_def_id, rundata_def_id, shifts, limit=20, referenc
     return trajdata.def_id
 
 #ApDDStackParamsData
-def savePathData(preset, align, bin, ref_apddstackrundata_unaligned_ddstackrun, method, ref_apstackdata_stack=None, ref_apdealignerparamsdata_de_aligner=None):
+def saveDDStackParamsData(preset, align, bin, ref_apddstackrundata_unaligned_ddstackrun, method, ref_apstackdata_stack=None, ref_apdealignerparamsdata_de_aligner=None):
 	ddstackparamsdata = ApDDStackParamsData.objects.get(preset=preset, align=align, bin=bin, 
                                  ref_apddstackrundata_unaligned_ddstackrun=ref_apddstackrundata_unaligned_ddstackrun, 
                                          ref_apstackdata_stack=ref_apstackdata_stack,
@@ -169,14 +138,9 @@ def savePathData(preset, align, bin, ref_apddstackrundata_unaligned_ddstackrun, 
 	return ddstackparamsdata.def_id
 			
 # ApDDStackRunData
-def saveDDStackRunData(preset, align, bin, runname, rundir, ref_sessiondata_session, stackid = None):
-	# Maybe remove this since we don't use ApStackData?
-	if stackid:
-		stackdata = ApStackData.objects.get(stackid=stackid)
-		stack = stackdata.def_id
-	else:
-		stack = None
-	params = ApDDStackParamsData.objects.get(preset=preset,align=align,bin=bin,stack=stack)
+def saveDDStackRunData(preset, align, bin, runname, rundir, ref_sessiondata_session):
+	# We don't use ApStackData so that stack is always set to None.
+	params = ApDDStackParamsData.objects.get(preset=preset,align=align,bin=bin,stack=None)
 	path = ApPathData.objects.get(path=os.path.abspath(rundir))
 	results = ApDDStackRunData.objects.get(runname=runname,ref_apddstackparamsdata_params=params,ref_sessiondata_session=ref_sessiondata_session,ref_appathdata_path=path)
 	if not results:
@@ -192,3 +156,84 @@ def savePathData(path):
 		appath = ApPathData(path=path)
 		appath.save()
 	return appath.def_id
+
+def saveMotionCorrLog(logData: dict, outputLogPath: str, throw: int, totalRenderedFrames: int, binning: float = 1.0) -> None:
+    ''' 
+    Takes the output log from motioncor2/motioncor3 and converts it to a motioncorr-formatted log.
+    This is necessary because the myamiweb web UI reads motioncorr logs directly / doesn't query the database for information about shifts.
+    See here: https://github.com/leginon-org/leginon/blob/34bf9ab9a7a7ec8ae2d9a6ab818a4538cb925787/myamiweb/processing/inc/particledata.inc#L2505-L2533
+    '''
+    # Convert to the convention used in motioncorr
+    # so that shift is in pixels of the aligned image.
+    adjusted_shifts = []
+    midval = int(len(logData["shifts"])/2)
+    midshx = logData["shifts"][midval][0]
+    midshy = logData["shifts"][midval][1]
+    for shift in logData["shifts"]:
+        shxa = -(shift[0] - midshx) / binning
+        shya = -(shift[1] - midshy) / binning
+        adjusted_shifts.append((shxa, shya))
+
+    # Formats the shifts in motioncorr format.
+    with open(outputLogPath,"w") as f:
+        f.write("Sum Frame #%.3d - #%.3d (Reference Frame #%.3d):\n" % (0, totalRenderedFrames, totalRenderedFrames/2))
+        # Eer nframe is not predictable.
+        for idx, adjusted_shift in enumerate(adjusted_shifts):
+            f.write("......Add Frame #%.3d with xy shift: %.5f %.5f\n" % (idx+throw, adjusted_shift[0], adjusted_shift[1]))
+
+# Dark functions
+
+def saveDark(dark_output_path : str, camera_name : str, eer_frames : bool, dark_input_path : str = "", nframes : int = 1):
+    if not dark_input_path:
+        # Why is this switch statement necessary?  Why not save default dimensions into the database instead of
+        # hardcoding them in here?  (Original Appion has these hardcoded as part of object initialization.)
+        if camera_name == "GatanK2":
+            dimensions = (3710,3838)
+        elif camera_name == 'GatanK3':
+            dimensions = (8184,11520)
+        elif camera_name == 'DE':
+            dimensions = (4096,3072)
+        elif camera_name in ['TIA','Falcon','Falcon3','Falcon4'] or (camera_name == 'Falcon4EC' and eer_frames):
+            dimensions = (4096,4096)
+        else:
+            dimensions = None
+        unscaled_darkarray =  numpy.zeros((dimensions[1],dimensions[0]), dtype=numpy.float32)
+    else:
+        unscaled_darkarray = mrcfile.read(dark_input_path) / nframes
+    mrcfile.write(dark_output_path, unscaled_darkarray, overwrite=True)
+
+# DefectMap functions
+def saveDefectMrc(defect_map_path : str, defect_map : numpy.ndarray, frame_flip : int = 0, frame_rotate : int = 0) -> None:
+    # flip and rotate map_array.  Therefore, do the opposite of
+    # frames
+    if frame_flip:
+        if frame_rotate and frame_rotate == 2:
+            # Faster to just flip left-right than up-down flip + rotate
+            # flipping the frame left-right
+            defect_map = numpy.fliplr(defect_map)
+            frame_rotate = 0
+            # reset flip
+            frame_flip = 0
+    if frame_rotate:
+        # rotating the frame by %d degrees" % (frame_rotate*90,)
+        defect_map = numpy.rot90(defect_map,4-frame_rotate)
+    if frame_flip:
+        #flipping the frame up-down
+        defect_map = numpy.flipud(defect_map)
+    mrcfile.write(defect_map_path, defect_map, overwrite=True)
+
+# FmIntFile/FmDose functions
+def saveFmIntFile(fmintpath, nraw, size, raw_dose):
+    '''
+    calculate and set frame dose and create FmIntFile
+    '''
+    modulo = nraw % size
+    int_div = nraw // size
+    lines = []
+    total_rendered_frames = calcTotalRenderedFrames(nraw, size)
+    if modulo != 0:
+        total_rendered_frames += 1
+        lines.append('%d\t%d\t%.3f\n' % (modulo, modulo, raw_dose))
+    lines.append('%d\t%d\t%.3f\n' % (int_div*size+modulo, size, raw_dose))
+    with open(fmintpath,'w') as f:
+        f.write(''.join(lines))

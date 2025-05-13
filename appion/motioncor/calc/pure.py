@@ -1,0 +1,166 @@
+import numpy
+import math
+
+## Calculations for parameters used in motioncor2 command
+# InMrc, InTiff, InEer functions
+def calcInputType(fpath):
+    if fpath.endswith(".mrc"):
+        return "InMrc"
+    elif fpath.endswith(".tif") or fpath.endswith(".tiff"):
+        return "InTiff"
+    elif fpath.endswith(".eer"):
+        return "InEer"
+    else:
+        raise RuntimeError("Unsupported file format for input path: %s." % fpath)
+
+# DefectMap functions   
+def calcImageDefectMap(bad_rows : str, bad_cols : str, bad_pixels : str, dx : int, dy : int):
+    bad_rows = eval(bad_rows) if bad_rows else []
+    bad_cols = eval(bad_cols) if bad_cols else []
+    bad_pixels = eval(bad_pixels) if bad_pixels else []
+    defect_map = numpy.zeros((dy,dx),dtype=numpy.int8)
+    defect_map[bad_rows,:] = 1
+    defect_map[:,bad_cols] = 1
+    for px, py in bad_pixels:
+        defect_map[py,px] = 1
+    return defect_map
+
+# FmIntFile/FmDose functions
+def calcFmDose(total_raw_frames: int, exposure_time, frame_time, dose, rendered_frame_size, totaldose, is_eer):
+    # This depends on whether or not we're using an EER formatted-input.
+    # see https://github.com/nysbc/appion-slurm/blob/f376758762771073c0450d2bc3badc0fed6f8e66/appion/appionlib/apDDFrameAligner.py#L395-L399
+
+    if total_raw_frames is None:
+        # older data or k2
+        total_raw_frames =  int(exposure_time / frame_time)
+    # avoid 0 for dark image scaling and frame list creation
+    if total_raw_frames == 0:
+        total_raw_frames = 1
+
+    # totaldose is user-specified when the doseweight flag is passed
+    # If this flag isn't specified, the database is queried.
+    if not totaldose:
+        if not dose:
+            dose = 0.0
+        totaldose = dose / 1e20
+    if totaldose > 0:
+        raw_dose = totaldose / total_raw_frames
+    else:
+        raw_dose = 0.03 #make fake dose similar to Falcon4EC 7 e/p/s
+
+    if not is_eer:
+        return totaldose/total_raw_frames
+    else:
+        return raw_dose*rendered_frame_size
+
+def calcTotalRenderedFrames(nraw, size):
+    # total_rendered_frames is used when writing out the motioncorr log
+    return nraw // size
+
+# PixSize functions
+
+def calcPixelSize(pixelsizedatas, binning, imgdata_timestamp):
+    """
+    use image data object to get pixel size
+    multiplies by binning and also by 1e10 to return image pixel size in angstroms
+    Assumes that pixelsizedata is in descending order sorted by timestamp.
+
+    return image pixel size in Angstroms
+    """
+    i = 0
+    pixelsizedata = pixelsizedatas[i]
+    oldestpixelsizedata = pixelsizedata
+    while pixelsizedata["timestamp"] > imgdata_timestamp and i < len(pixelsizedatas):
+        i += 1
+        pixelsizedata = pixelsizedatas[i]
+        if pixelsizedata["timestamp"] < oldestpixelsizedata["timestamp"]:
+            oldestpixelsizedata = pixelsizedata
+    if pixelsizedata["timestamp"] > imgdata_timestamp:
+        # There is no pixel size calibration data for this image. Use oldest value.
+        pixelsizedata = oldestpixelsizedata
+    pixelsize = oldestpixelsizedata["pixelsize"] * binning
+    return pixelsize*1e10
+
+# Trunc Functions
+def filterFrameList(pixelsize : float, total_frames : int, shifts : list, nframe : int = None, startframe : int = None, driftlimit : int = None):
+    '''
+    Get list of frames
+    '''
+    framelist=[]
+    # frame list according to start frame and number of frames
+    if nframe is None:
+        if startframe is None:
+            framelist = range(total_frames)
+        else:
+            framelist = range(startframe,total_frames)
+    else:
+        framelist = range(startframe,startframe+nframe)
+    if driftlimit is not None:
+        # drift limit considered
+        threshold = driftlimit / pixelsize
+        stillframes = []
+        # pick out passed frames
+        for i in range(len(shifts[:-1])):
+            # keep the frame if at least one shift around the frame is small enough
+            if min(shifts[i],shifts[i+1]) < threshold:
+                # index is off by 1 because of the duplication
+                stillframes.append(i)
+        if stillframes:
+            framelist = list(set(framelist).intersection(set(stillframes)))
+            framelist.sort()
+        #apDisplay.printMsg('Limit frames used to %s' % (framelist,))
+    return framelist
+
+def calcKV(high_tension):
+    return high_tension/1000.0
+
+def calcTrunc(camera_name : str, exposure_time : float, sumframelist : list, frame_time : float, nframes : int, eer_frames : bool):
+    if camera_name in ["GatanK2","GatanK3"]:
+        total_frames = max(1,int(exposure_time / frame_time))
+    elif 'DE':
+        total_frames = nframes
+    elif camera_name in ['TIA','Falcon','Falcon3','Falcon4'] or (camera_name == 'Falcon4EC' and eer_frames):
+        total_frames = nframes
+    else:
+        total_frames = nframes
+    return total_frames - sumframelist[-1] - 1
+
+# RotGain and FlipGain functions
+def calcRotFlipGain(frame_rotate : int, frame_flip: int, force_cpu_flat : bool, frame_aligner_flat: bool) -> tuple:
+    if not force_cpu_flat and frame_aligner_flat:
+        return frame_rotate, frame_flip
+    else:
+        return 0, 0
+    
+## Calculations for metadata outputs
+def calcFrameStats(pixel_shifts):
+    '''
+    get alignment frame stats for faster graphing.
+    '''
+    if not pixel_shifts:
+        raise ValueError('no pixel shift found for calculating stats')
+    if len(pixel_shifts) < 3:
+        raise ValueError('Not enough pixel shifts found for stats calculation')
+    pixel_shifts_sort = list(pixel_shifts)
+    pixel_shifts_sort.sort()
+    median = numpy.median(numpy.array(pixel_shifts_sort))
+    max1 = pixel_shifts_sort[-1]
+    max2 = pixel_shifts_sort[-2]
+    max3 = pixel_shifts_sort[-3]
+    m1index = pixel_shifts.index(max1)
+    m2index = pixel_shifts.index(max2)
+    m3index = pixel_shifts.index(max3)
+    return [(max1,m1index),(max2,m2index),(max3,m3index)], median
+
+def calcFrameShiftFromPositions(positions,running=1):
+	# place holder for running first frame shift duplication
+	offset = int((running-1)/2)
+	shifts = offset*[None,]
+	for p in range(len(positions)-1):
+		shift = math.hypot(positions[p][0]-positions[p+1][0],positions[p][1]-positions[p+1][1])
+		shifts.append(shift)
+	# duplicate first and last shift for the end points if running
+	for i in range(offset):
+		shifts.append(shifts[-1])
+		shifts[i] = shifts[offset]
+	return shifts
