@@ -3,7 +3,7 @@
 
 from shutil import which
 import subprocess
-from retrieve import parseMotionCorLog
+from appion.motioncor.retrieve.logs import parseMotionCorLog
 
 VALIDPARAMS=set(["InMrc","InTiff","InEer","OutMrc","ArcDir",
                     "FullSum","DefectFile","InAln","OutAln",

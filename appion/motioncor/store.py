@@ -13,6 +13,7 @@ from sinedon.models.leginon import ZeroLossIceThicknessData
 from sinedon.models.appion import ApDDStackParamsData
 from sinedon.models.appion import ApPathData
 from sinedon.models.appion import ApDDStackRunData
+from .calc import *
 import sinedon.setup
 sinedon.setup()
 
@@ -113,7 +114,7 @@ def saveFrameTrajectory(image_def_id, rundata_def_id, shifts, limit=20, referenc
 									ref_apstackparticledata_particle=particle,
 									ref_apddstackrundata_ddstackrun=rundata_def_id,
                                     seq_pos_x=str(list(xy['x'][:limit])), #position relative to reference
-                                    seq_pos_x=str(list(xy['y'][:limit])), #position relative to reference
+                                    seq_pos_y=str(list(xy['y'][:limit])), #position relative to reference
                                     last_x=xy['x'][-1],
                                     last_y=xy['y'][-1],
                                     number_of_positions= n_positions,

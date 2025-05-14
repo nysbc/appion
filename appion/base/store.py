@@ -15,7 +15,6 @@ import socket
 import distro
 import psutil
 from argparse import ArgumentParser
-from django.conf import settings
 
 
 def saveScriptProgramName(name):

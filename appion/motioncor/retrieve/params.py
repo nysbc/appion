@@ -1,15 +1,16 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright 2002-2015 Scripps Research Institute, 2015-2025 New York Structural Biology Center
 
+import sinedon.setup
+sinedon.setup()
 from django.db.models import F
 from sinedon.models.leginon import AcquisitionImageData
 from sinedon.models.leginon import PixelSizeCalibrationData
-import sinedon.setup
 import os
 import math
 from glob import glob
-from .calc import *
-from .store import *
+from ..calc import *
+from ..store import *
 
 # InMrc, InTiff, InEer functions
 def readInputPath(session_image_path : str, filename : str) -> str:
@@ -57,7 +58,6 @@ def readShiftsBetweenFrames(logfile : str) -> list:
     
 # Retrieves metadata from the database that is used to calculate inputs to motioncor2/motioncor3
 def readImageMetadata(imageid: int, has_bad_pixels : bool = False, is_align : bool = False, has_non_zero_dark : bool = False):
-    sinedon.setup()
     imgmetadata={}
     imgdata=AcquisitionImageData.objects.get(def_id=imageid)
     correctorplandata=imgdata.ref_correctorplandata_corrector_plan
@@ -198,38 +198,3 @@ def calcParams(imgmetadata : dict, gain_input : str = "/tmp/gain.mrc",
                                                            imgmetadata['frame_aligner_flat'])
 
     return kwargs
-
-def parseMotionCorLog(outbuffer: list) -> dict:
-    '''
-    Parses the output log from motioncor2/motioncor3 and converts it into a dict.
-    '''
-    logData={}
-
-    # Discard all output before the alignment shifts.
-    line=outbuffer.pop(0)
-    # For some reason motioncor2 1.6.4 uses a tabular format for the alignment shift outputs, but motioncor3 and older versions of motioncor2 don't.
-    # The initial line denoting the shift outputs omits the word "shift".
-    while ("Full-frame alignment shift" not in line) and (line.strip() != "Full-frame alignment"):
-        if not outbuffer:
-            raise RuntimeError("Alignment shift line not found in stdout.")
-        line=outbuffer.pop(0)
-    line=outbuffer.pop(0)
-    logData["shifts"] = []
-    while ("Global shifts are corrected" not in line) and outbuffer:
-        # Remove empty lines
-        if not line and outbuffer:
-            line=outbuffer.pop(0)
-            continue
-        # For some reason motioncor2 1.6.4 uses a tabular format for the alignment shift outputs, but motioncor3 and older versions of motioncor2 don't.
-        # This removes a header from that table.
-        if "Frame   x Shift   y Shift" in line:
-            line=outbuffer.pop(0)
-            continue
-        try:
-            shx = float(line.split()[-2])
-            shy = float(line.split()[-1])
-            logData["shifts"].append((shx, shy))
-        except Exception as e:
-            raise RuntimeError("Could not parse shifts in log.  Line: %s" % line) from e
-        line=outbuffer.pop(0)
-    return logData
