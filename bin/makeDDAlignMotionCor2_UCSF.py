@@ -9,7 +9,7 @@ from appion.motioncor.cli import constructMotionCorParser
 def main():
     parser = argparse.ArgumentParser(parents=[constructGlobalParser(), constructMotionCorParser()])
     args = parser.parse_args()
-    print(args)
+    print(args.eer_sampling)
     
 if __name__ == '__main__':
     main()
