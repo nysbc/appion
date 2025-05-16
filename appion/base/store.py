@@ -15,6 +15,8 @@ import socket
 import distro
 import psutil
 from argparse import ArgumentParser
+import json
+from dask.distributed import Lock
 
 
 def saveScriptProgramName(name):
@@ -155,3 +157,20 @@ def saveApAppionJobData(ref_appathdata_path, jobtype, runname, user, hostname, r
                                 ref_sessiondata_session = ref_sessiondata_session,
                                 jobtype=jobtype)
         clust.save()
+
+# Handle locking using Dask distributed lock
+def saveCheckpoint(image_id, checkpoint_path):
+    lock = Lock("checkpoint")
+    lock.acquire(timeout=10)
+    if not os.path.exists(checkpoint_path):
+        with open(checkpoint_path,"w") as f:
+            completed=[]
+            json.dump(completed, f)
+    with open(checkpoint_path, "r+") as f:
+        completed=json.load(f)
+        completed.append(image_id)
+        f.seek(0)
+        f.truncate()
+        json.dump(completed, f)
+        f.flush()
+    lock.release()

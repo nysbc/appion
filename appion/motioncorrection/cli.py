@@ -89,7 +89,7 @@ def constructMotionCorParser():
 def constructMotionCorKwargs(imgmetadata : dict, cli_args : dict, gain_input : str = "/tmp/gain.mrc", 
                dark_input : str = "/tmp/dark.mrc", defect_map_path : str ="/tmp/defect.mrc", 
                fmintfile : str ="/tmp/fmintfile.txt", force_cpu_flat : bool = False,
-               rendered_frame_size : int = 1, totaldose : float = False) -> dict:
+               rendered_frame_size : int = 1) -> dict:
 
     # Keyword args for motioncor2 function
     kwargs={}
@@ -110,7 +110,7 @@ def constructMotionCorKwargs(imgmetadata : dict, cli_args : dict, gain_input : s
         kwargs["Throw"] = cli_args["startframe"]
     if 'nrw' in cli_args.keys():
         kwargs["Group"] = cli_args["nrw"]
-    # This flag doesn't seem to have been supported in motioncor2 since the 01-30-2017 version. |
+    # This flag doesn't seem to have been supported in motioncor2 since the 01-30-2017 version.
     #if 'MaskSizecols' in cli_args.keys() and 'MaskSizerows' in cli_args.keys():
     #    kwargs["MaskSize"] = "%d %d" % (cli_args["MaskSizecols"], cli_args["MaskSizerows"])
     if 'FmRef' in cli_args.keys():
@@ -119,7 +119,10 @@ def constructMotionCorKwargs(imgmetadata : dict, cli_args : dict, gain_input : s
         kwargs["Gpu"] = cli_args["gpuids"]
 # TODO Figure out how user input might interact with Trunc calculation
 #| `-Trunc` | User Input / Calculated | `setAlignedSumFrameList`, `-nframe`, `-startframe`, `driftlimit`, `apix` | |
-
+    if "totaldose" in cli_args.keys():
+        totaldose = cli_args["totaldose"]
+    else:
+        totaldose = imgmetadata['dose']
     # InMrc, InTiff, InEer
     # Get the path to the input image.
     fpath = readInputPath(imgmetadata['session_image_path'].replace("leginon","frames"),imgmetadata['image_filename'])
@@ -187,3 +190,16 @@ def constructMotionCorKwargs(imgmetadata : dict, cli_args : dict, gain_input : s
 
 
     return kwargs
+
+def preTask(imageid: int, args : dict):
+    imgmetadata=readImageMetadata(imageid, False, args["align"], False)
+    return constructMotionCorKwargs(imgmetadata, args)
+    (imgmetadata : dict, cli_args : dict, gain_input : str = "/tmp/gain.mrc", 
+               dark_input : str = "/tmp/dark.mrc", defect_map_path : str ="/tmp/defect.mrc", 
+               fmintfile : str ="/tmp/fmintfile.txt", force_cpu_flat : bool = False,
+               rendered_frame_size : int = 1, totaldose : float = False) 
+
+def postTask():
+    #updateDb
+    # write out motioncorr log
+    pass
