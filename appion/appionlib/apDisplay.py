@@ -5,8 +5,6 @@ import re
 import sys
 import types
 import glob
-import os
-import inspect
 
 ####
 # This is a low-level file with NO database connections
@@ -23,27 +21,10 @@ except:
 def isDebugOn():
 	return debug
 
-def getCallingFunctionAndModule():
-	cm=""
-	cf=""
-	if len(inspect.stack()) >= 3:
-		cm=inspect.stack()[2]
-		try:
-			cf=cm[3]
-		except IndexError:
-			cf=""
-		cm=inspect.getmodule(cm[0])
-		try:
-			cm=cm.__name__
-		except AttributeError:
-			cm=""
-	return cm, cf
-
 def printWarning(text):
 	"""
 	standardized warning message
 	"""
-	cm, cf = getCallingFunctionAndModule()
 	if writeOut is True:
 		try:
 			f = open(outFile, "a")
@@ -51,13 +32,12 @@ def printWarning(text):
 			f.close()
 		except:
 			print "write error"
-	sys.stderr.write(colorString("!!! WARNING: [ %d ] [ %s ] [%s] " % (os.getpid(), cm, cf) +text,"yellow")+"\n")
+	sys.stderr.write(colorString("!!! WARNING: "+text,"yellow")+"\n")
 
 def printMsg(text, colorstr=None):
 	"""
 	standardized log message
 	"""
-	cm, cf = getCallingFunctionAndModule()
 	if writeOut is True:
 		try:
 			f = open(outFile, "a")
@@ -65,7 +45,7 @@ def printMsg(text, colorstr=None):
 			f.close()
 		except:
 			print "write error"
-	sys.stderr.write(" ... [ %d ] [ %s ] [%s] " % (os.getpid(), cm, cf) +colorString(text, colorstr)+"\n")
+	sys.stderr.write(" ... "+colorString(text, colorstr)+"\n")
 	
 def printError(text,raised=True):
 	"""
@@ -83,7 +63,6 @@ def printError(text,raised=True):
 		except OSError as e:
 			printWarning('unlock %s failed: %s.' % (lockfile, e))
 	'''
-	cm, cf = getCallingFunctionAndModule()
 	if writeOut is True:
 		try:
 			f = open(outFile, "a")
@@ -92,15 +71,14 @@ def printError(text,raised=True):
 		except:
 			print "write error"
 	if raised:
-		raise Exception, colorString("\n *** FATAL ERROR *** [ %d ] [ %s ] [%s] \n" % (os.getpid(), cm, cf) +text+"\n\a","red")
+		raise Exception, colorString("\n *** FATAL ERROR ***\n"+text+"\n\a","red")
 	else:
-		sys.stderr.write(colorString("\n *** FATAL ERROR *** [ %d ] [ %s ] [%s] \n" % (os.getpid(), cm, cf) +text+"\n\a","red"))
+		sys.stderr.write(colorString("\n *** FATAL ERROR ***\n"+text+"\n\a","red"))
 
 def printDebug(text):
 	"""
 	standardized debug message
 	"""
-	cm, cf = getCallingFunctionAndModule()
 	if not debug:
 		return
 	if writeOut is True:
@@ -110,7 +88,7 @@ def printDebug(text):
 			f.close()
 		except:
 			print "write error"
-	sys.stderr.write(colorString("!!! DEBUG: [ %d ] [ %s ] [%s] " % (os.getpid(), cm, cf) +text,"yellow")+"\n")
+	sys.stderr.write(colorString("!!! DEBUG: "+text,"yellow")+"\n")
 
 def printColor(text, colorstr):
 	"""
