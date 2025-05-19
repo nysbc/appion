@@ -1,4 +1,5 @@
 import argparse
+import os
 
 def constructGlobalParser():
     """
@@ -7,10 +8,12 @@ def constructGlobalParser():
     parser = argparse.ArgumentParser(add_help=False)
 
     ### Input value options
+    parser.add_argument("-r", "--rundir", dest="rundir",
+        help="Path to the run directory", type=str, default=os.getcwd())
     parser.add_argument("-s", "--session", dest="sessionname",
-        help="Session name associated with processing run, e.g. --session=06mar12a", metavar="SESSION")
+        help="Session name associated with processing run, e.g. --session=06mar12a")
     parser.add_argument("--preset", dest="preset",
-        help="Image preset associated with processing run, e.g. --preset=en", metavar="PRESET")
+        help="Image preset associated with processing run, e.g. --preset=en")
 
     #parser.add_argument("--reprocess", dest="reprocess", type=float,
     #	help="Only process images that pass this reprocess criteria")

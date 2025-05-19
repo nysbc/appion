@@ -36,6 +36,8 @@ def constructMotionCorParser():
         help="Trim edge off after frame stack gain/dark correction")
     parser.add_argument("--align", dest="align", default=False,
         action="store_true", help="Make Aligned frame stack")
+    parser.add_argument("--refimgid", dest="refimgid", type=int,
+        help="Specify a corrected image to do gain/dark correction with")
 
     parser.add_argument("--gpuid", dest="gpuid", type=int, default=0,
         help="GPU device id used in gpu processing")
@@ -77,19 +79,17 @@ def constructMotionCorParser():
     parser.add_argument("--Bft_local",dest="Bft_local",type=float,default=150.0,
                     help=" Global B-Factor for alignment, default 150.0.")
 
-    #parser.add_argument("--force_cpu_flat", dest="force_cpu_flat", default=False,
-    #	action="store_true", help="Use cpu to make frame flat field corrrection")
+    # Not used anymore.  Get rid of?  Was this meant for pre-direct detector images (camera CMOS/CCD)?
+    parser.add_argument("--force_cpu_flat", dest="force_cpu_flat", default=False,
+    	action="store_true", help="Use cpu to make frame flat field corrrection")
 
     parser.add_argument("--rendered_frame_size", dest="rendered_frame_size", type=int, default=1,
-        help="Sum this number of saved frames as a rendered frame in alignment", metavar="INT")
+        help="Sum this number of saved frames as a rendered frame in alignment")
     parser.add_argument("--eer_sampling", dest="eer_sampling", type=int, default=1,
         help="Upsampling eer frames. Fourier binning will be added to return the results back", metavar="INT")
     return parser
 
-def constructMotionCorKwargs(imgmetadata : dict, cli_args : dict, gain_input : str = "/tmp/gain.mrc", 
-               dark_input : str = "/tmp/dark.mrc", defect_map_path : str ="/tmp/defect.mrc", 
-               fmintfile : str ="/tmp/fmintfile.txt", force_cpu_flat : bool = False,
-               rendered_frame_size : int = 1) -> dict:
+def constructMotionCorKwargs(imgmetadata : dict, cli_args : dict) -> dict:
 
     # Keyword args for motioncor2 function
     kwargs={}
@@ -123,6 +123,7 @@ def constructMotionCorKwargs(imgmetadata : dict, cli_args : dict, gain_input : s
         totaldose = cli_args["totaldose"]
     else:
         totaldose = imgmetadata['dose']
+
     # InMrc, InTiff, InEer
     # Get the path to the input image.
     fpath = readInputPath(imgmetadata['session_image_path'].replace("leginon","frames"),imgmetadata['image_filename'])
@@ -131,10 +132,7 @@ def constructMotionCorKwargs(imgmetadata : dict, cli_args : dict, gain_input : s
 
     # Gain
     # Get the reference image
-    if gain_input:
-        kwargs["Gain"]=gain_input
-    else:
-        kwargs["Gain"]=imgmetadata['gain_input']
+    kwargs["Gain"]=imgmetadata['gain_input']
 
     # TODO - what exactly is the bright reference?  It isn't passed as a param into motioncor2, but
     # Appion still prints out its path.  To what end / why?
@@ -148,23 +146,25 @@ def constructMotionCorKwargs(imgmetadata : dict, cli_args : dict, gain_input : s
     # self.setCameraInfo(1,use_full_raw_area)
         
     # Get the dark image.  Create it if it does not exist.
-
-    saveDark(dark_input, imgmetadata['camera_name'], imgmetadata['eer_frames'], imgmetadata["dark_input"], imgmetadata["dark_nframes"])
-    kwargs["Dark"]=dark_input
+    dark_path=os.path.join(cli_args["rundir"], imgmetadata['filename']+"_dark.mrc")
+    saveDark(dark_path, imgmetadata['camera_name'], imgmetadata['eer_frames'], imgmetadata["dark_input"], imgmetadata["dark_nframes"])
+    kwargs["Dark"]=dark_path
 
     # DefectMap
     if imgmetadata['bad_pixels'] or imgmetadata['bad_cols'] or imgmetadata['bad_rows']:
+        defect_map_path=os.path.join(cli_args["rundir"], imgmetadata['filename']+"_defect.mrc")
         defect_map=calcImageDefectMap(imgmetadata['bad_rows'], imgmetadata['bad_cols'], imgmetadata['bad_pixels'], imgmetadata['dx'], imgmetadata['dy'])
         saveDefectMrc(defect_map_path, defect_map, imgmetadata['frame_flip'], imgmetadata['frame_rotate'])
 
     # FmIntFile
     # FmDose
     if "InEer" in kwargs.keys():
-        kwargs["FmDose"] = calcFmDose(imgmetadata['total_raw_frames'], imgmetadata['exposure_time'], imgmetadata['frame_time'], imgmetadata['dose'], rendered_frame_size, totaldose, True)
-        saveFmIntFile(fmintfile, imgmetadata['total_raw_frames'], rendered_frame_size, kwargs["FmDose"] / rendered_frame_size)
-        kwargs["FmIntFile"] = fmintfile
+        kwargs["FmDose"] = calcFmDose(imgmetadata['total_raw_frames'], imgmetadata['exposure_time'], imgmetadata['frame_time'], imgmetadata['dose'], cli_args['rendered_frame_size'], totaldose, True)
+        fmintfile_path=os.path.join(cli_args["rundir"], imgmetadata['filename']+"_fmintfile.txt")
+        saveFmIntFile(fmintfile_path, imgmetadata['total_raw_frames'], cli_args['rendered_frame_size'], kwargs["FmDose"] / cli_args['rendered_frame_size'])
+        kwargs["FmIntFile"] = fmintfile_path
     else:
-        kwargs["FmDose"] = calcFmDose(imgmetadata['total_raw_frames'], imgmetadata['exposure_time'], imgmetadata['frame_time'], imgmetadata['dose'], rendered_frame_size, totaldose, False)
+        kwargs["FmDose"] = calcFmDose(imgmetadata['total_raw_frames'], imgmetadata['exposure_time'], imgmetadata['frame_time'], imgmetadata['dose'], cli_args['rendered_frame_size'], totaldose, False)
 
     # PixSize
 
@@ -185,7 +185,7 @@ def constructMotionCorKwargs(imgmetadata : dict, cli_args : dict, gain_input : s
     # FlipGain
     kwargs['RotGain'], kwargs['FlipGain'] = calcRotFlipGain(imgmetadata['frame_rotate'], 
                                                            imgmetadata['frame_flip'], 
-                                                           force_cpu_flat, 
+                                                           cli_args['force_cpu_flat'], 
                                                            imgmetadata['frame_aligner_flat'])
 
 
@@ -193,11 +193,10 @@ def constructMotionCorKwargs(imgmetadata : dict, cli_args : dict, gain_input : s
 
 def preTask(imageid: int, args : dict):
     imgmetadata=readImageMetadata(imageid, False, args["align"], False)
+    if 'refimgid' in args.keys():
+        gainmetadata=readImageMetadata(args['refimgid'], False, args["align"], False)
+        imgmetadata['gain_input']=readInputPath(gainmetadata['session_image_path'].replace("leginon","frames"),gainmetadata['image_filename'])
     return constructMotionCorKwargs(imgmetadata, args)
-    (imgmetadata : dict, cli_args : dict, gain_input : str = "/tmp/gain.mrc", 
-               dark_input : str = "/tmp/dark.mrc", defect_map_path : str ="/tmp/defect.mrc", 
-               fmintfile : str ="/tmp/fmintfile.txt", force_cpu_flat : bool = False,
-               rendered_frame_size : int = 1, totaldose : float = False) 
 
 def postTask():
     #updateDb

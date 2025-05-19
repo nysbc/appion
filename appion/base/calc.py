@@ -8,7 +8,7 @@ def filterImages(images, checkpoint_images, reprocess_images : set = set(), reje
 
 def getTiltAngleDeg(imgdata):
     from math import degrees
-	return degrees(imgdata['scope']['stage position']['a'])
+    return degrees(imgdata['scope']['stage position']['a'])
 
 def calcSkipTiltAngle(tilt_angle, tilt_angle_type, unit : str = "radians") -> bool:
     if unit == "radians":

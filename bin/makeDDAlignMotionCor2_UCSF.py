@@ -18,7 +18,12 @@ def main():
     args = parser.parse_args()
     cluster = SLURMCluster(queue="long", cores=2, memory="16G", job_extra_directives=["-J motioncor2-worker"], processes=8,local_directory="/h2/jpellman/appion_django/dask/spillover", death_timeout=120, log_directory="/h2/jpellman/appion-django/dask/logs", walltime="2:00:00", shared_temp_directory="/h2/jpellman/appion_django/dask/shared_inc",scheduler_options={'port':8889})
     cluster.adapt(minimum_jobs=2,maximum_jobs=10)
-    loop(filterImages, preTask, motioncor, postTask, saveCheckpoint, cluster)
+    loop(filterImages, 
+         lambda imageid : preTask(imageid, vars(args)), 
+         motioncor, 
+         postTask, 
+         saveCheckpoint, 
+         cluster)
  
 if __name__ == '__main__':
     main()

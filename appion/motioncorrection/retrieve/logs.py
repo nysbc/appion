@@ -1,3 +1,6 @@
+def retrieveLogParser(version : str) -> function:
+    return parseMotionCorLog
+
 def parseMotionCorLog(outbuffer: list) -> dict:
     '''
     Parses the output log from motioncor2/motioncor3 and converts it into a dict.

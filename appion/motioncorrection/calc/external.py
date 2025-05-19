@@ -2,10 +2,15 @@
 # Copyright 2025 New York Structural Biology Center
 
 from shutil import which
+from ..retrieve.version import readMotionCorVersion
+from ..retrieve.logs import retrieveLogParser
 import subprocess
-from appion.motioncor.retrieve.logs import parseMotionCorLog
 
-VALIDPARAMS=set(["InMrc","InTiff","InEer","OutMrc","ArcDir",
+def compareSupportedVersion(version : str) -> bool:
+    return version in ["MotionCor2 version 1.5.0","MotionCor2 version 1.6.4"]
+
+def validateMotionCorArgs(version : str, passedParams : set) -> bool:
+    baseParams=set(["InMrc","InTiff","InEer","OutMrc","ArcDir",
                     "FullSum","DefectFile","InAln","OutAln",
                     "DefectMap","Serial","Gain","Dark","TmpFile",
                     "Patch","Iter","Tol","Bft","PhaseOnly","StackZ",
@@ -13,27 +18,34 @@ VALIDPARAMS=set(["InMrc","InTiff","InEer","OutMrc","ArcDir",
                     "Throw","Trunc","SumRange","Group","Crop","FmRef",
                     "Tilt","RotGain","FlipGain","Mag","InFmMotion",
                     "Gpu","GpuMemUsage","UseGpus","SplitSum","OutStar"])
-
-def motioncor(dryrun : bool = False, motionCorVersion: str = "2.1.5.0", executable="motioncor2", **kwargs) -> tuple:
-    # Convert semantic version to int.  Use a dummy version if the version can't be cast into a float.
-    try:
-        motionCorVersion=motionCorVersion.split(".")
-        majorVersion=int(motionCorVersion[0])
-        motionCorVersion=float("".join(motionCorVersion))/(10**(len(motionCorVersion)-1))
-    except:
-        majorVersion=0
-        motionCorVersion=0.0
-    if majorVersion not in [2,3]:
-        raise RuntimeError("Unsupported major version of motioncor: %d" % majorVersion)
-    passedParams=set(kwargs.keys())
-    if len(VALIDPARAMS | passedParams) != len(VALIDPARAMS):
-        raise RuntimeError("Unsupported parameters: %s" % ", ".join(passedParams - VALIDPARAMS))
+    validParams=baseParams
+    if len(validParams | passedParams) != len(validParams):
+        return False, validParams
     if "InTiff" not in passedParams and "InMrc" not in passedParams and "InEer" not in passedParams:
-        raise RuntimeError("Input file not specified for %s run." % executable)
+        return False, validParams
+
+def motioncor(dryrun : bool = False, version: str = "", executable="motioncor2", **kwargs) -> tuple:
     cmd=which(executable)
     if not cmd:
         raise RuntimeError("%s binary is not in path.  Cannot execute." % executable)
     else:
+        if not version:
+            version=readMotionCorVersion(cmd)
+        if not version:
+            raise RuntimeError("Could not determine motioncor version.")
+        supported=compareSupportedVersion(version)
+        if not supported:
+            raise RuntimeError("Unsupported version of motioncor: %s" % str(version))
+        validArgs, validParams=validateMotionCorArgs(version, set(kwargs.keys()))
+        if not validArgs:
+            invalidArgs=", ".join(list(validParams - set(kwargs.keys())))
+            invalidArgs=invalidArgs.rstrip(", ")
+            validParamsStr=", ".join(list(validParams))
+            validParamsStr=validParamsStr.rstrip(", ")
+            raise RuntimeError("Invalid argument(s) passed in: %s.\nValid parameters are as follows: %s" % (invalidArgs, validParamsStr))
+        logparser=retrieveLogParser(version)
+        if not logparser:
+            raise RuntimeError("No supported log parser for motioncor version %s." % version)
         cmd=[cmd]
     for k,v in kwargs.items():
         if type(v) in [tuple, list]:
@@ -47,5 +59,5 @@ def motioncor(dryrun : bool = False, motionCorVersion: str = "2.1.5.0", executab
         proc=subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=True, text=True, encoding="utf-8")
         rawoutput=proc.stdout
         output=rawoutput.split("\n")
-        output=parseMotionCorLog(output)
+        output=logparser(output)
     return output, rawoutput
