@@ -39,6 +39,3 @@ We concern ourselves with layer 3.
 2. Workflow Manager: `joblib`
 
 At the uppermost layer is a daemon that loops until SIGTERM is received.  This daemon uses functions from the data plane to query for parameters, uses the calculation stacks to perform processing, and then stores the results using the data plane functions.  The runtime stack is used to run all of these functions with interchangeable backends.  The daemon also takes in user-provided parameters.
-
-
-

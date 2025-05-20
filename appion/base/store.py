@@ -6,7 +6,9 @@ from sinedon.models.appion import ScriptParamName
 from sinedon.models.appion import ScriptParamValue
 from sinedon.models.appion import ApAssessmentRunData
 from sinedon.models.appion import ApAppionJobData
+from sinedon.models.appion import ApPathData
 from sinedon.models.projects import processingdb
+import sys
 import platform
 import importlib.metadata
 import os, pwd
@@ -18,10 +20,10 @@ from argparse import ArgumentParser
 import json
 from dask.distributed import Lock
 
-
-def saveScriptProgramName(name):
-    progname = ScriptProgramName(name=name)
+def saveScriptProgramName():
+    progname = ScriptProgramName(name=sys.argv[0])
     progname.save()
+    return progname.def_id
 
 def saveScriptUsername():
     getpwuid=pwd.getpwuid(os.getuid())
@@ -31,6 +33,7 @@ def saveScriptUsername():
                             fullname = getpwuid[4],
                             unixshell = getpwuid[6])
     username.save()
+    return username.def_id
 
 def saveScriptHostName():
     cpu_info = get_cpu_info()
@@ -45,6 +48,7 @@ def saveScriptHostName():
 							  arch = platform.machine()
 							  )
     hostname.save()
+    return hostname.def_id
 
 def saveScriptProgramRun(runname, ref_scriptprogramname_progname, ref_scriptusername_username, ref_scripthostname_hostname, ref_appathdata_rundir, ref_apappionjobdata_job, ref_appathdata_appion_path):
     getpwuid=pwd.getpwuid(os.getuid())
@@ -59,6 +63,7 @@ def saveScriptProgramRun(runname, ref_scriptprogramname_progname, ref_scriptuser
 							   unixshell=getpwuid[6]
 							   )
     progrun.save()
+    return progrun.def_id
 
 # Run parse_args() to get a namespace object and then transfrom that into a dict with vars()
 def saveScriptParams(args : dict, ref_scriptprogramname_progname, ref_scriptprogramrun_progrun, parser : ArgumentParser):
@@ -130,33 +135,40 @@ def saveApAssessmentRunData(ref_sessiondata_session, assessment="unassessed"):
         assessrun = ApAssessmentRunData(ref_sessiondata_session=ref_sessiondata_session,
                                         name = "run1")
         assessrun.save()
+        return assessrun.def_id
+    return None
 
 # ApAppionJobData
-
-# Appion database is initialized by myamiweb / web viewer.
-def readAppionDatabaseName(projectid):
-    project = processingdb.objects.get(ref_projects_project=projectid)
-    return project.appiondb
 
 def updateApAppionJobData(jobid, status):
     appionjob = ApAppionJobData.objects.get(def_id=jobid)
     appionjob.status = status
     appionjob.save()
+    return appionjob.def_id
 
 def saveApAppionJobData(ref_appathdata_path, jobtype, runname, user, hostname, ref_sessiondata_session):
     #=====================
-    clust = ApAppionJobData.objects.get(ref_appathdata_path = ref_appathdata_path,
+    appionjob = ApAppionJobData.objects.get(ref_appathdata_path = ref_appathdata_path,
                                         jobtype = jobtype)
-    if not clust:
+    if not appionjob:
         ### insert a cluster job
-        clust = ApAppionJobData(name = runname+".appionsub.job",
+        appionjob = ApAppionJobData(name = runname+".appionsub.job",
                                 ref_appathdata_clusterpath = ref_appathdata_path,
                                 user = user,
                                 cluster = hostname,
                                 status = "R",
                                 ref_sessiondata_session = ref_sessiondata_session,
                                 jobtype=jobtype)
-        clust.save()
+        appionjob.save()
+    return appionjob.def_id
+
+# ApPathData
+def savePathData(path):
+	appath = ApPathData.objects.get(path=path)
+	if not appath:
+		appath = ApPathData(path=path)
+		appath.save()
+	return appath.def_id
 
 # Handle locking using Dask distributed lock
 def saveCheckpoint(image_id, checkpoint_path):

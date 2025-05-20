@@ -11,7 +11,6 @@ from sinedon.models.leginon import AcquisitionImageData
 from sinedon.models.leginon import ObjIceThicknessData
 from sinedon.models.leginon import ZeroLossIceThicknessData
 from sinedon.models.appion import ApDDStackParamsData
-from sinedon.models.appion import ApPathData
 from sinedon.models.appion import ApDDStackRunData
 from .calc import *
 import sinedon.setup
@@ -149,14 +148,6 @@ def saveDDStackRunData(preset, align, bin, runname, rundir, ref_sessiondata_sess
 		ddstackrundata.save()
 	return ddstackrundata.def_id
 
-		
-# ApPathData
-def savePathData(path):
-	appath = ApPathData.objects.get(path=path)
-	if not appath:
-		appath = ApPathData(path=path)
-		appath.save()
-	return appath.def_id
 
 def saveMotionCorrLog(logData: dict, outputLogPath: str, throw: int, totalRenderedFrames: int, binning: float = 1.0) -> None:
     ''' 

@@ -1,11 +1,12 @@
-from dask.distributed import Client, as_completed
+from dask.distributed import Client, wait
 from distributed.deploy import Cluster
+from time import sleep
 import logging
 import sys
 from signal import signal, SIGINT, SIGTERM, SIGCONT, Signals
 
 # Parameters passed in using lambdas.
-def loop(updateTaskList : function, preTask: function, task: function, postTask : function, checkpoint : function, cluster : Cluster) -> None:
+def loop(updateTaskList : function, preTask: function, task: function, postTask : function, checkpoint : function, cluster : Cluster, retries : int = 3) -> None:
     # Signal handler used to ensure that cleanup happens if SIGINT, SIGCONT or SIGTERM is received.
     def handler(signum, frame):
         signame = Signals(signum).name
@@ -38,15 +39,11 @@ def loop(updateTaskList : function, preTask: function, task: function, postTask 
     client = Client(cluster)
     while True:
         tasklist=updateTaskList()
-        futures = []
-        for t in tasklist:
-            f_pre=client.submit(preTask, t)
-            futures.append(f_pre)
-            f_task=client.submit(task, f_pre)
-            futures.append(f_task)
-            f_post=client.submit(postTask, f_task)
-            futures.append(f_post)
-            f_checkpoint=client.submit(checkpoint, f_post)
-            futures.append(f_checkpoint)
-        for future, result in as_completed(futures, with_results=True):
-            logger.info("Task has completed: %s" % str(result))
+        if tasklist:
+            pre_task_futures = client.map(tasklist, preTask, retries=retries, pure=False)
+            task_futures = client.map(pre_task_futures, task, retries=retries, pure=False)
+            post_task_futures = client.map(task_futures, postTask, retries=retries, pure=False)
+            checkpoint_futures = client.map(post_task_futures, checkpoint, retries=retries, pure=False)
+            wait(pre_task_futures + task_futures + post_task_futures + checkpoint_futures)
+        else:
+            sleep(30)
