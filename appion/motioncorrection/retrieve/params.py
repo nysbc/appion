@@ -59,6 +59,7 @@ def readShiftsBetweenFrames(logfile : str) -> list:
 # Retrieves metadata from the database that is used to calculate inputs to motioncor2/motioncor3
 def readImageMetadata(imageid: int, has_bad_pixels : bool = False, is_align : bool = False, has_non_zero_dark : bool = False):
     imgmetadata={}
+    imgmetadata['imageid']=imageid
     imgdata=AcquisitionImageData.objects.get(def_id=imageid)
     correctorplandata=imgdata.ref_correctorplandata_corrector_plan
     sessiondata=imgdata.ref_sessiondata_session
@@ -123,4 +124,5 @@ def readImageMetadata(imageid: int, has_bad_pixels : bool = False, is_align : bo
     darkdata = AcquisitionImageData.objects.get(def_id=imgmetadata['dark_id'])
     imgmetadata['dark_input']=darkdata.mrc_image
     imgmetadata['dark_nframes']=darkdata.ref_cameraemdata_camera.nframes
+    imgmetadata['presetid']=imgdata.ref_presetdata_preset
     return imgmetadata

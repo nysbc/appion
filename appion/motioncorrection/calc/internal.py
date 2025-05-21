@@ -164,3 +164,32 @@ def calcFrameShiftFromPositions(positions,running=1):
 		shifts.append(shifts[-1])
 		shifts[i] = shifts[offset]
 	return shifts
+
+def calcAlignedCamera(dimensions : tuple, square_output : bool, binning : tuple, offset : tuple, stack_binning, trimming_edge, framelist, nframes):
+    '''
+    DD aligned image will be uploaded into database with the specified binning.
+    If self.square_output is True, with a square
+    camera dimension at the center and the specificed binning
+    '''
+    # First element is x, second element is y in tuples.
+    if square_output:
+        mindim = min(dimensions)
+        dimensions = (mindim, mindim)
+    unaligned_binning = binning[0]
+    aligned_binning = unaligned_binning * stack_binning
+    aligned_binning = (aligned_binning, aligned_binning)
+    aligned_dimensions = []
+    aligned_offset = []
+    for axis in [0,1]:
+        camerasize = (offset[axis]*2+dimensions[axis])*binning[axis]
+        aligned_dimensions.append(dimensions[axis] * binning[axis] / aligned_binning - 2*trimming_edge / aligned_binning)
+        aligned_offset.append((camerasize/aligned_binning -dimensions[axis])/2)
+    aligned_dimensions = tuple(aligned_dimensions)
+    aligned_offset = tuple(aligned_offset)
+    # see Issue 12298
+    if framelist and framelist != range(nframes):
+        use_frames = framelist
+    else:
+        # assume all frames that are saved are used by not defining the list
+        use_frames = None
+    return aligned_binning, aligned_dimensions, aligned_offset, use_frames

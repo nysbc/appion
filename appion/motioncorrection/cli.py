@@ -223,12 +223,13 @@ def task(kwargs, jobmetadata, args, imageid):
     return jobmetadata, args, imageid, output
 
 def postTask(jobmetadata, imgmetadata, args, kwargs, imageid, logData):
+    # constructAlignedCamera(camera_id, square_output):
     saveApAssessmentRunData(jobmetadata['ref_sessiondata_session'], assessment)
     updateApAppionJobData(jobid, "D")
     uploadAlignedImage(imageid, aligned_image_def_id, rundata_def_id, logData["shifts"], kwargs["PixSize"])
     saveFrameTrajectory(image_def_id, rundata_def_id, logData["shifts"], limit, reference_index, particle)
     # TODO Probably should rename the bin param so that it doesn't override the bin function
-    saveDDStackParamsData(args['preset'], args['align'], bin, ref_apddstackrundata_unaligned_ddstackrun, method, ref_apstackdata_stack, ref_apdealignerparamsdata_de_aligner)
-    saveDDStackRunData(args['preset'], args['align'], bin, jobmetadata['runname'], args['rundir'], imgmetadata["session_id"])
+    saveDDStackParamsData(args['preset'], args['align'], binning, ref_apddstackrundata_unaligned_ddstackrun, method, ref_apstackdata_stack, ref_apdealignerparamsdata_de_aligner)
+    saveDDStackRunData(args['preset'], args['align'], binning, jobmetadata['runname'], args['rundir'], imgmetadata["session_id"])
     saveMotionCorrLog(logData, outputLogPath, throw, totalRenderedFrames, binning)
     return imageid

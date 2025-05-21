@@ -7,7 +7,7 @@ import mrcfile
 from sinedon.models.appion import ApDDAlignImagePairData
 from sinedon.models.appion import ApDDFrameTrajectoryData
 from sinedon.models.appion import ApDDAlignStatsData
-from sinedon.models.leginon import AcquisitionImageData
+from sinedon.models.leginon import AcquisitionImageData, PresetData
 from sinedon.models.leginon import ObjIceThicknessData
 from sinedon.models.leginon import ZeroLossIceThicknessData
 from sinedon.models.appion import ApDDStackParamsData
@@ -23,36 +23,6 @@ def getTrimmingEdge():
 
 def getStackBinning():
      pass
-
-def calcAlignedCamera(dimensions : tuple, square_output : bool, binning : tuple, offset : tuple, stack_binning, trimming_edge, framelist, nframes):
-    '''
-    DD aligned image will be uploaded into database with the specified binning.
-    If self.square_output is True, with a square
-    camera dimension at the center and the specificed binning
-    '''
-    # First element is x, second element is y in tuples.
-    #camdata = self.getImageCameraEMData()
-    if square_output:
-        mindim = min(dimensions)
-        dimensions = (mindim, mindim)
-    unaligned_binning = binning[0]
-    aligned_binning = unaligned_binning * stack_binning
-    aligned_binning = (aligned_binning, aligned_binning)
-    aligned_dimensions = []
-    aligned_offset = []
-    for axis in [0,1]:
-        camerasize = (offset[axis]*2+dimensions[axis])*binning[axis]
-        aligned_dimensions.append(dimensions[axis] * binning[axis] / aligned_binning - 2*trimming_edge / aligned_binning)
-        aligned_offset.append((camerasize/aligned_binning -dimensions[axis])/2)
-    aligned_dimensions = tuple(aligned_dimensions)
-    aligned_offset = tuple(aligned_offset)
-    # see Issue 12298
-    if framelist and framelist != range(nframes):
-        use_frames = framelist
-    else:
-        # assume all frames that are saved are used by not defining the list
-        use_frames = None
-    return aligned_binning, aligned_dimensions, aligned_offset, use_frames
 
 def getAlignedSumFrameList():
     pass
@@ -88,54 +58,62 @@ def constructAlignedCamera(camera_id, square_output):
             camdata.seq_use_frames=str(use_frames)
         else:
             camdata.seq_use_frames=None
+        camdata.align_frames=True
         camdata.save()
         return camdata.def_id
     return None
 
-# def makeAlignedImageData(aligned_sumpath,alignlabel='a'):
-#     '''
-#     Prepare ImageData to be uploaded after alignment
-#     '''
-#     camdata = self.aligned_camdata
-#     new_array = mrcfile.read(aligned_sumpath)
-#     return makeAlignedImageData2(self.image,camdata,new_array,alignlabel)
+def constructAlignedPresets(preset_id, camera_id, magnification, defocus, tem, session, alignlabel='a'):
+    align_presetdata = PresetData.objects.get(def_id=preset_id)
+    camdata = CameraEMData.objects.get(def_id=camera_id)
+    if not align_presetdata:
+        align_presetdata=PresetData(name="ma-%s" % alignlabel,
+                                    magnification=magnification,
+                                    defocus=defocus,
+                                    tem=tem,
+                                    ccdcamera=camdata,
+                                    session=session)
+    else:
+        # https://docs.djangoproject.com/en/5.2/topics/db/queries/#copying-model-instances
+        align_presetdata.pk = None
+        align_presetdata._state.adding = True
+        align_presetdata.name = "%s-%s" % (align_presetdata.name, alignlabel)
+    align_presetdata.dimension_x = camdata.subd_dimension_x
+    align_presetdata.dimension_y = camdata.subd_dimension_y
+    align_presetdata.binning_x = camdata.subd_binning_x
+    align_presetdata.binning_y = camdata.subd_binning_y
+    align_presetdata.offset_x = camdata.subd_offset_x
+    align_presetdata.offset_y = camdata.subd_offset_y
+    align_presetdata.exposure_time = camdata.exposure_time
+    align_presetdata.save()
+    return align_presetdata.def_id
 
-# def makeAlignedImageData2(old_imagedata,new_camdata,new_array,alignlabel='a'):
-# 		'''
-# 		Prepare ImageData to be uploaded after alignment
-# 		'''
-# 		label_string = '-%s' % (alignlabel)
-# 		camdata = leginondata.CameraEMData(initializer=new_camdata) # new CameraEMData for the aligned image
-# 		align_presetdata = leginondata.PresetData(initializer=old_imagedata['preset'])
-# 		if old_imagedata['preset'] is None:
-# 			old_name = 'ma'
-# 			align_presetdata = leginondata.PresetData(
-# 					name='ma-%s' % (label_string),
-# 					magnification=old_imagedata['scope']['magnification'],
-# 					defocus=old_imagedata['scope']['defocus'],
-# 					tem = old_imagedata['scope']['tem'],
-# 					ccdcamera = camdata['ccdcamera'],
-# 					session = old_imagedata['session'],
-# 			)
-# 		else:
-# 			old_name = align_presetdata['name']
-# 			align_presetdata['name'] = old_name+label_string
-# 		align_presetdata['dimension'] = camdata['dimension']
-# 		align_presetdata['binning'] = camdata['binning']
-# 		align_presetdata['offset'] = camdata['offset']
-# 		align_presetdata['exposure time'] = camdata['exposure time']
-# 		# make new imagedata with the align_preset amd aligned CameraEMData
-# 		imagedata = leginondata.AcquisitionImageData(initializer=old_imagedata)
-# 		imagedata['preset'] = align_presetdata
-# 		imagefilename = imagedata['filename']
-# 		bits = imagefilename.split(old_name)
-# 		before_string = old_name.join(bits[:-1])
-# 		newfilename = align_presetdata['name'].join((before_string,bits[-1]))
-# 		imagedata['camera'] = camdata
-# 		imagedata['camera']['align frames'] = True
-# 		imagedata['image'] = new_array
-# 		imagedata['filename'] = makeUniqueImageFilename(imagedata,old_name,align_presetdata['name'])
-# 		return imagedata
+def makeUniqueImageFilename(imgdata, presetname, alignlabel='a'):
+    pass
+
+# Filename should be output of makeUniqueImageFilename(?)
+def constructAlignedImageData(imageid, presetid, cameraid, aligned_sumpath, filename):
+    '''
+    Prepare ImageData to be uploaded after alignment
+    '''
+    # make new imagedata with the align_preset amd aligned CameraEMData
+    imgdata=AcquisitionImageData.objects.get(def_id=imageid)
+    if imgdata:
+        # https://docs.djangoproject.com/en/5.2/topics/db/queries/#copying-model-instances
+        imgdata.pk = None
+        imgdata._state.adding = True
+        imgdata.ref_presetdata_preset=PresetData.objects.get(def_id=presetid)
+        imagefilename = imgdata.filename
+        presetname = imgdata.ref_presetdata_preset.name
+        bits = imagefilename.split(presetname)
+        before_string = presetname.join(bits[:-1])
+        newfilename = presetname.join((before_string,bits[-1]))
+        imgdata.ref_cameraemdata_camera=CameraEMData.objects.get(def_id=cameraid)
+        imgdata.mrc_image = os.path.normpath(aligned_sumpath)
+        imgdata.filename = filename
+        imgdata.save()
+        return imgdata.def_id
+    return None
 
 # ApDDAlignImagePairData
 # We can only really add insert ref IDs here b/c the raw and aligned images are in a different database from the Appion results.
@@ -243,14 +221,14 @@ def saveFrameTrajectory(image_def_id, rundata_def_id, shifts, limit=20, referenc
     return trajdata.def_id
 
 #ApDDStackParamsData
-def saveDDStackParamsData(preset, align, bin, ref_apddstackrundata_unaligned_ddstackrun, method, ref_apstackdata_stack=None, ref_apdealignerparamsdata_de_aligner=None):
-	ddstackparamsdata = ApDDStackParamsData.objects.get(preset=preset, align=align, bin=bin, 
+def saveDDStackParamsData(preset, align, binning, ref_apddstackrundata_unaligned_ddstackrun, method, ref_apstackdata_stack=None, ref_apdealignerparamsdata_de_aligner=None):
+	ddstackparamsdata = ApDDStackParamsData.objects.get(preset=preset, align=align, bin=binning, 
                                  ref_apddstackrundata_unaligned_ddstackrun=ref_apddstackrundata_unaligned_ddstackrun, 
                                          ref_apstackdata_stack=ref_apstackdata_stack,
                                          method=method,
                                          ref_apdealignerparamsdata_de_aligner=ref_apdealignerparamsdata_de_aligner)
 	if not ddstackparamsdata:
-		ddstackparamsdata = ApDDStackParamsData(preset=preset, align=align, bin=bin, 
+		ddstackparamsdata = ApDDStackParamsData(preset=preset, align=align, bin=binning, 
 									ref_apddstackrundata_unaligned_ddstackrun=ref_apddstackrundata_unaligned_ddstackrun, 
 											ref_apstackdata_stack=ref_apstackdata_stack,
 											method=method,
@@ -259,9 +237,9 @@ def saveDDStackParamsData(preset, align, bin, ref_apddstackrundata_unaligned_dds
 	return ddstackparamsdata.def_id
 			
 # ApDDStackRunData
-def saveDDStackRunData(preset, align, bin, runname, rundir, ref_sessiondata_session):
+def saveDDStackRunData(preset, align, binning, runname, rundir, ref_sessiondata_session):
 	# We don't use ApStackData so that stack is always set to None.
-	params = ApDDStackParamsData.objects.get(preset=preset,align=align,bin=bin,stack=None)
+	params = ApDDStackParamsData.objects.get(preset=preset,align=align,binning=binning,stack=None)
 	path = ApPathData.objects.get(path=os.path.abspath(rundir))
 	results = ApDDStackRunData.objects.get(runname=runname,ref_apddstackparamsdata_params=params,ref_sessiondata_session=ref_sessiondata_session,ref_appathdata_path=path)
 	if not results:
