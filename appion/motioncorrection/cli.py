@@ -202,9 +202,9 @@ def constructJobMetadata(args : dict):
     # TODO write a function to get session id from session name
     jobmetadata['ref_sessiondata_session']=readSessionId(args['session'])
     # TODO write a function to generate the run name.
-    runname=""
-    jobmetadata['ref_apappionjobdata_job']=saveApAppionJobData(jobmetadata['ref_appathdata_rundir'], "makeddalignmotioncor2_ucsf", runname, pwd.getpwuid(os.getuid())[0], platform.node(), jobmetadata['ref_sessiondata_session'])
-    jobmetadata['ref_scriptprogramrun_progrun']=saveScriptProgramRun(runname, jobmetadata['ref_scriptprogramname_progname'], jobmetadata['ref_scriptusername_username'], jobmetadata['ref_scripthostname_hostname'], jobmetadata['ref_appathdata_appion_path'], jobmetadata['ref_appathdata_rundir'], jobmetadata['ref_apappionjobdata_job'])
+    jobmetadata['runname']=""
+    jobmetadata['ref_apappionjobdata_job']=saveApAppionJobData(jobmetadata['ref_appathdata_rundir'], "makeddalignmotioncor2_ucsf", jobmetadata['runname'], pwd.getpwuid(os.getuid())[0], platform.node(), jobmetadata['ref_sessiondata_session'])
+    jobmetadata['ref_scriptprogramrun_progrun']=saveScriptProgramRun(jobmetadata['runname'], jobmetadata['ref_scriptprogramname_progname'], jobmetadata['ref_scriptusername_username'], jobmetadata['ref_scripthostname_hostname'], jobmetadata['ref_appathdata_appion_path'], jobmetadata['ref_appathdata_rundir'], jobmetadata['ref_apappionjobdata_job'])
     #TODO Modify to take in args instead of a parser object.
     saveScriptParams(args, jobmetadata['ref_scriptprogramname_progname'], jobmetadata['ref_scriptprogramrun_progrun'], args)
     return jobmetadata
@@ -216,17 +216,19 @@ def preTask(imageid: int, args : dict):
         gainmetadata=readImageMetadata(args['refimgid'], False, args["align"], False)
         imgmetadata['gain_input']=readInputPath(gainmetadata['session_image_path'].replace("leginon","frames"),gainmetadata['image_filename'])
     kwargs=constructMotionCorKwargs(imgmetadata, args)
-    return kwargs, jobmetadata, args
+    return kwargs, jobmetadata, imageid
 
-def task(kwargs, jobmetadata, args):
-    motioncor(**kwargs)
+def task(kwargs, jobmetadata, args, imageid):
+    output, rawoutput = motioncor(**kwargs)
+    return jobmetadata, args, imageid, output
 
-def postTask(jobmetadata, args, logdata):
+def postTask(jobmetadata, imgmetadata, args, kwargs, imageid, logData):
     saveApAssessmentRunData(jobmetadata['ref_sessiondata_session'], assessment)
     updateApAppionJobData(jobid, "D")
-    uploadAlignedImage(raw_image_def_id, aligned_image_def_id, rundata_def_id, logData, kwargs)
-    saveFrameTrajectory(image_def_id, rundata_def_id, shifts, limit, reference_index, particle)
+    uploadAlignedImage(imageid, aligned_image_def_id, rundata_def_id, logData["shifts"], kwargs["PixSize"])
+    saveFrameTrajectory(image_def_id, rundata_def_id, logData["shifts"], limit, reference_index, particle)
     # TODO Probably should rename the bin param so that it doesn't override the bin function
-    saveDDStackParamsData(preset, align, bin, ref_apddstackrundata_unaligned_ddstackrun, method, ref_apstackdata_stack, ref_apdealignerparamsdata_de_aligner)
-    saveDDStackRunData(preset, align, bin, runname, rundir, ref_sessiondata_session)
+    saveDDStackParamsData(args['preset'], args['align'], bin, ref_apddstackrundata_unaligned_ddstackrun, method, ref_apstackdata_stack, ref_apdealignerparamsdata_de_aligner)
+    saveDDStackRunData(args['preset'], args['align'], bin, jobmetadata['runname'], args['rundir'], imgmetadata["session_id"])
     saveMotionCorrLog(logData, outputLogPath, throw, totalRenderedFrames, binning)
+    return imageid

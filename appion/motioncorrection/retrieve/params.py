@@ -65,6 +65,7 @@ def readImageMetadata(imageid: int, has_bad_pixels : bool = False, is_align : bo
     cameradata=imgdata.ref_cameraemdata_camera
     # Additional parameters derived from the database
     # Input image parameters
+    imgmetadata['session_id']=sessiondata.def_id
     imgmetadata['session_image_path']=sessiondata.image_path
     imgmetadata['image_filename']=imgdata.filename
     # Dark inputs

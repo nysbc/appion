@@ -5,9 +5,7 @@
 import argparse
 from appion.base.cli import constructGlobalParser
 from appion.motioncorrection.cli import constructMotionCorParser
-from appion.motioncorrection.cli import preTask
-from appion.motioncorrection.calc.external import motioncor
-from appion.motioncorrection.cli import postTask
+from appion.motioncorrection.cli import preTask, task, postTask
 from appion.base import loop
 from appion.base.calc import filterImages
 from appion.base.store import saveCheckpoint
@@ -20,8 +18,8 @@ def main():
     cluster.adapt(minimum_jobs=2,maximum_jobs=10)
     loop(filterImages, 
          lambda imageid : preTask(imageid, vars(args)), 
-         motioncor, 
-         postTask, 
+         lambda p_args : task(*p_args), 
+         lambda p_args : postTask(*p_args), 
          saveCheckpoint, 
          cluster)
  
