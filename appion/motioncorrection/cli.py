@@ -203,8 +203,6 @@ def constructJobMetadata(args : dict):
     jobmetadata['ref_scripthostname_hostname']=saveScriptHostName()
     jobmetadata['ref_appathdata_appion_path']=savePathData(__path__)
     jobmetadata['ref_appathdata_rundir']=savePathData(args['rundir'])
-    # TODO write a function to get session id from session name
-    jobmetadata['ref_sessiondata_session']=readSessionId(args['session'])
     # TODO write a function to generate the run name.
     jobmetadata['runname']=""
     jobmetadata['ref_apappionjobdata_job']=saveApAppionJobData(jobmetadata['ref_appathdata_rundir'], "makeddalignmotioncor2_ucsf", jobmetadata['runname'], pwd.getpwuid(os.getuid())[0], platform.node(), jobmetadata['ref_sessiondata_session'])
@@ -223,17 +221,16 @@ def preTask(imageid: int, args : dict):
     return kwargs, jobmetadata, imageid
 
 def task(kwargs, jobmetadata, args, imageid):
-    output, rawoutput = motioncor(**kwargs)
+    output, _ = motioncor(**kwargs)
     return jobmetadata, args, imageid, output
 
 def postTask(jobmetadata, imgmetadata, args, kwargs, imageid, logData):
     # constructAlignedCamera(camera_id, square_output):
-    saveApAssessmentRunData(jobmetadata['ref_sessiondata_session'], assessment)
+    saveApAssessmentRunData(imgmetadata['session_id'], assessment)
     updateApAppionJobData(jobid, "D")
     # TODO Hardlink motion-corrected output to Leginon directory b/c that's where myamiweb / image viewer expects it to be; symlink as fallback.
     uploadAlignedImage(imageid, aligned_image_def_id, rundata_def_id, logData["shifts"], kwargs["PixSize"])
     saveFrameTrajectory(image_def_id, rundata_def_id, logData["shifts"], limit, reference_index, particle)
-    # TODO Probably should rename the bin param so that it doesn't override the bin function
     saveDDStackParamsData(args['preset'], args['align'], binning, ref_apddstackrundata_unaligned_ddstackrun, method, ref_apstackdata_stack, ref_apdealignerparamsdata_de_aligner)
     saveDDStackRunData(args['preset'], args['align'], binning, jobmetadata['runname'], args['rundir'], imgmetadata["session_id"])
     saveMotionCorrLog(logData, outputLogPath, throw, totalRenderedFrames, binning)

@@ -33,13 +33,31 @@ We concern ourselves with layer 3.
 2. Specific Applications: `motioncor2`, `motioncor3`, `ctffind4`, `gctf`
 3. Generic Wrappers: `calcMotionCorrection`, `calcCTF`
 
+We concern ourselves with layer 3.
+
 ### Runtime
 
-1. Orchestration: `dask`
-2. Workflow Manager: `loop.py
+1. Cluster Orchestration : slurm, kubernetes, etc
+2. Lightweight Orchestration: `dask`
+3. Controller: `loop.py`
+
+We concern ourselves with layer 2.
 
 At the uppermost layer is a daemon that loops until SIGTERM is received.  This daemon uses functions from the data plane to query for parameters, uses the calculation stacks to perform processing, and then stores the results using the data plane functions.  The runtime stack is used to run all of these functions with interchangeable backends.  The daemon also takes in user-provided parameters.
 
-### Versioning Scheme
+## Versioning Scheme
 
 SEMC Appion's version string is of the form `YYYY.MM.DD`, which reflects the date of the release.  If there are multiple releases within the same day, the version string can be of the form `YYYY.MM.DD.HH`.  The following suffixes may also be appended to the version string: `a` or `b`.  These indicate alpha and beta releases respectively.  Alpha releases have not been tested at all, and the code is not guaranteed to even run.  Beta releases can run, but testing for regressions / unexpected exceptions and logic issues has not occurred.
+
+## Package Organization
+
+`base` is a submodule that consists of common code that is shared by two or more processing steps.  Each other submodule (e.g., `ctfestimation`, `motioncorrection`, etc) contains code related to a specific processing step in the Cryo-EM reconstruction pipeline.  Currently only `ctfestimation` and `motioncorrection`, but particle picking (via `topaz`) and 2d/3d reconstruction submodules could also be added in the future if desired/needed.
+
+Each submodule contains the following nested submodules:
+
+* `calc` contains both pure and impure functions.  In some top-level submodules, `calc` is a single file.  For others, `calc` is further split up into functions that live in `internal` (pure functions and/or functions that don't call outside programs) and `external` (functions that call external commands like `motioncor2` and `ctffind4`).
+* `cli` contains functions that are used by the main CLI wrapper command that initiates processing.
+* `retrieve` contains functions that retrieve state from external data stores (e.g., database, filesystem)
+* `store` contains functions that update external data stores (e.g., database, filesystem)
+
+Generally, functions with side effects should go into `retrieve` or `store`.  `calc.internal` should consist primarily of pure functions, except when it makes sense to break this convention. `calc.external` should always be where wrappers around command line programs should go.
