@@ -18,33 +18,21 @@ from .calc import *
 import sinedon.setup
 sinedon.setup()
 
-def getTrimmingEdge():
-     pass
-
-def getStackBinning():
-     pass
-
-def getAlignedSumFrameList():
-    pass
-
-def getNumberOfFrameSaved():
-    pass
-
-def constructAlignedCamera(camera_id, square_output):
+# trimming_edge is the same value as kwargs["Trim"]
+# binning is cli_args.bin
+# framelist is output of filterFrameList
+# nframes is output of calcTotalFrames
+def constructAlignedCamera(camera_id, square_output, binning : int = 1, trimming_edge : int = 0, framelist : list = [], nframes : int = 0):
     camdata = CameraEMData.objects.get(def_id=camera_id)
     if camdata:
         # https://docs.djangoproject.com/en/5.2/topics/db/queries/#copying-model-instances
         camdata.pk = None
         camdata._state.adding = True
-        stack_binning=getStackBinning()
-        trimming_edge=getTrimmingEdge()
-        framelist = getAlignedSumFrameList()
-        nframes = getNumberOfFrameSaved()
         aligned_binning, aligned_dimensions, aligned_offset, use_frames = calcAlignedCamera((camdata.subd_dimension_x, camdata.subd_dimension_y), 
                                                                                             square_output, 
                                                                                             (camdata.subd_binning_x, camdata.subd_binning_y), 
                                                                                             (camdata.subd_offset_x, camdata.subd_offset_y), 
-                                                                                            stack_binning, 
+                                                                                            binning, 
                                                                                             trimming_edge, 
                                                                                             framelist, 
                                                                                             nframes)
@@ -88,11 +76,20 @@ def constructAlignedPresets(preset_id, camera_id, magnification, defocus, tem, s
     align_presetdata.save()
     return align_presetdata.def_id
 
-def makeUniqueImageFilename(imgdata, presetname, alignlabel='a'):
-    pass
+def calcVersionedFilename(basepath, filename):
+    '''
+    Make a unique image filename in the same session
+    '''
+    imgpath=os.path.join(basepath, filename)
+    img_version=0
+    while os.path.isfile(imgpath):
+        img_version+=1
+        imglist=os.path.splitext(imgpath)
+        imgpath="%s_v%02d%s" % (imglist[0], img_version, imglist[1])
+    return os.path.basename(imgpath)
 
 # Filename should be output of makeUniqueImageFilename(?)
-def constructAlignedImageData(imageid, presetid, cameraid, aligned_sumpath, filename):
+def constructAlignedImageData(imageid, presetid, cameraid, aligned_filename):
     '''
     Prepare ImageData to be uploaded after alignment
     '''
@@ -103,14 +100,9 @@ def constructAlignedImageData(imageid, presetid, cameraid, aligned_sumpath, file
         imgdata.pk = None
         imgdata._state.adding = True
         imgdata.ref_presetdata_preset=PresetData.objects.get(def_id=presetid)
-        imagefilename = imgdata.filename
-        presetname = imgdata.ref_presetdata_preset.name
-        bits = imagefilename.split(presetname)
-        before_string = presetname.join(bits[:-1])
-        newfilename = presetname.join((before_string,bits[-1]))
         imgdata.ref_cameraemdata_camera=CameraEMData.objects.get(def_id=cameraid)
-        imgdata.mrc_image = os.path.normpath(aligned_sumpath)
-        imgdata.filename = filename
+        imgdata.mrc_image = aligned_filename
+        imgdata.filename = os.path.splitext(aligned_filename)[0]
         imgdata.save()
         return imgdata.def_id
     return None

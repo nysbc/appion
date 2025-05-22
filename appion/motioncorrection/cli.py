@@ -131,6 +131,9 @@ def constructMotionCorKwargs(imgmetadata : dict, cli_args : dict) -> dict:
     inputType = calcInputType(fpath)
     kwargs[inputType] = fpath
 
+    #TODO
+    #OutMrc
+
     # Gain
     # Get the reference image
     kwargs["Gain"]=imgmetadata['gain_input']
@@ -178,7 +181,8 @@ def constructMotionCorKwargs(imgmetadata : dict, cli_args : dict) -> dict:
     # shifts = readShiftsBetweenFrames()
     shifts=[]
     sumframelist = filterFrameList(kwargs["PixSize"], imgmetadata['nframes'], shifts)
-    kwargs['Trunc'] = calcTrunc(imgmetadata['camera_name'], imgmetadata['exposure_time'], sumframelist, imgmetadata['frame_time'], imgmetadata['nframes'], imgmetadata['eer_frames'])
+    total_frames = calcTotalFrames(imgmetadata['camera_name'], imgmetadata['exposure_time'], imgmetadata['frame_time'], imgmetadata['nframes'], imgmetadata['eer_frames'])
+    kwargs['Trunc'] = calcTrunc(total_frames, sumframelist)
     if not kwargs['Trunc']:
         del kwargs['Trunc']
 
@@ -226,6 +230,7 @@ def postTask(jobmetadata, imgmetadata, args, kwargs, imageid, logData):
     # constructAlignedCamera(camera_id, square_output):
     saveApAssessmentRunData(jobmetadata['ref_sessiondata_session'], assessment)
     updateApAppionJobData(jobid, "D")
+    # TODO Hardlink motion-corrected output to Leginon directory b/c that's where myamiweb / image viewer expects it to be; symlink as fallback.
     uploadAlignedImage(imageid, aligned_image_def_id, rundata_def_id, logData["shifts"], kwargs["PixSize"])
     saveFrameTrajectory(image_def_id, rundata_def_id, logData["shifts"], limit, reference_index, particle)
     # TODO Probably should rename the bin param so that it doesn't override the bin function

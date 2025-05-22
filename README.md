@@ -2,7 +2,7 @@
 
 This branch contains an attempt to refactor Appion.  The goals of this refactor are as follows:
 
-1. Reduce the burden of maintaining Appion by switching from in-house libraries (`sinedon`, `numextension`, Appion's pipelining/orchestration functionality) to mainstream external libraries (e.g., `django`, `numpy` with `numba`, `joblib`, and `dask`) with extensive community and institutional support.
+1. Reduce the burden of maintaining Appion by switching from in-house libraries (`sinedon`, `numextension`, Appion's pipelining/orchestration functionality) to mainstream external libraries (e.g., `django`, `numpy` with `numba`, and `dask`) with extensive community and institutional support.
 2. Remove unused functionality / clean up the codebase so that only what is being actively used is present.
 3. Switch to the functional programming paradigm from the object-oriented programming paradigm currently in use.  This is a stylistic preference on my part, but it seems that there is a lot of complexity added by embracing inheritance, encapsulation, and polymorphism, and that the steps in our processing pipeline are better modeled as functions than as objects.  Changing to a functional paradigm also opens the possibility of us being able to run event-triggered functions on a third-party service (e.g., AWS Lambda) if that's desirable.  Above, all writing processing steps as functions is more in-line with what `dask` expects.
 4. Leverage [Dask futures](https://docs.dask.org/en/stable/futures.html) and [Dask Slurm jobqueue](https://jobqueue.dask.org/en/latest/generated/dask_jobqueue.SLURMCluster.html) to create autoscaling pools of workers that can elastically expand/contract depending on how many exposures are taken in a session.  These workers would run on top of Slurm.  Underlying this goal is a core concern that Appion never fall too far behind when processing EM images in near-realtime.  Building around `dask-jobqueue` also gives us the option of making it easier to migrate our code to other job schedulers / orchestrators with minimal effort. 
@@ -35,7 +35,11 @@ We concern ourselves with layer 3.
 
 ### Runtime
 
-1. Orchestration: `dask`, `threading`, `loky`, `multiprocessing`
-2. Workflow Manager: `joblib`
+1. Orchestration: `dask`
+2. Workflow Manager: `loop.py
 
 At the uppermost layer is a daemon that loops until SIGTERM is received.  This daemon uses functions from the data plane to query for parameters, uses the calculation stacks to perform processing, and then stores the results using the data plane functions.  The runtime stack is used to run all of these functions with interchangeable backends.  The daemon also takes in user-provided parameters.
+
+### Versioning Scheme
+
+SEMC Appion's version string is of the form `YYYY.MM.DD`, which reflects the date of the release.  If there are multiple releases within the same day, the version string can be of the form `YYYY.MM.DD.HH`.  The following suffixes may also be appended to the version string: `a` or `b`.  These indicate alpha and beta releases respectively.  Alpha releases have not been tested at all, and the code is not guaranteed to even run.  Beta releases can run, but testing for regressions / unexpected exceptions and logic issues has not occurred.

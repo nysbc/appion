@@ -114,7 +114,8 @@ def filterFrameList(pixelsize : float, total_frames : int, shifts : list, nframe
 def calcKV(high_tension):
     return high_tension/1000.0
 
-def calcTrunc(camera_name : str, exposure_time : float, sumframelist : list, frame_time : float, nframes : int, eer_frames : bool):
+
+def calcTotalFrames(camera_name : str, exposure_time : float, frame_time : float, nframes : int, eer_frames : bool):
     if camera_name in ["GatanK2","GatanK3"]:
         total_frames = max(1,int(exposure_time / frame_time))
     elif 'DE':
@@ -123,6 +124,9 @@ def calcTrunc(camera_name : str, exposure_time : float, sumframelist : list, fra
         total_frames = nframes
     else:
         total_frames = nframes
+    return total_frames
+
+def calcTrunc(total_frames: int, sumframelist : list,):
     return total_frames - sumframelist[-1] - 1
 
 # RotGain and FlipGain functions
