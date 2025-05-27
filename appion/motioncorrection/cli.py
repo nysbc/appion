@@ -132,8 +132,9 @@ def constructMotionCorKwargs(imgmetadata : dict, cli_args : dict) -> dict:
     inputType = calcInputType(fpath)
     kwargs[inputType] = fpath
 
-    #TODO
     #OutMrc
+    #Path to the aligned aligned/summed micrograph.
+    kwargs['OutMrc'] = os.path.join(cli_args['rundir'],imgmetadata['image_filename']+'_c.mrc')
 
     # Gain
     # Get the reference image
@@ -223,13 +224,28 @@ def task(kwargs, jobmetadata, args, imageid):
     return jobmetadata, args, imageid, output
 
 def postTask(jobmetadata, imgmetadata, args, kwargs, imageid, logData):
-    # constructAlignedCamera(camera_id, square_output):
+    # constructAlignedCamera(camera_id, square_output)
+    # preset = constructAlignedPresets
+    # image = constructAlignedImage
+    # preset_dw = constructAlignedPresets
+    # image_dw = constructAlignedImage
     saveApAssessmentRunData(imgmetadata['session_id'], assessment)
-    updateApAppionJobData(jobid, "D")
     # TODO Hardlink motion-corrected output to Leginon directory b/c that's where myamiweb / image viewer expects it to be; symlink as fallback.
     uploadAlignedImage(imageid, aligned_image_def_id, rundata_def_id, logData["shifts"], kwargs["PixSize"])
     saveFrameTrajectory(image_def_id, rundata_def_id, logData["shifts"], limit, reference_index, particle)
     saveDDStackParamsData(args['preset'], args['align'], args['bin'], ref_apddstackrundata_unaligned_ddstackrun, method, ref_apstackdata_stack, ref_apdealignerparamsdata_de_aligner)
     saveDDStackRunData(args['preset'], args['align'], args['bin'], args['runname'], args['rundir'], imgmetadata["session_id"])
-    saveMotionCorrLog(logData, outputLogPath, args['startframe'], calcTotalRenderedFrames(imgmetadata['total_raw_frames'], args['rendered_frame_size']), args['bin'])
+    # Is this really the right/best way to determine the framestack path?  It works for our purposes ( I think )
+    # but the original codebase has more elaborate logic that works for both aligned and unaligned images:
+    # https://github.com/nysbc/appion-slurm/blob/814544a7fee69ba7121e7eb1dd3c8b63bc4bb75a/appion/appionlib/apDDprocess.py#L104-L123
+    # Not sure that really is necessary for what we're trying to achieve in the immediate future.
+    if 'InMrc' in kwargs.keys():
+        framestackpath=kwargs['InMrc']
+    elif 'InTiff' in kwargs.keys():
+        framestackpath=kwargs['InTiff']
+    elif 'InEer' in kwargs.keys():
+        framestackpath=kwargs['InEer']
+    motioncorr_log_path=calcMotionCorrLogPath(framestackpath)
+    saveMotionCorrLog(logData, motioncorr_log_path, args['startframe'], calcTotalRenderedFrames(imgmetadata['total_raw_frames'], args['rendered_frame_size']), args['bin'])
+    updateApAppionJobData(jobmetadata['ref_apappionjobdata_job'], "D")
     return imageid

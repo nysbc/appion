@@ -1,5 +1,6 @@
 import numpy
 import math
+import os
 
 ## Calculations for parameters used in motioncor2 command
 # InMrc, InTiff, InEer functions
@@ -197,3 +198,6 @@ def calcAlignedCamera(dimensions : tuple, square_output : bool, binning : tuple,
         # assume all frames that are saved are used by not defining the list
         use_frames = None
     return aligned_binning, aligned_dimensions, aligned_offset, use_frames
+
+def calcMotionCorrLogPath(framestackpath):
+    return os.path.splitext(framestackpath)[0]+"_Log.txt"
