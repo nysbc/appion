@@ -65,7 +65,7 @@ def constructAlignedCamera(camera_id, square_output, binning : int = 1, trimming
         return camdata.def_id
     return None
 
-def constructAlignedPresets(preset_id, camera_id, magnification, defocus, tem, session, alignlabel='a'):
+def constructAlignedPresets(preset_id, camera_id, magnification=None, defocus=None, tem=None, session=None, alignlabel='a'):
     align_presetdata = PresetData.objects.get(def_id=preset_id)
     camdata = CameraEMData.objects.get(def_id=camera_id)
     if not align_presetdata:
@@ -243,9 +243,9 @@ def saveDDStackParamsData(preset, align, binning, ref_apddstackrundata_unaligned
 	return ddstackparamsdata.def_id
 			
 # ApDDStackRunData
-def saveDDStackRunData(preset, align, binning, runname, rundir, ref_sessiondata_session):
+def saveDDStackRunData(preset, align, binning, runname, rundir, ref_sessiondata_session, stack=None):
 	# We don't use ApStackData so that stack is always set to None.
-	params = ApDDStackParamsData.objects.get(preset=preset,align=align,binning=binning,stack=None)
+	params = ApDDStackParamsData.objects.get(preset=preset,align=align,binning=binning,stack=stack)
 	path = ApPathData.objects.get(path=os.path.abspath(rundir))
 	results = ApDDStackRunData.objects.get(runname=runname,ref_apddstackparamsdata_params=params,ref_sessiondata_session=ref_sessiondata_session,ref_appathdata_path=path)
 	if not results:

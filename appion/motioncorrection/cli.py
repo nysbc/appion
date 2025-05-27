@@ -233,14 +233,22 @@ def postTask(jobmetadata, imgmetadata, args, kwargs, imageid, logData):
     framelist=filterFrameList(kwargs["PixSize"], imgmetadata['nframes'], shifts)
     nframes=calcTotalFrames(imgmetadata['camera_name'], imgmetadata['exposure_time'], imgmetadata['frame_time'], imgmetadata['nframes'], imgmetadata['eer_frames'])
     aligned_camera_id = constructAlignedCamera(imgmetadata['camera_id'], args['square'], args['bin'], kwargs["Trim"], framelist, nframes)
-    # preset = constructAlignedPresets
-    # image = constructAlignedImage
+    aligned_preset_id = constructAlignedPresets(imgmetadata['preset_id'], aligned_camera_id, alignlabel=args['alignlabel'])
+    aligned_image_filename = imgmetadata['image_filename']+"-%s" % args['alignlabel']
+    aligned_image_mrc_image = aligned_image_filename + ".mrc"
+    aligned_image_id = constructAlignedImage(imageid, aligned_preset_id, aligned_camera_id, aligned_image_mrc_image, aligned_image_filename)
+    # TODO Hardlink motion-corrected output to Leginon directory b/c that's where myamiweb / image viewer expects it to be; symlink as fallback.
+    uploadAlignedImage(imageid, aligned_image_id, rundata_def_id, logData["shifts"], kwargs["PixSize"])
     # preset_dw = constructAlignedPresets
     # image_dw = constructAlignedImage
-    saveApAssessmentRunData(imgmetadata['session_id'], assessment)
+    aligned_preset_dw_id = constructAlignedPresets(imgmetadata['preset_id'], aligned_camera_id, alignlabel=args['alignlabel'])
+    aligned_image_dw_filename = imgmetadata['image_filename']+"-%s-DW" % args['alignlabel']
+    aligned_image_dw_mrc_image = aligned_image_filename + ".mrc"
+    aligned_image_dw_id = constructAlignedImage(imageid, aligned_preset_dw_id, aligned_camera_id, aligned_image_dw_mrc_image, aligned_image_dw_filename)
     # TODO Hardlink motion-corrected output to Leginon directory b/c that's where myamiweb / image viewer expects it to be; symlink as fallback.
-    uploadAlignedImage(imageid, aligned_image_def_id, rundata_def_id, logData["shifts"], kwargs["PixSize"])
+    uploadAlignedImage(imageid, aligned_image_dw_id, rundata_def_id, logData["shifts"], kwargs["PixSize"])
     saveFrameTrajectory(image_def_id, rundata_def_id, logData["shifts"], limit, reference_index, particle)
+    saveApAssessmentRunData(imgmetadata['session_id'], assessment)
     saveDDStackParamsData(args['preset'], args['align'], args['bin'], ref_apddstackrundata_unaligned_ddstackrun, method, ref_apstackdata_stack, ref_apdealignerparamsdata_de_aligner)
     saveDDStackRunData(args['preset'], args['align'], args['bin'], args['runname'], args['rundir'], imgmetadata["session_id"])
     # Is this really the right/best way to determine the framestack path?  It works for our purposes ( I think )
