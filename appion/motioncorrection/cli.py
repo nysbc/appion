@@ -204,8 +204,6 @@ def constructJobMetadata(args : dict):
     jobmetadata['ref_scripthostname_hostname']=saveScriptHostName()
     jobmetadata['ref_appathdata_appion_path']=savePathData(__path__)
     jobmetadata['ref_appathdata_rundir']=savePathData(args['rundir'])
-    # TODO write a function to generate the run name.
-    jobmetadata['runname']=""
     jobmetadata['ref_apappionjobdata_job']=saveApAppionJobData(jobmetadata['ref_appathdata_rundir'], "makeddalignmotioncor2_ucsf", jobmetadata['runname'], pwd.getpwuid(os.getuid())[0], platform.node(), jobmetadata['ref_sessiondata_session'])
     jobmetadata['ref_scriptprogramrun_progrun']=saveScriptProgramRun(jobmetadata['runname'], jobmetadata['ref_scriptprogramname_progname'], jobmetadata['ref_scriptusername_username'], jobmetadata['ref_scripthostname_hostname'], jobmetadata['ref_appathdata_appion_path'], jobmetadata['ref_appathdata_rundir'], jobmetadata['ref_apappionjobdata_job'])
     saveScriptParams(args, jobmetadata['ref_scriptprogramname_progname'], jobmetadata['ref_scriptprogramrun_progrun'])
@@ -232,6 +230,6 @@ def postTask(jobmetadata, imgmetadata, args, kwargs, imageid, logData):
     uploadAlignedImage(imageid, aligned_image_def_id, rundata_def_id, logData["shifts"], kwargs["PixSize"])
     saveFrameTrajectory(image_def_id, rundata_def_id, logData["shifts"], limit, reference_index, particle)
     saveDDStackParamsData(args['preset'], args['align'], args['bin'], ref_apddstackrundata_unaligned_ddstackrun, method, ref_apstackdata_stack, ref_apdealignerparamsdata_de_aligner)
-    saveDDStackRunData(args['preset'], args['align'], args['bin'], jobmetadata['runname'], args['rundir'], imgmetadata["session_id"])
+    saveDDStackRunData(args['preset'], args['align'], args['bin'], args['runname'], args['rundir'], imgmetadata["session_id"])
     saveMotionCorrLog(logData, outputLogPath, args['startframe'], calcTotalRenderedFrames(imgmetadata['total_raw_frames'], args['rendered_frame_size']), args['bin'])
     return imageid

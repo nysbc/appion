@@ -8,8 +8,8 @@ def constructGlobalParser():
     parser = argparse.ArgumentParser(add_help=False)
 
     ### Input value options
-    parser.add_argument("-r", "--rundir", dest="rundir",
-        help="Path to the run directory", type=str, default=os.getcwd())
+    parser.add_argument("-R", "--rundir", "--outdir", dest="rundir",
+        help="Run path for storing output, e.g. --rundir=/data/appion/runs/run1", default=os.getcwd())
     parser.add_argument("-s", "--session", dest="sessionname",
         help="Session name associated with processing run, e.g. --session=06mar12a")
     parser.add_argument("--preset", dest="preset",
@@ -36,4 +36,20 @@ def constructGlobalParser():
         action="store_true", help="Process the images from newest to oldest")
     parser.add_argument("--parallel", dest="parallel", default=False,
         action="store_true", help="parallel appionLoop on different cpu. Only work with the part not using gpu")
+    
+    parser.add_argument("-n", "--runname", dest="runname",
+        help="Name for processing run, e.g. --runname=run1")
+    parser.add_argument("-d", "--description", dest="description",
+        help="Description of the processing run (must be in quotes)")
+    parser.add_argument("-p", "--projectid", dest="projectid", type=int,
+        help="Project id associated with processing run, e.g. --projectid=159")
+    parser.add_argument("-C", "--commit", dest="commit", default=True,
+        action="store_true", help="Commit processing run to database")
+    parser.add_argument("--no-commit", dest="commit", default=True,
+        action="store_false", help="Do not commit processing run to database")
+
+    parser.add_argument("--expid", "--expId", dest="expid", type=int,
+        help="Session id associated with processing run, e.g. --expid=7159")
+    parser.add_argument("--nproc", dest="nproc", type=int,
+        help="Number of processor to use")
     return parser
