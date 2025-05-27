@@ -18,6 +18,20 @@ from .calc import *
 import sinedon.setup
 sinedon.setup()
 
+def constructAlignedImage(image_id, preset_id, camera_id, mrc_image, filename):
+    imgdata = AcquisitionImageData.objects.get(def_id=image_id)
+    if imgdata:
+        # https://docs.djangoproject.com/en/5.2/topics/db/queries/#copying-model-instances
+        imgdata.pk = None
+        imgdata._state.adding = True
+        imgdata.ref_presetdata_preset=preset_id
+        imgdata.ref_cameraemdata_camera=camera_id
+        imgdata.mrc_image=mrc_image
+        imgdata.filename=filename
+        imgdata.save()
+        return imgdata.def_id
+    return None
+
 # trimming_edge is the same value as kwargs["Trim"]
 # binning is cli_args.bin
 # framelist is output of filterFrameList

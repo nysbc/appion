@@ -28,6 +28,10 @@ def constructMotionCorParser():
 
     #parser.add_argument("--override_db", dest="override_db", default=False,
     #	action="store_true", help="Override database for bad rows, columns, and image flips")
+
+    # Argument that isn't generally used.  Keeping for constructAlignedCamera.
+    parser.add_argument("--square", dest="square", default=False,
+                        action="store_true", help="Output square images")
     # String
 
     # Integer
@@ -224,7 +228,11 @@ def task(kwargs, jobmetadata, args, imageid):
     return jobmetadata, args, imageid, output
 
 def postTask(jobmetadata, imgmetadata, args, kwargs, imageid, logData):
-    # constructAlignedCamera(camera_id, square_output)
+    shifts=[]
+    # Find way to not calculate these twice?
+    framelist=filterFrameList(kwargs["PixSize"], imgmetadata['nframes'], shifts)
+    nframes=calcTotalFrames(imgmetadata['camera_name'], imgmetadata['exposure_time'], imgmetadata['frame_time'], imgmetadata['nframes'], imgmetadata['eer_frames'])
+    aligned_camera_id = constructAlignedCamera(imgmetadata['camera_id'], args['square'], args['bin'], kwargs["Trim"], framelist, nframes)
     # preset = constructAlignedPresets
     # image = constructAlignedImage
     # preset_dw = constructAlignedPresets

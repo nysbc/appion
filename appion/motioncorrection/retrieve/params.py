@@ -64,6 +64,7 @@ def readImageMetadata(imageid: int, has_bad_pixels : bool = False, is_align : bo
     correctorplandata=imgdata.ref_correctorplandata_corrector_plan
     sessiondata=imgdata.ref_sessiondata_session
     cameradata=imgdata.ref_cameraemdata_camera
+    imgmetadata['camera_id']=imgdata.ref_cameraemdata_camera.def_id
     # Additional parameters derived from the database
     # Input image parameters
     imgmetadata['session_id']=sessiondata.def_id
