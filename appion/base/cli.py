@@ -30,8 +30,8 @@ def constructGlobalParser():
     #	action="store_false", help="Do not continue processing run from last image")
     parser.add_argument("--no-wait", dest="wait", default=True,
         action="store_false", help="Do not wait for more images after completing loop")
-    parser.add_argument("--no-rejects", dest="norejects", default=False,
-        action="store_true", help="Do not process hidden or rejected images")
+    parser.add_argument("--no-rejects", dest="rejects", default=False,
+        action="store_false", help="Do not process hidden or rejected images")
     parser.add_argument("--reverse", dest="reverse", default=False,
         action="store_true", help="Process the images from newest to oldest")
     parser.add_argument("--parallel", dest="parallel", default=False,

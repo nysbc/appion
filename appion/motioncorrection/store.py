@@ -279,7 +279,7 @@ def saveDark(dark_output_path : str, camera_name : str, eer_frames : bool, dark_
         elif camera_name in ['TIA','Falcon','Falcon3','Falcon4'] or (camera_name == 'Falcon4EC' and eer_frames):
             dimensions = (4096,4096)
         else:
-            dimensions = None
+            dimensions = (0,0)
         unscaled_darkarray =  numpy.zeros((dimensions[1],dimensions[0]), dtype=numpy.float32)
     else:
         unscaled_darkarray = mrcfile.read(dark_input_path) / nframes

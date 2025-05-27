@@ -25,7 +25,8 @@ dependencies = [
   "pexpect",
   "py-cpuinfo",
   "distro",
-  "psutil"
+  "psutil",
+  "argunparse"
 ]
 requires-python = ">= 3.9"
 

@@ -16,7 +16,7 @@ from cpuinfo import get_cpu_info
 import socket
 import distro
 import psutil
-from argparse import ArgumentParser
+import argunparse
 import json
 from dask.distributed import Lock
 
@@ -66,12 +66,22 @@ def saveScriptProgramRun(runname, ref_scriptprogramname_progname, ref_scriptuser
     return progrun.def_id
 
 # Run parse_args() to get a namespace object and then transfrom that into a dict with vars()
-def saveScriptParams(args : dict, ref_scriptprogramname_progname, ref_scriptprogramrun_progrun, parser : ArgumentParser):
+def saveScriptParams(args : dict, ref_scriptprogramname_progname, ref_scriptprogramrun_progrun):
     for paramname in args.keys():
         paramname = ScriptParamName(name=paramname,
 									ref_scriptprogramname_progname=ref_scriptprogramname_progname)
         paramname.save()
-        usage=calcUsageFromParamDest(args, parser, paramname, args[paramname])
+        usage=None
+        if isinstance(args[paramname], bool):
+            if args[paramname] is True:
+                usage="--%s" % paramname
+            else:
+                usage="--no-%s" % paramname
+        else:
+            tmp={paramname : args[paramname]}
+            unparser = argunparse.ArgumentUnparser()
+            usage=unparser.unparse(**tmp)
+            del tmp
         if usage:
             paramvalue = ScriptParamValue(value=str(args[paramname]),
                                         usage = usage,
@@ -79,47 +89,6 @@ def saveScriptParams(args : dict, ref_scriptprogramname_progname, ref_scriptprog
                                         ref_scriptprogramrun_progrun=ref_scriptprogramrun_progrun
             )
             paramvalue.save()
-			
-def calcUsageFromParamDest(args, parser, dest, value):
-    """
-    For a given optparse destination (dest, e.g., 'commit')
-        and value (e.g., 'False') this will generate the command line
-        usage (e.g., '--no-commit')
-    """
-    usage = None
-    if value is None:
-        return None
-    if len(args) == 0:
-        for opt in parser.option_list:
-            arg = str(opt.get_opt_string.im_self)
-            if '/' in arg:
-                args = arg.split('/')
-                arg = args[-1:][0]
-                args[opt.dest] = arg
-                args[opt.dest] = opt
-        if dest in args:
-            argument=args[dest]
-        else:
-            return usage
-    if not dest in args:
-        return usage
-    optaction = args[dest].action
-    if optaction == 'store':
-        value = str(value)
-        if not ' ' in value:
-            usage = argument+"="+value
-        else:
-            usage = argument+"='"+value+"'"
-    elif optaction == 'store_true' or optaction == 'store_false':
-        storage = 'store_'+str(value).lower()
-        for opt in parser.option_list:
-            if opt.dest == dest and opt.action == storage:
-                arg = str(opt.get_opt_string.im_self)
-                if '/' in arg:
-                    arglist = arg.split('/')
-                    arg = arglist[-1:][0]
-                    usage = arg
-    return usage
 
 # ApAssessmentRunData
 
