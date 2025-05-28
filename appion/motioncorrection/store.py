@@ -124,11 +124,12 @@ def constructAlignedImageData(imageid, presetid, cameraid, aligned_filename):
 # ApDDAlignImagePairData
 # We can only really add insert ref IDs here b/c the raw and aligned images are in a different database from the Appion results.
 # If it weren't for this, we'd probably pass objects directly.
-def uploadAlignedImage(raw_image_def_id, aligned_image_def_id, rundata_def_id, shifts, pixsize):
+def uploadAlignedImage(raw_image_def_id, aligned_image_def_id, rundata_def_id, shifts, pixsize, doseweighted=False):
     saveImagePairData(raw_image_def_id, aligned_image_def_id, rundata_def_id)
     aligned_image=AcquisitionImageData.objects.get(def_id=aligned_image_def_id)
     nframes=aligned_image.ref_cameraemdata_camera.nframes
-    saveAlignStats(aligned_image_def_id, rundata_def_id, shifts, nframes, pixsize)
+    if not doseweighted:
+        saveAlignStats(aligned_image_def_id, rundata_def_id, shifts, nframes, pixsize)
     copyALSThicknessParams(raw_image_def_id,aligned_image_def_id)
     copyZLPThicknessParams(raw_image_def_id,aligned_image_def_id)
 
@@ -173,6 +174,7 @@ def copyZLPThicknessParams(unaligned,aligned):
     return None
 
 
+#TODO Where does this get invoked?
 def uploadAlignStats(shifts, nframes):
     pixel_shifts = calcFrameShiftFromPositions(shifts, nframes - len(shifts)+1)
     max_drifts, median = calcFrameStats(pixel_shifts, nframes)
@@ -201,6 +203,8 @@ def saveAlignStats(aligned_image_def_id, rundata_def_id, trajdata_def_id, max_dr
 	
 # ApDDFrameTrajectoryData
 
+# Default args used by motioncor2 for limit, reference_index, particle.
+# Separate pure calculations from storage functionality?
 def saveFrameTrajectory(image_def_id, rundata_def_id, shifts, limit=20, reference_index=None, particle=None):
     '''
     Save appiondata ApDDFrameTrajectoryData

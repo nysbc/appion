@@ -202,7 +202,8 @@ def constructMotionCorKwargs(imgmetadata : dict, cli_args : dict) -> dict:
 
     return kwargs
 
-def constructJobMetadata(args : dict):
+# TODO Doesn't this only have to happen once before the loop starts, after the command is invoked?
+def constructJobMetadata(args : dict, session_id : int):
     jobmetadata={}
     jobmetadata['ref_scriptprogramname_progname']=saveScriptProgramName()
     jobmetadata['ref_scriptusername_username']=saveScriptUsername()
@@ -212,9 +213,11 @@ def constructJobMetadata(args : dict):
     jobmetadata['ref_apappionjobdata_job']=saveApAppionJobData(jobmetadata['ref_appathdata_rundir'], "makeddalignmotioncor2_ucsf", jobmetadata['runname'], pwd.getpwuid(os.getuid())[0], platform.node(), jobmetadata['ref_sessiondata_session'])
     jobmetadata['ref_scriptprogramrun_progrun']=saveScriptProgramRun(jobmetadata['runname'], jobmetadata['ref_scriptprogramname_progname'], jobmetadata['ref_scriptusername_username'], jobmetadata['ref_scripthostname_hostname'], jobmetadata['ref_appathdata_appion_path'], jobmetadata['ref_appathdata_rundir'], jobmetadata['ref_apappionjobdata_job'])
     saveScriptParams(args, jobmetadata['ref_scriptprogramname_progname'], jobmetadata['ref_scriptprogramrun_progrun'])
+    jobmetadata['ref_apddstackrundata_ddstackrun']=saveDDStackRunData(args['preset'], args['align'], args['bin'], args['runname'], args['rundir'], session_id)
     return jobmetadata
 
 def preTask(imageid: int, args : dict):
+    # TODO Doesn't this only have to happen once before the loop starts, after the command is invoked?
     jobmetadata=constructJobMetadata(args)
     imgmetadata=readImageMetadata(imageid, False, args["align"], False)
     if 'refimgid' in args.keys():
@@ -238,19 +241,21 @@ def postTask(jobmetadata, imgmetadata, args, kwargs, imageid, logData):
     aligned_image_mrc_image = aligned_image_filename + ".mrc"
     aligned_image_id = constructAlignedImage(imageid, aligned_preset_id, aligned_camera_id, aligned_image_mrc_image, aligned_image_filename)
     # TODO Hardlink motion-corrected output to Leginon directory b/c that's where myamiweb / image viewer expects it to be; symlink as fallback.
-    uploadAlignedImage(imageid, aligned_image_id, rundata_def_id, logData["shifts"], kwargs["PixSize"])
-    # preset_dw = constructAlignedPresets
-    # image_dw = constructAlignedImage
+    uploadAlignedImage(imageid, aligned_image_id, jobmetadata['ref_apddstackrundata_ddstackrun'], logData["shifts"], kwargs["PixSize"], False)
     aligned_preset_dw_id = constructAlignedPresets(imgmetadata['preset_id'], aligned_camera_id, alignlabel=args['alignlabel'])
     aligned_image_dw_filename = imgmetadata['image_filename']+"-%s-DW" % args['alignlabel']
     aligned_image_dw_mrc_image = aligned_image_filename + ".mrc"
     aligned_image_dw_id = constructAlignedImage(imageid, aligned_preset_dw_id, aligned_camera_id, aligned_image_dw_mrc_image, aligned_image_dw_filename)
     # TODO Hardlink motion-corrected output to Leginon directory b/c that's where myamiweb / image viewer expects it to be; symlink as fallback.
-    uploadAlignedImage(imageid, aligned_image_dw_id, rundata_def_id, logData["shifts"], kwargs["PixSize"])
-    saveFrameTrajectory(image_def_id, rundata_def_id, logData["shifts"], limit, reference_index, particle)
-    saveApAssessmentRunData(imgmetadata['session_id'], assessment)
-    saveDDStackParamsData(args['preset'], args['align'], args['bin'], ref_apddstackrundata_unaligned_ddstackrun, method, ref_apstackdata_stack, ref_apdealignerparamsdata_de_aligner)
-    saveDDStackRunData(args['preset'], args['align'], args['bin'], args['runname'], args['rundir'], imgmetadata["session_id"])
+    uploadAlignedImage(imageid, aligned_image_dw_id, jobmetadata['ref_apddstackrundata_ddstackrun'], logData["shifts"], kwargs["PixSize"], True)
+    # Frame trajectory only saved for aligned_image_id: https://github.com/nysbc/appion-slurm/blob/814544a7fee69ba7121e7eb1dd3c8b63bc4bb75a/appion/appionlib/apDDLoop.py#L89-L107
+    saveFrameTrajectory(aligned_image_id, jobmetadata['ref_apddstackrundata_ddstackrun'], logData["shifts"])
+    # This is only used by manualpicker.py so it can go away.  Just making a note of it in a commit for future me / someone.
+    #saveApAssessmentRunData(imgmetadata['session_id'], assessment)
+    # Seems mostly unused?  Might have been used with a prior implementation of motion correction?  Fields seem to mostly be filled with nulls in the MEMC database.
+    saveDDStackParamsData(args['preset'], args['align'], args['bin'], None, None, None, None)
+    #saveDDStackParamsData(args['preset'], args['align'], args['bin'], ref_apddstackrundata_unaligned_ddstackrun, method, ref_apstackdata_stack, ref_apdealignerparamsdata_de_aligner)
+    
     # Is this really the right/best way to determine the framestack path?  It works for our purposes ( I think )
     # but the original codebase has more elaborate logic that works for both aligned and unaligned images:
     # https://github.com/nysbc/appion-slurm/blob/814544a7fee69ba7121e7eb1dd3c8b63bc4bb75a/appion/appionlib/apDDprocess.py#L104-L123
@@ -263,5 +268,6 @@ def postTask(jobmetadata, imgmetadata, args, kwargs, imageid, logData):
         framestackpath=kwargs['InEer']
     motioncorr_log_path=calcMotionCorrLogPath(framestackpath)
     saveMotionCorrLog(logData, motioncorr_log_path, args['startframe'], calcTotalRenderedFrames(imgmetadata['total_raw_frames'], args['rendered_frame_size']), args['bin'])
+    # Is this run in post-task after an image is processed?  I don't think so!  This also needs to live outside of the loop.
     updateApAppionJobData(jobmetadata['ref_apappionjobdata_job'], "D")
     return imageid
