@@ -6,7 +6,7 @@ import sys
 from signal import signal, SIGINT, SIGTERM, SIGCONT, Signals
 
 # Parameters passed in using lambdas.
-def loop(updateTaskList : function, preTask: function, task: function, postTask : function, checkpoint : function, cluster : Cluster, retries : int = 3) -> None:
+def loop(updateTaskList, preTask, task, postTask, checkpoint, cluster : Cluster, retries : int = 3) -> None:
     # Signal handler used to ensure that cleanup happens if SIGINT, SIGCONT or SIGTERM is received.
     def handler(signum, frame):
         signame = Signals(signum).name

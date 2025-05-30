@@ -7,7 +7,6 @@ from sinedon.models.appion import ScriptParamValue
 from sinedon.models.appion import ApAssessmentRunData
 from sinedon.models.appion import ApAppionJobData
 from sinedon.models.appion import ApPathData
-from sinedon.models.projects import processingdb
 import sys
 import platform
 import importlib.metadata

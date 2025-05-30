@@ -1,5 +1,3 @@
-import sinedon.setup
-sinedon.setup()
 from sinedon.models.leginon import SessionData, PresetData, AcquisitionImageData
 import json
 
@@ -25,10 +23,4 @@ def readImageSetCheckpoint(checkpoint_path):
     with open(checkpoint_path, "r") as f:
         images=set(json.load(f))
     return images
-
-# Appion database is initialized by myamiweb / web viewer.
-def readAppionDatabaseName(projectid):
-    #TODO
-    project = processingdb.objects.get(ref_projects_project=projectid)
-    return project.appiondb
 

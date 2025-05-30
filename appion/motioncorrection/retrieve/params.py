@@ -1,8 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright 2002-2015 Scripps Research Institute, 2015-2025 New York Structural Biology Center
 
-import sinedon.setup
-sinedon.setup()
 from django.db.models import F
 from sinedon.models.leginon import AcquisitionImageData
 from sinedon.models.leginon import PixelSizeCalibrationData
