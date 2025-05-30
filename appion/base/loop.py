@@ -4,9 +4,10 @@ from time import sleep
 import logging
 import sys
 from signal import signal, SIGINT, SIGTERM, SIGCONT, Signals
+from base.calc import filterImages
 
 # Parameters passed in using lambdas.
-def loop(updateTaskList, preTask, task, postTask, checkpoint, cluster : Cluster, retries : int = 3) -> None:
+def loop(pipeline, args: dict, cluster : Cluster, checkpoint_path : str, retries : int = 3) -> None:
     # Signal handler used to ensure that cleanup happens if SIGINT, SIGCONT or SIGTERM is received.
     def handler(signum, frame):
         signame = Signals(signum).name
@@ -37,13 +38,12 @@ def loop(updateTaskList, preTask, task, postTask, checkpoint, cluster : Cluster,
     signal(SIGINT, handler)
     signal(SIGCONT, handler)
     client = Client(cluster)
+
     while True:
-        tasklist=updateTaskList()
+        done=reloadCheckpoint(checkpoint_path)
+        tasklist=filterImages()
         if tasklist:
-            pre_task_futures = client.map(tasklist, preTask, retries=retries, pure=False)
-            task_futures = client.map(pre_task_futures, task, retries=retries, pure=False)
-            post_task_futures = client.map(task_futures, postTask, retries=retries, pure=False)
-            checkpoint_futures = client.map(post_task_futures, checkpoint, retries=retries, pure=False)
-            wait(pre_task_futures + task_futures + post_task_futures + checkpoint_futures)
+            futures=pipeline(tasklist, args, client)
+            wait(futures)
         else:
             sleep(30)

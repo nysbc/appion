@@ -216,58 +216,56 @@ def constructJobMetadata(args : dict, session_id : int):
     jobmetadata['ref_apddstackrundata_ddstackrun']=saveDDStackRunData(args['preset'], args['align'], args['bin'], args['runname'], args['rundir'], session_id)
     return jobmetadata
 
-def preTask(imageid: int, args : dict):
-    # TODO Doesn't this only have to happen once before the loop starts, after the command is invoked?
+def pipeline(tasklist: list, args : dict, checkpoint_path: str):
+    # Pre-task
     jobmetadata=constructJobMetadata(args)
-    imgmetadata=readImageMetadata(imageid, False, args["align"], False)
-    if 'refimgid' in args.keys():
-        gainmetadata=readImageMetadata(args['refimgid'], False, args["align"], False)
-        imgmetadata['gain_input']=readInputPath(gainmetadata['session_image_path'].replace("leginon","frames"),gainmetadata['image_filename'])
-    kwargs=constructMotionCorKwargs(imgmetadata, args)
-    return kwargs, jobmetadata, imageid
+    for imageid in tasklist:
+        imgmetadata=readImageMetadata(imageid, False, args["align"], False)
+        if 'refimgid' in args.keys():
+            gainmetadata=readImageMetadata(args['refimgid'], False, args["align"], False)
+            imgmetadata['gain_input']=readInputPath(gainmetadata['session_image_path'].replace("leginon","frames"),gainmetadata['image_filename'])
+        kwargs=constructMotionCorKwargs(imgmetadata, args)
 
-def task(kwargs, jobmetadata, args, imageid):
-    output, _ = motioncor(**kwargs)
-    return jobmetadata, args, imageid, output
+        # Task
+        logData, _ = motioncor(**kwargs)
 
-def postTask(jobmetadata, imgmetadata, args, kwargs, imageid, logData):
-    shifts=[]
-    # Find way to not calculate these twice?
-    framelist=filterFrameList(kwargs["PixSize"], imgmetadata['nframes'], shifts)
-    nframes=calcTotalFrames(imgmetadata['camera_name'], imgmetadata['exposure_time'], imgmetadata['frame_time'], imgmetadata['nframes'], imgmetadata['eer_frames'])
-    aligned_camera_id = constructAlignedCamera(imgmetadata['camera_id'], args['square'], args['bin'], kwargs["Trim"], framelist, nframes)
-    aligned_preset_id = constructAlignedPresets(imgmetadata['preset_id'], aligned_camera_id, alignlabel=args['alignlabel'])
-    aligned_image_filename = imgmetadata['image_filename']+"-%s" % args['alignlabel']
-    aligned_image_mrc_image = aligned_image_filename + ".mrc"
-    aligned_image_id = constructAlignedImage(imageid, aligned_preset_id, aligned_camera_id, aligned_image_mrc_image, aligned_image_filename)
-    # TODO Hardlink motion-corrected output to Leginon directory b/c that's where myamiweb / image viewer expects it to be; symlink as fallback.
-    uploadAlignedImage(imageid, aligned_image_id, jobmetadata['ref_apddstackrundata_ddstackrun'], logData["shifts"], kwargs["PixSize"], False)
-    aligned_preset_dw_id = constructAlignedPresets(imgmetadata['preset_id'], aligned_camera_id, alignlabel=args['alignlabel'])
-    aligned_image_dw_filename = imgmetadata['image_filename']+"-%s-DW" % args['alignlabel']
-    aligned_image_dw_mrc_image = aligned_image_filename + ".mrc"
-    aligned_image_dw_id = constructAlignedImage(imageid, aligned_preset_dw_id, aligned_camera_id, aligned_image_dw_mrc_image, aligned_image_dw_filename)
-    # TODO Hardlink motion-corrected output to Leginon directory b/c that's where myamiweb / image viewer expects it to be; symlink as fallback.
-    uploadAlignedImage(imageid, aligned_image_dw_id, jobmetadata['ref_apddstackrundata_ddstackrun'], logData["shifts"], kwargs["PixSize"], True)
-    # Frame trajectory only saved for aligned_image_id: https://github.com/nysbc/appion-slurm/blob/814544a7fee69ba7121e7eb1dd3c8b63bc4bb75a/appion/appionlib/apDDLoop.py#L89-L107
-    saveFrameTrajectory(aligned_image_id, jobmetadata['ref_apddstackrundata_ddstackrun'], logData["shifts"])
-    # This is only used by manualpicker.py so it can go away.  Just making a note of it in a commit for future me / someone.
-    #saveApAssessmentRunData(imgmetadata['session_id'], assessment)
-    # Seems mostly unused?  Might have been used with a prior implementation of motion correction?  Fields seem to mostly be filled with nulls in the MEMC database.
-    saveDDStackParamsData(args['preset'], args['align'], args['bin'], None, None, None, None)
-    #saveDDStackParamsData(args['preset'], args['align'], args['bin'], ref_apddstackrundata_unaligned_ddstackrun, method, ref_apstackdata_stack, ref_apdealignerparamsdata_de_aligner)
-    
-    # Is this really the right/best way to determine the framestack path?  It works for our purposes ( I think )
-    # but the original codebase has more elaborate logic that works for both aligned and unaligned images:
-    # https://github.com/nysbc/appion-slurm/blob/814544a7fee69ba7121e7eb1dd3c8b63bc4bb75a/appion/appionlib/apDDprocess.py#L104-L123
-    # Not sure that really is necessary for what we're trying to achieve in the immediate future.
-    if 'InMrc' in kwargs.keys():
-        framestackpath=kwargs['InMrc']
-    elif 'InTiff' in kwargs.keys():
-        framestackpath=kwargs['InTiff']
-    elif 'InEer' in kwargs.keys():
-        framestackpath=kwargs['InEer']
-    motioncorr_log_path=calcMotionCorrLogPath(framestackpath)
-    saveMotionCorrLog(logData, motioncorr_log_path, args['startframe'], calcTotalRenderedFrames(imgmetadata['total_raw_frames'], args['rendered_frame_size']), args['bin'])
-    # Is this run in post-task after an image is processed?  I don't think so!  This also needs to live outside of the loop.
+        # Post-task
+        shifts=[]
+        # Find way to not calculate these twice?
+        framelist=filterFrameList(kwargs["PixSize"], imgmetadata['nframes'], shifts)
+        nframes=calcTotalFrames(imgmetadata['camera_name'], imgmetadata['exposure_time'], imgmetadata['frame_time'], imgmetadata['nframes'], imgmetadata['eer_frames'])
+        aligned_camera_id = constructAlignedCamera(imgmetadata['camera_id'], args['square'], args['bin'], kwargs["Trim"], framelist, nframes)
+        aligned_preset_id = constructAlignedPresets(imgmetadata['preset_id'], aligned_camera_id, alignlabel=args['alignlabel'])
+        aligned_image_filename = imgmetadata['image_filename']+"-%s" % args['alignlabel']
+        aligned_image_mrc_image = aligned_image_filename + ".mrc"
+        aligned_image_id = constructAlignedImage(imageid, aligned_preset_id, aligned_camera_id, aligned_image_mrc_image, aligned_image_filename)
+        # TODO Hardlink motion-corrected output to Leginon directory b/c that's where myamiweb / image viewer expects it to be; symlink as fallback.
+        uploadAlignedImage(imageid, aligned_image_id, jobmetadata['ref_apddstackrundata_ddstackrun'], logData["shifts"], kwargs["PixSize"], False)
+        aligned_preset_dw_id = constructAlignedPresets(imgmetadata['preset_id'], aligned_camera_id, alignlabel=args['alignlabel'])
+        aligned_image_dw_filename = imgmetadata['image_filename']+"-%s-DW" % args['alignlabel']
+        aligned_image_dw_mrc_image = aligned_image_filename + ".mrc"
+        aligned_image_dw_id = constructAlignedImage(imageid, aligned_preset_dw_id, aligned_camera_id, aligned_image_dw_mrc_image, aligned_image_dw_filename)
+        # TODO Hardlink motion-corrected output to Leginon directory b/c that's where myamiweb / image viewer expects it to be; symlink as fallback.
+        uploadAlignedImage(imageid, aligned_image_dw_id, jobmetadata['ref_apddstackrundata_ddstackrun'], logData["shifts"], kwargs["PixSize"], True)
+        # Frame trajectory only saved for aligned_image_id: https://github.com/nysbc/appion-slurm/blob/814544a7fee69ba7121e7eb1dd3c8b63bc4bb75a/appion/appionlib/apDDLoop.py#L89-L107
+        saveFrameTrajectory(aligned_image_id, jobmetadata['ref_apddstackrundata_ddstackrun'], logData["shifts"])
+        # This is only used by manualpicker.py so it can go away.  Just making a note of it in a commit for future me / someone.
+        #saveApAssessmentRunData(imgmetadata['session_id'], assessment)
+        # Seems mostly unused?  Might have been used with a prior implementation of motion correction?  Fields seem to mostly be filled with nulls in the MEMC database.
+        saveDDStackParamsData(args['preset'], args['align'], args['bin'], None, None, None, None)
+        #saveDDStackParamsData(args['preset'], args['align'], args['bin'], ref_apddstackrundata_unaligned_ddstackrun, method, ref_apstackdata_stack, ref_apdealignerparamsdata_de_aligner)
+        
+        # Is this really the right/best way to determine the framestack path?  It works for our purposes ( I think )
+        # but the original codebase has more elaborate logic that works for both aligned and unaligned images:
+        # https://github.com/nysbc/appion-slurm/blob/814544a7fee69ba7121e7eb1dd3c8b63bc4bb75a/appion/appionlib/apDDprocess.py#L104-L123
+        # Not sure that really is necessary for what we're trying to achieve in the immediate future.
+        if 'InMrc' in kwargs.keys():
+            framestackpath=kwargs['InMrc']
+        elif 'InTiff' in kwargs.keys():
+            framestackpath=kwargs['InTiff']
+        elif 'InEer' in kwargs.keys():
+            framestackpath=kwargs['InEer']
+        motioncorr_log_path=calcMotionCorrLogPath(framestackpath)
+        saveMotionCorrLog(logData, motioncorr_log_path, args['startframe'], calcTotalRenderedFrames(imgmetadata['total_raw_frames'], args['rendered_frame_size']), args['bin'])
+        saveCheckpoint(imageid, checkpoint_path)
     updateApAppionJobData(jobmetadata['ref_apappionjobdata_job'], "D")
-    return imageid

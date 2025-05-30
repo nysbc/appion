@@ -5,10 +5,8 @@
 import argparse
 from appion.base.cli import constructGlobalParser
 from appion.motioncorrection.cli import constructMotionCorParser
-from appion.motioncorrection.cli import preTask, task, postTask
+from appion.motioncorrection.cli import pipeline
 from appion.base import loop
-from appion.base.calc import filterImages
-from appion.base.store import saveCheckpoint
 from dask_jobqueue import SLURMCluster
 import sinedon.setup
 
@@ -18,11 +16,8 @@ def main():
     sinedon.setup(args.projectid)
     cluster = SLURMCluster(queue="long", cores=2, memory="16G", job_extra_directives=["-J motioncor2-worker"], processes=8,local_directory="/h2/jpellman/appion_django/dask/spillover", death_timeout=120, log_directory="/h2/jpellman/appion-django/dask/logs", walltime="2:00:00", shared_temp_directory="/h2/jpellman/appion_django/dask/shared_inc",scheduler_options={'port':8889})
     cluster.adapt(minimum_jobs=2,maximum_jobs=10)
-    loop(filterImages, 
-         lambda imageid : preTask(imageid, vars(args)), 
-         lambda p_args : task(*p_args), 
-         lambda p_args : postTask(*p_args), 
-         saveCheckpoint, 
+    loop(pipeline,
+         vars(args),
          cluster)
  
 if __name__ == '__main__':
