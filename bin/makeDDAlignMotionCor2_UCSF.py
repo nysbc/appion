@@ -10,10 +10,12 @@ from appion.base import loop
 from appion.base.calc import filterImages
 from appion.base.store import saveCheckpoint
 from dask_jobqueue import SLURMCluster
+import sinedon.setup
 
 def main():
     parser = argparse.ArgumentParser(parents=[constructGlobalParser(), constructMotionCorParser()])
     args = parser.parse_args()
+    sinedon.setup(args.projectid)
     cluster = SLURMCluster(queue="long", cores=2, memory="16G", job_extra_directives=["-J motioncor2-worker"], processes=8,local_directory="/h2/jpellman/appion_django/dask/spillover", death_timeout=120, log_directory="/h2/jpellman/appion-django/dask/logs", walltime="2:00:00", shared_temp_directory="/h2/jpellman/appion_django/dask/shared_inc",scheduler_options={'port':8889})
     cluster.adapt(minimum_jobs=2,maximum_jobs=10)
     loop(filterImages, 
