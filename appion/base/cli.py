@@ -14,6 +14,8 @@ def constructGlobalParser():
         help="Session name associated with processing run, e.g. --session=06mar12a")
     parser.add_argument("--preset", dest="preset",
         help="Image preset associated with processing run, e.g. --preset=en")
+    parser.add_argument("--clusterconfig", dest="clusterconfig",
+        help="Path to a YAML file that contains Dask cluster configuration info.", type=str, default="/etc/dask/cluster.yml")
 
     #parser.add_argument("--reprocess", dest="reprocess", type=float,
     #	help="Only process images that pass this reprocess criteria")

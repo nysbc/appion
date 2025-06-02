@@ -3,19 +3,36 @@
 # Copyright 2002-2015 Scripps Research Institute, 2015-2025 New York Structural Biology Center
 
 import argparse
+import yaml
+import os
 from appion.base.cli import constructGlobalParser
 from appion.motioncorrection.cli import constructMotionCorParser
 from appion.motioncorrection.cli import pipeline
-from appion.base import loop
-from dask_jobqueue import SLURMCluster
+from appion.base import loop, constructCluster
 import sinedon.setup
 
 def main():
     parser = argparse.ArgumentParser(parents=[constructGlobalParser(), constructMotionCorParser()])
     args = parser.parse_args()
     sinedon.setup(args.projectid)
-    cluster = SLURMCluster(queue="long", cores=2, memory="16G", job_extra_directives=["-J motioncor2-worker"], processes=8,local_directory="/h2/jpellman/appion_django/dask/spillover", death_timeout=120, log_directory="/h2/jpellman/appion-django/dask/logs", walltime="2:00:00", shared_temp_directory="/h2/jpellman/appion_django/dask/shared_inc",scheduler_options={'port':8889})
-    cluster.adapt(minimum_jobs=2,maximum_jobs=10)
+    # The cluster config can be set via environment variable instead of the CLI flag.
+    # This is necessary for backwards compatibility since the myamiweb web UI will not add the clusterconfig flag at present.
+    clusterconfig={}
+    if "DASK_CLUSTER_CONFIG" in os.environ.keys():
+        clusterconfig_path=os.environ["DASK_CLUSTER_CONFIG"]
+        if os.path.exists(clusterconfig_path):
+            with open(clusterconfig_path,"r") as f:
+                clusterconfig=yaml.load(f)
+        else:
+            raise RuntimeError("Dask cluster configuration at %s does not exist." % clusterconfig_path)
+    else:
+        clusterconfig_path=args.clusterconfig
+        if os.path.exists(clusterconfig_path):
+            with open(clusterconfig_path,"r") as f:
+                clusterconfig=yaml.load(f)
+        else:
+            raise RuntimeError("Dask cluster configuration at %s does not exist." % clusterconfig_path)
+    cluster=constructCluster(clusterconfig)
     loop(pipeline,
          vars(args),
          cluster)
