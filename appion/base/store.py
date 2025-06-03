@@ -17,7 +17,7 @@ import distro
 import psutil
 import argunparse
 import json
-from dask.distributed import Lock
+from fcntl import flock, LOCK_EX, LOCK_UN
 
 def saveScriptProgramName():
     progname = ScriptProgramName(name=sys.argv[0])
@@ -138,19 +138,19 @@ def savePathData(path):
 		appath.save()
 	return appath.def_id
 
-# Handle locking using Dask distributed lock
 def saveCheckpoint(image_id, checkpoint_path):
-    lock = Lock("checkpoint")
-    lock.acquire(timeout=10)
     if not os.path.exists(checkpoint_path):
         with open(checkpoint_path,"w") as f:
+            flock(f, LOCK_EX)
             completed=[]
             json.dump(completed, f)
+            flock(f, LOCK_UN)
     with open(checkpoint_path, "r+") as f:
+        flock(f, LOCK_EX)
         completed=json.load(f)
         completed.append(image_id)
         f.seek(0)
         f.truncate()
         json.dump(completed, f)
         f.flush()
-    lock.release()
+        flock(f, LOCK_EX)

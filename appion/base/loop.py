@@ -4,6 +4,7 @@ from time import sleep
 import logging
 import sys
 from signal import signal, SIGINT, SIGTERM, SIGCONT, Signals
+from base.retrieve import readCheckpoint, readImageSet
 from base.calc import filterImages
 
 # Parameters passed in using lambdas.
@@ -40,8 +41,9 @@ def loop(pipeline, args: dict, cluster : Cluster, checkpoint_path : str, retries
     client = Client(cluster)
 
     while True:
-        done=reloadCheckpoint(checkpoint_path)
-        tasklist=filterImages()
+        done_images=readCheckpoint(checkpoint_path)
+        all_images=readImageSet(args["sessionname"], args["preset"])
+        tasklist=filterImages(all_images, done_images)
         if tasklist:
             futures=pipeline(tasklist, args, client)
             wait(futures)

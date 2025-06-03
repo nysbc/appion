@@ -19,7 +19,8 @@ def readImageSet(session, preset = None):
         images = AcquisitionImageData.objects.filter(ref_sessiondata_session=session.def_id)
     return set([image.def_id for image in images])
 
-def readImageSetCheckpoint(checkpoint_path):
+#TODO Add locking?
+def readCheckpoint(checkpoint_path):
     with open(checkpoint_path, "r") as f:
         images=set(json.load(f))
     return images

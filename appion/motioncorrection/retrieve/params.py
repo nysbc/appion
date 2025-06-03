@@ -7,9 +7,11 @@ from sinedon.models.leginon import PixelSizeCalibrationData
 import os
 import math
 from glob import glob
+#TODO import specific functions / don't be lazy
 from ..calc import *
 from ..store import *
 
+#TODO Use leginon.cfg?
 # InMrc, InTiff, InEer functions
 def readInputPath(session_image_path : str, filename : str) -> str:
     fpath = os.path.join(session_image_path,filename+".*")

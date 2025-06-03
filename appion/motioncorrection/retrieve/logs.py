@@ -1,3 +1,5 @@
+
+#TODO create multiple implementations of parseMotionCorLog and return them with a switch.
 def retrieveLogParser(version : str) -> function:
     return parseMotionCorLog
 

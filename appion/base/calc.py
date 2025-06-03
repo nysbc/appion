@@ -26,6 +26,7 @@ def calcSkipTiltAngle(tilt_angle, tilt_angle_type, unit : str = "radians") -> bo
         return True
     return False
 
+#TODO refactor this to return a set?  What are we doing with this?
 #=====================
 def skipTestOnImage(self,imgdata):
     imgname = imgdata['filename']
