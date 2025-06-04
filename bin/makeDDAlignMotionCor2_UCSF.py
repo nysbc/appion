@@ -9,6 +9,8 @@ from fcntl import flock, LOCK_EX, LOCK_UN
 from appion.base.cli import constructGlobalParser
 from appion.motioncorrection.cli import constructMotionCorParser
 from appion.motioncorrection.cli import pipeline
+from appion.motioncorrection.cli import constructJobMetadata
+from appion.base.store import updateApAppionJobData
 from appion.base import loop, constructCluster
 import sinedon.setup
 
@@ -43,7 +45,9 @@ def main():
         cluster=constructCluster(clusterconfig)
         loop(pipeline,
                 vars(args),
-                cluster)
+                cluster,
+                constructJobMetadata,
+                lambda jobmetadata : updateApAppionJobData(jobmetadata['ref_apappionjobdata_job'], "D"))
         flock(f, LOCK_UN)
  
 if __name__ == '__main__':

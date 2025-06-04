@@ -37,7 +37,7 @@ def main():
         cmd=cmd[1:]
     args=ArgumentParser(args=cmd)
     template_dir=os.environ.get("APPION_TEMPLATE_DIR","/etc/appion/templates")
-    template_file="slurm_job.sh.j2"
+    template_file=os.environ.get("APPION_JOB_TEMPLATE","slurm_job.sh.j2")
     batch_script_path = renderJobScript(args.rundir, template_dir, template_file, " ".join(cmd))
     stdout = sbatch(batch_script_path)
     print(stdout)

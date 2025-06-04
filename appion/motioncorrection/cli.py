@@ -1,9 +1,10 @@
 import argparse
 import os, pwd, platform
+from dask.distributed import Client
 from .calc import calcInputType, calcImageDefectMap, calcFmDose, calcPixelSize, calcKV, calcTotalFrames, calcTrunc, calcRotFlipGain, filterFrameList, calcMotionCorrLogPath, calcTotalRenderedFrames, motioncor
 from .store import saveDark, saveDefectMrc, saveFmIntFile, saveDDStackRunData, saveFrameTrajectory, constructAlignedCamera, constructAlignedPresets, constructAlignedImage, uploadAlignedImage, saveDDStackParamsData, saveMotionCorrLog
 from .retrieve import readInputPath, readImageMetadata
-from ..base.store import saveScriptProgramName, saveScriptUsername, saveScriptHostName, savePathData, saveApAppionJobData, saveScriptProgramRun, saveScriptParams, saveCheckpoint, updateApAppionJobData
+from ..base.store import saveScriptProgramName, saveScriptUsername, saveScriptHostName, savePathData, saveApAppionJobData, saveScriptProgramRun, saveScriptParams, saveCheckpoint, 
 
 def constructMotionCorParser():
     parser = argparse.ArgumentParser(add_help=False)
@@ -216,63 +217,70 @@ def constructJobMetadata(args : dict, session_id : int):
     jobmetadata['ref_apddstackrundata_ddstackrun']=saveDDStackRunData(args['preset'], args['align'], args['bin'], args['runname'], args['rundir'], session_id)
     return jobmetadata
 
-def pipeline(tasklist: list, args : dict, checkpoint_path: str):
-    # Pre-task
-    jobmetadata=constructJobMetadata(args)
+def preTask(imageid, args):
+    imgmetadata=readImageMetadata(imageid, False, args["align"], False)
+    if 'refimgid' in args.keys():
+        gainmetadata=readImageMetadata(args['refimgid'], False, args["align"], False)
+        imgmetadata['gain_input']=readInputPath(gainmetadata['session_frame_path'],gainmetadata['image_filename'])
+    kwargs=constructMotionCorKwargs(imgmetadata, args)
+    return kwargs, imgmetadata
+
+def postTask(imageid, kwargs, imgmetadata, jobmetadata, args, logData, checkpoint_path):
+    shifts=[]
+    # Find way to not calculate these twice?
+    framelist=filterFrameList(kwargs["PixSize"], imgmetadata['nframes'], shifts)
+    nframes=calcTotalFrames(imgmetadata['camera_name'], imgmetadata['exposure_time'], imgmetadata['frame_time'], imgmetadata['nframes'], imgmetadata['eer_frames'])
+    aligned_camera_id = constructAlignedCamera(imgmetadata['camera_id'], args['square'], args['bin'], kwargs["Trim"], framelist, nframes)
+    aligned_preset_id = constructAlignedPresets(imgmetadata['preset_id'], aligned_camera_id, alignlabel=args['alignlabel'])
+    aligned_image_filename = imgmetadata['image_filename']+"-%s" % args['alignlabel']
+    aligned_image_mrc_image = aligned_image_filename + ".mrc"
+    try:
+        os.link(kwargs["OutMrc"], os.path.join(imgmetadata["session_image_path"],aligned_image_mrc_image))
+    except OSError:
+        os.symlink(kwargs["OutMrc"], os.path.join(imgmetadata["session_image_path"],aligned_image_mrc_image))
+    aligned_image_id = constructAlignedImage(imageid, aligned_preset_id, aligned_camera_id, aligned_image_mrc_image, aligned_image_filename)
+    uploadAlignedImage(imageid, aligned_image_id, jobmetadata['ref_apddstackrundata_ddstackrun'], logData["shifts"], kwargs["PixSize"], False)
+    #TODO Is alignlabel for doseweighted image really the same as aligned image?
+    aligned_preset_dw_id = constructAlignedPresets(imgmetadata['preset_id'], aligned_camera_id, alignlabel=args['alignlabel'])
+    aligned_image_dw_filename = imgmetadata['image_filename']+"-%s-DW" % args['alignlabel']
+    aligned_image_dw_mrc_image = aligned_image_filename + ".mrc"
+    try:
+        os.link(kwargs["OutMrc"].replace(".mrc","_DW.mrc"), os.path.join(imgmetadata["session_image_path"],aligned_image_dw_mrc_image))
+    except OSError:
+        os.symlink(kwargs["OutMrc"].replace(".mrc","_DW.mrc"), os.path.join(imgmetadata["session_image_path"],aligned_image_dw_mrc_image))
+    aligned_image_dw_id = constructAlignedImage(imageid, aligned_preset_dw_id, aligned_camera_id, aligned_image_dw_mrc_image, aligned_image_dw_filename)
+    uploadAlignedImage(imageid, aligned_image_dw_id, jobmetadata['ref_apddstackrundata_ddstackrun'], logData["shifts"], kwargs["PixSize"], True)
+    # Frame trajectory only saved for aligned_image_id: https://github.com/nysbc/appion-slurm/blob/814544a7fee69ba7121e7eb1dd3c8b63bc4bb75a/appion/appionlib/apDDLoop.py#L89-L107
+    saveFrameTrajectory(aligned_image_id, jobmetadata['ref_apddstackrundata_ddstackrun'], logData["shifts"])
+    # This is only used by manualpicker.py so it can go away.  Just making a note of it in a commit for future me / someone.
+    #saveApAssessmentRunData(imgmetadata['session_id'], assessment)
+    # Seems mostly unused?  Might have been used with a prior implementation of motion correction?  Fields seem to mostly be filled with nulls in the MEMC database.
+    saveDDStackParamsData(args['preset'], args['align'], args['bin'], None, None, None, None)
+    #saveDDStackParamsData(args['preset'], args['align'], args['bin'], ref_apddstackrundata_unaligned_ddstackrun, method, ref_apstackdata_stack, ref_apdealignerparamsdata_de_aligner)
+    
+    # Is this really the right/best way to determine the framestack path?  It works for our purposes ( I think )
+    # but the original codebase has more elaborate logic that works for both aligned and unaligned images:
+    # https://github.com/nysbc/appion-slurm/blob/814544a7fee69ba7121e7eb1dd3c8b63bc4bb75a/appion/appionlib/apDDprocess.py#L104-L123
+    # Not sure that really is necessary for what we're trying to achieve in the immediate future.
+    if 'InMrc' in kwargs.keys():
+        framestackpath=kwargs['InMrc']
+    elif 'InTiff' in kwargs.keys():
+        framestackpath=kwargs['InTiff']
+    elif 'InEer' in kwargs.keys():
+        framestackpath=kwargs['InEer']
+    motioncorr_log_path=calcMotionCorrLogPath(framestackpath)
+    saveMotionCorrLog(logData, motioncorr_log_path, args['startframe'], calcTotalRenderedFrames(imgmetadata['total_raw_frames'], args['rendered_frame_size']), args['bin'])
+    saveCheckpoint(imageid, checkpoint_path)
+
+def pipeline(tasklist: list, args : dict, checkpoint_path: str, jobmetadata: dict, client : Client):
+    futures=[]
     for imageid in tasklist:
-        imgmetadata=readImageMetadata(imageid, False, args["align"], False)
-        if 'refimgid' in args.keys():
-            gainmetadata=readImageMetadata(args['refimgid'], False, args["align"], False)
-            imgmetadata['gain_input']=readInputPath(gainmetadata['session_frame_path'],gainmetadata['image_filename'])
-        kwargs=constructMotionCorKwargs(imgmetadata, args)
+        pretask_f=client.submit(preTask, imageid, args)
+        futures.append(pretask_f)
 
-        # Task
-        logData, _ = motioncor(**kwargs)
+        task_f=client.submit(lambda pretask_data : motioncor(**pretask_data[0]), pretask_f)
+        futures.append(task_f)
 
-        # Post-task
-        shifts=[]
-        # Find way to not calculate these twice?
-        framelist=filterFrameList(kwargs["PixSize"], imgmetadata['nframes'], shifts)
-        nframes=calcTotalFrames(imgmetadata['camera_name'], imgmetadata['exposure_time'], imgmetadata['frame_time'], imgmetadata['nframes'], imgmetadata['eer_frames'])
-        aligned_camera_id = constructAlignedCamera(imgmetadata['camera_id'], args['square'], args['bin'], kwargs["Trim"], framelist, nframes)
-        aligned_preset_id = constructAlignedPresets(imgmetadata['preset_id'], aligned_camera_id, alignlabel=args['alignlabel'])
-        aligned_image_filename = imgmetadata['image_filename']+"-%s" % args['alignlabel']
-        aligned_image_mrc_image = aligned_image_filename + ".mrc"
-        try:
-            os.link(kwargs["OutMrc"], os.path.join(imgmetadata["session_image_path"],aligned_image_mrc_image))
-        except OSError:
-            os.symlink(kwargs["OutMrc"], os.path.join(imgmetadata["session_image_path"],aligned_image_mrc_image))
-        aligned_image_id = constructAlignedImage(imageid, aligned_preset_id, aligned_camera_id, aligned_image_mrc_image, aligned_image_filename)
-        uploadAlignedImage(imageid, aligned_image_id, jobmetadata['ref_apddstackrundata_ddstackrun'], logData["shifts"], kwargs["PixSize"], False)
-        #TODO Is alignlabel for doseweighted image really the same as aligned image?
-        aligned_preset_dw_id = constructAlignedPresets(imgmetadata['preset_id'], aligned_camera_id, alignlabel=args['alignlabel'])
-        aligned_image_dw_filename = imgmetadata['image_filename']+"-%s-DW" % args['alignlabel']
-        aligned_image_dw_mrc_image = aligned_image_filename + ".mrc"
-        try:
-            os.link(kwargs["OutMrc"].replace(".mrc","_DW.mrc"), os.path.join(imgmetadata["session_image_path"],aligned_image_dw_mrc_image))
-        except OSError:
-            os.symlink(kwargs["OutMrc"].replace(".mrc","_DW.mrc"), os.path.join(imgmetadata["session_image_path"],aligned_image_dw_mrc_image))
-        aligned_image_dw_id = constructAlignedImage(imageid, aligned_preset_dw_id, aligned_camera_id, aligned_image_dw_mrc_image, aligned_image_dw_filename)
-        uploadAlignedImage(imageid, aligned_image_dw_id, jobmetadata['ref_apddstackrundata_ddstackrun'], logData["shifts"], kwargs["PixSize"], True)
-        # Frame trajectory only saved for aligned_image_id: https://github.com/nysbc/appion-slurm/blob/814544a7fee69ba7121e7eb1dd3c8b63bc4bb75a/appion/appionlib/apDDLoop.py#L89-L107
-        saveFrameTrajectory(aligned_image_id, jobmetadata['ref_apddstackrundata_ddstackrun'], logData["shifts"])
-        # This is only used by manualpicker.py so it can go away.  Just making a note of it in a commit for future me / someone.
-        #saveApAssessmentRunData(imgmetadata['session_id'], assessment)
-        # Seems mostly unused?  Might have been used with a prior implementation of motion correction?  Fields seem to mostly be filled with nulls in the MEMC database.
-        saveDDStackParamsData(args['preset'], args['align'], args['bin'], None, None, None, None)
-        #saveDDStackParamsData(args['preset'], args['align'], args['bin'], ref_apddstackrundata_unaligned_ddstackrun, method, ref_apstackdata_stack, ref_apdealignerparamsdata_de_aligner)
-        
-        # Is this really the right/best way to determine the framestack path?  It works for our purposes ( I think )
-        # but the original codebase has more elaborate logic that works for both aligned and unaligned images:
-        # https://github.com/nysbc/appion-slurm/blob/814544a7fee69ba7121e7eb1dd3c8b63bc4bb75a/appion/appionlib/apDDprocess.py#L104-L123
-        # Not sure that really is necessary for what we're trying to achieve in the immediate future.
-        if 'InMrc' in kwargs.keys():
-            framestackpath=kwargs['InMrc']
-        elif 'InTiff' in kwargs.keys():
-            framestackpath=kwargs['InTiff']
-        elif 'InEer' in kwargs.keys():
-            framestackpath=kwargs['InEer']
-        motioncorr_log_path=calcMotionCorrLogPath(framestackpath)
-        saveMotionCorrLog(logData, motioncorr_log_path, args['startframe'], calcTotalRenderedFrames(imgmetadata['total_raw_frames'], args['rendered_frame_size']), args['bin'])
-        saveCheckpoint(imageid, checkpoint_path)
-    updateApAppionJobData(jobmetadata['ref_apappionjobdata_job'], "D")
+        posttask_f=client.submit(lambda pretask_data, task_data : postTask(imageid, pretask_data[0], pretask_data[1], jobmetadata, args, task_data[0], checkpoint_path))
+        futures.append(posttask_f)
+    return futures

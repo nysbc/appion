@@ -6,17 +6,21 @@ import sys
 from signal import signal, SIGINT, SIGTERM, SIGCONT, Signals
 from base.retrieve import readCheckpoint, readImageSet
 from base.calc import filterImages
+from typing import Callable
 
 # Parameters passed in using lambdas.
-def loop(pipeline, args: dict, cluster : Cluster, checkpoint_path : str, retries : int = 3) -> None:
+def loop(pipeline, args: dict, cluster : Cluster, checkpoint_path : str, preLoop : Callable = lambda args : {}, postLoop : Callable = lambda jobmetadata : None) -> None:
+    jobmetadata={}
     # Signal handler used to ensure that cleanup happens if SIGINT, SIGCONT or SIGTERM is received.
     def handler(signum, frame):
         signame = Signals(signum).name
         logger.info(f"Received {signame} signal.  Cleaning up and exiting now.")
         try:
             cluster.close()
+            postLoop(jobmetadata)
             logger.info("Server has exited cleanly.  Bye!")
         except SystemExit:
+            postLoop(jobmetadata)
             logger.debug("Function lower on the stack has received exited midway.")
         except:
             logger.exception("Exception occurred while server was trying to exit cleanly.", stack_info=True)
@@ -40,12 +44,13 @@ def loop(pipeline, args: dict, cluster : Cluster, checkpoint_path : str, retries
     signal(SIGCONT, handler)
     client = Client(cluster)
 
+    jobmetadata=preLoop(args)
     while True:
         done_images=readCheckpoint(checkpoint_path)
         all_images=readImageSet(args["sessionname"], args["preset"])
         tasklist=filterImages(all_images, done_images)
         if tasklist:
-            futures=pipeline(tasklist, args, client)
+            futures=pipeline(tasklist, args, checkpoint_path, client)
             wait(futures)
         else:
             sleep(30)
