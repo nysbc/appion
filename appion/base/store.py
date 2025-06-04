@@ -43,7 +43,7 @@ def saveScriptHostName():
 							  nproc = cpu_info["count"],
 							  memory = psutil.virtual_memory().total,
 							  cpu_vendor = cpu_info["vendor_id_raw"],
-							  gpu_vendor = None , # TODO
+							  gpu_vendor = None , # TODO But we don't really care about this as much.
 							  arch = platform.machine()
 							  )
     hostname.save()

@@ -6,17 +6,18 @@ from sinedon.models.leginon import AcquisitionImageData
 from sinedon.models.leginon import PixelSizeCalibrationData
 import os
 import math
-from glob import glob
-#TODO import specific functions / don't be lazy
-from ..calc import *
-from ..store import *
 
-#TODO Use leginon.cfg?
 # InMrc, InTiff, InEer functions
-def readInputPath(session_image_path : str, filename : str) -> str:
-    fpath = os.path.join(session_image_path,filename+".*")
-    fpath=glob(fpath)
-    return fpath[0] if fpath else ""
+def readInputPath(session_frame_path : str, filename : str) -> str:
+    # Potential suffixes for filename are determined by rawtransfer
+    # https://github.com/nysbc/leginon/blob/48be5325d4645d1591395d3f707bac2161570f98/leginon/rawtransfer.py#L149-L164
+    # Suffix does not seem to be saved in the database anywhere.
+    dst_suffixes = [".frames.mrc", ".frames.tif",".frames.eer", ".frames"]
+    for dst_suffix in dst_suffixes:
+        fpath = os.path.join(session_frame_path,filename+dst_suffix)
+        if os.path.exists(fpath):
+            return fpath
+    return ""
 
 # Trunc Functions
 # Forming the path to the log file is a problem for future me.
@@ -69,6 +70,7 @@ def readImageMetadata(imageid: int, has_bad_pixels : bool = False, is_align : bo
     # Input image parameters
     imgmetadata['session_id']=sessiondata.def_id
     imgmetadata['session_image_path']=sessiondata.image_path
+    imgmetadata['session_frame_path']=sessiondata.frame_path
     imgmetadata['image_filename']=imgdata.filename
     # Dark inputs
     imgmetadata['dark_id']=imgdata.ref_darkimagedata_dark
@@ -121,7 +123,7 @@ def readImageMetadata(imageid: int, has_bad_pixels : bool = False, is_align : bo
     imgmetadata['pixelsizedata']=[{"timestamp": p.def_timestamp, "pixelsize" : p.pixelsize } for p in pixelsizecalibrationdata]
     # Gain inputs
     gaindata=AcquisitionImageData.objects.get(def_id=imgdata.ref_normimagedata_norm)
-    imgmetadata['gain_input']=os.path.join(imgmetadata['session_image_path'],gaindata.mrc_image)
+    imgmetadata['gain_input']=os.path.join(imgmetadata['session_frame_path'],gaindata.mrc_image)
     darkdata = AcquisitionImageData.objects.get(def_id=imgmetadata['dark_id'])
     imgmetadata['dark_input']=darkdata.mrc_image
     imgmetadata['dark_nframes']=darkdata.ref_cameraemdata_camera.nframes

@@ -132,8 +132,7 @@ def constructMotionCorKwargs(imgmetadata : dict, cli_args : dict) -> dict:
 
     # InMrc, InTiff, InEer
     # Get the path to the input image.
-    #TODO Better way to do this using the data in leginon.cfg?
-    fpath = readInputPath(imgmetadata['session_image_path'].replace("leginon","frames"),imgmetadata['image_filename'])
+    fpath = readInputPath(imgmetadata['session_frame_path'],imgmetadata['image_filename'])
     inputType = calcInputType(fpath)
     kwargs[inputType] = fpath
 
@@ -224,7 +223,7 @@ def pipeline(tasklist: list, args : dict, checkpoint_path: str):
         imgmetadata=readImageMetadata(imageid, False, args["align"], False)
         if 'refimgid' in args.keys():
             gainmetadata=readImageMetadata(args['refimgid'], False, args["align"], False)
-            imgmetadata['gain_input']=readInputPath(gainmetadata['session_image_path'].replace("leginon","frames"),gainmetadata['image_filename'])
+            imgmetadata['gain_input']=readInputPath(gainmetadata['session_frame_path'],gainmetadata['image_filename'])
         kwargs=constructMotionCorKwargs(imgmetadata, args)
 
         # Task
@@ -239,14 +238,21 @@ def pipeline(tasklist: list, args : dict, checkpoint_path: str):
         aligned_preset_id = constructAlignedPresets(imgmetadata['preset_id'], aligned_camera_id, alignlabel=args['alignlabel'])
         aligned_image_filename = imgmetadata['image_filename']+"-%s" % args['alignlabel']
         aligned_image_mrc_image = aligned_image_filename + ".mrc"
+        try:
+            os.link(kwargs["OutMrc"], os.path.join(imgmetadata["session_image_path"],aligned_image_mrc_image))
+        except OSError:
+            os.symlink(kwargs["OutMrc"], os.path.join(imgmetadata["session_image_path"],aligned_image_mrc_image))
         aligned_image_id = constructAlignedImage(imageid, aligned_preset_id, aligned_camera_id, aligned_image_mrc_image, aligned_image_filename)
-        # TODO Hardlink motion-corrected output to Leginon directory b/c that's where myamiweb / image viewer expects it to be; symlink as fallback.
         uploadAlignedImage(imageid, aligned_image_id, jobmetadata['ref_apddstackrundata_ddstackrun'], logData["shifts"], kwargs["PixSize"], False)
+        #TODO Is alignlabel for doseweighted image really the same as aligned image?
         aligned_preset_dw_id = constructAlignedPresets(imgmetadata['preset_id'], aligned_camera_id, alignlabel=args['alignlabel'])
         aligned_image_dw_filename = imgmetadata['image_filename']+"-%s-DW" % args['alignlabel']
         aligned_image_dw_mrc_image = aligned_image_filename + ".mrc"
+        try:
+            os.link(kwargs["OutMrc"].replace(".mrc","_DW.mrc"), os.path.join(imgmetadata["session_image_path"],aligned_image_dw_mrc_image))
+        except OSError:
+            os.symlink(kwargs["OutMrc"].replace(".mrc","_DW.mrc"), os.path.join(imgmetadata["session_image_path"],aligned_image_dw_mrc_image))
         aligned_image_dw_id = constructAlignedImage(imageid, aligned_preset_dw_id, aligned_camera_id, aligned_image_dw_mrc_image, aligned_image_dw_filename)
-        # TODO Hardlink motion-corrected output to Leginon directory b/c that's where myamiweb / image viewer expects it to be; symlink as fallback.
         uploadAlignedImage(imageid, aligned_image_dw_id, jobmetadata['ref_apddstackrundata_ddstackrun'], logData["shifts"], kwargs["PixSize"], True)
         # Frame trajectory only saved for aligned_image_id: https://github.com/nysbc/appion-slurm/blob/814544a7fee69ba7121e7eb1dd3c8b63bc4bb75a/appion/appionlib/apDDLoop.py#L89-L107
         saveFrameTrajectory(aligned_image_id, jobmetadata['ref_apddstackrundata_ddstackrun'], logData["shifts"])
