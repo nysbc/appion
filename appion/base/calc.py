@@ -28,39 +28,39 @@ def calcSkipTiltAngle(tilt_angle, tilt_angle_type, unit : str = "radians") -> bo
 
 #TODO refactor this to return a set?  What are we doing with this?
 #=====================
-def skipTestOnImage(self,imgdata):
-    imgname = imgdata['filename']
-    skip = False
-    reason = None
-    # Check if in donedict first. This means rejected images that
-    # was last tested will not be called rejected, but done
-    # This speeds up this function when rerun but means past image
-    # status can not be reverted.
-    try:
-        self.donedict[imgname]
-        return True, 'done'
-    except KeyError:
-        pass
-    if self.reprocessImage(imgdata) is False:
-        self._writeDoneDict(imgname)
-        reason = 'reproc'
-        skip = True
+# def skipTestOnImage(self,imgdata):
+#     imgname = imgdata['filename']
+#     skip = False
+#     reason = None
+#     # Check if in donedict first. This means rejected images that
+#     # was last tested will not be called rejected, but done
+#     # This speeds up this function when rerun but means past image
+#     # status can not be reverted.
+#     try:
+#         self.donedict[imgname]
+#         return True, 'done'
+#     except KeyError:
+#         pass
+#     if self.reprocessImage(imgdata) is False:
+#         self._writeDoneDict(imgname)
+#         reason = 'reproc'
+#         skip = True
 
-    if skip is True:
-        return skip, reason
-    else:
-    # image not done or reprocessing allowed
+#     if skip is True:
+#         return skip, reason
+#     else:
+#     # image not done or reprocessing allowed
 
-        if self.params['norejects'] is True and status is False:
-            reason = 'reject'
-            skip = True
+#         if self.params['norejects'] is True and status is False:
+#             reason = 'reject'
+#             skip = True
 
-        elif ( self.params['tiltangle'] is not None or self.params['tiltangle'] != 'all' ):
-            tiltangle = apDatabase.getTiltAngleDeg(imgdata)
+#         elif ( self.params['tiltangle'] is not None or self.params['tiltangle'] != 'all' ):
+#             tiltangle = apDatabase.getTiltAngleDeg(imgdata)
 
-            tiltangle = apDatabase.getTiltAngleDeg(imgdata)
+#             tiltangle = apDatabase.getTiltAngleDeg(imgdata)
 
-            if skip == True:
-                reason = 'tilt'
+#             if skip == True:
+#                 reason = 'tilt'
 
-    return skip, reason
+#     return skip, reason
