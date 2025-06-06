@@ -1,5 +1,6 @@
 import argparse
-import os
+import os, pwd, platform
+from .store import saveScriptProgramName, saveScriptUsername, saveScriptHostName, savePathData, saveApAppionJobData, saveScriptProgramRun, saveScriptParams
 
 def constructGlobalParser():
     """
@@ -55,3 +56,16 @@ def constructGlobalParser():
     parser.add_argument("--nproc", dest="nproc", type=int,
         help="Number of processor to use")
     return parser
+
+# TODO Make this generic and move to base?
+def constructJobMetadata(args : dict, progname: str):
+    jobmetadata={}
+    jobmetadata['ref_scriptprogramname_progname']=saveScriptProgramName()
+    jobmetadata['ref_scriptusername_username']=saveScriptUsername()
+    jobmetadata['ref_scripthostname_hostname']=saveScriptHostName()
+    jobmetadata['ref_appathdata_appion_path']=savePathData(__path__)
+    jobmetadata['ref_appathdata_rundir']=savePathData(args['rundir'])
+    jobmetadata['ref_apappionjobdata_job']=saveApAppionJobData(jobmetadata['ref_appathdata_rundir'], progname, jobmetadata['runname'], pwd.getpwuid(os.getuid())[0], platform.node(), jobmetadata['ref_sessiondata_session'])
+    jobmetadata['ref_scriptprogramrun_progrun']=saveScriptProgramRun(jobmetadata['runname'], jobmetadata['ref_scriptprogramname_progname'], jobmetadata['ref_scriptusername_username'], jobmetadata['ref_scripthostname_hostname'], jobmetadata['ref_appathdata_appion_path'], jobmetadata['ref_appathdata_rundir'], jobmetadata['ref_apappionjobdata_job'])
+    saveScriptParams(args, jobmetadata['ref_scriptprogramname_progname'], jobmetadata['ref_scriptprogramrun_progrun'])
+    return jobmetadata

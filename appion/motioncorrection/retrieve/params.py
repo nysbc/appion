@@ -3,6 +3,7 @@
 
 from django.db.models import F
 from sinedon.models.leginon import AcquisitionImageData
+from sinedon.models.leginon import SessionData
 from sinedon.models.leginon import PixelSizeCalibrationData
 import os
 import math
@@ -129,3 +130,11 @@ def readImageMetadata(imageid: int, has_bad_pixels : bool = False, is_align : bo
     imgmetadata['dark_nframes']=darkdata.ref_cameraemdata_camera.nframes
     imgmetadata['presetid']=imgdata.ref_presetdata_preset
     return imgmetadata
+
+def readSessionData(sessionname : str):
+    sessiondata=SessionData.objects.get(name=sessionname)
+    sessionmetadata={}
+    sessionmetadata['session_id']=sessiondata.def_id
+    sessionmetadata['session_image_path']=sessiondata.image_path
+    sessionmetadata['session_frame_path']=sessiondata.frame_path
+    return sessionmetadata

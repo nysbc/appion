@@ -1,6 +1,6 @@
-
+from typing import Callable
 #TODO create multiple implementations of parseMotionCorLog and return them with a switch.
-def retrieveLogParser(version : str) -> function:
+def retrieveLogParser(version : str) -> Callable:
     return parseMotionCorLog
 
 def parseMotionCorLog(outbuffer: list) -> dict:

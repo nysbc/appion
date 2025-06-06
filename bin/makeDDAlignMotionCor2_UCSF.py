@@ -9,7 +9,9 @@ from fcntl import flock, LOCK_EX, LOCK_UN
 from appion.base.cli import constructGlobalParser
 from appion.motioncorrection.cli import constructMotionCorParser
 from appion.motioncorrection.cli import pipeline
-from appion.motioncorrection.cli import constructJobMetadata
+from appion.motioncorrection.cli import constructMotionCor2JobMetadata
+from appion.motioncorrection.retrieve.images import retrieveDoneImages
+from appion.motioncorrection.retrieve.params import readSessionData
 from appion.base.store import updateApAppionJobData
 from appion.base import loop, constructCluster
 import sinedon.setup
@@ -42,11 +44,13 @@ def main():
                     clusterconfig=yaml.load(f)
             else:
                 raise RuntimeError("Dask cluster configuration at %s does not exist." % clusterconfig_path)
+        session_metadata=readSessionData(args.sessionname)
         cluster=constructCluster(clusterconfig)
         loop(pipeline,
                 vars(args),
                 cluster,
-                constructJobMetadata,
+                lambda : retrieveDoneImages(args.rundir, session_metadata['session_id']),
+                lambda : constructMotionCor2JobMetadata(vars(args)),
                 lambda jobmetadata : updateApAppionJobData(jobmetadata['ref_apappionjobdata_job'], "D"))
         flock(f, LOCK_UN)
  

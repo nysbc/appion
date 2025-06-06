@@ -3,8 +3,8 @@ from math import degrees
 # Currently ctffind4 is the only tool that has an obvious criteria for images that should be reprocessed.
 # See: https://github.com/nysbc/appion-slurm/blob/f376758762771073c0450d2bc3badc0fed6f8e66/appion/bin/ctffind4.py#L130
 # Rejected images 
-def filterImages(images, checkpoint_images, reprocess_images : set = set(), rejected_images: set = set()):
-    return images - checkpoint_images + reprocess_images - rejected_images
+def filterImages(all_images, done_images, reprocess_images : set = set(), rejected_images: set = set()):
+    return all_images - done_images + reprocess_images - rejected_images
 
 def getTiltAngleDeg(imgdata):
     from math import degrees

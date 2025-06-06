@@ -1,10 +1,10 @@
 import argparse
-import os, pwd, platform
+import os
 from dask.distributed import Client
 from .calc import calcInputType, calcImageDefectMap, calcFmDose, calcPixelSize, calcKV, calcTotalFrames, calcTrunc, calcRotFlipGain, filterFrameList, calcMotionCorrLogPath, calcTotalRenderedFrames, motioncor
 from .store import saveDark, saveDefectMrc, saveFmIntFile, saveDDStackRunData, saveFrameTrajectory, constructAlignedCamera, constructAlignedPresets, constructAlignedImage, uploadAlignedImage, saveDDStackParamsData, saveMotionCorrLog
-from .retrieve import readInputPath, readImageMetadata
-from ..base.store import saveScriptProgramName, saveScriptUsername, saveScriptHostName, savePathData, saveApAppionJobData, saveScriptProgramRun, saveScriptParams, saveCheckpoint, 
+from .retrieve import readInputPath, readImageMetadata, readSessionData
+from ..base.cli import constructJobMetadata
 
 def constructMotionCorParser():
     parser = argparse.ArgumentParser(add_help=False)
@@ -203,18 +203,11 @@ def constructMotionCorKwargs(imgmetadata : dict, cli_args : dict) -> dict:
 
     return kwargs
 
-# TODO Doesn't this only have to happen once before the loop starts, after the command is invoked?
-def constructJobMetadata(args : dict, session_id : int):
-    jobmetadata={}
-    jobmetadata['ref_scriptprogramname_progname']=saveScriptProgramName()
-    jobmetadata['ref_scriptusername_username']=saveScriptUsername()
-    jobmetadata['ref_scripthostname_hostname']=saveScriptHostName()
-    jobmetadata['ref_appathdata_appion_path']=savePathData(__path__)
-    jobmetadata['ref_appathdata_rundir']=savePathData(args['rundir'])
-    jobmetadata['ref_apappionjobdata_job']=saveApAppionJobData(jobmetadata['ref_appathdata_rundir'], "makeddalignmotioncor2_ucsf", jobmetadata['runname'], pwd.getpwuid(os.getuid())[0], platform.node(), jobmetadata['ref_sessiondata_session'])
-    jobmetadata['ref_scriptprogramrun_progrun']=saveScriptProgramRun(jobmetadata['runname'], jobmetadata['ref_scriptprogramname_progname'], jobmetadata['ref_scriptusername_username'], jobmetadata['ref_scripthostname_hostname'], jobmetadata['ref_appathdata_appion_path'], jobmetadata['ref_appathdata_rundir'], jobmetadata['ref_apappionjobdata_job'])
-    saveScriptParams(args, jobmetadata['ref_scriptprogramname_progname'], jobmetadata['ref_scriptprogramrun_progrun'])
-    jobmetadata['ref_apddstackrundata_ddstackrun']=saveDDStackRunData(args['preset'], args['align'], args['bin'], args['runname'], args['rundir'], session_id)
+def constructMotionCor2JobMetadata(args : dict):
+    progname="makeddalignmotioncor2_ucsf"
+    jobmetadata=constructJobMetadata(args, progname)
+    sessionmetadata=readSessionData(args["sesseionname"])
+    jobmetadata['ref_apddstackrundata_ddstackrun']=saveDDStackRunData(args['preset'], args['align'], args['bin'], args['runname'], args['rundir'], sessionmetadata["session_id"])
     return jobmetadata
 
 def preTask(imageid, args):
@@ -225,7 +218,7 @@ def preTask(imageid, args):
     kwargs=constructMotionCorKwargs(imgmetadata, args)
     return kwargs, imgmetadata
 
-def postTask(imageid, kwargs, imgmetadata, jobmetadata, args, logData, checkpoint_path):
+def postTask(imageid, kwargs, imgmetadata, jobmetadata, args, logData):
     shifts=[]
     # Find way to not calculate these twice?
     framelist=filterFrameList(kwargs["PixSize"], imgmetadata['nframes'], shifts)
@@ -270,17 +263,16 @@ def postTask(imageid, kwargs, imgmetadata, jobmetadata, args, logData, checkpoin
         framestackpath=kwargs['InEer']
     motioncorr_log_path=calcMotionCorrLogPath(framestackpath)
     saveMotionCorrLog(logData, motioncorr_log_path, args['startframe'], calcTotalRenderedFrames(imgmetadata['total_raw_frames'], args['rendered_frame_size']), args['bin'])
-    saveCheckpoint(imageid, checkpoint_path)
 
-def pipeline(tasklist: list, args : dict, checkpoint_path: str, jobmetadata: dict, client : Client):
+def pipeline(tasklist: list, args : dict, jobmetadata: dict, client : Client):
     futures=[]
     for imageid in tasklist:
-        pretask_f=client.submit(preTask, imageid, args)
+        pretask_f=client.submit(preTask, imageid, args, pure=False)
         futures.append(pretask_f)
 
-        task_f=client.submit(lambda pretask_data : motioncor(**pretask_data[0]), pretask_f)
+        task_f=client.submit(lambda pretask_data : motioncor(**pretask_data[0]), pretask_f, pure=False)
         futures.append(task_f)
 
-        posttask_f=client.submit(lambda pretask_data, task_data : postTask(imageid, pretask_data[0], pretask_data[1], jobmetadata, args, task_data[0], checkpoint_path))
+        posttask_f=client.submit(lambda pretask_data, task_data : postTask(imageid, pretask_data[0], pretask_data[1], jobmetadata, args, task_data[0]), pretask_f, task_f, pure=False)
         futures.append(posttask_f)
     return futures

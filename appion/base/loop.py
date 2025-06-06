@@ -4,12 +4,12 @@ from time import sleep
 import logging
 import sys
 from signal import signal, SIGINT, SIGTERM, SIGCONT, Signals
-from base.retrieve import readCheckpoint, readImageSet
-from base.calc import filterImages
+from .retrieve import readImageSet
+from .calc import filterImages
 from typing import Callable
 
 # Parameters passed in using lambdas.
-def loop(pipeline, args: dict, cluster : Cluster, checkpoint_path : str, preLoop : Callable = lambda args : {}, postLoop : Callable = lambda jobmetadata : None) -> None:
+def loop(pipeline, args: dict, cluster : Cluster, retrieveDoneImages : Callable = lambda : set(), preLoop : Callable = lambda args : {}, postLoop : Callable = lambda jobmetadata : None) -> None:
     jobmetadata={}
     # Signal handler used to ensure that cleanup happens if SIGINT, SIGCONT or SIGTERM is received.
     def handler(signum, frame):
@@ -44,13 +44,13 @@ def loop(pipeline, args: dict, cluster : Cluster, checkpoint_path : str, preLoop
     signal(SIGCONT, handler)
     client = Client(cluster)
 
-    jobmetadata=preLoop(args)
+    jobmetadata=preLoop()
     while True:
-        done_images=readCheckpoint(checkpoint_path)
+        done_images=retrieveDoneImages()
         all_images=readImageSet(args["sessionname"], args["preset"])
         tasklist=filterImages(all_images, done_images)
         if tasklist:
-            futures=pipeline(tasklist, args, checkpoint_path, client)
+            futures=pipeline(tasklist, args, client)
             wait(futures)
         else:
             sleep(30)
