@@ -17,12 +17,13 @@ def validateMotionCorArgs(version : str, passedParams : set) -> bool:
                     "FtBin","InitDose","FmDose","PixSize","kV","Align",
                     "Throw","Trunc","SumRange","Group","Crop","FmRef",
                     "Tilt","RotGain","FlipGain","Mag","InFmMotion",
-                    "Gpu","GpuMemUsage","UseGpus","SplitSum","OutStar"])
+                    "Gpu","GpuMemUsage","UseGpus","SplitSum","OutStar", "EerSampling"])
     validParams=baseParams
     if len(validParams | passedParams) != len(validParams):
         return False, validParams
     if "InTiff" not in passedParams and "InMrc" not in passedParams and "InEer" not in passedParams:
         return False, validParams
+    return True, validParams
 
 def motioncor(dryrun : bool = False, version: str = "", executable="motioncor2", **kwargs) -> tuple:
     cmd=which(executable)
@@ -38,7 +39,7 @@ def motioncor(dryrun : bool = False, version: str = "", executable="motioncor2",
             raise RuntimeError("Unsupported version of motioncor: %s" % str(version))
         validArgs, validParams=validateMotionCorArgs(version, set(kwargs.keys()))
         if not validArgs:
-            invalidArgs=", ".join(list(validParams - set(kwargs.keys())))
+            invalidArgs=", ".join(list(set(kwargs.keys()) - validParams))
             invalidArgs=invalidArgs.rstrip(", ")
             validParamsStr=", ".join(list(validParams))
             validParamsStr=validParamsStr.rstrip(", ")

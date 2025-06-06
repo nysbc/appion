@@ -1,7 +1,7 @@
 import os
 from ..calc.internal import calcInputType, calcImageDefectMap, calcFmDose, calcPixelSize, calcKV, calcTotalFrames, calcTrunc, calcRotFlipGain, filterFrameList
 from ..store import saveDark, saveDefectMrc, saveFmIntFile, saveDDStackRunData
-from ..retrieve import readInputPath
+from ..retrieve.params import readInputPath
 from ...base.retrieve import readSessionData
 from ...base.cli import constructJobMetadata
 

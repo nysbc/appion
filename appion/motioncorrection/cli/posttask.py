@@ -4,13 +4,17 @@ def postTask(imageid, kwargs, imgmetadata, jobmetadata, args, logData):
     import sinedon.setup
     sinedon.setup(args['projectid'])
     import os
-    from ..calc import calcTotalFrames, filterFrameList, calcMotionCorrLogPath, calcTotalRenderedFrames
+    from ..calc.internal import calcTotalFrames, filterFrameList, calcMotionCorrLogPath, calcTotalRenderedFrames
     from ..store import saveFrameTrajectory, constructAlignedCamera, constructAlignedPresets, constructAlignedImage, uploadAlignedImage, saveDDStackParamsData, saveMotionCorrLog
     shifts=[]
     # Find way to not calculate these twice?
     framelist=filterFrameList(kwargs["PixSize"], imgmetadata['nframes'], shifts)
     nframes=calcTotalFrames(imgmetadata['camera_name'], imgmetadata['exposure_time'], imgmetadata['frame_time'], imgmetadata['nframes'], imgmetadata['eer_frames'])
-    aligned_camera_id = constructAlignedCamera(imgmetadata['camera_id'], args['square'], args['bin'], kwargs["Trim"], framelist, nframes)
+    if "Trim" in kwargs.keys():
+        trim=kwargs["Trim"]
+    else:
+        trim=0
+    aligned_camera_id = constructAlignedCamera(imgmetadata['camera_id'], args['square'], args['bin'], trim, framelist, nframes)
     aligned_preset_id = constructAlignedPresets(imgmetadata['preset_id'], aligned_camera_id, alignlabel=args['alignlabel'])
     aligned_image_filename = imgmetadata['image_filename']+"-%s" % args['alignlabel']
     aligned_image_mrc_image = aligned_image_filename + ".mrc"

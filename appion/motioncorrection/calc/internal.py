@@ -182,7 +182,9 @@ def calcAlignedCamera(dimensions : tuple, square_output : bool, binning : tuple,
         dimensions = (mindim, mindim)
     unaligned_binning = binning[0]
     aligned_binning = unaligned_binning * stack_binning
-    aligned_binning = (aligned_binning, aligned_binning)
+    # Why do we do this again?  Is it for the return value?
+    # If we do this, then the aligned_dimensions division operation croaks b/c we can't mix ints and tuples
+    #aligned_binning = (aligned_binning, aligned_binning)
     aligned_dimensions = []
     aligned_offset = []
     for axis in [0,1]:
