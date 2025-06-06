@@ -15,9 +15,15 @@ def readInputPath(session_frame_path : str, filename : str) -> str:
     dst_suffixes = [".frames.mrc", ".frames.tif",".frames.eer", ".frames"]
     for dst_suffix in dst_suffixes:
         fpath = os.path.join(session_frame_path,filename+dst_suffix)
+        # Lazy way to create test files in shoddy test env
+        #if not os.path.isdir(session_frame_path):
+        #    os.makedirs(session_frame_path)
+        #if not os.path.exists(fpath):
+        #    with open(fpath,"w") as f:
+        #        f.write("")
         if os.path.exists(fpath):
             return fpath
-    return ""
+    return None
 
 # Trunc Functions
 # Forming the path to the log file is a problem for future me.
@@ -122,10 +128,17 @@ def readImageMetadata(imageid: int, has_bad_pixels : bool = False, is_align : bo
                            imgmetadata['ccdcamera']))
     imgmetadata['pixelsizedata']=[{"timestamp": p.def_timestamp, "pixelsize" : p.pixelsize } for p in pixelsizecalibrationdata]
     # Gain inputs
-    gaindata=AcquisitionImageData.objects.get(def_id=imgdata.ref_normimagedata_norm)
-    imgmetadata['gain_input']=os.path.join(imgmetadata['session_frame_path'],gaindata.mrc_image)
-    darkdata = AcquisitionImageData.objects.get(def_id=imgmetadata['dark_id'])
-    imgmetadata['dark_input']=darkdata.mrc_image
-    imgmetadata['dark_nframes']=darkdata.ref_cameraemdata_camera.nframes
-    imgmetadata['presetid']=imgdata.ref_presetdata_preset
+    if imgdata.ref_normimagedata_norm:
+        gaindata=AcquisitionImageData.objects.get(def_id=imgdata.ref_normimagedata_norm)
+        imgmetadata['gain_input']=os.path.join(imgmetadata['session_frame_path'],gaindata.mrc_image)
+    else:
+        imgmetadata['gain_input']=None
+    if imgmetadata['dark_id']:
+        darkdata = AcquisitionImageData.objects.get(def_id=imgmetadata['dark_id'])
+        imgmetadata['dark_input']=darkdata.mrc_image
+        imgmetadata['dark_nframes']=darkdata.ref_cameraemdata_camera.nframes
+    else:
+        imgmetadata['dark_input']=None
+        imgmetadata['dark_nframes']=None
+    imgmetadata['presetid']=imgdata.ref_presetdata_preset.def_id
     return imgmetadata

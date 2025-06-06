@@ -1,7 +1,7 @@
 import os
-from ..calc import calcInputType, calcImageDefectMap, calcFmDose, calcPixelSize, calcKV, calcTotalFrames, calcTrunc, calcRotFlipGain, filterFrameList, calcMotionCorrLogPath, calcTotalRenderedFrames, motioncor
-from ..store import saveDark, saveDefectMrc, saveFmIntFile, saveDDStackRunData, saveFrameTrajectory, constructAlignedCamera, constructAlignedPresets, constructAlignedImage, uploadAlignedImage, saveDDStackParamsData, saveMotionCorrLog
-from ..retrieve import readInputPath, readImageMetadata
+from ..calc.internal import calcInputType, calcImageDefectMap, calcFmDose, calcPixelSize, calcKV, calcTotalFrames, calcTrunc, calcRotFlipGain, filterFrameList
+from ..store import saveDark, saveDefectMrc, saveFmIntFile, saveDDStackRunData
+from ..retrieve import readInputPath
 from ...base.retrieve import readSessionData
 from ...base.cli import constructJobMetadata
 
@@ -14,7 +14,7 @@ def constructMotionCorKwargs(imgmetadata : dict, cli_args : dict) -> dict:
     if 'eer_sampling' in cli_args.keys():
         kwargs['EerSampling'] = cli_args['eer_sampling']
     if 'Patchrows' in cli_args.keys() and 'Patchcols' in cli_args.keys():
-        kwargs["Patch"] = cli_args["Patch"]
+        kwargs["Patch"] = "%s %s" % (str(cli_args["Patchrows"]), str(cli_args["Patchcols"]))
     if 'Iter' in cli_args.keys():
         kwargs["Iter"] = cli_args["Iter"]
     if 'Tol' in cli_args.keys():
@@ -44,6 +44,8 @@ def constructMotionCorKwargs(imgmetadata : dict, cli_args : dict) -> dict:
     # InMrc, InTiff, InEer
     # Get the path to the input image.
     fpath = readInputPath(imgmetadata['session_frame_path'],imgmetadata['image_filename'])
+    if fpath is None:
+        raise RuntimeError("Input file for %d does not exist." % imgmetadata["imageid"])
     inputType = calcInputType(fpath)
     kwargs[inputType] = fpath
 
@@ -67,13 +69,13 @@ def constructMotionCorKwargs(imgmetadata : dict, cli_args : dict) -> dict:
     # self.setCameraInfo(1,use_full_raw_area)
         
     # Get the dark image.  Create it if it does not exist.
-    dark_path=os.path.join(cli_args["rundir"], imgmetadata['filename']+"_dark.mrc")
+    dark_path=os.path.join(cli_args["rundir"], imgmetadata['image_filename']+"_dark.mrc")
     saveDark(dark_path, imgmetadata['camera_name'], imgmetadata['eer_frames'], imgmetadata["dark_input"], imgmetadata["dark_nframes"])
     kwargs["Dark"]=dark_path
 
     # DefectMap
     if imgmetadata['bad_pixels'] or imgmetadata['bad_cols'] or imgmetadata['bad_rows']:
-        defect_map_path=os.path.join(cli_args["rundir"], imgmetadata['filename']+"_defect.mrc")
+        defect_map_path=os.path.join(cli_args["rundir"], imgmetadata['image_filename']+"_defect.mrc")
         defect_map=calcImageDefectMap(imgmetadata['bad_rows'], imgmetadata['bad_cols'], imgmetadata['bad_pixels'], imgmetadata['dx'], imgmetadata['dy'])
         saveDefectMrc(defect_map_path, defect_map, imgmetadata['frame_flip'], imgmetadata['frame_rotate'])
 
@@ -81,7 +83,7 @@ def constructMotionCorKwargs(imgmetadata : dict, cli_args : dict) -> dict:
     # FmDose
     if "InEer" in kwargs.keys():
         kwargs["FmDose"] = calcFmDose(imgmetadata['total_raw_frames'], imgmetadata['exposure_time'], imgmetadata['frame_time'], imgmetadata['dose'], cli_args['rendered_frame_size'], totaldose, True)
-        fmintfile_path=os.path.join(cli_args["rundir"], imgmetadata['filename']+"_fmintfile.txt")
+        fmintfile_path=os.path.join(cli_args["rundir"], imgmetadata['image_filename']+"_fmintfile.txt")
         saveFmIntFile(fmintfile_path, imgmetadata['total_raw_frames'], cli_args['rendered_frame_size'], kwargs["FmDose"] / cli_args['rendered_frame_size'])
         kwargs["FmIntFile"] = fmintfile_path
     else:

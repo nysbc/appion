@@ -1,6 +1,6 @@
 from dask.distributed import Client
 from .pretask import preTask
-from ..calc import motioncor
+from ..calc.external import motioncor
 from .posttask import postTask
 
 def pipeline(tasklist: list, args : dict, jobmetadata: dict, client : Client):

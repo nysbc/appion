@@ -5,7 +5,8 @@ def preTask(imageid, args):
     from .constructors import constructMotionCorKwargs
     imgmetadata=readImageMetadata(imageid, False, args["align"], False)
     if 'refimgid' in args.keys():
-        gainmetadata=readImageMetadata(args['refimgid'], False, args["align"], False)
-        imgmetadata['gain_input']=readInputPath(gainmetadata['session_frame_path'],gainmetadata['image_filename'])
+        if args['refimgid']:
+            gainmetadata=readImageMetadata(args['refimgid'], False, args["align"], False)
+            imgmetadata['gain_input']=readInputPath(gainmetadata['session_frame_path'],gainmetadata['image_filename'])
     kwargs=constructMotionCorKwargs(imgmetadata, args)
     return kwargs, imgmetadata
