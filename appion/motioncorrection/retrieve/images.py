@@ -3,7 +3,6 @@
 from sinedon.models.appion import ApDDAlignImagePairData
 from sinedon.models.appion import ApDDStackRunData
 from sinedon.models.appion import ApPathData
-from .params import readSessionData
 
 # preset is implicitly encoded in the path; each run should only be for one (and only one) preset.
 def retrieveDoneImages(rundir, session_id):

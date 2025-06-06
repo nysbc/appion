@@ -246,14 +246,18 @@ def saveDDStackParamsData(preset, align, binning, ref_apddstackrundata_unaligned
 			
 # ApDDStackRunData
 def saveDDStackRunData(preset, align, binning, runname, rundir, ref_sessiondata_session, stack=None):
-	# We don't use ApStackData so that stack is always set to None.
-	params = ApDDStackParamsData.objects.get(preset=preset,align=align,binning=binning,stack=stack)
-	path = ApPathData.objects.get(path=os.path.abspath(rundir))
-	results = ApDDStackRunData.objects.get(runname=runname,ref_apddstackparamsdata_params=params,ref_sessiondata_session=ref_sessiondata_session,ref_appathdata_path=path)
-	if not results:
-		ddstackrundata = ApDDStackRunData(runname=runname,ref_apddstackparamsdata_params=params,ref_sessiondata_session=ref_sessiondata_session,ref_appathdata_path=path)
-		ddstackrundata.save()
-	return ddstackrundata.def_id
+    # We don't use ApStackData so that stack is always set to None.
+    params = ApDDStackParamsData.objects.filter(preset=preset,align=align,binning=binning,ref_apstackdata_stack=stack)
+    params = params[len(params) - 1]
+    path = ApPathData.objects.filter(path=os.path.abspath(rundir))
+    path = path[len(path) - 1]
+    results = ApDDStackRunData.objects.filter(runname=runname,ref_apddstackparamsdata_params=params.def_id,ref_sessiondata_session=ref_sessiondata_session,ref_appathdata_path=path.def_id)
+    if not results:
+        ddstackrundata = ApDDStackRunData(runname=runname,ref_apddstackparamsdata_params=params.def_id,ref_sessiondata_session=ref_sessiondata_session,ref_appathdata_path=path.def_id)
+        ddstackrundata.save()
+    else:
+        ddstackrundata=ddstackrundata[0]
+    return ddstackrundata.def_id
 
 
 def saveMotionCorrLog(logData: dict, outputLogPath: str, throw: int, totalRenderedFrames: int, binning: float = 1.0) -> None:

@@ -46,11 +46,11 @@ def loop(pipeline, args: dict, cluster : Cluster, retrieveDoneImages : Callable 
 
     jobmetadata=preLoop()
     while True:
-        done_images=retrieveDoneImages()
         all_images=readImageSet(args["sessionname"], args["preset"])
+        done_images=retrieveDoneImages()
         tasklist=filterImages(all_images, done_images)
         if tasklist:
-            futures=pipeline(tasklist, args, client)
+            futures=pipeline(tasklist, args, jobmetadata, client)
             wait(futures)
         else:
             sleep(30)

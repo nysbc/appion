@@ -29,8 +29,7 @@ def saveScriptUsername():
     username = ScriptUserName(name=getpwuid[0],
                             uid = getpwuid[2],
                             gid = getpwuid[3],
-                            fullname = getpwuid[4],
-                            unixshell = getpwuid[6])
+                            fullname = getpwuid[4])
     username.save()
     return username.def_id
 
@@ -41,11 +40,12 @@ def saveScriptHostName():
 							  system = os.uname()[0].lower(),
 							  distro = distro.name(pretty=True),
 							  nproc = cpu_info["count"],
-							  memory = psutil.virtual_memory().total,
+							  memory = int(psutil.virtual_memory().total/1024),
 							  cpu_vendor = cpu_info["vendor_id_raw"],
 							  gpu_vendor = None , # TODO But we don't really care about this as much.
 							  arch = platform.machine()
 							  )
+    print(psutil.virtual_memory().total)
     hostname.save()
     return hostname.def_id
 
@@ -67,9 +67,9 @@ def saveScriptProgramRun(runname, ref_scriptprogramname_progname, ref_scriptuser
 # Run parse_args() to get a namespace object and then transfrom that into a dict with vars()
 def saveScriptParams(args : dict, ref_scriptprogramname_progname, ref_scriptprogramrun_progrun):
     for paramname in args.keys():
-        paramname = ScriptParamName(name=paramname,
+        scriptparamname = ScriptParamName(name=paramname,
 									ref_scriptprogramname_progname=ref_scriptprogramname_progname)
-        paramname.save()
+        scriptparamname.save()
         usage=None
         if isinstance(args[paramname], bool):
             if args[paramname] is True:
@@ -84,7 +84,7 @@ def saveScriptParams(args : dict, ref_scriptprogramname_progname, ref_scriptprog
         if usage:
             paramvalue = ScriptParamValue(value=str(args[paramname]),
                                         usage = usage,
-                                        paramname=paramname.def_id,
+                                        ref_scriptparamname_paramname=scriptparamname.def_id,
                                         ref_scriptprogramrun_progrun=ref_scriptprogramrun_progrun
             )
             paramvalue.save()
@@ -116,7 +116,7 @@ def updateApAppionJobData(jobid, status):
 
 def saveApAppionJobData(ref_appathdata_path, jobtype, runname, user, hostname, ref_sessiondata_session):
     #=====================
-    appionjob = ApAppionJobData.objects.get(ref_appathdata_path = ref_appathdata_path,
+    appionjob = ApAppionJobData.objects.filter(ref_appathdata_path = ref_appathdata_path,
                                         jobtype = jobtype)
     if not appionjob:
         ### insert a cluster job
@@ -132,11 +132,9 @@ def saveApAppionJobData(ref_appathdata_path, jobtype, runname, user, hostname, r
 
 # ApPathData
 def savePathData(path):
-	appath = ApPathData.objects.get(path=path)
-	if not appath:
-		appath = ApPathData(path=path)
-		appath.save()
-	return appath.def_id
+    appath = ApPathData(path=path)
+    appath.save()
+    return appath.def_id
 
 # This isn't necessary for ctffind or motioncor2, since images that have been processed are 
 # recorded in the Appion database, but it might be useful in the future for applications that don't

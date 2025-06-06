@@ -35,3 +35,10 @@ def readCheckpoint(checkpoint_path):
         flock(f, LOCK_UN)
     return images
 
+def readSessionData(sessionname : str):
+    sessiondata=SessionData.objects.get(name=sessionname)
+    sessionmetadata={}
+    sessionmetadata['session_id']=sessiondata.def_id
+    sessionmetadata['session_image_path']=sessiondata.image_path
+    sessionmetadata['session_frame_path']=sessiondata.frame_path
+    return sessionmetadata

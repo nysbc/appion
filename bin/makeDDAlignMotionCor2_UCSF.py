@@ -7,26 +7,30 @@ import yaml
 import os
 from fcntl import flock, LOCK_EX, LOCK_UN
 from appion.base.cli import constructGlobalParser
-from appion.motioncorrection.cli import constructMotionCorParser
-from appion.motioncorrection.cli import pipeline
-from appion.motioncorrection.cli import constructMotionCor2JobMetadata
-from appion.motioncorrection.retrieve.images import retrieveDoneImages
-from appion.motioncorrection.retrieve.params import readSessionData
-from appion.base.store import updateApAppionJobData
-from appion.base import loop, constructCluster
+from appion.motioncorrection.cli.parser import constructMotionCorParser
 import sinedon.setup
 
 def main():
     parser = argparse.ArgumentParser(parents=[constructGlobalParser(), constructMotionCorParser()])
     args = parser.parse_args()
     sinedon.setup(args.projectid)
+    from appion.motioncorrection.cli.pipeline import pipeline
+    from appion.motioncorrection.cli.constructors import constructMotionCor2JobMetadata
+    from appion.motioncorrection.retrieve.images import retrieveDoneImages
+    from appion.base.retrieve import readSessionData
+    from appion.base.store import updateApAppionJobData
+    from appion.base.loop import loop
+    from appion.base.cluster import constructCluster
     # Create a lock in the run directory so that only one loop can run at a time.
     lockfile=os.path.join(args.rundir, ".lock")
-    with open(lockfile, 'r+'):
+    if not os.path.exists(lockfile):
+        f=open(lockfile, "w")
+        f.close()
+    with open(lockfile, 'r+') as f:
         flock(f, LOCK_EX)
         f.seek(0)
         f.truncate()
-        f.write(os.getpid())
+        f.write(str(os.getpid()))
         # The cluster config can be set via environment variable instead of the CLI flag.
         # This is necessary for backwards compatibility since the myamiweb web UI will not add the clusterconfig flag at present.
         clusterconfig={}
@@ -34,14 +38,14 @@ def main():
             clusterconfig_path=os.environ["DASK_CLUSTER_CONFIG"]
             if os.path.exists(clusterconfig_path):
                 with open(clusterconfig_path,"r") as f:
-                    clusterconfig=yaml.load(f)
+                    clusterconfig=yaml.load(f, Loader=yaml.Loader)
             else:
                 raise RuntimeError("Dask cluster configuration at %s does not exist." % clusterconfig_path)
         else:
             clusterconfig_path=args.clusterconfig
             if os.path.exists(clusterconfig_path):
                 with open(clusterconfig_path,"r") as f:
-                    clusterconfig=yaml.load(f)
+                    clusterconfig=yaml.load(f, Loader=yaml.Loader)
             else:
                 raise RuntimeError("Dask cluster configuration at %s does not exist." % clusterconfig_path)
         session_metadata=readSessionData(args.sessionname)
