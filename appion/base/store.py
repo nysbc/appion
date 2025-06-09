@@ -45,7 +45,6 @@ def saveScriptHostName():
 							  gpu_vendor = None , # TODO But we don't really care about this as much.
 							  arch = platform.machine()
 							  )
-    print(psutil.virtual_memory().total)
     hostname.save()
     return hostname.def_id
 

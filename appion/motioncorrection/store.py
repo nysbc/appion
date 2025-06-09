@@ -22,8 +22,8 @@ def constructAlignedImage(image_id, preset_id, camera_id, mrc_image, filename):
         # https://docs.djangoproject.com/en/5.2/topics/db/queries/#copying-model-instances
         imgdata.pk = None
         imgdata._state.adding = True
-        imgdata.ref_presetdata_preset=preset_id
-        imgdata.ref_cameraemdata_camera=camera_id
+        imgdata.ref_presetdata_preset=PresetData.objects.get(def_id=preset_id)
+        imgdata.ref_cameraemdata_camera=CameraEMData.objects.get(def_id=camera_id)
         imgdata.mrc_image=mrc_image
         imgdata.filename=filename
         imgdata.save()
@@ -122,12 +122,12 @@ def constructAlignedImageData(imageid, presetid, cameraid, aligned_filename):
 # ApDDAlignImagePairData
 # We can only really add insert ref IDs here b/c the raw and aligned images are in a different database from the Appion results.
 # If it weren't for this, we'd probably pass objects directly.
-def uploadAlignedImage(raw_image_def_id, aligned_image_def_id, rundata_def_id, shifts, pixsize, doseweighted=False):
+def uploadAlignedImage(raw_image_def_id, aligned_image_def_id, rundata_def_id, shifts, pixsize, doseweighted=False, trajdata_def_id=None):
     saveImagePairData(raw_image_def_id, aligned_image_def_id, rundata_def_id)
     aligned_image=AcquisitionImageData.objects.get(def_id=aligned_image_def_id)
     nframes=aligned_image.ref_cameraemdata_camera.nframes
     if not doseweighted:
-        saveAlignStats(aligned_image_def_id, rundata_def_id, shifts, nframes, pixsize)
+        saveAlignStats(aligned_image_def_id, rundata_def_id, shifts, nframes, pixsize, trajdata_def_id)
     copyALSThicknessParams(raw_image_def_id,aligned_image_def_id)
     copyZLPThicknessParams(raw_image_def_id,aligned_image_def_id)
 
@@ -181,7 +181,7 @@ def uploadAlignStats(shifts, nframes):
 # ApDDAlignStatsData
 # Pass in shifts from dict returned by parseLog
 # Run saveFrameTrajectory beforehand to get trajdata_def_id.
-def saveAlignStats(aligned_image_def_id, rundata_def_id, trajdata_def_id, max_drifts, median, pixsize):
+def saveAlignStats(aligned_image_def_id, rundata_def_id, max_drifts, median, pixsize, trajdata_def_id=None):
     # Issue #6155 need new query to get timestamp
 	# JP: Where does a timestamp come into play?
     #aligned_imgdata = AcquisitionImageData.objects.get(def_id=aligned_image_def_id)

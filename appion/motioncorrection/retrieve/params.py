@@ -140,5 +140,5 @@ def readImageMetadata(imageid: int, has_bad_pixels : bool = False, is_align : bo
     else:
         imgmetadata['dark_input']=None
         imgmetadata['dark_nframes']=None
-    imgmetadata['presetid']=imgdata.ref_presetdata_preset.def_id
+    imgmetadata['preset_id']=imgdata.ref_presetdata_preset.def_id
     return imgmetadata

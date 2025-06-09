@@ -182,9 +182,6 @@ def calcAlignedCamera(dimensions : tuple, square_output : bool, binning : tuple,
         dimensions = (mindim, mindim)
     unaligned_binning = binning[0]
     aligned_binning = unaligned_binning * stack_binning
-    # Why do we do this again?  Is it for the return value?
-    # If we do this, then the aligned_dimensions division operation croaks b/c we can't mix ints and tuples
-    #aligned_binning = (aligned_binning, aligned_binning)
     aligned_dimensions = []
     aligned_offset = []
     for axis in [0,1]:
@@ -199,7 +196,7 @@ def calcAlignedCamera(dimensions : tuple, square_output : bool, binning : tuple,
     else:
         # assume all frames that are saved are used by not defining the list
         use_frames = None
-    return aligned_binning, aligned_dimensions, aligned_offset, use_frames
+    return (aligned_binning, aligned_binning), aligned_dimensions, aligned_offset, use_frames
 
 def calcMotionCorrLogPath(framestackpath):
     return os.path.splitext(framestackpath)[0]+"_Log.txt"
