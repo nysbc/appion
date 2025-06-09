@@ -1,8 +1,8 @@
 def preTask(imageid, args):
     import sinedon.setup
     sinedon.setup(args['projectid'])
-    from ..retrieve.params import readInputPath, readImageMetadata
     from .constructors import constructMotionCorKwargs
+    from ..retrieve.params import readInputPath, readImageMetadata
     imgmetadata=readImageMetadata(imageid, False, args["align"], False)
     if 'refimgid' in args.keys():
         if args['refimgid']:

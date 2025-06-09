@@ -127,7 +127,8 @@ def uploadAlignedImage(raw_image_def_id, aligned_image_def_id, rundata_def_id, s
     aligned_image=AcquisitionImageData.objects.get(def_id=aligned_image_def_id)
     nframes=aligned_image.ref_cameraemdata_camera.nframes
     if not doseweighted:
-        saveAlignStats(aligned_image_def_id, rundata_def_id, shifts, nframes, pixsize, trajdata_def_id)
+        max_drifts, median = uploadAlignStats(shifts, nframes)
+        saveAlignStats(aligned_image_def_id, rundata_def_id, max_drifts, median, pixsize, trajdata_def_id)
     copyALSThicknessParams(raw_image_def_id,aligned_image_def_id)
     copyZLPThicknessParams(raw_image_def_id,aligned_image_def_id)
 
@@ -141,14 +142,16 @@ def saveImagePairData(raw_image_def_id, aligned_image_def_id, rundata_def_id):
 def copyALSThicknessParams(unaligned,aligned):
 # transfers aperture limited scattering measurements and parameters from the unaligned image to the aligned image
 # should it be here or in a different place???
-    obthdata = ObjIceThicknessData.objects.get(ref_acquisitionimagedata_image=unaligned)
+    unaligned_image = AcquisitionImageData.objects.get(def_id=unaligned)
+    obthdata = ObjIceThicknessData.objects.filter(ref_acquisitionimagedata_image=unaligned_image)
+    aligned_image = AcquisitionImageData.objects.get(def_id=aligned)
     if obthdata:
-        results = obthdata[0]
-        newobjth = ObjIceThicknessData(vacuum_intensity = results.vacuum_intensity,
-                                       mfp = results.mfp,
-                                       intensity = results.intensity,
-                                       thickness = results.thickness,
-                                       ref_acquisitionimagedata_image = aligned)
+        obthdata = obthdata[len(obthdata) - 1]
+        newobjth = ObjIceThicknessData(vacuum_intensity = obthdata.vacuum_intensity,
+                                       mfp = obthdata.mfp,
+                                       intensity = obthdata.intensity,
+                                       thickness = obthdata.thickness,
+                                       ref_acquisitionimagedata_image = aligned_image)
         newobjth.save()
         return newobjth.def_id
     return None
@@ -157,25 +160,25 @@ def copyALSThicknessParams(unaligned,aligned):
 def copyZLPThicknessParams(unaligned,aligned):
     # transfers zero loss peak measurements and parameters from the unaligned image to the aligned image
     # should it be here or in a different place???
-    zlpthdata = ZeroLossIceThicknessData.objects.get(ref_acquisitionimagedata_image=unaligned)
+    unaligned_image = AcquisitionImageData.objects.get(def_id=unaligned)
+    zlpthdata = ZeroLossIceThicknessData.objects.filter(ref_acquisitionimagedata_image=unaligned_image)
+    aligned_image = AcquisitionImageData.objects.get(def_id=aligned)
     if zlpthdata:
-        results = zlpthdata[0]
-        newzlossth = ZeroLossIceThicknessData(no_slit_mean = results.no_slit_mean,
-											  no_slit_sd = results.no_slit_sd,
-											  slit_mean = results.slit_mean,
-											  slit_sd = results.slit_sd,
-											  thickness = results.thickness,
-											  ref_acquisitionimagedata_image = aligned
+        zlpthdata = zlpthdata[len(zlpthdata) - 1]
+        newzlossth = ZeroLossIceThicknessData(no_slit_mean = zlpthdata.no_slit_mean,
+											  no_slit_sd = zlpthdata.no_slit_sd,
+											  slit_mean = zlpthdata.slit_mean,
+											  slit_sd = zlpthdata.slit_sd,
+											  thickness = zlpthdata.thickness,
+											  ref_acquisitionimagedata_image = aligned_image
         )
         newzlossth.save()
         return newzlossth.def_id
     return None
 
-
-#TODO Where does this get invoked?
 def uploadAlignStats(shifts, nframes):
     pixel_shifts = calcFrameShiftFromPositions(shifts, nframes - len(shifts)+1)
-    max_drifts, median = calcFrameStats(pixel_shifts, nframes)
+    max_drifts, median = calcFrameStats(pixel_shifts)
     return max_drifts, median
 
 # ApDDAlignStatsData
@@ -190,12 +193,22 @@ def saveAlignStats(aligned_image_def_id, rundata_def_id, max_drifts, median, pix
         key = 'top_shift%d' % (i+1,)
         drifts[key+'_index'] = drift_tuple[1]
         drifts[key+'_value'] = drift_tuple[0]
-    alignstatsdata = ApDDAlignStatsData(image=aligned_image_def_id, 
-										apix=pixsize,
-                                        ddstackrun=rundata_def_id,
-                                        median_shift_value=median,
-                                        trajectory=trajdata_def_id,
-                                        **drifts)
+    aligned_image = AcquisitionImageData.objects.get(def_id=aligned_image_def_id)
+    rundata = ApDDStackRunData.objects.get(def_id=rundata_def_id)
+    if trajdata_def_id:
+        trajdata = ApDDFrameTrajectoryData.objects.get(def_id=trajdata_def_id)
+        alignstatsdata = ApDDAlignStatsData(ref_acquisitionimagedata_image=aligned_image, 
+                                            apix=pixsize,
+                                            ref_apddstackrundata_ddstackrun=rundata,
+                                            median_shift_value=median,
+                                            ref_apddframetrajectorydata_trajectory=trajdata,
+                                            **drifts)
+    else:
+        alignstatsdata = ApDDAlignStatsData(ref_acquisitionimagedata_image=aligned_image, 
+                                            apix=pixsize,
+                                            ref_apddstackrundata_ddstackrun=rundata,
+                                            median_shift_value=median,
+                                            **drifts)
     alignstatsdata.save()
     return alignstatsdata.def_id
 	
@@ -230,19 +243,21 @@ def saveFrameTrajectory(image_def_id, rundata_def_id, shifts, limit=20, referenc
 
 #ApDDStackParamsData
 def saveDDStackParamsData(preset, align, binning, ref_apddstackrundata_unaligned_ddstackrun, method, ref_apstackdata_stack=None, ref_apdealignerparamsdata_de_aligner=None):
-	ddstackparamsdata = ApDDStackParamsData.objects.get(preset=preset, align=align, bin=binning, 
-                                 ref_apddstackrundata_unaligned_ddstackrun=ref_apddstackrundata_unaligned_ddstackrun, 
-                                         ref_apstackdata_stack=ref_apstackdata_stack,
-                                         method=method,
-                                         ref_apdealignerparamsdata_de_aligner=ref_apdealignerparamsdata_de_aligner)
-	if not ddstackparamsdata:
-		ddstackparamsdata = ApDDStackParamsData(preset=preset, align=align, bin=binning, 
-									ref_apddstackrundata_unaligned_ddstackrun=ref_apddstackrundata_unaligned_ddstackrun, 
-											ref_apstackdata_stack=ref_apstackdata_stack,
-											method=method,
-											ref_apdealignerparamsdata_de_aligner=ref_apdealignerparamsdata_de_aligner)
-		ddstackparamsdata.save()
-	return ddstackparamsdata.def_id
+    ddstackparamsdata = ApDDStackParamsData.objects.filter(preset=preset, align=align, binning=binning, 
+                                                           ref_apddstackrundata_unaligned_ddstackrun=ref_apddstackrundata_unaligned_ddstackrun, 
+                                                           ref_apstackdata_stack=ref_apstackdata_stack,
+                                                           method=method,
+                                                           ref_apdealignerparamsdata_de_aligner=ref_apdealignerparamsdata_de_aligner)
+    if not ddstackparamsdata:
+        ddstackparamsdata = ApDDStackParamsData(preset=preset, align=align, binning=binning, 
+                                                ref_apddstackrundata_unaligned_ddstackrun=ref_apddstackrundata_unaligned_ddstackrun, 
+                                                ref_apstackdata_stack=ref_apstackdata_stack,
+                                                method=method,
+                                                ref_apdealignerparamsdata_de_aligner=ref_apdealignerparamsdata_de_aligner)
+        ddstackparamsdata.save()
+    else:
+        ddstackparamsdata=ddstackparamsdata[len(ddstackparamsdata)-1]
+    return ddstackparamsdata.def_id
 			
 # ApDDStackRunData
 def saveDDStackRunData(preset, align, binning, runname, rundir, ref_sessiondata_session, stack=None):

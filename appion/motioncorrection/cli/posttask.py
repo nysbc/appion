@@ -27,7 +27,7 @@ def postTask(imageid, kwargs, imgmetadata, jobmetadata, args, logData):
     #TODO Is alignlabel for doseweighted image really the same as aligned image?
     aligned_preset_dw_id = constructAlignedPresets(imgmetadata['preset_id'], aligned_camera_id, alignlabel=args['alignlabel'])
     aligned_image_dw_filename = imgmetadata['image_filename']+"-%s-DW" % args['alignlabel']
-    aligned_image_dw_mrc_image = aligned_image_filename + ".mrc"
+    aligned_image_dw_mrc_image = aligned_image_dw_filename + ".mrc"
     try:
         os.link(kwargs["OutMrc"].replace(".mrc","_DW.mrc"), os.path.join(imgmetadata["session_image_path"],aligned_image_dw_mrc_image))
     except OSError:
@@ -52,5 +52,7 @@ def postTask(imageid, kwargs, imgmetadata, jobmetadata, args, logData):
         framestackpath=kwargs['InTiff']
     elif 'InEer' in kwargs.keys():
         framestackpath=kwargs['InEer']
+    # These need to go in the Appion directory / working directory.
+    framestackpath=os.path.join(args["rundir"],os.path.basename(framestackpath))
     motioncorr_log_path=calcMotionCorrLogPath(framestackpath)
     saveMotionCorrLog(logData, motioncorr_log_path, args['startframe'], calcTotalRenderedFrames(imgmetadata['total_raw_frames'], args['rendered_frame_size']), args['bin'])

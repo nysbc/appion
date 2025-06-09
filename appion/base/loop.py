@@ -1,6 +1,6 @@
 from dask.distributed import Client, wait
 from distributed.deploy import Cluster
-from time import sleep
+from time import sleep, time
 import logging
 import sys
 from signal import signal, SIGINT, SIGTERM, SIGCONT, Signals
@@ -28,7 +28,7 @@ def loop(pipeline, args: dict, cluster : Cluster, retrieveDoneImages : Callable 
         sys.exit(0)
 
     # Set up logging
-    logger=logging.getLogger()
+    logger=logging.getLogger(__name__)
     distributed_scheduler_logger=logging.getLogger("distributed.scheduler")
     logHandler=logging.StreamHandler(sys.stdout)
     logFormatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(funcName)s - %(process)d - %(message)s")
@@ -45,12 +45,17 @@ def loop(pipeline, args: dict, cluster : Cluster, retrieveDoneImages : Callable 
     client = Client(cluster)
 
     jobmetadata=preLoop()
+    waitTime=30
     while True:
         all_images=readImageSet(args["sessionname"], args["preset"])
         done_images=retrieveDoneImages()
         tasklist=filterImages(all_images, done_images)
         if tasklist:
+            t0=time()
             futures=pipeline(tasklist, args, jobmetadata, client)
             wait(futures)
+            t1=time()
+            logger.info("Finished processing %d images in %d seconds." % (len(tasklist), (t1-t0)))
         else:
-            sleep(30)
+            logger.info(f"No new images.  Waiting {waitTime} seconds.")
+            sleep(waitTime)
