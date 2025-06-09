@@ -1,13 +1,8 @@
-import os
-from ..calc.internal import calcInputType, calcImageDefectMap, calcFmDose, calcPixelSize, calcKV, calcTotalFrames, calcTrunc, calcRotFlipGain, filterFrameList
-from ..store import saveDark, saveDefectMrc, saveFmIntFile, saveDDStackRunData
-from ..retrieve.params import readInputPath
-from ...base.retrieve import readSessionData
-from ...base.cli import constructJobMetadata
-
-
 def constructMotionCorKwargs(imgmetadata : dict, cli_args : dict) -> dict:
-
+    import os
+    from ..calc.internal import calcInputType, calcImageDefectMap, calcFmDose, calcPixelSize, calcKV, calcTotalFrames, calcTrunc, calcRotFlipGain, filterFrameList
+    from ..store import saveDark, saveDefectMrc, saveFmIntFile
+    from ..retrieve.params import readInputPath
     # Keyword args for motioncor2 function
     kwargs={}
 
@@ -116,6 +111,9 @@ def constructMotionCorKwargs(imgmetadata : dict, cli_args : dict) -> dict:
     return kwargs
 
 def constructMotionCor2JobMetadata(args : dict):
+    from ...base.retrieve import readSessionData
+    from ...base.cli import constructJobMetadata
+    from ..store import saveDDStackRunData
     progname="makeddalignmotioncor2_ucsf"
     jobmetadata=constructJobMetadata(args, progname)
     sessionmetadata=readSessionData(args["sessionname"])
