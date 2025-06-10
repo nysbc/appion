@@ -6,10 +6,6 @@ from math import degrees
 def filterImages(all_images, done_images, reprocess_images : set = set(), rejected_images: set = set()):
     return ((all_images - done_images) | reprocess_images) - rejected_images
 
-def getTiltAngleDeg(imgdata):
-    from math import degrees
-    return degrees(imgdata['scope']['stage position']['a'])
-
 def calcSkipTiltAngle(tilt_angle, tilt_angle_type, unit : str = "radians") -> bool:
     if unit == "radians":
         tilt_angle=degrees(tilt_angle)
@@ -25,42 +21,3 @@ def calcSkipTiltAngle(tilt_angle, tilt_angle_type, unit : str = "radians") -> bo
     elif (tilt_angle_type == 'plustilt' and tilt_angle < 2.0 ):
         return True
     return False
-
-#TODO refactor this to return a set?  What are we doing with this?
-#=====================
-# def skipTestOnImage(self,imgdata):
-#     imgname = imgdata['filename']
-#     skip = False
-#     reason = None
-#     # Check if in donedict first. This means rejected images that
-#     # was last tested will not be called rejected, but done
-#     # This speeds up this function when rerun but means past image
-#     # status can not be reverted.
-#     try:
-#         self.donedict[imgname]
-#         return True, 'done'
-#     except KeyError:
-#         pass
-#     if self.reprocessImage(imgdata) is False:
-#         self._writeDoneDict(imgname)
-#         reason = 'reproc'
-#         skip = True
-
-#     if skip is True:
-#         return skip, reason
-#     else:
-#     # image not done or reprocessing allowed
-
-#         if self.params['norejects'] is True and status is False:
-#             reason = 'reject'
-#             skip = True
-
-#         elif ( self.params['tiltangle'] is not None or self.params['tiltangle'] != 'all' ):
-#             tiltangle = apDatabase.getTiltAngleDeg(imgdata)
-
-#             tiltangle = apDatabase.getTiltAngleDeg(imgdata)
-
-#             if skip == True:
-#                 reason = 'tilt'
-
-#     return skip, reason

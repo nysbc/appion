@@ -18,3 +18,4 @@ def retrieveDoneImages(rundir, session_id):
         imageIds=imageIds | set([imageid.ref_acquisitionimagedata_source for imageid in runImageIds])
     return imageIds
 
+

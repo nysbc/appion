@@ -1,5 +1,6 @@
-from sinedon.models.leginon import SessionData, PresetData, AcquisitionImageData
+from sinedon.models.leginon import SessionData, PresetData, AcquisitionImageData, ScopeEMData
 import json
+from .calc import calcSkipTiltAngle
 from fcntl import flock, LOCK_EX, LOCK_UN
 
 # The idea here is to have two sets of image IDs.  One set (queried from the database)
@@ -23,6 +24,20 @@ def readImageSet(session, preset = None):
         session = SessionData.objects.get(name=session)
         images = AcquisitionImageData.objects.filter(ref_sessiondata_session=session.def_id)
         images = set([image.def_id for image in images])
+    return images
+
+def retrieveRejectedImages(session, tilt_angle_type):
+    session = SessionData.objects.get(name=session)
+    scopes = ScopeEMData.objects.filter(ref_sessiondata_session=session)
+    rejected_scopes=[]
+    for scope in scopes:
+        if calcSkipTiltAngle(scope.stage_position_a, tilt_angle_type):
+            rejected_scopes.append(scope)
+    images = []
+    for scope in rejected_scopes:
+        q_result = AcquisitionImageData.objects.filter(ref_scopeemdata_scope=scope)
+        images += [image.def_id for image in q_result]
+    images = set(images)
     return images
 
 # This isn't necessary for ctffind or motioncor2, since images that have been processed are 

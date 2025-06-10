@@ -3,9 +3,8 @@ from .pretask import preTask
 from ..calc.external import motioncor
 from .posttask import postTask
 
-def pipeline(tasklist: list, args : dict, jobmetadata: dict, client : Client):
+def pipeline(tasklist: list, args : dict, jobmetadata: dict, client : Client, retries : int = 3):
     futures=[]
-    retries=3
     for imageid in tasklist:
         pretask_f=client.submit(preTask, imageid, args, pure=False, retries=retries)
         futures.append(pretask_f)
