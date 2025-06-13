@@ -1,6 +1,7 @@
-from sinedon.models.leginon import SessionData, PresetData, AcquisitionImageData, ScopeEMData
+from sinedon.models.leginon import SessionData, PresetData, AcquisitionImageData, ScopeEMData, ViewerImageStatus
+from sinedon.models.appion import ApAssessmentData
 import json
-from .calc import calcSkipTiltAngle
+from .calc import calcSkipTiltAngle, calcSlicedImageSet
 from fcntl import flock, LOCK_EX, LOCK_UN
 
 # The idea here is to have two sets of image IDs.  One set (queried from the database)
@@ -26,7 +27,30 @@ def readImageSet(session, preset = None):
         images = set([image.def_id for image in images])
     return images
 
-def retrieveRejectedImages(session, tilt_angle_type):
+def retrieveRejectedImages(images, session, start, stop, tilt_angle_type):
+    skipped_tilt_angle_images = retrieveSkippedTiltAngleImages(session, tilt_angle_type)
+    sliced_images = calcSlicedImageSet(images, start, stop)
+    viewer_rejects = retrieveViewerRejects(session)
+    assessment_rejects = retrieveAssessmentRejects()
+    skipped_tilt_angle_images & sliced_images & viewer_rejects & assessment_rejects
+
+
+def retrieveAssessmentRejects():
+    #TODO Might want to limit this to a range of image IDs for the current session only.
+    assessment_rejects = ApAssessmentData.objects.filter(selectionkeep=0)
+    return set([reject.ref_acquisitionimagedata_image for reject in assessment_rejects])
+
+def retrieveViewerRejects(session):
+    '''
+    Images that are hidden in the viewer or are trash are rejected.
+    '''
+    session = SessionData.objects.get(name=session)
+    hidden_images = ViewerImageStatus.objects.filter(ref_sessiondata_session=session, status="hidden")
+    trash_images = ViewerImageStatus.objects.filter(ref_sessiondata_session=session, status="trash")
+    return set([status.ref_acquisitionimagedata_image.def_id for status in hidden_images] + [status.ref_acquisitionimagedata_image.def_id for status in trash_images])
+
+
+def retrieveSkippedTiltAngleImages(session, tilt_angle_type):
     session = SessionData.objects.get(name=session)
     scopes = ScopeEMData.objects.filter(ref_sessiondata_session=session)
     rejected_scopes=[]

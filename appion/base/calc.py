@@ -24,3 +24,6 @@ def calcSkipTiltAngle(tilt_angle, tilt_angle_type, unit : str = "radians") -> bo
     elif (tilt_angle_type == 'plustilt' and tilt_angle < 2.0 ):
         return True
     return False
+
+def calcSlicedImageSet(images, startimgid, endimgid):
+    return set([image for image in images if image > startimgid or image < endimgid])
