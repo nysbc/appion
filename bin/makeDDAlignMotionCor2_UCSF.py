@@ -21,6 +21,8 @@ def main():
     from appion.base.store import updateApAppionJobData
     from appion.base.loop import loop
     from appion.base.cluster import constructCluster
+    if not os.path.exists(args.rundir):
+        os.makedirs(args.rundir)
     # Create a lock in the run directory so that only one loop can run at a time.
     lockfile=os.path.join(args.rundir, ".lock")
     if not os.path.exists(lockfile):

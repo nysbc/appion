@@ -18,6 +18,8 @@ def postTask(imageid, kwargs, imgmetadata, jobmetadata, args, logData):
     aligned_preset_id = constructAlignedPresets(imgmetadata['preset_id'], aligned_camera_id, alignlabel=args['alignlabel'])
     aligned_image_filename = imgmetadata['image_filename']+"-%s" % args['alignlabel']
     aligned_image_mrc_image = aligned_image_filename + ".mrc"
+    if os.path.lexists(os.path.join(imgmetadata["session_image_path"],aligned_image_mrc_image)):
+        os.unlink(os.path.join(imgmetadata["session_image_path"],aligned_image_mrc_image))
     try:
         os.link(kwargs["OutMrc"], os.path.join(imgmetadata["session_image_path"],aligned_image_mrc_image))
     except OSError:
@@ -28,6 +30,8 @@ def postTask(imageid, kwargs, imgmetadata, jobmetadata, args, logData):
     aligned_preset_dw_id = constructAlignedPresets(imgmetadata['preset_id'], aligned_camera_id, alignlabel=args['alignlabel'])
     aligned_image_dw_filename = imgmetadata['image_filename']+"-%s-DW" % args['alignlabel']
     aligned_image_dw_mrc_image = aligned_image_dw_filename + ".mrc"
+    if os.path.lexists(os.path.join(imgmetadata["session_image_path"],aligned_image_dw_mrc_image)):
+        os.unlink(os.path.join(imgmetadata["session_image_path"],aligned_image_dw_mrc_image))
     try:
         os.link(kwargs["OutMrc"].replace(".mrc","_DW.mrc"), os.path.join(imgmetadata["session_image_path"],aligned_image_dw_mrc_image))
     except OSError:
