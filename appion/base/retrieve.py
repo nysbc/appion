@@ -27,18 +27,24 @@ def readImageSet(session, preset = None):
         images = set([image.def_id for image in images])
     return images
 
-def retrieveRejectedImages(images, session, start, stop, tilt_angle_type):
+def retrieveRejectedImages(images, session, start : None, stop : None, tilt_angle_type):
     skipped_tilt_angle_images = retrieveSkippedTiltAngleImages(session, tilt_angle_type)
-    sliced_images = calcSlicedImageSet(images, start, stop)
+    if start and stop:
+        sliced_images = calcSlicedImageSet(images, start, stop)
+    else:
+        sliced_images = set()
     viewer_rejects = retrieveViewerRejects(session)
     assessment_rejects = retrieveAssessmentRejects()
-    skipped_tilt_angle_images & sliced_images & viewer_rejects & assessment_rejects
+    return skipped_tilt_angle_images & sliced_images & viewer_rejects & assessment_rejects
 
 
 def retrieveAssessmentRejects():
     #TODO Might want to limit this to a range of image IDs for the current session only.
     assessment_rejects = ApAssessmentData.objects.filter(selectionkeep=0)
-    return set([reject.ref_acquisitionimagedata_image for reject in assessment_rejects])
+    if assessment_rejects:
+        return set([reject.ref_acquisitionimagedata_image for reject in assessment_rejects])
+    else:
+        return set()
 
 def retrieveViewerRejects(session):
     '''

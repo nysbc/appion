@@ -4,7 +4,7 @@ from time import sleep, time
 import logging
 import sys
 from signal import signal, SIGINT, SIGTERM, SIGCONT, Signals
-from .retrieve import readImageSet
+from .retrieve import readImageSet, retrieveRejectedImages
 from .calc import filterImages
 from typing import Callable
 
@@ -47,9 +47,15 @@ def loop(pipeline, args: dict, cluster : Cluster, retrieveDoneImages : Callable 
     jobmetadata=preLoop()
     waitTime=30
     while True:
+        t0=time()
         all_images=readImageSet(args["sessionname"], args["preset"])
         done_images=retrieveDoneImages()
-        tasklist=filterImages(all_images, done_images)
+        rejected_images=retrieveRejectedImages(all_images, args["sessionname"], None, None, args["tiltangle"])
+        reprocess_images=set()
+        tasklist=filterImages(all_images, done_images, reprocess_images, rejected_images)
+        t1=time()
+        logger.info("Constructed task list in %d seconds." % (t1-t0))
+        logger.info("Image counts: %d total images, %d done images, %d rejected images, and %d images marked for reprocessing." % (len(all_images), len(done_images), len(rejected_images), len(reprocess_images)))
         if tasklist:
             t0=time()
             futures=pipeline(tasklist, args, jobmetadata, client)
