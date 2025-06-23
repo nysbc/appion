@@ -18,6 +18,8 @@ def postTask(imageid, kwargs, imgmetadata, jobmetadata, args, logData):
     aligned_preset_id = constructAlignedPresets(imgmetadata['preset_id'], aligned_camera_id, alignlabel=args['alignlabel'])
     aligned_image_filename = imgmetadata['image_filename']+"-%s" % args['alignlabel']
     aligned_image_mrc_image = aligned_image_filename + ".mrc"
+    if not os.path.exists(imgmetadata["session_image_path"]):
+        raise RuntimeError("Session path does not exist at %s." % imgmetadata["session_image_path"])
     if os.path.lexists(os.path.join(imgmetadata["session_image_path"],aligned_image_mrc_image)):
         os.unlink(os.path.join(imgmetadata["session_image_path"],aligned_image_mrc_image))
     try:

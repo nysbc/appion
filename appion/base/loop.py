@@ -9,7 +9,7 @@ from .calc import filterImages
 from typing import Callable
 
 # Parameters passed in using lambdas.
-def loop(pipeline, args: dict, cluster : Cluster, retrieveDoneImages : Callable = lambda : set(), preLoop : Callable = lambda args : {}, postLoop : Callable = lambda jobmetadata : None) -> None:
+def loop(pipeline, args: dict, cluster : Cluster, retrieveDoneImages : Callable = lambda : set(), preLoop : Callable = lambda args : {}, postLoop : Callable = lambda jobmetadata : None, retrieveReprocessImages : Callable = lambda : set()) -> None:
     jobmetadata={}
     # Signal handler used to ensure that cleanup happens if SIGINT, SIGCONT or SIGTERM is received.
     def handler(signum, frame):
@@ -51,7 +51,8 @@ def loop(pipeline, args: dict, cluster : Cluster, retrieveDoneImages : Callable 
         all_images=readImageSet(args["sessionname"], args["preset"])
         done_images=retrieveDoneImages()
         rejected_images=retrieveRejectedImages(all_images, args["sessionname"], None, None, args["tiltangle"])
-        reprocess_images=set()
+        # Not used by motioncor2; used by ctffind4
+        reprocess_images=retrieveReprocessImages()
         tasklist=filterImages(all_images, done_images, reprocess_images, rejected_images)
         t1=time()
         logger.info("Constructed task list in %d seconds." % (t1-t0))

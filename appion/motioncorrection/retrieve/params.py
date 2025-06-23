@@ -16,11 +16,11 @@ def readInputPath(session_frame_path : str, filename : str) -> str:
     for dst_suffix in dst_suffixes:
         fpath = os.path.join(session_frame_path,filename+dst_suffix)
         # Lazy way to create test files in shoddy test env
-        #if not os.path.isdir(session_frame_path):
-        #    os.makedirs(session_frame_path)
-        #if not os.path.exists(fpath):
-        #    with open(fpath,"w") as f:
-        #        f.write("")
+        if not os.path.isdir(session_frame_path):
+            os.makedirs(session_frame_path)
+        if not os.path.exists(fpath):
+            with open(fpath,"w") as f:
+                f.write("")
         if os.path.exists(fpath):
             return fpath
     return None

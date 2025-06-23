@@ -2,7 +2,7 @@
 
 ## Background
 
-SEMC Appion is a refactor of the Leginon Cryo-EM suite's Appion program (classic Appion).  It exists primarily because the original Appion was experiencing scaling issues due to a facilties expansion in January 2025 (more microscopes!) and because we started working with larger datasets (in [EER format](https://guide.cryosparc.com/processing-data/tutorials-and-case-studies/tutorial-eer-file-support)) more often than previously.  The goals of our refactor were as follows:
+SEMC Appion is a refactor of the Leginon Cryo-EM suite's Appion program (classic Appion).  It exists primarily because classic Appion was experiencing scaling issues due to a facilties expansion in January 2025 (more microscopes!) and because we started working with larger datasets (in [EER format](https://guide.cryosparc.com/processing-data/tutorials-and-case-studies/tutorial-eer-file-support)) more often than previously.  The goals of our refactor were as follows:
 
 1. Reduce the burden of maintaining Appion by switching from in-house libraries (`sinedon`, `numextension`, Appion's pipelining/orchestration functionality) to mainstream external libraries (e.g., `django`, `numpy` with `numba`, and `dask`) with extensive community and institutional support.
 2. Remove unused functionality / clean up the codebase so that only what is being actively used at SEMC is present.

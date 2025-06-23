@@ -35,7 +35,7 @@ def retrieveRejectedImages(images, session, start : None, stop : None, tilt_angl
         sliced_images = set()
     viewer_rejects = retrieveViewerRejects(session)
     assessment_rejects = retrieveAssessmentRejects()
-    return skipped_tilt_angle_images & sliced_images & viewer_rejects & assessment_rejects
+    return skipped_tilt_angle_images | sliced_images | viewer_rejects | assessment_rejects
 
 
 def retrieveAssessmentRejects():
