@@ -1,6 +1,9 @@
 
 
 def postTask(imageid, kwargs, imgmetadata, jobmetadata, args, logData):
+    # Sinedon needs to be reimported and setup within the local scope of this function
+    # because the function runs as a Dask task, which means that it is run in a forked process
+    # that doesn't have Django initialized.
     import sinedon.setup
     sinedon.setup(args['projectid'])
     import os
