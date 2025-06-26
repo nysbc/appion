@@ -61,7 +61,7 @@ def motioncor(dryrun : bool = False, version: str = "", executable="motioncor2",
         try:
             proc=subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=True, text=True, encoding="utf-8")
         except CalledProcessError as e:
-            raise RuntimeError("motioncor2 failed to run.  \n\nStdOut: %s\n\nStdErr: %s") % (e.stdout, e.stderr) from e
+            raise RuntimeError("motioncor2 failed to run.  \n\nStdOut: %s\n\nStdErr: %s" % (e.stdout, e.stderr)) from e
         rawoutput=proc.stdout
         output=rawoutput.split("\n")
         output=logparser(output)
