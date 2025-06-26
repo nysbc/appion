@@ -1,9 +1,11 @@
 from dask.distributed import Client
+import dask
 from .pretask import preTask
 from ..calc.external import motioncor
 from .posttask import postTask
 
 def pipeline(tasklist: list, args : dict, jobmetadata: dict, client : Client, retries : int = 3):
+    dask.config.set({"distributed.scheduler.unknown-task-duration":"30s"})
     futures=[]
     for imageid in tasklist:
         pretask_f=client.submit(preTask, imageid, args, pure=False, retries=retries, resources={'CPU': 1, "MEMORY" : 16})
