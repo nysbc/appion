@@ -1,5 +1,5 @@
-import dask_jobqueue
-from dask.distributed import LocalCluster, SLURMCluster
+from dask_jobqueue import SLURMCluster
+from dask.distributed import LocalCluster
 
 # This is a separate helper function that creates a Dask cluster object.
 # The cluster initialization/instantiation occurs here because this simplifies switching between
