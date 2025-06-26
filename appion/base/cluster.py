@@ -9,6 +9,7 @@ def constructCluster(clusterconfig : dict):
     Initializes a Dask cluster object.  clusterconfig is a dict that specifies the cluster type, the kwargs to pass to the Dask constructor, and settings for any
     misc methods that need to be run for the cluster (e.g., adapt for autoscaling)
     '''
+    cluster=None
     if clusterconfig["cluster_type"] in ["HTCondorCluster", "LSFCluster", "MoabCluster", "OARCluster", "PBSCluster", "SGECluster", "SLURMCluster"]:
         exec("cluster = dask_jobqueue.%s(**clusterconfig[\"kwargs\"])" % clusterconfig["cluster_type"])
         if "methods" in clusterconfig.keys():
