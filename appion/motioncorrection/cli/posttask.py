@@ -31,8 +31,7 @@ def postTask(imageid, kwargs, imgmetadata, jobmetadata, args, logData):
         os.symlink(kwargs["OutMrc"], os.path.join(imgmetadata["session_image_path"],aligned_image_mrc_image))
     aligned_image_id = constructAlignedImage(imageid, aligned_preset_id, aligned_camera_id, aligned_image_mrc_image, aligned_image_filename)
     uploadAlignedImage(imageid, aligned_image_id, jobmetadata['ref_apddstackrundata_ddstackrun'], logData["shifts"], kwargs["PixSize"], False)
-    #TODO Is alignlabel for doseweighted image really the same as aligned image?
-    aligned_preset_dw_id = constructAlignedPresets(imgmetadata['preset_id'], aligned_camera_id, alignlabel=args['alignlabel'])
+    aligned_preset_dw_id = constructAlignedPresets(imgmetadata['preset_id'], aligned_camera_id, alignlabel=args['alignlabel']+"-DW")
     aligned_image_dw_filename = imgmetadata['image_filename']+"-%s-DW" % args['alignlabel']
     aligned_image_dw_mrc_image = aligned_image_dw_filename + ".mrc"
     if os.path.lexists(os.path.join(imgmetadata["session_image_path"],aligned_image_dw_mrc_image)):
