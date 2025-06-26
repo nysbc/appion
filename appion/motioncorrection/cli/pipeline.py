@@ -8,7 +8,7 @@ def pipeline(tasklist: list, args : dict, jobmetadata: dict, client : Client, re
     dask.config.set({"distributed.scheduler.unknown-task-duration":"30s"})
     futures=[]
     for imageid in tasklist:
-        pretask_f=client.submit(preTask, imageid, args, pure=False, retries=retries, resources={'CPU': 1, "MEMORY" : 16})
+        pretask_f=client.submit(preTask, imageid, args, pure=False, retries=retries, resources={'CPU': 4, "MEMORY" : 64})
         futures.append(pretask_f)
 
         motioncor_lambda = lambda pretask_data : motioncor(**pretask_data[0])
@@ -16,6 +16,6 @@ def pipeline(tasklist: list, args : dict, jobmetadata: dict, client : Client, re
         futures.append(task_f)
 
         postTask_lambda = lambda pretask_data, task_data : postTask(imageid, pretask_data[0], pretask_data[1], jobmetadata, args, task_data[0])
-        posttask_f=client.submit(postTask_lambda, pretask_f, task_f, pure=False, retries=retries, resources={'CPU': 1, "MEMORY" : 16})
+        posttask_f=client.submit(postTask_lambda, pretask_f, task_f, pure=False, retries=retries, resources={'CPU': 4, "MEMORY" : 64})
         futures.append(posttask_f)
     return futures
