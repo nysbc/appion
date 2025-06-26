@@ -5,6 +5,7 @@ from shutil import which
 from ..retrieve.version import readMotionCorVersion
 from ..retrieve.logs import retrieveLogParser
 import subprocess
+from subprocess import CalledProcessError
 
 def compareSupportedVersion(version : str) -> bool:
     return version in ["MotionCor2 version 1.5.0","MotionCor2 version 1.6.4"]
@@ -57,7 +58,10 @@ def motioncor(dryrun : bool = False, version: str = "", executable="motioncor2",
         rawoutput=""
         output={}
     else:
-        proc=subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=True, text=True, encoding="utf-8")
+        try:
+            proc=subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=True, text=True, encoding="utf-8")
+        except CalledProcessError as e:
+            raise RuntimeError("motioncor2 failed to run.  \n\nStdOut: %s\n\nStdErr: %s") % (e.stdout, e.stderr) from e
         rawoutput=proc.stdout
         output=rawoutput.split("\n")
         output=logparser(output)
