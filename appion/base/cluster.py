@@ -1,5 +1,5 @@
 import dask_jobqueue
-from dask.distributed import LocalCluster
+from dask.distributed import LocalCluster, SLURMCluster
 
 # This is a separate helper function that creates a Dask cluster object.
 # The cluster initialization/instantiation occurs here because this simplifies switching between
@@ -10,8 +10,8 @@ def constructCluster(clusterconfig : dict):
     misc methods that need to be run for the cluster (e.g., adapt for autoscaling)
     '''
     cluster=None
-    if clusterconfig["cluster_type"] in ["HTCondorCluster", "LSFCluster", "MoabCluster", "OARCluster", "PBSCluster", "SGECluster", "SLURMCluster"]:
-        exec("cluster = dask_jobqueue.%s(**clusterconfig[\"kwargs\"])" % clusterconfig["cluster_type"])
+    if clusterconfig["cluster_type"] == "SLURMCluster":
+        cluster = SLURMCluster(**clusterconfig["kwargs"])
         if "methods" in clusterconfig.keys():
             if "adapt" in clusterconfig["methods"].keys():
                 cluster.adapt(**clusterconfig["methods"]["adapt"])
@@ -19,4 +19,6 @@ def constructCluster(clusterconfig : dict):
                 cluster.scale(**clusterconfig["methods"]["scale"])
     elif clusterconfig["cluster_type"] == "LocalCluster":
         cluster = LocalCluster()
+    else:
+        raise RuntimeError("Unsupported cluster type: %s" % clusterconfig["cluster_type"])
     return cluster
