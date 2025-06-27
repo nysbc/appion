@@ -71,7 +71,7 @@ def loop(pipeline, args: dict, cluster : Cluster, retrieveDoneImages : Callable 
                     images_processed_total=len(done_images) - (len(all_images) - len(tasklist))
                     images_processed_t1=images_processed_total-images_processed_total_t0
                     throughput=(images_processed_t1)/(((throughput_t1-throughput_t0))/60.)
-                    remaining_image_count=len(tasklist)-images_processed_t1
+                    remaining_image_count=len(tasklist)-images_processed_total
                     logger.info("Progress: %d / %d images processed." % (images_processed_total, len(tasklist)))
                     logger.info("Throughput: %.2f images/min." % throughput)
                     logger.info("Estimated remaining time: %.2f min." % (remaining_image_count/throughput))
