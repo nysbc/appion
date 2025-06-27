@@ -64,7 +64,8 @@ def loop(pipeline, args: dict, cluster : Cluster, retrieveDoneImages : Callable 
             for _ in as_completed(futures):
                 future_complete_counter+=1
                 if future_complete_counter % 100 == 0:
-                    logger.info("%d tasks finished out of %d tasks total." % (future_complete_counter, len(futures)))
+                    done_images=retrieveDoneImages()
+                    logger.info("Image counts: %d total images, %d done images, %d rejected images, and %d images marked for reprocessing." % (len(all_images), len(done_images), len(rejected_images), len(reprocess_images)))
             t1=time()
             logger.info("Finished processing %d images in %d seconds." % (len(tasklist), (t1-t0)))
         else:
