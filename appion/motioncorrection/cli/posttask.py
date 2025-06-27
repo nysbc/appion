@@ -5,11 +5,17 @@ def postTask(imageid, kwargs, imgmetadata, jobmetadata, args, logData):
     # that doesn't have Django initialized.
     import sinedon.setup
     sinedon.setup(args['projectid'])
-    import os
+    import os, sys
     import logging
     from ..calc.internal import calcTotalFrames, filterFrameList, calcMotionCorrLogPath, calcTotalRenderedFrames
     from ..store import saveFrameTrajectory, constructAlignedCamera, constructAlignedPresets, constructAlignedImage, uploadAlignedImage, saveDDStackParamsData, saveMotionCorrLog
     logger=logging.getLogger(__name__)
+    logHandler=logging.StreamHandler(sys.stdout)
+    logFormatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(funcName)s - %(process)d - %(message)s")
+    logHandler.setFormatter(logFormatter)
+    logger.setLevel("INFO")
+    logHandler.setLevel("INFO")
+    logger.addHandler(logHandler)
     shifts=[]
     # Find way to not calculate these twice?
     framelist=filterFrameList(kwargs["PixSize"], imgmetadata['nframes'], shifts)
@@ -30,7 +36,7 @@ def postTask(imageid, kwargs, imgmetadata, jobmetadata, args, logData):
         os.link(kwargs["OutMrc"], os.path.join(imgmetadata["session_image_path"],aligned_image_mrc_image))
     except OSError:
         os.symlink(kwargs["OutMrc"], os.path.join(imgmetadata["session_image_path"],aligned_image_mrc_image))
-    logger.info("%s linked to %s." % (os.path.join(imgmetadata["session_image_path"],aligned_image_mrc_image)), kwargs["OutMrc"])
+    logger.info("%s linked to %s." % (os.path.join(imgmetadata["session_image_path"],aligned_image_mrc_image), kwargs["OutMrc"]))
     logger.info("Constructing aligned image record for %d." % imageid)
     aligned_image_id = constructAlignedImage(imageid, aligned_preset_id, aligned_camera_id, aligned_image_mrc_image, aligned_image_filename)
     logger.info("Uploading aligned image record for %d." % imageid)
@@ -44,7 +50,7 @@ def postTask(imageid, kwargs, imgmetadata, jobmetadata, args, logData):
         os.link(kwargs["OutMrc"].replace(".mrc","_DW.mrc"), os.path.join(imgmetadata["session_image_path"],aligned_image_dw_mrc_image))
     except OSError:
         os.symlink(kwargs["OutMrc"].replace(".mrc","_DW.mrc"), os.path.join(imgmetadata["session_image_path"],aligned_image_dw_mrc_image))
-    logger.info("%s linked to %s." % (os.path.join(imgmetadata["session_image_path"],aligned_image_dw_mrc_image)), kwargs["OutMrc"].replace(".mrc","_DW.mrc"))
+    logger.info("%s linked to %s." % (os.path.join(imgmetadata["session_image_path"],aligned_image_dw_mrc_image), kwargs["OutMrc"].replace(".mrc","_DW.mrc")))
     logger.info("Constructing aligned, dose-weighted image record for %d." % imageid)
     aligned_image_dw_id = constructAlignedImage(imageid, aligned_preset_dw_id, aligned_camera_id, aligned_image_dw_mrc_image, aligned_image_dw_filename)
     # Frame trajectory only saved for aligned_image_id: https://github.com/nysbc/appion-slurm/blob/814544a7fee69ba7121e7eb1dd3c8b63bc4bb75a/appion/appionlib/apDDLoop.py#L89-L107

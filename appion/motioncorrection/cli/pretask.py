@@ -8,6 +8,12 @@ def preTask(imageid, args):
     from .constructors import constructMotionCorKwargs
     from ..retrieve.params import readInputPath, readImageMetadata
     logger=logging.getLogger(__name__)
+    logHandler=logging.StreamHandler(sys.stdout)
+    logFormatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(funcName)s - %(process)d - %(message)s")
+    logHandler.setFormatter(logFormatter)
+    logger.setLevel("INFO")
+    logHandler.setLevel("INFO")
+    logger.addHandler(logHandler)
     logger.info("Gathering image metadata for %d." % imageid)
     imgmetadata=readImageMetadata(imageid, False, args["align"], False)
     if 'refimgid' in args.keys():
