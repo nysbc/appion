@@ -61,7 +61,7 @@ def loop(pipeline, args: dict, cluster : Cluster, retrieveDoneImages : Callable 
             pipeline_t0=time()
             futures=pipeline(tasklist, args, jobmetadata, client)
             future_complete_counter=0
-            images_processed_t0=0
+            images_processed_total_t0=0
             throughput_t0=time()
             for _ in as_completed(futures):
                 future_complete_counter+=1
@@ -69,14 +69,14 @@ def loop(pipeline, args: dict, cluster : Cluster, retrieveDoneImages : Callable 
                     throughput_t1=time()
                     done_images=retrieveDoneImages()
                     images_processed_total=len(done_images) - (len(all_images) - len(tasklist))
-                    images_processed_t1=images_processed_total-images_processed_t0
+                    images_processed_t1=images_processed_total-images_processed_total_t0
                     throughput=(images_processed_t1)/(((throughput_t1-throughput_t0))/60.)
                     remaining_image_count=len(tasklist)-images_processed_t1
                     logger.info("Progress: %d / %d images processed." % (images_processed_total, len(tasklist)))
                     logger.info("Throughput: %.2f images/min." % throughput)
                     logger.info("Estimated remaining time: %.2f min." % (remaining_image_count/throughput))
                     throughput_t0=time()
-                    images_processed_t0=images_processed_t1
+                    images_processed_total_t0=images_processed_total
             pipeline_t1=time()
             logger.info("Finished processing %d images in %d seconds." % (len(tasklist), (pipeline_t1-pipeline_t0)))
         else:
