@@ -1,5 +1,4 @@
 
-
 def postTask(imageid, kwargs, imgmetadata, jobmetadata, args, logData):
     # Sinedon needs to be reimported and setup within the local scope of this function
     # because the function runs as a Dask task, which means that it is run in a forked process
@@ -7,8 +6,10 @@ def postTask(imageid, kwargs, imgmetadata, jobmetadata, args, logData):
     import sinedon.setup
     sinedon.setup(args['projectid'])
     import os
+    import logging
     from ..calc.internal import calcTotalFrames, filterFrameList, calcMotionCorrLogPath, calcTotalRenderedFrames
     from ..store import saveFrameTrajectory, constructAlignedCamera, constructAlignedPresets, constructAlignedImage, uploadAlignedImage, saveDDStackParamsData, saveMotionCorrLog
+    logger=logging.getLogger(__name__)
     shifts=[]
     # Find way to not calculate these twice?
     framelist=filterFrameList(kwargs["PixSize"], imgmetadata['nframes'], shifts)
@@ -29,7 +30,10 @@ def postTask(imageid, kwargs, imgmetadata, jobmetadata, args, logData):
         os.link(kwargs["OutMrc"], os.path.join(imgmetadata["session_image_path"],aligned_image_mrc_image))
     except OSError:
         os.symlink(kwargs["OutMrc"], os.path.join(imgmetadata["session_image_path"],aligned_image_mrc_image))
+    logger.info("%s linked to %s." % (os.path.join(imgmetadata["session_image_path"],aligned_image_mrc_image)), kwargs["OutMrc"])
+    logger.info("Constructing aligned image record for %d." % imageid)
     aligned_image_id = constructAlignedImage(imageid, aligned_preset_id, aligned_camera_id, aligned_image_mrc_image, aligned_image_filename)
+    logger.info("Uploading aligned image record for %d." % imageid)
     uploadAlignedImage(imageid, aligned_image_id, jobmetadata['ref_apddstackrundata_ddstackrun'], logData["shifts"], kwargs["PixSize"], False)
     aligned_preset_dw_id = constructAlignedPresets(imgmetadata['preset_id'], aligned_camera_id, alignlabel=args['alignlabel']+"-DW")
     aligned_image_dw_filename = imgmetadata['image_filename']+"-%s-DW" % args['alignlabel']
@@ -40,9 +44,12 @@ def postTask(imageid, kwargs, imgmetadata, jobmetadata, args, logData):
         os.link(kwargs["OutMrc"].replace(".mrc","_DW.mrc"), os.path.join(imgmetadata["session_image_path"],aligned_image_dw_mrc_image))
     except OSError:
         os.symlink(kwargs["OutMrc"].replace(".mrc","_DW.mrc"), os.path.join(imgmetadata["session_image_path"],aligned_image_dw_mrc_image))
+    logger.info("%s linked to %s." % (os.path.join(imgmetadata["session_image_path"],aligned_image_dw_mrc_image)), kwargs["OutMrc"].replace(".mrc","_DW.mrc"))
+    logger.info("Constructing aligned, dose-weighted image record for %d." % imageid)
     aligned_image_dw_id = constructAlignedImage(imageid, aligned_preset_dw_id, aligned_camera_id, aligned_image_dw_mrc_image, aligned_image_dw_filename)
     # Frame trajectory only saved for aligned_image_id: https://github.com/nysbc/appion-slurm/blob/814544a7fee69ba7121e7eb1dd3c8b63bc4bb75a/appion/appionlib/apDDLoop.py#L89-L107
     trajdata_id=saveFrameTrajectory(aligned_image_id, jobmetadata['ref_apddstackrundata_ddstackrun'], logData["shifts"])
+    logger.info("Uploading aligned image record for %d." % imageid)
     uploadAlignedImage(imageid, aligned_image_dw_id, jobmetadata['ref_apddstackrundata_ddstackrun'], logData["shifts"], kwargs["PixSize"], True, trajdata_id)
     # This is only used by manualpicker.py so it can go away.  Just making a note of it in a commit for future me / someone.
     #saveApAssessmentRunData(imgmetadata['session_id'], assessment)
@@ -63,4 +70,6 @@ def postTask(imageid, kwargs, imgmetadata, jobmetadata, args, logData):
     # These need to go in the Appion directory / working directory.
     framestackpath=os.path.join(args["rundir"],os.path.basename(framestackpath))
     motioncorr_log_path=calcMotionCorrLogPath(framestackpath)
+
+    logger.info("Saving out motioncorr-formatted log for %d to %s." % (imageid, motioncorr_log_path))
     saveMotionCorrLog(logData, motioncorr_log_path, args['startframe'], calcTotalRenderedFrames(imgmetadata['total_raw_frames'], args['rendered_frame_size']), args['bin'])
