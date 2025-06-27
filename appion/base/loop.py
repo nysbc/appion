@@ -68,10 +68,11 @@ def loop(pipeline, args: dict, cluster : Cluster, retrieveDoneImages : Callable 
                 if future_complete_counter % 100 == 0:
                     throughput_t1=time()
                     done_images=retrieveDoneImages()
-                    images_processed_t1=len(done_images) - (len(all_images) - len(tasklist))
-                    throughput=((images_processed_t1-images_processed_t0)/((throughput_t1-throughput_t0))/60.)
+                    images_processed_total=len(done_images) - (len(all_images) - len(tasklist))
+                    images_processed_t1=images_processed_total-images_processed_t0
+                    throughput=((images_processed_t1)/((throughput_t1-throughput_t0))/60.)
                     remaining_image_count=len(tasklist)-images_processed_t1
-                    logger.info("Progress: %d / %d images processed." % (images_processed_t1, len(tasklist)))
+                    logger.info("Progress: %d / %d images processed." % (images_processed_total, len(tasklist)))
                     logger.info("Throughput: %.2f images/min." % throughput)
                     logger.info("Estimated remaining time: %.2f min." % (remaining_image_count/throughput))
                     throughput_t0=time()
