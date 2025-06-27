@@ -1,4 +1,4 @@
-from dask.distributed import Client, wait
+from dask.distributed import Client, as_completed
 from distributed.deploy import Cluster
 from time import sleep, time
 import logging
@@ -60,7 +60,11 @@ def loop(pipeline, args: dict, cluster : Cluster, retrieveDoneImages : Callable 
         if tasklist:
             t0=time()
             futures=pipeline(tasklist, args, jobmetadata, client)
-            wait(futures)
+            future_complete_counter=0
+            for _ in as_completed(futures):
+                future_complete_counter+=1
+                if future_complete_counter % 100 == 0:
+                    logger.info("%d tasks finished out of %d tasks total." % (future_complete_counter, len(futures)))
             t1=time()
             logger.info("Finished processing %d images in %d seconds." % (len(tasklist), (t1-t0)))
         else:
