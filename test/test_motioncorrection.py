@@ -1,9 +1,10 @@
 import parametrize_from_file
 
-from appion.motioncorrection.calc.internal import calcKV, calcPixelSize
+from appion.motioncorrection.calc.internal import calcInputType, calcKV, calcPixelSize
 
-def test_calcInputType():
-    pass
+@parametrize_from_file
+def test_calcInputType(fpath, expected):
+    assert calcInputType(fpath) == expected
 
 def test_calcImageDefectMap():
     pass
