@@ -26,7 +26,7 @@ for imageid in validationData.keys():
     if "totaldose" in validationData[imageid]["appionflags"].keys():
         totaldose = float(validationData[imageid]["appionflags"]["totaldose"])
     else:
-        totaldose = float(imgmetadata['dose'])
+        totaldose = None
     if "InEer" in validationData[imageid]["motioncorflags"].keys():
         params['test_calcFmDose'].append({"total_raw_frames" : imgmetadata['total_raw_frames'], 
                                           "exposure_time" : imgmetadata['exposure_time'], 
