@@ -9,6 +9,7 @@ with open(os.path.join(os.getcwd(),"motioncor2_validation.json"), "r") as f:
 
 params={}
 params['test_calcInputType']=[]
+params['test_calcFmDose']=[]
 params['test_calcPixelSize']=[]
 params["test_calcKV"]=[]
 
@@ -22,6 +23,28 @@ for imageid in validationData.keys():
         params['test_calcInputType'].append({"fpath": validationData[imageid]["motioncorflags"]["InMrc"], "expected" : "InMrc"})
     elif "InTiff" in validationData[imageid]["motioncorflags"].keys():
         params['test_calcInputType'].append({"fpath": validationData[imageid]["motioncorflags"]["InTiff"], "expected" : "InTiff"})
+    if "totaldose" in validationData[imageid]["appionflags"].keys():
+        totaldose = float(validationData[imageid]["appionflags"]["totaldose"])
+    else:
+        totaldose = float(imgmetadata['dose'])
+    if "InEer" in validationData[imageid]["motioncorflags"].keys():
+        params['test_calcFmDose'].append({"total_raw_frames" : imgmetadata['total_raw_frames'], 
+                                          "exposure_time" : imgmetadata['exposure_time'], 
+                                          "frame_time" : imgmetadata['frame_time'], 
+                                          "dose" : imgmetadata['dose'], 
+                                          "rendered_frame_size" : validationData[imageid]["appionflags"]['rendered_frame_size'], 
+                                          "totaldose" : totaldose, 
+                                          "is_eer" : True,
+                                          "expected": validationData[imageid]["motioncorflags"]["FmDose"] })
+    else:
+        params['test_calcFmDose'].append({"total_raw_frames" : imgmetadata['total_raw_frames'], 
+                                          "exposure_time" : imgmetadata['exposure_time'], 
+                                          "frame_time" : imgmetadata['frame_time'], 
+                                          "dose" : imgmetadata['dose'], 
+                                          "rendered_frame_size" : validationData[imageid]["appionflags"]['rendered_frame_size'], 
+                                          "totaldose" : totaldose, 
+                                          "is_eer" : False,
+                                          "expected": validationData[imageid]["motioncorflags"]["FmDose"]})
     params['test_calcPixelSize'].append({"pixelsizedatas" : imgmetadata['pixelsizedata'], 
                                           "binning" : imgmetadata['binning'], 
                                           "imgdata_timestamp" : imgmetadata['imgdata_timestamp'], 

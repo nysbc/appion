@@ -1,6 +1,6 @@
 import parametrize_from_file
 
-from appion.motioncorrection.calc.internal import calcInputType, calcKV, calcPixelSize
+from appion.motioncorrection.calc.internal import calcInputType, calcFmDose, calcKV, calcPixelSize
 
 @parametrize_from_file
 def test_calcInputType(fpath, expected):
@@ -9,8 +9,9 @@ def test_calcInputType(fpath, expected):
 def test_calcImageDefectMap():
     pass
 
-def test_calcFmDose():
-    pass
+@parametrize_from_file
+def test_calcFmDose(total_raw_frames, exposure_time, frame_time, dose, rendered_frame_size, totaldose, is_eer, expected):
+    calcFmDose(total_raw_frames, exposure_time, frame_time, dose, rendered_frame_size, totaldose, is_eer)
 
 def test_calcTotalRenderedFrames():
     pass
