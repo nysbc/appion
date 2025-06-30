@@ -6,7 +6,7 @@ test_calcFmDose:
   is_eer: false
   rendered_frame_size: '1'
   total_raw_frames: 50
-  totaldose: 5.454610165461196e+21
+  totaldose: null
 - dose: 5.910586096772249e+21
   expected: '1.642'
   exposure_time: 1800.0
@@ -14,7 +14,7 @@ test_calcFmDose:
   is_eer: false
   rendered_frame_size: '1'
   total_raw_frames: 36
-  totaldose: 5.910586096772249e+21
+  totaldose: null
 - dose: null
   expected: '1.350'
   exposure_time: 1600.0
@@ -30,7 +30,7 @@ test_calcFmDose:
   is_eer: false
   rendered_frame_size: '1'
   total_raw_frames: 40
-  totaldose: 5.215582512172212e+21
+  totaldose: null
 - dose: 5.392344761873541e+21
   expected: '1.350'
   exposure_time: 1600.0
@@ -46,7 +46,7 @@ test_calcFmDose:
   is_eer: false
   rendered_frame_size: '1'
   total_raw_frames: 36
-  totaldose: 5.910586096772249e+21
+  totaldose: null
 - dose: 5.392344761873541e+21
   expected: '1.350'
   exposure_time: 1600.0
@@ -62,7 +62,7 @@ test_calcFmDose:
   is_eer: false
   rendered_frame_size: '1'
   total_raw_frames: 32
-  totaldose: 5.036889516485281e+21
+  totaldose: null
 - dose: 5.215582512172212e+21
   expected: '1.304'
   exposure_time: 2000.0
@@ -70,7 +70,7 @@ test_calcFmDose:
   is_eer: false
   rendered_frame_size: '1'
   total_raw_frames: 40
-  totaldose: 5.215582512172212e+21
+  totaldose: null
 - dose: 5.447922320539047e+21
   expected: '1.090'
   exposure_time: 1500.0
@@ -78,7 +78,7 @@ test_calcFmDose:
   is_eer: false
   rendered_frame_size: '1'
   total_raw_frames: 50
-  totaldose: 5.447922320539047e+21
+  totaldose: null
 - dose: 5.036889516485281e+21
   expected: '1.574'
   exposure_time: 1600.0
@@ -86,7 +86,7 @@ test_calcFmDose:
   is_eer: false
   rendered_frame_size: '1'
   total_raw_frames: 32
-  totaldose: 5.036889516485281e+21
+  totaldose: null
 - dose: null
   expected: '1.350'
   exposure_time: 1600.0
@@ -102,7 +102,7 @@ test_calcFmDose:
   is_eer: false
   rendered_frame_size: '1'
   total_raw_frames: 40
-  totaldose: 5.458074922452264e+21
+  totaldose: null
 - dose: 5.454610165461196e+21
   expected: '1.091'
   exposure_time: 1500.0
@@ -110,7 +110,7 @@ test_calcFmDose:
   is_eer: false
   rendered_frame_size: '1'
   total_raw_frames: 50
-  totaldose: 5.454610165461196e+21
+  totaldose: null
 - dose: 5.046550232123652e+21
   expected: '1.262'
   exposure_time: 2000.0
@@ -118,7 +118,7 @@ test_calcFmDose:
   is_eer: false
   rendered_frame_size: '1'
   total_raw_frames: 40
-  totaldose: 5.046550232123652e+21
+  totaldose: null
 - dose: 5.447922320539047e+21
   expected: '1.090'
   exposure_time: 1500.0
@@ -126,7 +126,7 @@ test_calcFmDose:
   is_eer: false
   rendered_frame_size: '1'
   total_raw_frames: 50
-  totaldose: 5.447922320539047e+21
+  totaldose: null
 - dose: 5.036889516485281e+21
   expected: '1.574'
   exposure_time: 1600.0
@@ -134,7 +134,7 @@ test_calcFmDose:
   is_eer: false
   rendered_frame_size: '1'
   total_raw_frames: 32
-  totaldose: 5.036889516485281e+21
+  totaldose: null
 - dose: null
   expected: '1.350'
   exposure_time: 1600.0
@@ -150,7 +150,7 @@ test_calcFmDose:
   is_eer: false
   rendered_frame_size: '1'
   total_raw_frames: 40
-  totaldose: 5.458074922452264e+21
+  totaldose: null
 - dose: 5.036889516485281e+21
   expected: '1.574'
   exposure_time: 1600.0
@@ -158,7 +158,7 @@ test_calcFmDose:
   is_eer: false
   rendered_frame_size: '1'
   total_raw_frames: 32
-  totaldose: 5.036889516485281e+21
+  totaldose: null
 - dose: 5.036889516485281e+21
   expected: '1.574'
   exposure_time: 1600.0
@@ -166,7 +166,7 @@ test_calcFmDose:
   is_eer: false
   rendered_frame_size: '1'
   total_raw_frames: 32
-  totaldose: 5.036889516485281e+21
+  totaldose: null
 - dose: 5.447922320539047e+21
   expected: '1.090'
   exposure_time: 1500.0
@@ -174,7 +174,7 @@ test_calcFmDose:
   is_eer: false
   rendered_frame_size: '1'
   total_raw_frames: 50
-  totaldose: 5.447922320539047e+21
+  totaldose: null
 - dose: 5.046550232123652e+21
   expected: '1.262'
   exposure_time: 2000.0
@@ -182,7 +182,7 @@ test_calcFmDose:
   is_eer: false
   rendered_frame_size: '1'
   total_raw_frames: 40
-  totaldose: 5.046550232123652e+21
+  totaldose: null
 - dose: 5.215582512172212e+21
   expected: '1.304'
   exposure_time: 2000.0
@@ -190,7 +190,7 @@ test_calcFmDose:
   is_eer: false
   rendered_frame_size: '1'
   total_raw_frames: 40
-  totaldose: 5.215582512172212e+21
+  totaldose: null
 - dose: 5.036889516485281e+21
   expected: '1.574'
   exposure_time: 1600.0
@@ -198,7 +198,7 @@ test_calcFmDose:
   is_eer: false
   rendered_frame_size: '1'
   total_raw_frames: 32
-  totaldose: 5.036889516485281e+21
+  totaldose: null
 test_calcInputType:
 - expected: InTiff
   fpath: /h1/jcheung/frames/m25mar17a/rawdata/m25mar17a_NY0268_Gr1a_00007gr_00038sq_v02_00003hl_v01_00022enn.frames.tif

@@ -34,7 +34,7 @@ def constructMotionCorKwargs(imgmetadata : dict, cli_args : dict) -> dict:
     if "totaldose" in cli_args.keys():
         totaldose = cli_args["totaldose"]
     else:
-        totaldose = imgmetadata['dose']
+        totaldose = None
 
     # InMrc, InTiff, InEer
     # Get the path to the input image.
