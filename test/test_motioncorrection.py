@@ -1,6 +1,6 @@
 import parametrize_from_file
 
-from appion.motioncorrection.calc.internal import calcKV
+from appion.motioncorrection.calc.internal import calcKV, calcPixelSize
 
 def test_calcInputType():
     pass
@@ -14,8 +14,9 @@ def test_calcFmDose():
 def test_calcTotalRenderedFrames():
     pass
 
-def test_calcPixelSize():
-    pass
+@parametrize_from_file
+def test_calcPixelSize(pixelsizedatas, binning, imgdata_timestamp, expected):
+    assert "%.2f" % calcPixelSize(pixelsizedatas, binning, imgdata_timestamp) == "%.2f" % expected
 
 def test_filterFrameList():
     pass

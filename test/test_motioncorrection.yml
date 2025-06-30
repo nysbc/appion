@@ -49,3 +49,222 @@ test_calcKV:
   high_tension: 300000
 - expected: 300.0
   high_tension: 300000
+test_calcPixelSize:
+- binning: 2
+  expected: 0.826
+  imgdata_timestamp: 2025-03-19 13:03:11
+  pixelsizedatas:
+  - pixelsize: 4.13e-11
+    timestamp: 2024-07-31 15:13:09
+  - pixelsize: 4.13e-11
+    timestamp: 2024-07-31 15:12:44
+  - pixelsize: 4.2215e-11
+    timestamp: 2022-09-02 14:49:10
+- binning: 2
+  expected: 0.856
+  imgdata_timestamp: 2025-03-29 21:17:44
+  pixelsizedatas:
+  - pixelsize: 4.28e-11
+    timestamp: 2024-03-04 15:05:49
+  - pixelsize: 4.23e-11
+    timestamp: 2022-09-02 14:49:08
+- binning: 1
+  expected: 0.428
+  imgdata_timestamp: 2025-04-01 01:28:14
+  pixelsizedatas:
+  - pixelsize: 4.28e-11
+    timestamp: 2024-03-04 15:05:49
+  - pixelsize: 4.23e-11
+    timestamp: 2022-09-02 14:49:08
+- binning: 2
+  expected: 1.073
+  imgdata_timestamp: 2025-03-25 03:30:11
+  pixelsizedatas:
+  - pixelsize: 5.365e-11
+    timestamp: 2024-03-04 15:05:31
+  - pixelsize: 5.38e-11
+    timestamp: 2022-09-02 14:49:08
+- binning: 2
+  expected: 0.856
+  imgdata_timestamp: 2025-03-21 22:21:00
+  pixelsizedatas:
+  - pixelsize: 4.28e-11
+    timestamp: 2024-03-04 15:05:49
+  - pixelsize: 4.23e-11
+    timestamp: 2022-09-02 14:49:08
+- binning: 2
+  expected: 0.856
+  imgdata_timestamp: 2025-03-29 06:34:10
+  pixelsizedatas:
+  - pixelsize: 4.28e-11
+    timestamp: 2024-03-04 15:05:49
+  - pixelsize: 4.23e-11
+    timestamp: 2022-09-02 14:49:08
+- binning: 2
+  expected: 0.856
+  imgdata_timestamp: 2025-03-22 15:05:14
+  pixelsizedatas:
+  - pixelsize: 4.28e-11
+    timestamp: 2024-03-04 15:05:49
+  - pixelsize: 4.23e-11
+    timestamp: 2022-09-02 14:49:08
+- binning: 2
+  expected: 0.826
+  imgdata_timestamp: 2025-04-01 19:40:32
+  pixelsizedatas:
+  - pixelsize: 4.13e-11
+    timestamp: 2024-07-31 15:13:09
+  - pixelsize: 4.13e-11
+    timestamp: 2024-07-31 15:12:44
+  - pixelsize: 4.2215e-11
+    timestamp: 2022-09-02 14:49:10
+- binning: 2
+  expected: 1.073
+  imgdata_timestamp: 2025-03-25 01:17:07
+  pixelsizedatas:
+  - pixelsize: 5.365e-11
+    timestamp: 2024-03-04 15:05:31
+  - pixelsize: 5.38e-11
+    timestamp: 2022-09-02 14:49:08
+- binning: 2
+  expected: 0.826
+  imgdata_timestamp: 2025-03-20 12:39:48
+  pixelsizedatas:
+  - pixelsize: 4.13e-11
+    timestamp: 2024-07-31 15:13:09
+  - pixelsize: 4.13e-11
+    timestamp: 2024-07-31 15:12:44
+  - pixelsize: 4.2215e-11
+    timestamp: 2022-09-02 14:49:10
+- binning: 2
+  expected: 0.826
+  imgdata_timestamp: 2025-04-01 00:57:59
+  pixelsizedatas:
+  - pixelsize: 4.13e-11
+    timestamp: 2024-07-31 15:13:09
+  - pixelsize: 4.13e-11
+    timestamp: 2024-07-31 15:12:44
+  - pixelsize: 4.2215e-11
+    timestamp: 2022-09-02 14:49:10
+- binning: 1
+  expected: 0.428
+  imgdata_timestamp: 2025-04-01 08:48:01
+  pixelsizedatas:
+  - pixelsize: 4.28e-11
+    timestamp: 2024-03-04 15:05:49
+  - pixelsize: 4.23e-11
+    timestamp: 2022-09-02 14:49:08
+- binning: 1
+  expected: 0.428
+  imgdata_timestamp: 2025-03-20 20:42:31
+  pixelsizedatas:
+  - pixelsize: 4.28e-11
+    timestamp: 2024-03-04 15:05:49
+  - pixelsize: 4.23e-11
+    timestamp: 2022-09-02 14:49:08
+- binning: 2
+  expected: 0.826
+  imgdata_timestamp: 2025-03-18 21:14:04
+  pixelsizedatas:
+  - pixelsize: 4.13e-11
+    timestamp: 2024-07-31 15:13:09
+  - pixelsize: 4.13e-11
+    timestamp: 2024-07-31 15:12:44
+  - pixelsize: 4.2215e-11
+    timestamp: 2022-09-02 14:49:10
+- binning: 2
+  expected: 1.083
+  imgdata_timestamp: 2025-03-20 10:02:29
+  pixelsizedatas:
+  - pixelsize: 5.4125e-11
+    timestamp: 2022-09-02 14:49:06
+- binning: 2
+  expected: 0.826
+  imgdata_timestamp: 2025-03-21 03:25:49
+  pixelsizedatas:
+  - pixelsize: 4.13e-11
+    timestamp: 2024-07-31 15:13:09
+  - pixelsize: 4.13e-11
+    timestamp: 2024-07-31 15:12:44
+  - pixelsize: 4.2215e-11
+    timestamp: 2022-09-02 14:49:10
+- binning: 2
+  expected: 0.826
+  imgdata_timestamp: 2025-04-01 08:27:02
+  pixelsizedatas:
+  - pixelsize: 4.13e-11
+    timestamp: 2024-07-31 15:13:09
+  - pixelsize: 4.13e-11
+    timestamp: 2024-07-31 15:12:44
+  - pixelsize: 4.2215e-11
+    timestamp: 2022-09-02 14:49:10
+- binning: 1
+  expected: 0.428
+  imgdata_timestamp: 2025-04-01 05:58:59
+  pixelsizedatas:
+  - pixelsize: 4.28e-11
+    timestamp: 2024-03-04 15:05:49
+  - pixelsize: 4.23e-11
+    timestamp: 2022-09-02 14:49:08
+- binning: 1
+  expected: 0.428
+  imgdata_timestamp: 2025-03-21 12:40:28
+  pixelsizedatas:
+  - pixelsize: 4.28e-11
+    timestamp: 2024-03-04 15:05:49
+  - pixelsize: 4.23e-11
+    timestamp: 2022-09-02 14:49:08
+- binning: 2
+  expected: 0.826
+  imgdata_timestamp: 2025-04-01 18:00:24
+  pixelsizedatas:
+  - pixelsize: 4.13e-11
+    timestamp: 2024-07-31 15:13:09
+  - pixelsize: 4.13e-11
+    timestamp: 2024-07-31 15:12:44
+  - pixelsize: 4.2215e-11
+    timestamp: 2022-09-02 14:49:10
+- binning: 2
+  expected: 0.826
+  imgdata_timestamp: 2025-04-01 06:23:22
+  pixelsizedatas:
+  - pixelsize: 4.13e-11
+    timestamp: 2024-07-31 15:13:09
+  - pixelsize: 4.13e-11
+    timestamp: 2024-07-31 15:12:44
+  - pixelsize: 4.2215e-11
+    timestamp: 2022-09-02 14:49:10
+- binning: 2
+  expected: 0.826
+  imgdata_timestamp: 2025-03-21 10:11:02
+  pixelsizedatas:
+  - pixelsize: 4.13e-11
+    timestamp: 2024-07-31 15:13:09
+  - pixelsize: 4.13e-11
+    timestamp: 2024-07-31 15:12:44
+  - pixelsize: 4.2215e-11
+    timestamp: 2022-09-02 14:49:10
+- binning: 2
+  expected: 1.083
+  imgdata_timestamp: 2025-03-20 11:02:48
+  pixelsizedatas:
+  - pixelsize: 5.4125e-11
+    timestamp: 2022-09-02 14:49:06
+- binning: 2
+  expected: 1.073
+  imgdata_timestamp: 2025-03-25 11:35:27
+  pixelsizedatas:
+  - pixelsize: 5.365e-11
+    timestamp: 2024-03-04 15:05:31
+  - pixelsize: 5.38e-11
+    timestamp: 2022-09-02 14:49:08
+- binning: 2
+  expected: 0.826
+  imgdata_timestamp: 2025-04-01 14:17:57
+  pixelsizedatas:
+  - pixelsize: 4.13e-11
+    timestamp: 2024-07-31 15:13:09
+  - pixelsize: 4.13e-11
+    timestamp: 2024-07-31 15:12:44
+  - pixelsize: 4.2215e-11
+    timestamp: 2022-09-02 14:49:10
