@@ -11,7 +11,7 @@ def test_calcImageDefectMap():
 
 @parametrize_from_file
 def test_calcFmDose(total_raw_frames, exposure_time, frame_time, dose, rendered_frame_size, totaldose, is_eer, expected):
-    calcFmDose(total_raw_frames, exposure_time, frame_time, dose, rendered_frame_size, totaldose, is_eer)
+    assert "%.3f" % calcFmDose(total_raw_frames, exposure_time, frame_time, dose, rendered_frame_size, totaldose, is_eer) == expected
 
 def test_calcTotalRenderedFrames():
     pass
