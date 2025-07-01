@@ -32,3 +32,5 @@ slack/build
 *.code-workspace
 *.swap
 
+*slurm*out
+*.mrc

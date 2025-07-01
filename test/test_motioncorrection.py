@@ -1,13 +1,25 @@
 import parametrize_from_file
 
-from appion.motioncorrection.calc.internal import calcInputType, calcFmDose, calcKV, calcTotalFrames, calcTrunc, calcPixelSize, filterFrameList, calcRotFlipGain, calcMotionCorrLogPath
+import appion
+import os
+from glob import glob
+import numpy
+from appion.motioncorrection.calc.internal import calcInputType, calcImageDefectMap, calcFmDose, calcKV, calcTotalFrames, calcTrunc, calcPixelSize, filterFrameList, calcRotFlipGain, calcMotionCorrLogPath
 
 @parametrize_from_file
 def test_calcInputType(fpath, expected):
     assert calcInputType(fpath) == expected
 
 def test_calcImageDefectMap():
-    pass
+    for dm in glob(os.path.join(os.path.dirname(appion.__file__),"../test","*.npz")):
+        dm_npz=numpy.load(dm)
+        defect_map_args=[str(element) for element in dm_npz["defect_map_args"]]
+        defect_map_args[3]=int(defect_map_args[3])
+        defect_map_args[4]=int(defect_map_args[3])
+        defect_map_args=tuple(defect_map_args)
+        defect_map=dm_npz["defect_map"]
+        calculated_defect_map=calcImageDefectMap(*defect_map_args)
+        assert defect_map == calculated_defect_map
 
 @parametrize_from_file
 def test_calcFmDose(total_raw_frames, exposure_time, frame_time, dose, rendered_frame_size, totaldose, is_eer, expected):
