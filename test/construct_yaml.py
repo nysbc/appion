@@ -3,7 +3,7 @@ import json, yaml
 import sinedon.setup
 sinedon.setup()
 from appion.motioncorrection.retrieve.params import readImageMetadata
-from appion.motioncorrection.calc.internal import calcMotionCorrLogPath, filterFrameList
+from appion.motioncorrection.calc.internal import calcMotionCorrLogPath, filterFrameList, calcTotalFrames
 
 with open(os.path.join(os.getcwd(),"motioncor2_validation.json"), "r") as f:
     validationData=json.load(f)
@@ -13,6 +13,8 @@ params['test_calcInputType']=[]
 params['test_calcFmDose']=[]
 params['test_calcPixelSize']=[]
 params['test_filterFrameList']=[]
+params['test_calcTotalFrames']=[]
+params['test_calcTrunc']=[]
 params["test_calcKV"]=[]
 params["test_calcRotFlipGain"]=[]
 params['test_calcMotionCorrLogPath']=[]
@@ -62,6 +64,19 @@ for imageid in validationData.keys():
                                             "nframes" : imgmetadata['nframes'], 
                                             "shifts" : [], 
                                             "expected" : list(filterFrameList(float(validationData[imageid]["motioncorflags"]["PixSize"]), imgmetadata['nframes'], []))})
+    params['test_calcTotalFrames'].append({"camera_name" : imgmetadata['camera_name'], 
+                                           "exposure_time" : imgmetadata['exposure_time'], 
+                                           "frame_time" : imgmetadata['frame_time'], 
+                                           "nframes" : imgmetadata['nframes'], 
+                                           "eer_frames" : imgmetadata['eer_frames'],
+                                           "expected" : calcTotalFrames(imgmetadata['camera_name'], imgmetadata['exposure_time'], imgmetadata['frame_time'], imgmetadata['nframes'], imgmetadata['eer_frames'])})
+    if "Trunc" in validationData[imageid]["motioncorflags"].keys():
+        trunc=validationData[imageid]["motioncorflags"]["Trunc"]
+    else:
+        trunc="%.2f" % 0
+    params['test_calcTrunc'].append({"total_frames" : calcTotalFrames(imgmetadata['camera_name'], imgmetadata['exposure_time'], imgmetadata['frame_time'], imgmetadata['nframes'], imgmetadata['eer_frames']),
+                                     "sumframelist" : list(filterFrameList(float(validationData[imageid]["motioncorflags"]["PixSize"]), imgmetadata['nframes'], [])),
+                                     "expected" : trunc})                
     params['test_calcKV'].append({"high_tension": imgmetadata['high_tension'],"expected": float(validationData[imageid]["motioncorflags"]["kV"])})
     force_cpu_flat= 'force_cpu_flat' in validationData[imageid]["appionflags"].keys()
     params["test_calcRotFlipGain"].append({"frame_rotate":imgmetadata["frame_rotate"], 

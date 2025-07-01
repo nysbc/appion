@@ -1,6 +1,6 @@
 import parametrize_from_file
 
-from appion.motioncorrection.calc.internal import calcInputType, calcFmDose, calcKV, calcPixelSize, filterFrameList, calcRotFlipGain, calcMotionCorrLogPath
+from appion.motioncorrection.calc.internal import calcInputType, calcFmDose, calcKV, calcTotalFrames, calcTrunc, calcPixelSize, filterFrameList, calcRotFlipGain, calcMotionCorrLogPath
 
 @parametrize_from_file
 def test_calcInputType(fpath, expected):
@@ -28,11 +28,13 @@ def test_filterFrameList(pixsize, nframes, shifts, expected):
 def test_calcKV(high_tension, expected):
     assert calcKV(high_tension) == expected
 
-def test_calcTotalFrames():
-    pass
+@parametrize_from_file
+def test_calcTotalFrames(camera_name, exposure_time, frame_time, nframes, eer_frames, expected):
+    assert calcTotalFrames(camera_name, exposure_time, frame_time, nframes, eer_frames) == expected
 
-def test_calcTrunc():
-    pass
+@parametrize_from_file
+def test_calcTrunc(total_frames, sumframelist, expected):
+    assert "%.2f" % calcTrunc(total_frames, sumframelist) == expected
 
 @parametrize_from_file
 def test_calcRotFlipGain(frame_rotate, frame_flip, force_cpu_flat, frame_aligner_flat, expected_RotGain, expected_FlipGain):
