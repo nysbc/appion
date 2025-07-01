@@ -1,6 +1,6 @@
 import parametrize_from_file
 
-from appion.motioncorrection.calc.internal import calcInputType, calcFmDose, calcKV, calcPixelSize
+from appion.motioncorrection.calc.internal import calcInputType, calcFmDose, calcKV, calcPixelSize, calcMotionCorrLogPath
 
 @parametrize_from_file
 def test_calcInputType(fpath, expected):
@@ -45,6 +45,7 @@ def test_calcFrameShiftFromPositions():
 def test_calcAlignedCamera():
     pass
 
-def test_calcMotionCorrLogPath():
-    pass
+@parametrize_from_file
+def test_calcMotionCorrLogPath(framestackpath, expected):
+    assert calcMotionCorrLogPath(framestackpath) == expected
 

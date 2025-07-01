@@ -301,6 +301,57 @@ test_calcKV:
   high_tension: 300000
 - expected: 300.0
   high_tension: 300000
+test_calcMotionCorrLogPath:
+- expected: /h1/jcheung/appion/m25mar17a/ddstack/ddstack1/m25mar17a_NY0268_Gr1a_00007gr_00038sq_v02_00003hl_v01_00022enn.frames_Log.txt
+  framestackpath: /h1/jcheung/appion/m25mar17a/ddstack/ddstack1/m25mar17a_NY0268_Gr1a_00007gr_00038sq_v02_00003hl_v01_00022enn.frames.tif
+- expected: /h1/jclosson/appion/m25mar28a/ddstack/ddstack1/m25mar28a_gr4_00012gr_00104sq_v03_00004hl_00007enn.frames_Log.txt
+  framestackpath: /h1/jclosson/appion/m25mar28a/ddstack/ddstack1/m25mar28a_gr4_00012gr_00104sq_v03_00004hl_00007enn.frames.tif
+- expected: /h1/jsun4/appion/m25mar31a/ddstack/ddstack1/m25mar31a_yellow1_00011gr_00018sq_v02_00003hl_00029esn.frames_Log.txt
+  framestackpath: /h1/jsun4/appion/m25mar31a/ddstack/ddstack1/m25mar31a_yellow1_00011gr_00018sq_v02_00003hl_00029esn.frames.tif
+- expected: /h1/yli5/appion/m25mar24a/ddstack/ddstack1/m25mar24a_G4_00002gr_00033sq_v02_00008hl_00005enn.frames_Log.txt
+  framestackpath: /h1/yli5/appion/m25mar24a/ddstack/ddstack1/m25mar24a_G4_00002gr_00033sq_v02_00008hl_00005enn.frames.tif
+- expected: /h2/aowji3/appion/m25mar21e/ddstack/ddstack1/m25mar21e_241111C3-tilt45_00005gr_00007sq_v03_00004hl_00013enn.frames_Log.txt
+  framestackpath: /h2/aowji3/appion/m25mar21e/ddstack/ddstack1/m25mar21e_241111C3-tilt45_00005gr_00007sq_v03_00004hl_00013enn.frames.tif
+- expected: /h1/jclosson/appion/m25mar28a/ddstack/ddstack1/m25mar28a_gr4_00013gr_00044sq_v02_00003hl_00023enn.frames_Log.txt
+  framestackpath: /h1/jclosson/appion/m25mar28a/ddstack/ddstack1/m25mar28a_gr4_00013gr_00044sq_v02_00003hl_00023enn.frames.tif
+- expected: /h2/aowji3/appion/m25mar21e/ddstack/ddstack1/m25mar21e_241111C3-tilt45_00002gr_00010sq_v03_00003hl_00029enn.frames_Log.txt
+  framestackpath: /h2/aowji3/appion/m25mar21e/ddstack/ddstack1/m25mar21e_241111C3-tilt45_00002gr_00010sq_v03_00003hl_00029enn.frames.tif
+- expected: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/m25mar31b_B1G2_00007gr_00059sq_v02_00002hl_v01_00011enn.frames_Log.txt
+  framestackpath: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/m25mar31b_B1G2_00007gr_00059sq_v02_00002hl_v01_00011enn.frames.tif
+- expected: /h1/yli5/appion/m25mar24a/ddstack/ddstack1/m25mar24a_G4_00005gr_00026sq_v02_00004hl_00031enn.frames_Log.txt
+  framestackpath: /h1/yli5/appion/m25mar24a/ddstack/ddstack1/m25mar24a_G4_00005gr_00026sq_v02_00004hl_00031enn.frames.tif
+- expected: /h1/iishigami/appion/m25mar19c/ddstack/ddstack1/m25mar19c_White_Gr3_00021gr_00029sq_v03_00004hl_00041enn.frames_Log.txt
+  framestackpath: /h1/iishigami/appion/m25mar19c/ddstack/ddstack1/m25mar19c_White_Gr3_00021gr_00029sq_v03_00004hl_00041enn.frames.tif
+- expected: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/m25mar31b_B1G2_00012gr_00016sq_v02_00002hl_v01_00016enn.frames_Log.txt
+  framestackpath: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/m25mar31b_B1G2_00012gr_00016sq_v02_00002hl_v01_00016enn.frames.tif
+- expected: /h1/jsun4/appion/m25mar31a/ddstack/ddstack1/m25mar31a_yellow1_00010gr_00032sq_v02_00003hl_00062esn.frames_Log.txt
+  framestackpath: /h1/jsun4/appion/m25mar31a/ddstack/ddstack1/m25mar31a_yellow1_00010gr_00032sq_v02_00003hl_00062esn.frames.tif
+- expected: /h1/wgong/appion/m25mar19a/ddstack/ddstack1/m25mar19a_g2_00018gr_00014sq_v02_00008hl_00016esn.frames_Log.txt
+  framestackpath: /h1/wgong/appion/m25mar19a/ddstack/ddstack1/m25mar19a_g2_00018gr_00014sq_v02_00008hl_00016esn.frames.tif
+- expected: /h1/jcheung/appion/m25mar17a/ddstack/ddstack1/m25mar17a_NY0268_Gr1a_00008gr_00012sq_v02_00002hl_00085enn.frames_Log.txt
+  framestackpath: /h1/jcheung/appion/m25mar17a/ddstack/ddstack1/m25mar17a_NY0268_Gr1a_00008gr_00012sq_v02_00002hl_00085enn.frames.tif
+- expected: /h1/bwimberly/appion/m25mar19b/ddstack/ddstack1/m25mar19b_G4_00018gr_00056sq_v02_00003hl_00015enn.frames_Log.txt
+  framestackpath: /h1/bwimberly/appion/m25mar19b/ddstack/ddstack1/m25mar19b_G4_00018gr_00056sq_v02_00003hl_00015enn.frames.tif
+- expected: /h1/iishigami/appion/m25mar19c/ddstack/ddstack1/m25mar19c_White_Gr3_00020gr_00047sq_v03_00007hl_00023enn.frames_Log.txt
+  framestackpath: /h1/iishigami/appion/m25mar19c/ddstack/ddstack1/m25mar19c_White_Gr3_00020gr_00047sq_v03_00007hl_00023enn.frames.tif
+- expected: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/m25mar31b_B1G2_00011gr_00033sq_v02_00002hl_00004enn.frames_Log.txt
+  framestackpath: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/m25mar31b_B1G2_00011gr_00033sq_v02_00002hl_00004enn.frames.tif
+- expected: /h1/jsun4/appion/m25mar31a/ddstack/ddstack1/m25mar31a_yellow1_00011gr_00025sq_v02_00007hl_00024esn.frames_Log.txt
+  framestackpath: /h1/jsun4/appion/m25mar31a/ddstack/ddstack1/m25mar31a_yellow1_00011gr_00025sq_v02_00007hl_00024esn.frames.tif
+- expected: /h1/wgong/appion/m25mar19a/ddstack/ddstack1/m25mar19a_g2_00021gr_00042sq_v03_00010hl_00021esn.frames_Log.txt
+  framestackpath: /h1/wgong/appion/m25mar19a/ddstack/ddstack1/m25mar19a_g2_00021gr_00042sq_v03_00010hl_00021esn.frames.tif
+- expected: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/m25mar31b_B1G2_00002gr_00054sq_v03_00003hl_00085enn.frames_Log.txt
+  framestackpath: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/m25mar31b_B1G2_00002gr_00054sq_v03_00003hl_00085enn.frames.tif
+- expected: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/m25mar31b_B1G2_00017gr_00027sq_v02_00005hl_00033enn.frames_Log.txt
+  framestackpath: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/m25mar31b_B1G2_00017gr_00027sq_v02_00005hl_00033enn.frames.tif
+- expected: /h1/iishigami/appion/m25mar19c/ddstack/ddstack1/m25mar19c_White_Gr3_00017gr_00058sq_v02_00002hl_00059enn.frames_Log.txt
+  framestackpath: /h1/iishigami/appion/m25mar19c/ddstack/ddstack1/m25mar19c_White_Gr3_00017gr_00058sq_v02_00002hl_00059enn.frames.tif
+- expected: /h1/bwimberly/appion/m25mar19b/ddstack/ddstack1/m25mar19b_G4_00018gr_00058sq_v02_00004hl_00019enn.frames_Log.txt
+  framestackpath: /h1/bwimberly/appion/m25mar19b/ddstack/ddstack1/m25mar19b_G4_00018gr_00058sq_v02_00004hl_00019enn.frames.tif
+- expected: /h1/yli5/appion/m25mar24a/ddstack/ddstack1/m25mar24a_G4_00007gr_00067sq_v02_00003hl_00010enn.frames_Log.txt
+  framestackpath: /h1/yli5/appion/m25mar24a/ddstack/ddstack1/m25mar24a_G4_00007gr_00067sq_v02_00003hl_00010enn.frames.tif
+- expected: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/m25mar31b_B1G2_00008gr_00047sq_v02_00002hl_00064enn.frames_Log.txt
+  framestackpath: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/m25mar31b_B1G2_00008gr_00047sq_v02_00002hl_00064enn.frames.tif
 test_calcPixelSize:
 - binning: 2
   expected: 0.826
