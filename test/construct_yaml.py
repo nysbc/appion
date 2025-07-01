@@ -13,6 +13,7 @@ params['test_calcInputType']=[]
 params['test_calcFmDose']=[]
 params['test_calcPixelSize']=[]
 params["test_calcKV"]=[]
+params["test_calcRotFlipGain"]=[]
 params['test_calcMotionCorrLogPath']=[]
 
 
@@ -57,6 +58,13 @@ for imageid in validationData.keys():
                                           "imgdata_timestamp" : imgmetadata['imgdata_timestamp'], 
                                           "expected": float(validationData[imageid]["motioncorflags"]["PixSize"])})
     params['test_calcKV'].append({"high_tension": imgmetadata['high_tension'],"expected": float(validationData[imageid]["motioncorflags"]["kV"])})
+    force_cpu_flat= 'force_cpu_flat' in validationData[imageid]["appionflags"].keys()
+    params["test_calcRotFlipGain"].append({"frame_rotate":imgmetadata["frame_rotate"], 
+                                           "frame_flip" : imgmetadata["frame_flip"], 
+                                           "force_cpu_flat" : force_cpu_flat, 
+                                           "frame_aligner_flat" : imgmetadata["frame_aligner_flat"], 
+                                           "expected_RotGain" : int(validationData[imageid]["motioncorflags"]["RotGain"]), 
+                                           "expected_FlipGain" : int(validationData[imageid]["motioncorflags"]["FlipGain"])})
     framestackpath=os.path.join(validationData[imageid]["appionflags"]["rundir"],os.path.basename(framestackpath))
     motioncorr_log_path=calcMotionCorrLogPath(framestackpath)
     params['test_calcMotionCorrLogPath'].append({"framestackpath":framestackpath, "expected": motioncorr_log_path})
