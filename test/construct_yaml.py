@@ -3,7 +3,7 @@ import json, yaml
 import sinedon.setup
 sinedon.setup()
 from appion.motioncorrection.retrieve.params import readImageMetadata
-from appion.motioncorrection.calc.internal import calcMotionCorrLogPath
+from appion.motioncorrection.calc.internal import calcMotionCorrLogPath, filterFrameList
 
 with open(os.path.join(os.getcwd(),"motioncor2_validation.json"), "r") as f:
     validationData=json.load(f)
@@ -12,6 +12,7 @@ params={}
 params['test_calcInputType']=[]
 params['test_calcFmDose']=[]
 params['test_calcPixelSize']=[]
+params['test_filterFrameList']=[]
 params["test_calcKV"]=[]
 params["test_calcRotFlipGain"]=[]
 params['test_calcMotionCorrLogPath']=[]
@@ -57,6 +58,10 @@ for imageid in validationData.keys():
                                           "binning" : imgmetadata['binning'], 
                                           "imgdata_timestamp" : imgmetadata['imgdata_timestamp'], 
                                           "expected": float(validationData[imageid]["motioncorflags"]["PixSize"])})
+    params['test_filterFrameList'].append({"pixsize" : float(validationData[imageid]["motioncorflags"]["PixSize"]),
+                                            "nframes" : imgmetadata['nframes'], 
+                                            "shifts" : [], 
+                                            "expected" : list(filterFrameList(float(validationData[imageid]["motioncorflags"]["PixSize"]), imgmetadata['nframes'], []))})
     params['test_calcKV'].append({"high_tension": imgmetadata['high_tension'],"expected": float(validationData[imageid]["motioncorflags"]["kV"])})
     force_cpu_flat= 'force_cpu_flat' in validationData[imageid]["appionflags"].keys()
     params["test_calcRotFlipGain"].append({"frame_rotate":imgmetadata["frame_rotate"], 
