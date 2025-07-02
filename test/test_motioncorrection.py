@@ -3,7 +3,7 @@ import parametrize_from_file
 import appion
 import os
 import numpy
-from appion.motioncorrection.calc.internal import calcInputType, calcImageDefectMap, calcFmDose, calcKV, calcTotalFrames, calcTrunc, calcPixelSize, filterFrameList, calcRotFlipGain, calcMotionCorrLogPath
+from appion.motioncorrection.calc.internal import calcInputType, calcImageDefectMap, calcFmDose, calcTotalRenderedFrames, calcKV, calcTotalFrames, calcTrunc, calcPixelSize, filterFrameList, calcRotFlipGain, calcAlignedCamera, calcMotionCorrLogPath
 
 @parametrize_from_file
 def test_calcInputType(fpath, expected):
@@ -25,8 +25,9 @@ def test_calcImageDefectMap(dm):
 def test_calcFmDose(total_raw_frames, exposure_time, frame_time, dose, rendered_frame_size, totaldose, is_eer, expected):
     assert "%.3f" % calcFmDose(total_raw_frames, exposure_time, frame_time, dose, rendered_frame_size, totaldose, is_eer) == expected
 
-def test_calcTotalRenderedFrames():
-    pass
+@parametrize_from_file
+def test_calcTotalRenderedFrames(total_raw_frames, rendered_frame_size, expected ):
+    assert calcTotalRenderedFrames(total_raw_frames, rendered_frame_size) == expected
 
 @parametrize_from_file
 def test_calcPixelSize(pixelsizedatas, binning, imgdata_timestamp, expected):
@@ -60,8 +61,28 @@ def test_calcFrameStats():
 def test_calcFrameShiftFromPositions():
     pass
 
-def test_calcAlignedCamera():
-    pass
+@parametrize_from_file
+def test_calcAlignedCamera(subd_dimension_x, subd_dimension_y, square_output, subd_binning_x, subd_binning_y,
+                           subd_offset_x, subd_offset_y, binning, trimming_edge, framelist, nframes,
+                           expected_aligned_binning_x, expected_aligned_binning_y,
+                           expected_aligned_dimensions_x, expected_aligned_dimensions_y,
+                           expected_aligned_offset_x, expected_aligned_offset_y,
+                           expected_use_frames):
+    aligned_binning, aligned_dimensions, aligned_offset, use_frames = calcAlignedCamera((subd_dimension_x, subd_dimension_y), 
+                                                                                        square_output, 
+                                                                                        (subd_binning_x, subd_binning_y), 
+                                                                                        (subd_offset_x, subd_offset_y), 
+                                                                                        binning, 
+                                                                                        trimming_edge, 
+                                                                                        framelist, 
+                                                                                        nframes)
+    assert aligned_binning[0] == expected_aligned_binning_x
+    assert aligned_binning[1] == expected_aligned_binning_y
+    assert aligned_dimensions[0] == expected_aligned_dimensions_x
+    assert aligned_dimensions[1] == expected_aligned_dimensions_y
+    assert aligned_offset[0] == expected_aligned_offset_x
+    assert aligned_offset[1] == expected_aligned_offset_y
+    assert use_frames == expected_use_frames
 
 @parametrize_from_file
 def test_calcMotionCorrLogPath(framestackpath, expected):
