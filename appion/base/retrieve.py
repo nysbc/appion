@@ -37,7 +37,6 @@ def retrieveRejectedImages(images, session, start : None, stop : None, tilt_angl
     assessment_rejects = retrieveAssessmentRejects()
     return skipped_tilt_angle_images | sliced_images | viewer_rejects | assessment_rejects
 
-
 def retrieveAssessmentRejects():
     #TODO Might want to limit this to a range of image IDs for the current session only.
     assessment_rejects = ApAssessmentData.objects.filter(selectionkeep=0)

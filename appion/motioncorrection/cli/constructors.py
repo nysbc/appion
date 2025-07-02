@@ -1,8 +1,6 @@
-def constructMotionCorKwargs(imgmetadata : dict, cli_args : dict) -> dict:
+def constructMotionCorKwargs(imgmetadata : dict, cli_args : dict, input_path : str) -> dict:
     import os
-    from ..calc.internal import calcInputType, calcImageDefectMap, calcFmDose, calcPixelSize, calcKV, calcTotalFrames, calcTrunc, calcRotFlipGain, filterFrameList
-    from ..store import saveDark, saveDefectMrc, saveFmIntFile
-    from ..retrieve.params import readInputPath
+    from ..calc.internal import calcInputType, calcFmDose, calcPixelSize, calcKV, calcTotalFrames, calcTrunc, calcRotFlipGain, filterFrameList
     # Keyword args for motioncor2 function
     kwargs={}
 
@@ -38,11 +36,8 @@ def constructMotionCorKwargs(imgmetadata : dict, cli_args : dict) -> dict:
 
     # InMrc, InTiff, InEer
     # Get the path to the input image.
-    fpath = readInputPath(imgmetadata['session_frame_path'],imgmetadata['image_filename'])
-    if fpath is None:
-        raise RuntimeError("Input file for %d does not exist." % imgmetadata["imageid"])
-    inputType = calcInputType(fpath)
-    kwargs[inputType] = fpath
+    inputType = calcInputType(input_path)
+    kwargs[inputType] = input_path
 
     #OutMrc
     #Path to the aligned aligned/summed micrograph.
@@ -65,21 +60,18 @@ def constructMotionCorKwargs(imgmetadata : dict, cli_args : dict) -> dict:
         
     # Get the dark image.  Create it if it does not exist.
     dark_path=os.path.join(cli_args["rundir"], imgmetadata['image_filename']+"_dark.mrc")
-    saveDark(dark_path, imgmetadata['camera_name'], imgmetadata['eer_frames'], imgmetadata["dark_input"], imgmetadata["dark_nframes"])
     kwargs["Dark"]=dark_path
 
     # DefectMap
     if imgmetadata['bad_pixels'] or imgmetadata['bad_cols'] or imgmetadata['bad_rows']:
         defect_map_path=os.path.join(cli_args["rundir"], imgmetadata['image_filename']+"_defect.mrc")
-        defect_map=calcImageDefectMap(imgmetadata['bad_rows'], imgmetadata['bad_cols'], imgmetadata['bad_pixels'], imgmetadata['dx'], imgmetadata['dy'])
-        saveDefectMrc(defect_map_path, defect_map, imgmetadata['frame_flip'], imgmetadata['frame_rotate'])
+        kwargs["DefectMap"]=defect_map_path
 
     # FmIntFile
     # FmDose
     if "InEer" in kwargs.keys():
         kwargs["FmDose"] = calcFmDose(imgmetadata['total_raw_frames'], imgmetadata['exposure_time'], imgmetadata['frame_time'], imgmetadata['dose'], cli_args['rendered_frame_size'], totaldose, True)
         fmintfile_path=os.path.join(cli_args["rundir"], imgmetadata['image_filename']+"_fmintfile.txt")
-        saveFmIntFile(fmintfile_path, imgmetadata['total_raw_frames'], cli_args['rendered_frame_size'], kwargs["FmDose"] / cli_args['rendered_frame_size'])
         kwargs["FmIntFile"] = fmintfile_path
     else:
         kwargs["FmDose"] = calcFmDose(imgmetadata['total_raw_frames'], imgmetadata['exposure_time'], imgmetadata['frame_time'], imgmetadata['dose'], cli_args['rendered_frame_size'], totaldose, False)
