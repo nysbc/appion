@@ -32,6 +32,6 @@ def preTask(imageid, args):
     if "FmIntFile" in kwargs.keys():
         saveFmIntFile(kwargs["FmIntFile"], imgmetadata['total_raw_frames'], args['rendered_frame_size'], kwargs["FmDose"] / args['rendered_frame_size'])
     if 'DefectMap' in kwargs.keys():
-        defect_map=calcImageDefectMap(imgmetadata['bad_rows'], imgmetadata['bad_cols'], imgmetadata['bad_pixels'], imgmetadata['dx'], imgmetadata['dy'])
-        saveDefectMrc(kwargs['DefectMap'], defect_map, imgmetadata['frame_flip'], imgmetadata['frame_rotate'])
+        defect_map=calcImageDefectMap(imgmetadata['bad_rows'], imgmetadata['bad_cols'], imgmetadata['bad_pixels'], imgmetadata['dx'], imgmetadata['dy'], imgmetadata['frame_flip'], imgmetadata['frame_rotate'])
+        saveDefectMrc(kwargs['DefectMap'], defect_map)
     return kwargs, imgmetadata

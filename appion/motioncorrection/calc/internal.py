@@ -15,7 +15,7 @@ def calcInputType(fpath):
         raise RuntimeError("Unsupported file format for input path: %s." % fpath)
 
 # DefectMap functions   
-def calcImageDefectMap(bad_rows : str, bad_cols : str, bad_pixels : str, dx : int, dy : int):
+def calcImageDefectMap(bad_rows : str, bad_cols : str, bad_pixels : str, dx : int, dy : int, frame_flip : int = 0, frame_rotate : int = 0):
     bad_rows = eval(bad_rows) if bad_rows else []
     bad_cols = eval(bad_cols) if bad_cols else []
     bad_pixels = eval(bad_pixels) if bad_pixels else []
@@ -24,6 +24,22 @@ def calcImageDefectMap(bad_rows : str, bad_cols : str, bad_pixels : str, dx : in
     defect_map[:,bad_cols] = 1
     for px, py in bad_pixels:
         defect_map[py,px] = 1
+    # flip and rotate map_array.  Therefore, do the opposite of
+    # frames
+    if frame_flip:
+        if frame_rotate and frame_rotate == 2:
+            # Faster to just flip left-right than up-down flip + rotate
+            # flipping the frame left-right
+            defect_map = numpy.fliplr(defect_map)
+            frame_rotate = 0
+            # reset flip
+            frame_flip = 0
+    if frame_rotate:
+        # rotating the frame by %d degrees" % (frame_rotate*90,)
+        defect_map = numpy.rot90(defect_map,4-frame_rotate)
+    if frame_flip:
+        #flipping the frame up-down
+        defect_map = numpy.flipud(defect_map)
     return defect_map
 
 # FmIntFile/FmDose functions

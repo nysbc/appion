@@ -321,23 +321,7 @@ def saveDark(dark_output_path : str, camera_name : str, eer_frames : bool, dark_
     mrcfile.write(dark_output_path, unscaled_darkarray, overwrite=True)
 
 # DefectMap functions
-def saveDefectMrc(defect_map_path : str, defect_map : numpy.ndarray, frame_flip : int = 0, frame_rotate : int = 0) -> None:
-    # flip and rotate map_array.  Therefore, do the opposite of
-    # frames
-    if frame_flip:
-        if frame_rotate and frame_rotate == 2:
-            # Faster to just flip left-right than up-down flip + rotate
-            # flipping the frame left-right
-            defect_map = numpy.fliplr(defect_map)
-            frame_rotate = 0
-            # reset flip
-            frame_flip = 0
-    if frame_rotate:
-        # rotating the frame by %d degrees" % (frame_rotate*90,)
-        defect_map = numpy.rot90(defect_map,4-frame_rotate)
-    if frame_flip:
-        #flipping the frame up-down
-        defect_map = numpy.flipud(defect_map)
+def saveDefectMrc(defect_map_path : str, defect_map : numpy.ndarray) -> None:
     mrcfile.write(defect_map_path, defect_map, overwrite=True)
 
 # FmIntFile/FmDose functions
