@@ -1,0 +1,361 @@
+salloc: Granted job allocation 1551249
+salloc: Waiting for resource configuration
+salloc: Nodes semc-gpu01 are ready for job
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 11.6.1
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+*************************
+** DEPRECATION NOTICE! **
+*************************
+THIS IMAGE IS DEPRECATED and is scheduled for DELETION.
+    https://gitlab.com/nvidia/container-images/cuda/blob/master/doc/support-policy.md
+
+
+-InMrc           
+-InTiff          /h1/hzuo/appion/m25apr23d/ddstack/ddstack1/m25apr23d_00009hl_00012enn_st.tif
+-InEer           
+-InSuffix        
+-OutMrc          /h1/hzuo/appion/m25apr23d/ddstack/ddstack1/m25apr23d_00009hl_00012enn_c.mrc
+-FmIntFile       
+-ArcDir          
+-FullSum         
+-Gain            /h1/hzuo/appion/m25apr23d/ddstack/ddstack1/norm-semc-gpu01-0-2382708.mrc
+-Dark            /h1/hzuo/appion/m25apr23d/ddstack/ddstack1/dark-semc-gpu01-0-2382708.mrc
+-DefectFile      
+-DefectMap       
+-InAln           
+-OutAln          
+-TmpFile         
+-LogDir          
+-FmIntFile       
+-Serial          0
+-EerSampling     1
+-Patch           7  5  0
+-Iter            7
+-Tol             0.50
+-Bft             500.00 100.00
+-PhaseOnly       0
+-StackZ          0
+-FtBin           1.00
+-InitDose        0.00
+-FmDose          1.33
+-PixSize         0.83
+-kV              300
+-Throw           0
+-Trunc           0
+-SumRange        3.00  25.00
+-SplitSum        0
+-Group           1
+-FmRef           -1
+-OutStack        0  1
+-RotGain         0
+-FlipGain        0
+-Align           1
+-Tilt            0.00  0.00
+-Mag             1.00  1.00  0.00
+-InFmMotion      0
+-Crop            0  0
+-Gpu             0
+-UseGpus         1
+-GpuMemUsage     0.75
+-OutStar         0
+
+
+TIFF file size: 5760  4092  40
+Stack mode: 0
+Rendered size:  5760  4092  40
+GPU 0 memory: 8107 MB
+
+Load gain refereince from
+   /h1/hzuo/appion/m25apr23d/ddstack/ddstack1/norm-semc-gpu01-0-2382708.mrc
+Gain reference has been loaded.
+
+Load dark reference from
+   /h1/hzuo/appion/m25apr23d/ddstack/ddstack1/dark-semc-gpu01-0-2382708.mrc
+Dark reference has been loaded.
+
+Warning: The sizes of Dark and gain references do not match.
+   Dark reference has been removed.
+
+TIFF file size: 5760  4092  40
+Stack mode: 0
+Rendered size:  5760  4092  40
+GPU 0 Allocation time: GPU (  0.26 GB)   0.00 s, CPU (  0.00 GB)   0.00 s
+GPU 0 Allocation time: GPU (  0.35 GB)   0.00 s, CPU (  0.00 GB)   0.00 s
+GPU 0 Allocation time: GPU (  0.88 GB)   0.00 s, CPU (  0.00 GB)   0.00 s
+GPU 0 Allocation time: GPU (  0.03 GB)   0.00 s, CPU (  0.00 GB)   0.00 s
+GPU 0 Allocation time: GPU (  3.25 GB)   0.01 s, CPU (  0.26 GB)   0.27 s
+Create buffers: total memory allocation 0.71 GB
+Create buffers: 0.57 seconds
+
+Load Tiff movie: 3.31 seconds
+
+Apply gain: 0.18 seconds
+
+Detect bad and hot pixels.
+Mean & Std:    23.25     6.23
+Hot pixel threshold:    60.63
+
+CC Mean Std: 1.489e-01  1.097e-01
+CC threshold: 0.807
+Patch based alignment
+Forward FFT of stack, please wait...
+Fourier transform done.
+Stack for correlation has been generated.
+Full-frame alignment has been started.
+Iteration  1  Error:     0.557
+Iteration  2  Error:     0.009
+
+# xcf img size: 2882  2048
+# CPatchCenters::Calculate()
+  0    205.00     204.00     205.86     204.80
+  1    615.00     204.00     617.57     204.80
+  2   1025.00     204.00    1024.46     232.00
+  3   1435.00     204.00    1441.00     204.80
+  4   1845.00     204.00    1699.93     200.00
+  5   2255.00     204.00    2285.34     200.00
+  6   2665.00     204.00    2690.62     200.00
+  7    205.00     612.00     191.38     568.00
+  8    615.00     612.00     619.18     568.00
+  9   1025.00     612.00    1029.29     614.40
+ 10   1435.00     612.00    1429.74     632.00
+ 11   1845.00     612.00    1852.71     614.40
+ 12   2255.00     612.00    2264.43     614.40
+ 13   2665.00     612.00    2668.10     536.00
+ 14    205.00    1020.00     258.93     984.00
+ 15    615.00    1020.00     617.57    1024.00
+ 16   1025.00    1020.00    1029.29    1024.00
+ 17   1435.00    1020.00    1441.00    1024.00
+ 18   1845.00    1020.00    1852.71    1024.00
+ 19   2255.00    1020.00    2264.43    1024.00
+ 20   2665.00    1020.00    2676.14    1024.00
+ 21    205.00    1428.00     191.38    1448.00
+ 22    615.00    1428.00     596.66    1416.00
+ 23   1025.00    1428.00    1029.29    1433.60
+ 24   1435.00    1428.00    1317.16    1432.00
+ 25   1845.00    1428.00    1852.71    1433.60
+ 26   2255.00    1428.00    2264.43    1433.60
+ 27   2665.00    1428.00    2676.14    1433.60
+ 28    205.00    1836.00     213.90    1768.00
+ 29    615.00    1836.00     617.57    1843.20
+ 30   1025.00    1836.00    1024.46    1816.00
+ 31   1435.00    1836.00    1441.00    1843.20
+ 32   1845.00    1836.00    1812.51    1816.00
+ 33   2255.00    1836.00    2217.79    1848.00
+ 34   2665.00    1836.00    2676.14    1843.20
+Full-frame alignment shift
+...... Frame (  1) shift:     0.770      0.190
+...... Frame (  2) shift:     0.590      0.090
+...... Frame (  3) shift:     0.380      0.120
+...... Frame (  4) shift:     0.430      0.120
+...... Frame (  5) shift:     0.390     -0.010
+...... Frame (  6) shift:     0.180      0.040
+...... Frame (  7) shift:     0.320      0.050
+...... Frame (  8) shift:     0.260     -0.090
+...... Frame (  9) shift:     0.170     -0.080
+...... Frame ( 10) shift:     0.240     -0.140
+...... Frame ( 11) shift:     0.260     -0.010
+...... Frame ( 12) shift:     0.320      0.160
+...... Frame ( 13) shift:     0.280      0.190
+...... Frame ( 14) shift:     0.190      0.130
+...... Frame ( 15) shift:     0.200      0.110
+...... Frame ( 16) shift:     0.410      0.120
+...... Frame ( 17) shift:     0.360     -0.020
+...... Frame ( 18) shift:     0.230     -0.080
+...... Frame ( 19) shift:     0.050     -0.040
+...... Frame ( 20) shift:     0.020     -0.050
+...... Frame ( 21) shift:     0.000      0.000
+...... Frame ( 22) shift:     0.150      0.040
+...... Frame ( 23) shift:     0.320      0.030
+...... Frame ( 24) shift:     0.240     -0.070
+...... Frame ( 25) shift:     0.240     -0.070
+...... Frame ( 26) shift:     0.180     -0.030
+...... Frame ( 27) shift:     0.230     -0.100
+...... Frame ( 28) shift:     0.440     -0.160
+...... Frame ( 29) shift:     0.370     -0.100
+...... Frame ( 30) shift:     0.150     -0.100
+...... Frame ( 31) shift:     0.400     -0.160
+...... Frame ( 32) shift:     0.210     -0.150
+...... Frame ( 33) shift:     0.170     -0.280
+...... Frame ( 34) shift:     0.400     -0.340
+...... Frame ( 35) shift:     0.370     -0.410
+...... Frame ( 36) shift:     0.330     -0.380
+...... Frame ( 37) shift:     0.210     -0.530
+...... Frame ( 38) shift:     0.390     -0.470
+...... Frame ( 39) shift:     0.380     -0.270
+...... Frame ( 40) shift:     0.410     -0.550
+
+Global shifts are corrected: 0.409172 sec
+Start to align patches.
+Align patch 1  34 left
+Iteration  1  Error:     0.321
+
+Align patch 2  33 left
+Iteration  1  Error:     0.269
+
+Align patch 3  32 left
+Iteration  1  Error:     0.247
+
+Align patch 4  31 left
+Iteration  1  Error:     0.279
+
+Align patch 5  30 left
+Iteration  1  Error:     0.290
+
+Align patch 6  29 left
+Iteration  1  Error:     0.297
+
+Align patch 7  28 left
+Iteration  1  Error:     0.314
+
+Align patch 8  27 left
+Iteration  1  Error:     0.259
+
+Align patch 9  26 left
+Iteration  1  Error:     0.364
+
+Align patch 10  25 left
+Iteration  1  Error:     0.330
+
+Align patch 11  24 left
+Iteration  1  Error:     0.219
+
+Align patch 12  23 left
+Iteration  1  Error:     0.241
+
+Align patch 13  22 left
+Iteration  1  Error:     0.298
+
+Align patch 14  21 left
+Iteration  1  Error:     0.306
+
+Align patch 15  20 left
+Iteration  1  Error:     0.306
+
+Align patch 16  19 left
+Iteration  1  Error:     0.336
+
+Align patch 17  18 left
+Iteration  1  Error:     0.308
+
+Align patch 18  17 left
+Iteration  1  Error:     0.273
+
+Align patch 19  16 left
+Iteration  1  Error:     0.344
+
+Align patch 20  15 left
+Iteration  1  Error:     0.563
+Iteration  2  Error:     0.049
+
+Align patch 21  14 left
+Iteration  1  Error:     0.262
+
+Align patch 22  13 left
+Iteration  1  Error:     0.267
+
+Align patch 23  12 left
+Iteration  1  Error:     0.238
+
+Align patch 24  11 left
+Iteration  1  Error:     0.292
+
+Align patch 25  10 left
+Iteration  1  Error:     0.283
+
+Align patch 26  9 left
+Iteration  1  Error:     0.260
+
+Align patch 27  8 left
+Iteration  1  Error:     0.288
+
+Align patch 28  7 left
+Iteration  1  Error:     0.321
+
+Align patch 29  6 left
+Iteration  1  Error:     0.282
+
+Align patch 30  5 left
+Iteration  1  Error:     0.339
+
+Align patch 31  4 left
+Iteration  1  Error:     0.334
+
+Align patch 32  3 left
+Iteration  1  Error:     0.345
+
+Align patch 33  2 left
+Iteration  1  Error:     0.315
+
+Align patch 34  1 left
+Iteration  1  Error:     0.386
+
+Align patch 35  0 left
+Iteration  1  Error:     0.614
+Iteration  2  Error:     0.036
+
+  1    0     0.01      0.21
+  2    1     0.03      0.17
+  3    2     0.09      0.16
+  4    2     0.05      0.17
+  5    2     0.02      0.16
+  6    5     0.07      0.17
+  7    5     0.04      0.14
+  8    7     0.07      0.14
+  9    7     0.06      0.12
+ 10    7     0.03      0.13
+ 11   10     0.05      0.12
+ 12   10     0.08      0.13
+ 13   10     0.02      0.14
+ 14   13     0.01      0.12
+ 15   14     0.04      0.14
+ 16   14     0.01      0.13
+ 17   14     0.01      0.12
+ 18   17     0.03      0.12
+ 19   17     0.01      0.12
+ 20   19     0.03      0.12
+ 21   19     0.01      0.13
+ 22   19     0.03      0.13
+ 23   19     0.03      0.12
+ 24   19     0.02      0.14
+ 25   19     0.07      0.13
+ 26   19     0.01      0.12
+ 27   26     0.05      0.14
+ 28   26     0.02      0.14
+ 29   26     0.07      0.15
+ 30   26     0.01      0.14
+ 31   26     0.04      0.15
+ 32   26     0.06      0.12
+ 33   26     0.01      0.16
+ 34   26     0.04      0.14
+ 35   26     0.04      0.15
+ 36   26     0.10      0.15
+ 37   26     0.08      0.17
+ 38   26     0.04      0.15
+ 39   26     0.06      0.17
+Patch alignment time: 0.34(sec)
+
+Mag stretch: 1.000  -0.000
+
+Correction of local motion: 1.320020 sec
+
+Computation time: 3.569971 sec
+
+Saving motion corrected images ......
+Saving motion corrected images done.
+Save image sums: 0.59 sec
+
+Total time: 9.243742 sec
+salloc: Relinquishing job allocation 1551249

@@ -1,11 +1,13 @@
 import os
 from glob import glob
+#import shutil
 import appion
 import json, yaml
 import sinedon.setup
 sinedon.setup()
 from appion.motioncorrection.retrieve.params import readImageMetadata
-from appion.motioncorrection.calc.internal import calcMotionCorrLogPath, filterFrameList, calcTotalFrames, calcTotalRenderedFrames, calcAlignedCamera
+from appion.motioncorrection.retrieve.logs import retrieveLogParser
+from appion.motioncorrection.calc.internal import calcMotionCorrLogPath, filterFrameList, calcTotalFrames, calcTotalRenderedFrames, calcFrameShiftFromPositions, calcFrameStats, calcAlignedCamera
 from sinedon.models.leginon import CameraEMData
 
 with open(os.path.join(os.getcwd(),"motioncor2_validation.json"), "r") as f:
@@ -21,6 +23,8 @@ params['test_calcTotalFrames']=[]
 params['test_calcTrunc']=[]
 params["test_calcKV"]=[]
 params["test_calcRotFlipGain"]=[]
+params["test_calcFrameStats"]=[]
+params["test_calcFrameShiftFromPositions"]=[]
 params['test_calcAlignedCamera']=[]
 params['test_calcMotionCorrLogPath']=[]
 
@@ -139,6 +143,33 @@ for imageid in validationData.keys():
     framestackpath=os.path.join(validationData[imageid]["appionflags"]["rundir"],os.path.basename(framestackpath))
     motioncorr_log_path=calcMotionCorrLogPath(framestackpath)
     params['test_calcMotionCorrLogPath'].append({"framestackpath":framestackpath, "expected": motioncorr_log_path})
+
+# m25apr22e (7858), m25apr23d (7873), m25apr02e (7605)
+
+logparser=retrieveLogParser("1.5.0")
+uploadAlignStatsTest=[30117940, 30157838, 29123499]
+for imageid in uploadAlignStatsTest:
+    imgmetadata=readImageMetadata(imageid, False, True, False)
+    #motioncorlogpath=glob(os.path.join("./logs",imgmetadata['image_filename']+"*motioncor2.txt"))[0]
+    #shutil.copy(motioncorlogpath, "./%d.motioncor2.log" % imageid)
+    motioncorlogpath="./logs/%d.motioncor2.log" % imageid
+    with open(motioncorlogpath, "r") as f:
+        outbuffer=f.readlines()
+        outbuffer=[s.replace("\n","") for s in outbuffer]
+        outbuffer=[s for s in outbuffer if s]
+        logdata=logparser(outbuffer)
+    shifts=logdata["shifts"]
+    nframes=imgmetadata["nframes"]
+    pixel_shifts = calcFrameShiftFromPositions(shifts, nframes - len(shifts)+1)
+    max_drifts, median = calcFrameStats(pixel_shifts)
+    shifts=[list(i) for i in shifts]
+    params["test_calcFrameShiftFromPositions"].append({"shifts" : shifts,
+                                                      "nframes" : nframes - len(shifts)+1,
+                                                      "expected" : pixel_shifts})
+    max_drifts=[list(i) for i in max_drifts]
+    params["test_calcFrameStats"].append({"pixel_shifts": pixel_shifts,
+                                          "expected_max_drifts" : list(max_drifts),
+                                          "expected_median" : float(median)})
 
 params['test_calcImageDefectMap']=[]
 for dm in glob(os.path.join(os.path.dirname(appion.__file__),"../test","*.npz")):

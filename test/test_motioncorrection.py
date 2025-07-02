@@ -3,7 +3,7 @@ import parametrize_from_file
 import appion
 import os
 import numpy
-from appion.motioncorrection.calc.internal import calcInputType, calcImageDefectMap, calcFmDose, calcTotalRenderedFrames, calcKV, calcTotalFrames, calcTrunc, calcPixelSize, filterFrameList, calcRotFlipGain, calcAlignedCamera, calcMotionCorrLogPath
+from appion.motioncorrection.calc.internal import calcInputType, calcImageDefectMap, calcFmDose, calcFrameStats, calcTotalRenderedFrames, calcKV, calcTotalFrames, calcTrunc, calcPixelSize, filterFrameList, calcRotFlipGain, calcFrameShiftFromPositions, calcAlignedCamera, calcMotionCorrLogPath
 
 @parametrize_from_file
 def test_calcInputType(fpath, expected):
@@ -55,11 +55,17 @@ def test_calcRotFlipGain(frame_rotate, frame_flip, force_cpu_flat, frame_aligner
     assert RotGain == expected_RotGain
     assert FlipGain == expected_FlipGain
 
-def test_calcFrameStats():
-    pass
+@parametrize_from_file
+def test_calcFrameStats(pixel_shifts, expected_max_drifts, expected_median):
+    max_drifts, median = calcFrameStats(pixel_shifts)
+    max_drifts=[list(i) for i in max_drifts]
+    assert max_drifts == expected_max_drifts
+    assert float(median) == expected_median
 
-def test_calcFrameShiftFromPositions():
-    pass
+@parametrize_from_file
+def test_calcFrameShiftFromPositions(shifts, nframes, expected):
+    pixel_shifts = calcFrameShiftFromPositions(shifts, nframes)
+    assert pixel_shifts == expected
 
 @parametrize_from_file
 def test_calcAlignedCamera(subd_dimension_x, subd_dimension_y, square_output, subd_binning_x, subd_binning_y,
