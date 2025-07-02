@@ -199,6 +199,13 @@ test_calcFmDose:
   rendered_frame_size: '1'
   total_raw_frames: 32
   totaldose: null
+test_calcImageDefectMap:
+- dm: test_motioncorrection_defect_map_0.npz
+- dm: test_motioncorrection_defect_map_1.npz
+- dm: test_motioncorrection_defect_map_2.npz
+- dm: test_motioncorrection_defect_map_3.npz
+- dm: test_motioncorrection_defect_map_4.npz
+- dm: test_motioncorrection_defect_map_5.npz
 test_calcInputType:
 - expected: InTiff
   fpath: /h1/jcheung/frames/m25mar17a/rawdata/m25mar17a_NY0268_Gr1a_00007gr_00038sq_v02_00003hl_v01_00022enn.frames.tif

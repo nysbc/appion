@@ -1,4 +1,6 @@
 import os
+from glob import glob
+import appion
 import json, yaml
 import sinedon.setup
 sinedon.setup()
@@ -18,7 +20,6 @@ params['test_calcTrunc']=[]
 params["test_calcKV"]=[]
 params["test_calcRotFlipGain"]=[]
 params['test_calcMotionCorrLogPath']=[]
-
 
 for imageid in validationData.keys():
     imgmetadata=readImageMetadata(imageid, False, True, False)
@@ -88,6 +89,10 @@ for imageid in validationData.keys():
     framestackpath=os.path.join(validationData[imageid]["appionflags"]["rundir"],os.path.basename(framestackpath))
     motioncorr_log_path=calcMotionCorrLogPath(framestackpath)
     params['test_calcMotionCorrLogPath'].append({"framestackpath":framestackpath, "expected": motioncorr_log_path})
+
+params['test_calcImageDefectMap']=[]
+for dm in glob(os.path.join(os.path.dirname(appion.__file__),"../test","*.npz")):
+    params['test_calcImageDefectMap'].append({"dm":os.path.basename(dm)})
 
 with open("./test_motioncorrection.yml","w") as f:
     yaml.dump(params, f)
