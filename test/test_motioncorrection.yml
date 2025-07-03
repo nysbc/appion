@@ -2166,8 +2166,8 @@ test_calcMotionCorrLogPath:
 test_calcPixelSize:
 - binning: 2
   expected: 0.826
-  imgdata_timestamp: 2025-03-19 13:03:11
-  pixelsizedatas:
+  imgdata_timestamp: &id029 2025-03-19 13:03:11
+  pixelsizedatas: &id030
   - pixelsize: 4.13e-11
     timestamp: 2024-07-31 15:13:09
   - pixelsize: 4.13e-11
@@ -2176,56 +2176,56 @@ test_calcPixelSize:
     timestamp: 2022-09-02 14:49:10
 - binning: 2
   expected: 0.856
-  imgdata_timestamp: 2025-03-29 21:17:44
-  pixelsizedatas:
+  imgdata_timestamp: &id031 2025-03-29 21:17:44
+  pixelsizedatas: &id032
   - pixelsize: 4.28e-11
     timestamp: 2024-03-04 15:05:49
   - pixelsize: 4.23e-11
     timestamp: 2022-09-02 14:49:08
 - binning: 1
   expected: 0.428
-  imgdata_timestamp: 2025-04-01 01:28:14
-  pixelsizedatas:
+  imgdata_timestamp: &id033 2025-04-01 01:28:14
+  pixelsizedatas: &id034
   - pixelsize: 4.28e-11
     timestamp: 2024-03-04 15:05:49
   - pixelsize: 4.23e-11
     timestamp: 2022-09-02 14:49:08
 - binning: 2
   expected: 1.073
-  imgdata_timestamp: 2025-03-25 03:30:11
-  pixelsizedatas:
+  imgdata_timestamp: &id035 2025-03-25 03:30:11
+  pixelsizedatas: &id036
   - pixelsize: 5.365e-11
     timestamp: 2024-03-04 15:05:31
   - pixelsize: 5.38e-11
     timestamp: 2022-09-02 14:49:08
 - binning: 2
   expected: 0.856
-  imgdata_timestamp: 2025-03-21 22:21:00
-  pixelsizedatas:
+  imgdata_timestamp: &id037 2025-03-21 22:21:00
+  pixelsizedatas: &id038
   - pixelsize: 4.28e-11
     timestamp: 2024-03-04 15:05:49
   - pixelsize: 4.23e-11
     timestamp: 2022-09-02 14:49:08
 - binning: 2
   expected: 0.856
-  imgdata_timestamp: 2025-03-29 06:34:10
-  pixelsizedatas:
+  imgdata_timestamp: &id039 2025-03-29 06:34:10
+  pixelsizedatas: &id040
   - pixelsize: 4.28e-11
     timestamp: 2024-03-04 15:05:49
   - pixelsize: 4.23e-11
     timestamp: 2022-09-02 14:49:08
 - binning: 2
   expected: 0.856
-  imgdata_timestamp: 2025-03-22 15:05:14
-  pixelsizedatas:
+  imgdata_timestamp: &id041 2025-03-22 15:05:14
+  pixelsizedatas: &id042
   - pixelsize: 4.28e-11
     timestamp: 2024-03-04 15:05:49
   - pixelsize: 4.23e-11
     timestamp: 2022-09-02 14:49:08
 - binning: 2
   expected: 0.826
-  imgdata_timestamp: 2025-04-01 19:40:32
-  pixelsizedatas:
+  imgdata_timestamp: &id043 2025-04-01 19:40:32
+  pixelsizedatas: &id044
   - pixelsize: 4.13e-11
     timestamp: 2024-07-31 15:13:09
   - pixelsize: 4.13e-11
@@ -2234,16 +2234,16 @@ test_calcPixelSize:
     timestamp: 2022-09-02 14:49:10
 - binning: 2
   expected: 1.073
-  imgdata_timestamp: 2025-03-25 01:17:07
-  pixelsizedatas:
+  imgdata_timestamp: &id045 2025-03-25 01:17:07
+  pixelsizedatas: &id046
   - pixelsize: 5.365e-11
     timestamp: 2024-03-04 15:05:31
   - pixelsize: 5.38e-11
     timestamp: 2022-09-02 14:49:08
 - binning: 2
   expected: 0.826
-  imgdata_timestamp: 2025-03-20 12:39:48
-  pixelsizedatas:
+  imgdata_timestamp: &id047 2025-03-20 12:39:48
+  pixelsizedatas: &id048
   - pixelsize: 4.13e-11
     timestamp: 2024-07-31 15:13:09
   - pixelsize: 4.13e-11
@@ -2252,8 +2252,8 @@ test_calcPixelSize:
     timestamp: 2022-09-02 14:49:10
 - binning: 2
   expected: 0.826
-  imgdata_timestamp: 2025-04-01 00:57:59
-  pixelsizedatas:
+  imgdata_timestamp: &id049 2025-04-01 00:57:59
+  pixelsizedatas: &id050
   - pixelsize: 4.13e-11
     timestamp: 2024-07-31 15:13:09
   - pixelsize: 4.13e-11
@@ -2262,24 +2262,24 @@ test_calcPixelSize:
     timestamp: 2022-09-02 14:49:10
 - binning: 1
   expected: 0.428
-  imgdata_timestamp: 2025-04-01 08:48:01
-  pixelsizedatas:
+  imgdata_timestamp: &id051 2025-04-01 08:48:01
+  pixelsizedatas: &id052
   - pixelsize: 4.28e-11
     timestamp: 2024-03-04 15:05:49
   - pixelsize: 4.23e-11
     timestamp: 2022-09-02 14:49:08
 - binning: 1
   expected: 0.428
-  imgdata_timestamp: 2025-03-20 20:42:31
-  pixelsizedatas:
+  imgdata_timestamp: &id053 2025-03-20 20:42:31
+  pixelsizedatas: &id054
   - pixelsize: 4.28e-11
     timestamp: 2024-03-04 15:05:49
   - pixelsize: 4.23e-11
     timestamp: 2022-09-02 14:49:08
 - binning: 2
   expected: 0.826
-  imgdata_timestamp: 2025-03-18 21:14:04
-  pixelsizedatas:
+  imgdata_timestamp: &id055 2025-03-18 21:14:04
+  pixelsizedatas: &id056
   - pixelsize: 4.13e-11
     timestamp: 2024-07-31 15:13:09
   - pixelsize: 4.13e-11
@@ -2288,14 +2288,14 @@ test_calcPixelSize:
     timestamp: 2022-09-02 14:49:10
 - binning: 2
   expected: 1.083
-  imgdata_timestamp: 2025-03-20 10:02:29
-  pixelsizedatas:
+  imgdata_timestamp: &id057 2025-03-20 10:02:29
+  pixelsizedatas: &id058
   - pixelsize: 5.4125e-11
     timestamp: 2022-09-02 14:49:06
 - binning: 2
   expected: 0.826
-  imgdata_timestamp: 2025-03-21 03:25:49
-  pixelsizedatas:
+  imgdata_timestamp: &id059 2025-03-21 03:25:49
+  pixelsizedatas: &id060
   - pixelsize: 4.13e-11
     timestamp: 2024-07-31 15:13:09
   - pixelsize: 4.13e-11
@@ -2304,8 +2304,8 @@ test_calcPixelSize:
     timestamp: 2022-09-02 14:49:10
 - binning: 2
   expected: 0.826
-  imgdata_timestamp: 2025-04-01 08:27:02
-  pixelsizedatas:
+  imgdata_timestamp: &id061 2025-04-01 08:27:02
+  pixelsizedatas: &id062
   - pixelsize: 4.13e-11
     timestamp: 2024-07-31 15:13:09
   - pixelsize: 4.13e-11
@@ -2314,24 +2314,24 @@ test_calcPixelSize:
     timestamp: 2022-09-02 14:49:10
 - binning: 1
   expected: 0.428
-  imgdata_timestamp: 2025-04-01 05:58:59
-  pixelsizedatas:
+  imgdata_timestamp: &id063 2025-04-01 05:58:59
+  pixelsizedatas: &id064
   - pixelsize: 4.28e-11
     timestamp: 2024-03-04 15:05:49
   - pixelsize: 4.23e-11
     timestamp: 2022-09-02 14:49:08
 - binning: 1
   expected: 0.428
-  imgdata_timestamp: 2025-03-21 12:40:28
-  pixelsizedatas:
+  imgdata_timestamp: &id065 2025-03-21 12:40:28
+  pixelsizedatas: &id066
   - pixelsize: 4.28e-11
     timestamp: 2024-03-04 15:05:49
   - pixelsize: 4.23e-11
     timestamp: 2022-09-02 14:49:08
 - binning: 2
   expected: 0.826
-  imgdata_timestamp: 2025-04-01 18:00:24
-  pixelsizedatas:
+  imgdata_timestamp: &id067 2025-04-01 18:00:24
+  pixelsizedatas: &id068
   - pixelsize: 4.13e-11
     timestamp: 2024-07-31 15:13:09
   - pixelsize: 4.13e-11
@@ -2340,8 +2340,8 @@ test_calcPixelSize:
     timestamp: 2022-09-02 14:49:10
 - binning: 2
   expected: 0.826
-  imgdata_timestamp: 2025-04-01 06:23:22
-  pixelsizedatas:
+  imgdata_timestamp: &id069 2025-04-01 06:23:22
+  pixelsizedatas: &id070
   - pixelsize: 4.13e-11
     timestamp: 2024-07-31 15:13:09
   - pixelsize: 4.13e-11
@@ -2350,8 +2350,8 @@ test_calcPixelSize:
     timestamp: 2022-09-02 14:49:10
 - binning: 2
   expected: 0.826
-  imgdata_timestamp: 2025-03-21 10:11:02
-  pixelsizedatas:
+  imgdata_timestamp: &id071 2025-03-21 10:11:02
+  pixelsizedatas: &id072
   - pixelsize: 4.13e-11
     timestamp: 2024-07-31 15:13:09
   - pixelsize: 4.13e-11
@@ -2360,22 +2360,22 @@ test_calcPixelSize:
     timestamp: 2022-09-02 14:49:10
 - binning: 2
   expected: 1.083
-  imgdata_timestamp: 2025-03-20 11:02:48
-  pixelsizedatas:
+  imgdata_timestamp: &id073 2025-03-20 11:02:48
+  pixelsizedatas: &id074
   - pixelsize: 5.4125e-11
     timestamp: 2022-09-02 14:49:06
 - binning: 2
   expected: 1.073
-  imgdata_timestamp: 2025-03-25 11:35:27
-  pixelsizedatas:
+  imgdata_timestamp: &id075 2025-03-25 11:35:27
+  pixelsizedatas: &id076
   - pixelsize: 5.365e-11
     timestamp: 2024-03-04 15:05:31
   - pixelsize: 5.38e-11
     timestamp: 2022-09-02 14:49:08
 - binning: 2
   expected: 0.826
-  imgdata_timestamp: 2025-04-01 14:17:57
-  pixelsizedatas:
+  imgdata_timestamp: &id077 2025-04-01 14:17:57
+  pixelsizedatas: &id078
   - pixelsize: 4.13e-11
     timestamp: 2024-07-31 15:13:09
   - pixelsize: 4.13e-11
@@ -3830,6 +3830,2244 @@ test_calcTrunc:
   - 30
   - 31
   total_frames: 32
+test_constructMotionCorKwargs:
+- args:
+    Bft_global: 500
+    Bft_local: 100
+    FmRef: 0
+    Iter: '7'
+    MaskCentcol: '0'
+    MaskCentrow: '0'
+    MaskSizecols: '1'
+    MaskSizerows: '1'
+    Patchcols: '7'
+    Patchrows: '5'
+    Tol: 0.5
+    align: ''
+    alignlabel: a
+    bin: 1.0
+    commit: ''
+    continue: ''
+    ddstartframe: '0'
+    doseweight: ''
+    expid: '7472'
+    force_cpu_flat: false
+    gpuids: '0'
+    jobid: '74'
+    jobtype: makeddrawframestack
+    no-rejects: ''
+    nodes: '1'
+    nrw: '1'
+    parallel: ''
+    ppn: '1'
+    preset: enn
+    projectid: '1271'
+    queue: preprocessing
+    rendered_frame_size: '1'
+    rundir: /h1/jcheung/appion/m25mar17a/ddstack/ddstack1
+    runname: ddstack1
+    session: m25mar17a
+    walltime: '120'
+  expected_kwargs:
+    Bft: 500 100
+    Dark: /h1/jcheung/appion/m25mar17a/ddstack/ddstack1/dark-semc-gpu01-0-1705747.mrc
+    FlipGain: '0'
+    FmDose: '1.091'
+    Gain: /h1/jcheung/appion/m25mar17a/ddstack/ddstack1/norm-semc-gpu01-0-1705747.mrc
+    Gpu: '0'
+    Group: '1'
+    InTiff: /h1/jcheung/frames/m25mar17a/rawdata/m25mar17a_NY0268_Gr1a_00007gr_00038sq_v02_00003hl_v01_00022enn.frames.tif
+    Iter: '7'
+    MaskSize: 1.000 1.000
+    OutMrc: /h1/jcheung/appion/m25mar17a/ddstack/ddstack1/m25mar17a_NY0268_Gr1a_00007gr_00038sq_v02_00003hl_v01_00022enn_c.mrc
+    Patch: 7 5
+    PixSize: '0.826'
+    RotGain: '0'
+    Tol: '0.500'
+    kV: '300'
+  imgmetadata:
+    bad_cols: ()
+    bad_pixels: ()
+    bad_rows: ()
+    binning: 2
+    camera_id: 19643946
+    camera_name: GatanK3
+    ccdcamera: 24
+    dark_id: null
+    dark_input: null
+    dark_nframes: null
+    dose: 5.454610165461196e+21
+    dx: 5760
+    dy: 4092
+    eer_frames: false
+    exposure_time: 1500.0
+    frame_aligner_flat: true
+    frame_flip: 0
+    frame_rotate: 0
+    frame_time: 30.0
+    gain_input: /h1/jcheung/frames/m25mar17a/rawdata/m22sep14b_g2_00001gr_00002sq940_v02_00006hl_00022enn-a.mrc
+    high_tension: 300000
+    image_filename: m25mar17a_NY0268_Gr1a_00007gr_00038sq_v02_00003hl_v01_00022enn
+    imageid: '28509806'
+    imgdata_timestamp: *id029
+    magnification: 105000
+    nframes: 50
+    pixelsizedata: *id030
+    preset_id: 103480
+    session_frame_path: /h1/jcheung/frames/m25mar17a/rawdata
+    session_id: 7472
+    session_image_path: /h1/jcheung/leginon/m25mar17a/rawdata
+    tem: 25
+    total_raw_frames: 50
+  input_path: /h1/jcheung/appion/m25mar17a/ddstack/ddstack1/m25mar17a_NY0268_Gr1a_00007gr_00038sq_v02_00003hl_v01_00022enn.frames.tif
+- args:
+    Bft_global: 500
+    Bft_local: 100
+    FmRef: 0
+    Iter: '7'
+    MaskCentcol: '0'
+    MaskCentrow: '0'
+    MaskSizecols: '1'
+    MaskSizerows: '1'
+    Patchcols: '7'
+    Patchrows: '5'
+    Tol: 0.5
+    align: ''
+    alignlabel: a
+    bin: 1.0
+    commit: ''
+    continue: ''
+    ddstartframe: '0'
+    doseweight: ''
+    expid: '7581'
+    force_cpu_flat: false
+    gpuids: '0'
+    jobid: '57'
+    jobtype: makeddrawframestack
+    no-rejects: ''
+    nodes: '1'
+    nrw: '1'
+    parallel: ''
+    ppn: '1'
+    preset: enn
+    projectid: '764'
+    queue: preprocessing
+    rendered_frame_size: '1'
+    rundir: /h1/jclosson/appion/m25mar28a/ddstack/ddstack1
+    runname: ddstack1
+    session: m25mar28a
+    walltime: '120'
+  expected_kwargs:
+    Bft: 500 100
+    Dark: /h1/jclosson/appion/m25mar28a/ddstack/ddstack1/dark-semc-gpu01-0-2324801.mrc
+    FlipGain: '0'
+    FmDose: '1.642'
+    Gain: /h1/jclosson/appion/m25mar28a/ddstack/ddstack1/norm-semc-gpu01-0-2324801.mrc
+    Gpu: '0'
+    Group: '1'
+    InTiff: /h1/jclosson/frames/m25mar28a/rawdata/m25mar28a_gr4_00012gr_00104sq_v03_00004hl_00007enn.frames.tif
+    Iter: '7'
+    MaskSize: 1.000 1.000
+    OutMrc: /h1/jclosson/appion/m25mar28a/ddstack/ddstack1/m25mar28a_gr4_00012gr_00104sq_v03_00004hl_00007enn_c.mrc
+    Patch: 7 5
+    PixSize: '0.856'
+    RotGain: '0'
+    Tol: '0.500'
+    kV: '300'
+  imgmetadata:
+    bad_cols: null
+    bad_pixels: null
+    bad_rows: null
+    binning: 2
+    camera_id: 19953121
+    camera_name: GatanK3
+    ccdcamera: 23
+    dark_id: null
+    dark_input: null
+    dark_nframes: null
+    dose: 5.910586096772249e+21
+    dx: 5760
+    dy: 4092
+    eer_frames: false
+    exposure_time: 1800.0
+    frame_aligner_flat: true
+    frame_flip: 0
+    frame_rotate: 0
+    frame_time: 50.0
+    gain_input: /h1/jclosson/frames/m25mar28a/rawdata/m22sep14b_g2_00001gr_00002sq940_v02_00006hl_00035enn-a.mrc
+    high_tension: 300000
+    image_filename: m25mar28a_gr4_00012gr_00104sq_v03_00004hl_00007enn
+    imageid: '28993663'
+    imgdata_timestamp: *id031
+    magnification: 81000
+    nframes: 36
+    pixelsizedata: *id032
+    preset_id: 105041
+    session_frame_path: /h1/jclosson/frames/m25mar28a/rawdata
+    session_id: 7581
+    session_image_path: /h1/jclosson/leginon/m25mar28a/rawdata
+    tem: 11
+    total_raw_frames: 36
+  input_path: /h1/jclosson/appion/m25mar28a/ddstack/ddstack1/m25mar28a_gr4_00012gr_00104sq_v03_00004hl_00007enn.frames.tif
+- args:
+    Bft_global: 500
+    Bft_local: 100
+    FmRef: 0
+    Iter: '7'
+    MaskCentcol: '0'
+    MaskCentrow: '0'
+    MaskSizecols: '1'
+    MaskSizerows: '1'
+    Patchcols: '7'
+    Patchrows: '5'
+    Tol: 0.5
+    align: ''
+    alignlabel: a
+    bin: 2.0
+    commit: ''
+    continue: ''
+    ddstartframe: '0'
+    doseweight: ''
+    expid: '7590'
+    force_cpu_flat: false
+    gpuids: '0'
+    jobid: '40'
+    jobtype: makeddrawframestack
+    no-rejects: ''
+    nodes: '1'
+    nrw: '1'
+    parallel: ''
+    ppn: '1'
+    preset: esn
+    projectid: '1169'
+    queue: preprocessing
+    rendered_frame_size: '1'
+    rundir: /h1/jsun4/appion/m25mar31a/ddstack/ddstack1
+    runname: ddstack1
+    session: m25mar31a
+    totaldose: 54.0
+    walltime: '120'
+  expected_kwargs:
+    Bft: 500 100
+    Dark: /h1/jsun4/appion/m25mar31a/ddstack/ddstack1/dark-semc-cpu02-0-1720956.mrc
+    FlipGain: '0'
+    FmDose: '1.350'
+    FtBin: '2.0'
+    Gain: /h1/jsun4/appion/m25mar31a/ddstack/ddstack1/norm-semc-cpu02-0-1720956.mrc
+    Gpu: '0'
+    Group: '1'
+    InTiff: /h1/jsun4/frames/m25mar31a/rawdata/m25mar31a_yellow1_00011gr_00018sq_v02_00003hl_00029esn.frames.tif
+    Iter: '7'
+    MaskSize: 1.000 1.000
+    OutMrc: /h1/jsun4/appion/m25mar31a/ddstack/ddstack1/m25mar31a_yellow1_00011gr_00018sq_v02_00003hl_00029esn_c.mrc
+    Patch: 7 5
+    PixSize: '0.428'
+    RotGain: '0'
+    Tol: '0.500'
+    kV: '300'
+  imgmetadata:
+    bad_cols: ()
+    bad_pixels: ()
+    bad_rows: ()
+    binning: 1
+    camera_id: 19981680
+    camera_name: GatanK3
+    ccdcamera: 23
+    dark_id: null
+    dark_input: null
+    dark_nframes: null
+    dose: null
+    dx: 11520
+    dy: 8184
+    eer_frames: false
+    exposure_time: 1600.0
+    frame_aligner_flat: true
+    frame_flip: 0
+    frame_rotate: 0
+    frame_time: 40.0
+    gain_input: /h1/jsun4/frames/m25mar31a/rawdata/m22sep14b_g2_00001gr_00002sq940_v02_00006hl_00042enn.mrc
+    high_tension: 300000
+    image_filename: m25mar31a_yellow1_00011gr_00018sq_v02_00003hl_00029esn
+    imageid: '29038406'
+    imgdata_timestamp: *id033
+    magnification: 81000
+    nframes: 40
+    pixelsizedata: *id034
+    preset_id: 105209
+    session_frame_path: /h1/jsun4/frames/m25mar31a/rawdata
+    session_id: 7590
+    session_image_path: /h1/jsun4/leginon/m25mar31a/rawdata
+    tem: 11
+    total_raw_frames: 40
+  input_path: /h1/jsun4/appion/m25mar31a/ddstack/ddstack1/m25mar31a_yellow1_00011gr_00018sq_v02_00003hl_00029esn.frames.tif
+- args:
+    Bft_global: 500
+    Bft_local: 100
+    FmRef: 0
+    Iter: '7'
+    MaskCentcol: '0'
+    MaskCentrow: '0'
+    MaskSizecols: '1'
+    MaskSizerows: '1'
+    Patchcols: '7'
+    Patchrows: '5'
+    Tol: 0.5
+    align: ''
+    alignlabel: a
+    bin: 1.0
+    commit: ''
+    continue: ''
+    ddstartframe: '0'
+    doseweight: ''
+    expid: '7517'
+    force_cpu_flat: false
+    gpuids: '0'
+    jobid: '9'
+    jobtype: makeddrawframestack
+    no-rejects: ''
+    nodes: '1'
+    nrw: '1'
+    parallel: ''
+    ppn: '1'
+    preset: enn
+    projectid: '1283'
+    queue: preprocessing
+    rendered_frame_size: '1'
+    rundir: /h1/yli5/appion/m25mar24a/ddstack/ddstack1
+    runname: ddstack1
+    session: m25mar24a
+    walltime: '120'
+  expected_kwargs:
+    Bft: 500 100
+    Dark: /h1/yli5/appion/m25mar24a/ddstack/ddstack1/dark-semc-gpu09-0-4190314.mrc
+    FlipGain: '0'
+    FmDose: '1.304'
+    Gain: /h1/yli5/appion/m25mar24a/ddstack/ddstack1/norm-semc-gpu09-0-4190314.mrc
+    Gpu: '0'
+    Group: '1'
+    InTiff: /h1/yli5/frames/m25mar24a/rawdata/m25mar24a_G4_00002gr_00033sq_v02_00008hl_00005enn.frames.tif
+    Iter: '7'
+    MaskSize: 1.000 1.000
+    OutMrc: /h1/yli5/appion/m25mar24a/ddstack/ddstack1/m25mar24a_G4_00002gr_00033sq_v02_00008hl_00005enn_c.mrc
+    Patch: 7 5
+    PixSize: '1.073'
+    RotGain: '0'
+    Tol: '0.500'
+    kV: '300'
+  imgmetadata:
+    bad_cols: null
+    bad_pixels: null
+    bad_rows: null
+    binning: 2
+    camera_id: 19798987
+    camera_name: GatanK3
+    ccdcamera: 23
+    dark_id: null
+    dark_input: null
+    dark_nframes: null
+    dose: 5.215582512172212e+21
+    dx: 5760
+    dy: 4092
+    eer_frames: false
+    exposure_time: 2000.0
+    frame_aligner_flat: true
+    frame_flip: 0
+    frame_rotate: 0
+    frame_time: 50.0
+    gain_input: /h1/yli5/frames/m25mar24a/rawdata/m22sep14b_g2_00001gr_00002sq940_v02_00006hl_00030enn-a-DW.mrc
+    high_tension: 300000
+    image_filename: m25mar24a_G4_00002gr_00033sq_v02_00008hl_00005enn
+    imageid: '28772058'
+    imgdata_timestamp: *id035
+    magnification: 64000
+    nframes: 40
+    pixelsizedata: *id036
+    preset_id: 104386
+    session_frame_path: /h1/yli5/frames/m25mar24a/rawdata
+    session_id: 7517
+    session_image_path: /h1/yli5/leginon/m25mar24a/rawdata
+    tem: 11
+    total_raw_frames: 40
+  input_path: /h1/yli5/appion/m25mar24a/ddstack/ddstack1/m25mar24a_G4_00002gr_00033sq_v02_00008hl_00005enn.frames.tif
+- args:
+    Bft_global: 500
+    Bft_local: 100
+    FmRef: 0
+    Iter: '7'
+    MaskCentcol: '0'
+    MaskCentrow: '0'
+    MaskSizecols: '1'
+    MaskSizerows: '1'
+    Patchcols: '7'
+    Patchrows: '5'
+    Tol: 0.5
+    align: ''
+    alignlabel: a
+    bin: 1.0
+    commit: ''
+    continue: ''
+    ddstartframe: '0'
+    doseweight: ''
+    expid: '7515'
+    force_cpu_flat: false
+    gpuids: '0'
+    jobid: '55'
+    jobtype: makeddrawframestack
+    no-rejects: ''
+    nodes: '1'
+    nrw: '1'
+    parallel: ''
+    ppn: '1'
+    preset: enn
+    projectid: '1212'
+    queue: preprocessing
+    rendered_frame_size: '1'
+    rundir: /h2/aowji3/appion/m25mar21e/ddstack/ddstack1
+    runname: ddstack1
+    session: m25mar21e
+    totaldose: 54.0
+    walltime: '120'
+  expected_kwargs:
+    Bft: 500 100
+    Dark: /h2/aowji3/appion/m25mar21e/ddstack/ddstack1/dark-semc-gpu14-0-1087484.mrc
+    FlipGain: '0'
+    FmDose: '1.350'
+    Gain: /h2/aowji3/appion/m25mar21e/ddstack/ddstack1/norm-semc-gpu14-0-1087484.mrc
+    Gpu: '0'
+    Group: '1'
+    InTiff: /h2/aowji3/frames/m25mar21e/rawdata/m25mar21e_241111C3-tilt45_00005gr_00007sq_v03_00004hl_00013enn.frames.tif
+    Iter: '7'
+    MaskSize: 1.000 1.000
+    OutMrc: /h2/aowji3/appion/m25mar21e/ddstack/ddstack1/m25mar21e_241111C3-tilt45_00005gr_00007sq_v03_00004hl_00013enn_c.mrc
+    Patch: 7 5
+    PixSize: '0.856'
+    RotGain: '0'
+    Tol: '0.500'
+    kV: '300'
+  imgmetadata:
+    bad_cols: null
+    bad_pixels: null
+    bad_rows: null
+    binning: 2
+    camera_id: 19745422
+    camera_name: GatanK3
+    ccdcamera: 23
+    dark_id: null
+    dark_input: null
+    dark_nframes: null
+    dose: 5.392344761873541e+21
+    dx: 5760
+    dy: 4092
+    eer_frames: false
+    exposure_time: 1600.0
+    frame_aligner_flat: true
+    frame_flip: 0
+    frame_rotate: 0
+    frame_time: 40.0
+    gain_input: /h2/aowji3/frames/m25mar21e/rawdata/m22sep14b_g2_00001gr_00002sq940_v02_00006hl_00028enn-a-DW.mrc
+    high_tension: 300000
+    image_filename: m25mar21e_241111C3-tilt45_00005gr_00007sq_v03_00004hl_00013enn
+    imageid: '28697558'
+    imgdata_timestamp: *id037
+    magnification: 81000
+    nframes: 40
+    pixelsizedata: *id038
+    preset_id: 104239
+    session_frame_path: /h2/aowji3/frames/m25mar21e/rawdata
+    session_id: 7515
+    session_image_path: /h2/aowji3/leginon/m25mar21e/rawdata
+    tem: 11
+    total_raw_frames: 40
+  input_path: /h2/aowji3/appion/m25mar21e/ddstack/ddstack1/m25mar21e_241111C3-tilt45_00005gr_00007sq_v03_00004hl_00013enn.frames.tif
+- args:
+    Bft_global: 500
+    Bft_local: 100
+    FmRef: 0
+    Iter: '7'
+    MaskCentcol: '0'
+    MaskCentrow: '0'
+    MaskSizecols: '1'
+    MaskSizerows: '1'
+    Patchcols: '7'
+    Patchrows: '5'
+    Tol: 0.5
+    align: ''
+    alignlabel: a
+    bin: 1.0
+    commit: ''
+    continue: ''
+    ddstartframe: '0'
+    doseweight: ''
+    expid: '7581'
+    force_cpu_flat: false
+    gpuids: '0'
+    jobid: '57'
+    jobtype: makeddrawframestack
+    no-rejects: ''
+    nodes: '1'
+    nrw: '1'
+    parallel: ''
+    ppn: '1'
+    preset: enn
+    projectid: '764'
+    queue: preprocessing
+    rendered_frame_size: '1'
+    rundir: /h1/jclosson/appion/m25mar28a/ddstack/ddstack1
+    runname: ddstack1
+    session: m25mar28a
+    walltime: '120'
+  expected_kwargs:
+    Bft: 500 100
+    Dark: /h1/jclosson/appion/m25mar28a/ddstack/ddstack1/dark-semc-gpu01-0-2324810.mrc
+    FlipGain: '0'
+    FmDose: '1.642'
+    Gain: /h1/jclosson/appion/m25mar28a/ddstack/ddstack1/norm-semc-gpu01-0-2324810.mrc
+    Gpu: '0'
+    Group: '1'
+    InTiff: /h1/jclosson/frames/m25mar28a/rawdata/m25mar28a_gr4_00013gr_00044sq_v02_00003hl_00023enn.frames.tif
+    Iter: '7'
+    MaskSize: 1.000 1.000
+    OutMrc: /h1/jclosson/appion/m25mar28a/ddstack/ddstack1/m25mar28a_gr4_00013gr_00044sq_v02_00003hl_00023enn_c.mrc
+    Patch: 7 5
+    PixSize: '0.856'
+    RotGain: '0'
+    Tol: '0.500'
+    kV: '300'
+  imgmetadata:
+    bad_cols: null
+    bad_pixels: null
+    bad_rows: null
+    binning: 2
+    camera_id: 19939191
+    camera_name: GatanK3
+    ccdcamera: 23
+    dark_id: null
+    dark_input: null
+    dark_nframes: null
+    dose: 5.910586096772249e+21
+    dx: 5760
+    dy: 4092
+    eer_frames: false
+    exposure_time: 1800.0
+    frame_aligner_flat: true
+    frame_flip: 0
+    frame_rotate: 0
+    frame_time: 50.0
+    gain_input: /h1/jclosson/frames/m25mar28a/rawdata/m22sep14b_g2_00001gr_00002sq940_v02_00006hl_00035enn-a.mrc
+    high_tension: 300000
+    image_filename: m25mar28a_gr4_00013gr_00044sq_v02_00003hl_00023enn
+    imageid: '28975620'
+    imgdata_timestamp: *id039
+    magnification: 81000
+    nframes: 36
+    pixelsizedata: *id040
+    preset_id: 105041
+    session_frame_path: /h1/jclosson/frames/m25mar28a/rawdata
+    session_id: 7581
+    session_image_path: /h1/jclosson/leginon/m25mar28a/rawdata
+    tem: 11
+    total_raw_frames: 36
+  input_path: /h1/jclosson/appion/m25mar28a/ddstack/ddstack1/m25mar28a_gr4_00013gr_00044sq_v02_00003hl_00023enn.frames.tif
+- args:
+    Bft_global: 500
+    Bft_local: 100
+    FmRef: 0
+    Iter: '7'
+    MaskCentcol: '0'
+    MaskCentrow: '0'
+    MaskSizecols: '1'
+    MaskSizerows: '1'
+    Patchcols: '7'
+    Patchrows: '5'
+    Tol: 0.5
+    align: ''
+    alignlabel: a
+    bin: 1.0
+    commit: ''
+    continue: ''
+    ddstartframe: '0'
+    doseweight: ''
+    expid: '7515'
+    force_cpu_flat: false
+    gpuids: '0'
+    jobid: '55'
+    jobtype: makeddrawframestack
+    no-rejects: ''
+    nodes: '1'
+    nrw: '1'
+    parallel: ''
+    ppn: '1'
+    preset: enn
+    projectid: '1212'
+    queue: preprocessing
+    rendered_frame_size: '1'
+    rundir: /h2/aowji3/appion/m25mar21e/ddstack/ddstack1
+    runname: ddstack1
+    session: m25mar21e
+    totaldose: 54.0
+    walltime: '120'
+  expected_kwargs:
+    Bft: 500 100
+    Dark: /h2/aowji3/appion/m25mar21e/ddstack/ddstack1/dark-semc-cpu02-0-788024.mrc
+    FlipGain: '0'
+    FmDose: '1.350'
+    Gain: /h2/aowji3/appion/m25mar21e/ddstack/ddstack1/norm-semc-cpu02-0-788024.mrc
+    Gpu: '0'
+    Group: '1'
+    InTiff: /h2/aowji3/frames/m25mar21e/rawdata/m25mar21e_241111C3-tilt45_00002gr_00010sq_v03_00003hl_00029enn.frames.tif
+    Iter: '7'
+    MaskSize: 1.000 1.000
+    OutMrc: /h2/aowji3/appion/m25mar21e/ddstack/ddstack1/m25mar21e_241111C3-tilt45_00002gr_00010sq_v03_00003hl_00029enn_c.mrc
+    Patch: 7 5
+    PixSize: '0.856'
+    RotGain: '0'
+    Tol: '0.500'
+    kV: '300'
+  imgmetadata:
+    bad_cols: null
+    bad_pixels: null
+    bad_rows: null
+    binning: 2
+    camera_id: 19752531
+    camera_name: GatanK3
+    ccdcamera: 23
+    dark_id: null
+    dark_input: null
+    dark_nframes: null
+    dose: 5.392344761873541e+21
+    dx: 5760
+    dy: 4092
+    eer_frames: false
+    exposure_time: 1600.0
+    frame_aligner_flat: true
+    frame_flip: 0
+    frame_rotate: 0
+    frame_time: 40.0
+    gain_input: /h2/aowji3/frames/m25mar21e/rawdata/m22sep14b_g2_00001gr_00002sq940_v02_00006hl_00028enn-a-DW.mrc
+    high_tension: 300000
+    image_filename: m25mar21e_241111C3-tilt45_00002gr_00010sq_v03_00003hl_00029enn
+    imageid: '28706517'
+    imgdata_timestamp: *id041
+    magnification: 81000
+    nframes: 40
+    pixelsizedata: *id042
+    preset_id: 104239
+    session_frame_path: /h2/aowji3/frames/m25mar21e/rawdata
+    session_id: 7515
+    session_image_path: /h2/aowji3/leginon/m25mar21e/rawdata
+    tem: 11
+    total_raw_frames: 40
+  input_path: /h2/aowji3/appion/m25mar21e/ddstack/ddstack1/m25mar21e_241111C3-tilt45_00002gr_00010sq_v03_00003hl_00029enn.frames.tif
+- args:
+    Bft_global: 500
+    Bft_local: 100
+    FmRef: 0
+    Iter: '7'
+    MaskCentcol: '0'
+    MaskCentrow: '0'
+    MaskSizecols: '1'
+    MaskSizerows: '1'
+    Patchcols: '7'
+    Patchrows: '5'
+    Tol: 0.5
+    align: ''
+    alignlabel: a
+    bin: 1.0
+    commit: ''
+    continue: ''
+    ddstartframe: '0'
+    doseweight: ''
+    expid: '7591'
+    force_cpu_flat: false
+    gpuids: '0'
+    jobid: '71'
+    jobtype: makeddrawframestack
+    no-rejects: ''
+    nodes: '1'
+    nrw: '1'
+    parallel: ''
+    ppn: '1'
+    preset: enn
+    projectid: '203'
+    queue: preprocessing
+    rendered_frame_size: '1'
+    rundir: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1
+    runname: ddstack1
+    session: m25mar31b
+    walltime: '120'
+  expected_kwargs:
+    Bft: 500 100
+    Dark: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/dark-semc-gpu01-0-489993.mrc
+    FlipGain: '0'
+    FmDose: '1.574'
+    Gain: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/norm-semc-gpu01-0-489993.mrc
+    Gpu: '0'
+    Group: '1'
+    InTiff: /h1/hsosa/frames/m25mar31b/rawdata/m25mar31b_B1G2_00007gr_00059sq_v02_00002hl_v01_00011enn.frames.tif
+    Iter: '7'
+    MaskSize: 1.000 1.000
+    OutMrc: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/m25mar31b_B1G2_00007gr_00059sq_v02_00002hl_v01_00011enn_c.mrc
+    Patch: 7 5
+    PixSize: '0.826'
+    RotGain: '0'
+    Tol: '0.500'
+    kV: '300'
+  imgmetadata:
+    bad_cols: ()
+    bad_pixels: ()
+    bad_rows: ()
+    binning: 2
+    camera_id: 20009798
+    camera_name: GatanK3
+    ccdcamera: 24
+    dark_id: null
+    dark_input: null
+    dark_nframes: null
+    dose: 5.036889516485281e+21
+    dx: 5760
+    dy: 4092
+    eer_frames: false
+    exposure_time: 1600.0
+    frame_aligner_flat: true
+    frame_flip: 0
+    frame_rotate: 0
+    frame_time: 50.0
+    gain_input: /h1/hsosa/frames/m25mar31b/rawdata/m22sep14b_g2_00001gr_00002sq940_v02_00006hl_00038enn-a.mrc
+    high_tension: 300000
+    image_filename: m25mar31b_B1G2_00007gr_00059sq_v02_00002hl_v01_00011enn
+    imageid: '29080077'
+    imgdata_timestamp: *id043
+    magnification: 105000
+    nframes: 32
+    pixelsizedata: *id044
+    preset_id: 105219
+    session_frame_path: /h1/hsosa/frames/m25mar31b/rawdata
+    session_id: 7591
+    session_image_path: /h1/hsosa/leginon/m25mar31b/rawdata
+    tem: 25
+    total_raw_frames: 32
+  input_path: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/m25mar31b_B1G2_00007gr_00059sq_v02_00002hl_v01_00011enn.frames.tif
+- args:
+    Bft_global: 500
+    Bft_local: 100
+    FmRef: 0
+    Iter: '7'
+    MaskCentcol: '0'
+    MaskCentrow: '0'
+    MaskSizecols: '1'
+    MaskSizerows: '1'
+    Patchcols: '7'
+    Patchrows: '5'
+    Tol: 0.5
+    align: ''
+    alignlabel: a
+    bin: 1.0
+    commit: ''
+    continue: ''
+    ddstartframe: '0'
+    doseweight: ''
+    expid: '7517'
+    force_cpu_flat: false
+    gpuids: '0'
+    jobid: '9'
+    jobtype: makeddrawframestack
+    no-rejects: ''
+    nodes: '1'
+    nrw: '1'
+    parallel: ''
+    ppn: '1'
+    preset: enn
+    projectid: '1283'
+    queue: preprocessing
+    rendered_frame_size: '1'
+    rundir: /h1/yli5/appion/m25mar24a/ddstack/ddstack1
+    runname: ddstack1
+    session: m25mar24a
+    walltime: '120'
+  expected_kwargs:
+    Bft: 500 100
+    Dark: /h1/yli5/appion/m25mar24a/ddstack/ddstack1/dark-semc-gpu09-0-4190317.mrc
+    FlipGain: '0'
+    FmDose: '1.304'
+    Gain: /h1/yli5/appion/m25mar24a/ddstack/ddstack1/norm-semc-gpu09-0-4190317.mrc
+    Gpu: '0'
+    Group: '1'
+    InTiff: /h1/yli5/frames/m25mar24a/rawdata/m25mar24a_G4_00005gr_00026sq_v02_00004hl_00031enn.frames.tif
+    Iter: '7'
+    MaskSize: 1.000 1.000
+    OutMrc: /h1/yli5/appion/m25mar24a/ddstack/ddstack1/m25mar24a_G4_00005gr_00026sq_v02_00004hl_00031enn_c.mrc
+    Patch: 7 5
+    PixSize: '1.073'
+    RotGain: '0'
+    Tol: '0.500'
+    kV: '300'
+  imgmetadata:
+    bad_cols: null
+    bad_pixels: null
+    bad_rows: null
+    binning: 2
+    camera_id: 19796221
+    camera_name: GatanK3
+    ccdcamera: 23
+    dark_id: null
+    dark_input: null
+    dark_nframes: null
+    dose: 5.215582512172212e+21
+    dx: 5760
+    dy: 4092
+    eer_frames: false
+    exposure_time: 2000.0
+    frame_aligner_flat: true
+    frame_flip: 0
+    frame_rotate: 0
+    frame_time: 50.0
+    gain_input: /h1/yli5/frames/m25mar24a/rawdata/m22sep14b_g2_00001gr_00002sq940_v02_00006hl_00030enn-a-DW.mrc
+    high_tension: 300000
+    image_filename: m25mar24a_G4_00005gr_00026sq_v02_00004hl_00031enn
+    imageid: '28768021'
+    imgdata_timestamp: *id045
+    magnification: 64000
+    nframes: 40
+    pixelsizedata: *id046
+    preset_id: 104386
+    session_frame_path: /h1/yli5/frames/m25mar24a/rawdata
+    session_id: 7517
+    session_image_path: /h1/yli5/leginon/m25mar24a/rawdata
+    tem: 11
+    total_raw_frames: 40
+  input_path: /h1/yli5/appion/m25mar24a/ddstack/ddstack1/m25mar24a_G4_00005gr_00026sq_v02_00004hl_00031enn.frames.tif
+- args:
+    Bft_global: 500
+    Bft_local: 100
+    FmRef: 0
+    Iter: '7'
+    MaskCentcol: '0'
+    MaskCentrow: '0'
+    MaskSizecols: '1'
+    MaskSizerows: '1'
+    Patchcols: '7'
+    Patchrows: '5'
+    Tol: 0.5
+    align: ''
+    alignlabel: a
+    bin: 1.0
+    commit: ''
+    continue: ''
+    ddstartframe: '0'
+    doseweight: ''
+    expid: '7489'
+    force_cpu_flat: false
+    gpuids: '0'
+    jobid: '115'
+    jobtype: makeddrawframestack
+    no-rejects: ''
+    nodes: '1'
+    nrw: '1'
+    parallel: ''
+    ppn: '1'
+    preset: enn
+    projectid: '1089'
+    queue: preprocessing
+    rendered_frame_size: '1'
+    rundir: /h1/iishigami/appion/m25mar19c/ddstack/ddstack1
+    runname: ddstack1
+    session: m25mar19c
+    walltime: '120'
+  expected_kwargs:
+    Bft: 500 100
+    Dark: /h1/iishigami/appion/m25mar19c/ddstack/ddstack1/dark-semc-cpu02-0-128378.mrc
+    FlipGain: '0'
+    FmDose: '1.090'
+    Gain: /h1/iishigami/appion/m25mar19c/ddstack/ddstack1/norm-semc-cpu02-0-128378.mrc
+    Gpu: '0'
+    Group: '1'
+    InTiff: /h1/iishigami/frames/m25mar19c/rawdata/m25mar19c_White_Gr3_00021gr_00029sq_v03_00004hl_00041enn.frames.tif
+    Iter: '7'
+    MaskSize: 1.000 1.000
+    OutMrc: /h1/iishigami/appion/m25mar19c/ddstack/ddstack1/m25mar19c_White_Gr3_00021gr_00029sq_v03_00004hl_00041enn_c.mrc
+    Patch: 7 5
+    PixSize: '0.826'
+    RotGain: '0'
+    Tol: '0.500'
+    kV: '300'
+  imgmetadata:
+    bad_cols: ()
+    bad_pixels: ()
+    bad_rows: ()
+    binning: 2
+    camera_id: 19685873
+    camera_name: GatanK3
+    ccdcamera: 24
+    dark_id: null
+    dark_input: null
+    dark_nframes: null
+    dose: 5.447922320539047e+21
+    dx: 5760
+    dy: 4092
+    eer_frames: false
+    exposure_time: 1500.0
+    frame_aligner_flat: true
+    frame_flip: 0
+    frame_rotate: 0
+    frame_time: 30.0
+    gain_input: /h1/iishigami/frames/m25mar19c/rawdata/m22sep14b_g2_00001gr_00002sq940_v02_00006hl_00023enn-a-DW.mrc
+    high_tension: 300000
+    image_filename: m25mar19c_White_Gr3_00021gr_00029sq_v03_00004hl_00041enn
+    imageid: '28571386'
+    imgdata_timestamp: *id047
+    magnification: 105000
+    nframes: 50
+    pixelsizedata: *id048
+    preset_id: 103782
+    session_frame_path: /h1/iishigami/frames/m25mar19c/rawdata
+    session_id: 7489
+    session_image_path: /h1/iishigami/leginon/m25mar19c/rawdata
+    tem: 25
+    total_raw_frames: 50
+  input_path: /h1/iishigami/appion/m25mar19c/ddstack/ddstack1/m25mar19c_White_Gr3_00021gr_00029sq_v03_00004hl_00041enn.frames.tif
+- args:
+    Bft_global: 500
+    Bft_local: 100
+    FmRef: 0
+    Iter: '7'
+    MaskCentcol: '0'
+    MaskCentrow: '0'
+    MaskSizecols: '1'
+    MaskSizerows: '1'
+    Patchcols: '7'
+    Patchrows: '5'
+    Tol: 0.5
+    align: ''
+    alignlabel: a
+    bin: 1.0
+    commit: ''
+    continue: ''
+    ddstartframe: '0'
+    doseweight: ''
+    expid: '7591'
+    force_cpu_flat: false
+    gpuids: '0'
+    jobid: '71'
+    jobtype: makeddrawframestack
+    no-rejects: ''
+    nodes: '1'
+    nrw: '1'
+    parallel: ''
+    ppn: '1'
+    preset: enn
+    projectid: '203'
+    queue: preprocessing
+    rendered_frame_size: '1'
+    rundir: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1
+    runname: ddstack1
+    session: m25mar31b
+    walltime: '120'
+  expected_kwargs:
+    Bft: 500 100
+    Dark: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/dark-semc-gpu01-0-490002.mrc
+    FlipGain: '0'
+    FmDose: '1.574'
+    Gain: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/norm-semc-gpu01-0-490002.mrc
+    Gpu: '0'
+    Group: '1'
+    InTiff: /h1/hsosa/frames/m25mar31b/rawdata/m25mar31b_B1G2_00012gr_00016sq_v02_00002hl_v01_00016enn.frames.tif
+    Iter: '7'
+    MaskSize: 1.000 1.000
+    OutMrc: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/m25mar31b_B1G2_00012gr_00016sq_v02_00002hl_v01_00016enn_c.mrc
+    Patch: 7 5
+    PixSize: '0.826'
+    RotGain: '0'
+    Tol: '0.500'
+    kV: '300'
+  imgmetadata:
+    bad_cols: ()
+    bad_pixels: ()
+    bad_rows: ()
+    binning: 2
+    camera_id: 19980872
+    camera_name: GatanK3
+    ccdcamera: 24
+    dark_id: null
+    dark_input: null
+    dark_nframes: null
+    dose: 5.036889516485281e+21
+    dx: 5760
+    dy: 4092
+    eer_frames: false
+    exposure_time: 1600.0
+    frame_aligner_flat: true
+    frame_flip: 0
+    frame_rotate: 0
+    frame_time: 50.0
+    gain_input: /h1/hsosa/frames/m25mar31b/rawdata/m22sep14b_g2_00001gr_00002sq940_v02_00006hl_00038enn-a.mrc
+    high_tension: 300000
+    image_filename: m25mar31b_B1G2_00012gr_00016sq_v02_00002hl_v01_00016enn
+    imageid: '29037197'
+    imgdata_timestamp: *id049
+    magnification: 105000
+    nframes: 32
+    pixelsizedata: *id050
+    preset_id: 105219
+    session_frame_path: /h1/hsosa/frames/m25mar31b/rawdata
+    session_id: 7591
+    session_image_path: /h1/hsosa/leginon/m25mar31b/rawdata
+    tem: 25
+    total_raw_frames: 32
+  input_path: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/m25mar31b_B1G2_00012gr_00016sq_v02_00002hl_v01_00016enn.frames.tif
+- args:
+    Bft_global: 500
+    Bft_local: 100
+    FmRef: 0
+    Iter: '7'
+    MaskCentcol: '0'
+    MaskCentrow: '0'
+    MaskSizecols: '1'
+    MaskSizerows: '1'
+    Patchcols: '7'
+    Patchrows: '5'
+    Tol: 0.5
+    align: ''
+    alignlabel: a
+    bin: 2.0
+    commit: ''
+    continue: ''
+    ddstartframe: '0'
+    doseweight: ''
+    expid: '7590'
+    force_cpu_flat: false
+    gpuids: '0'
+    jobid: '40'
+    jobtype: makeddrawframestack
+    no-rejects: ''
+    nodes: '1'
+    nrw: '1'
+    parallel: ''
+    ppn: '1'
+    preset: esn
+    projectid: '1169'
+    queue: preprocessing
+    rendered_frame_size: '1'
+    rundir: /h1/jsun4/appion/m25mar31a/ddstack/ddstack1
+    runname: ddstack1
+    session: m25mar31a
+    totaldose: 54.0
+    walltime: '120'
+  expected_kwargs:
+    Bft: 500 100
+    Dark: /h1/jsun4/appion/m25mar31a/ddstack/ddstack1/dark-semc-cpu02-0-1720955.mrc
+    FlipGain: '0'
+    FmDose: '1.350'
+    FtBin: '2.0'
+    Gain: /h1/jsun4/appion/m25mar31a/ddstack/ddstack1/norm-semc-cpu02-0-1720955.mrc
+    Gpu: '0'
+    Group: '1'
+    InTiff: /h1/jsun4/frames/m25mar31a/rawdata/m25mar31a_yellow1_00010gr_00032sq_v02_00003hl_00062esn.frames.tif
+    Iter: '7'
+    MaskSize: 1.000 1.000
+    OutMrc: /h1/jsun4/appion/m25mar31a/ddstack/ddstack1/m25mar31a_yellow1_00010gr_00032sq_v02_00003hl_00062esn_c.mrc
+    Patch: 7 5
+    PixSize: '0.428'
+    RotGain: '0'
+    Tol: '0.500'
+    kV: '300'
+  imgmetadata:
+    bad_cols: ()
+    bad_pixels: ()
+    bad_rows: ()
+    binning: 1
+    camera_id: 19992834
+    camera_name: GatanK3
+    ccdcamera: 23
+    dark_id: null
+    dark_input: null
+    dark_nframes: null
+    dose: null
+    dx: 11520
+    dy: 8184
+    eer_frames: false
+    exposure_time: 1600.0
+    frame_aligner_flat: true
+    frame_flip: 0
+    frame_rotate: 0
+    frame_time: 40.0
+    gain_input: /h1/jsun4/frames/m25mar31a/rawdata/m22sep14b_g2_00001gr_00002sq940_v02_00006hl_00042enn.mrc
+    high_tension: 300000
+    image_filename: m25mar31a_yellow1_00010gr_00032sq_v02_00003hl_00062esn
+    imageid: '29055044'
+    imgdata_timestamp: *id051
+    magnification: 81000
+    nframes: 40
+    pixelsizedata: *id052
+    preset_id: 105209
+    session_frame_path: /h1/jsun4/frames/m25mar31a/rawdata
+    session_id: 7590
+    session_image_path: /h1/jsun4/leginon/m25mar31a/rawdata
+    tem: 11
+    total_raw_frames: 40
+  input_path: /h1/jsun4/appion/m25mar31a/ddstack/ddstack1/m25mar31a_yellow1_00010gr_00032sq_v02_00003hl_00062esn.frames.tif
+- args:
+    Bft_global: 500
+    Bft_local: 100
+    FmRef: 0
+    Iter: '7'
+    MaskCentcol: '0'
+    MaskCentrow: '0'
+    MaskSizecols: '1'
+    MaskSizerows: '1'
+    Patchcols: '7'
+    Patchrows: '5'
+    Tol: 0.5
+    align: ''
+    alignlabel: a
+    bin: 2.0
+    commit: ''
+    continue: ''
+    ddstartframe: '0'
+    doseweight: ''
+    expid: '7487'
+    force_cpu_flat: false
+    gpuids: '0'
+    jobid: '8'
+    jobtype: makeddrawframestack
+    no-rejects: ''
+    nodes: '1'
+    nrw: '1'
+    parallel: ''
+    ppn: '1'
+    preset: esn
+    projectid: '1309'
+    queue: preprocessing
+    rendered_frame_size: '1'
+    rundir: /h1/wgong/appion/m25mar19a/ddstack/ddstack1
+    runname: ddstack1
+    session: m25mar19a
+    walltime: '120'
+  expected_kwargs:
+    Bft: 500 100
+    Dark: /h1/wgong/appion/m25mar19a/ddstack/ddstack1/dark-semc-gpu09-0-3776974.mrc
+    FlipGain: '0'
+    FmDose: '1.365'
+    FtBin: '2.0'
+    Gain: /h1/wgong/appion/m25mar19a/ddstack/ddstack1/norm-semc-gpu09-0-3776974.mrc
+    Gpu: '0'
+    Group: '1'
+    InTiff: /h1/wgong/frames/m25mar19a/rawdata/m25mar19a_g2_00018gr_00014sq_v02_00008hl_00016esn.frames.tif
+    Iter: '7'
+    MaskSize: 1.000 1.000
+    OutMrc: /h1/wgong/appion/m25mar19a/ddstack/ddstack1/m25mar19a_g2_00018gr_00014sq_v02_00008hl_00016esn_c.mrc
+    Patch: 7 5
+    PixSize: '0.428'
+    RotGain: '0'
+    Tol: '0.500'
+    kV: '300'
+  imgmetadata:
+    bad_cols: ()
+    bad_pixels: ()
+    bad_rows: ()
+    binning: 1
+    camera_id: 19700434
+    camera_name: GatanK3
+    ccdcamera: 23
+    dark_id: null
+    dark_input: null
+    dark_nframes: null
+    dose: 5.458074922452264e+21
+    dx: 11520
+    dy: 8184
+    eer_frames: false
+    exposure_time: 1600.0
+    frame_aligner_flat: true
+    frame_flip: 0
+    frame_rotate: 0
+    frame_time: 40.0
+    gain_input: /h1/wgong/frames/m25mar19a/rawdata/m22sep14b_g2_00001gr_00002sq940_v02_00006hl_00033enn.mrc
+    high_tension: 300000
+    image_filename: m25mar19a_g2_00018gr_00014sq_v02_00008hl_00016esn
+    imageid: '28593016'
+    imgdata_timestamp: *id053
+    magnification: 81000
+    nframes: 40
+    pixelsizedata: *id054
+    preset_id: 103924
+    session_frame_path: /h1/wgong/frames/m25mar19a/rawdata
+    session_id: 7487
+    session_image_path: /h1/wgong/leginon/m25mar19a/rawdata
+    tem: 11
+    total_raw_frames: 40
+  input_path: /h1/wgong/appion/m25mar19a/ddstack/ddstack1/m25mar19a_g2_00018gr_00014sq_v02_00008hl_00016esn.frames.tif
+- args:
+    Bft_global: 500
+    Bft_local: 100
+    FmRef: 0
+    Iter: '7'
+    MaskCentcol: '0'
+    MaskCentrow: '0'
+    MaskSizecols: '1'
+    MaskSizerows: '1'
+    Patchcols: '7'
+    Patchrows: '5'
+    Tol: 0.5
+    align: ''
+    alignlabel: a
+    bin: 1.0
+    commit: ''
+    continue: ''
+    ddstartframe: '0'
+    doseweight: ''
+    expid: '7472'
+    force_cpu_flat: false
+    gpuids: '0'
+    jobid: '74'
+    jobtype: makeddrawframestack
+    no-rejects: ''
+    nodes: '1'
+    nrw: '1'
+    parallel: ''
+    ppn: '1'
+    preset: enn
+    projectid: '1271'
+    queue: preprocessing
+    rendered_frame_size: '1'
+    rundir: /h1/jcheung/appion/m25mar17a/ddstack/ddstack1
+    runname: ddstack1
+    session: m25mar17a
+    walltime: '120'
+  expected_kwargs:
+    Bft: 500 100
+    Dark: /h1/jcheung/appion/m25mar17a/ddstack/ddstack1/dark-semc-gpu01-0-1705744.mrc
+    FlipGain: '0'
+    FmDose: '1.091'
+    Gain: /h1/jcheung/appion/m25mar17a/ddstack/ddstack1/norm-semc-gpu01-0-1705744.mrc
+    Gpu: '0'
+    Group: '1'
+    InTiff: /h1/jcheung/frames/m25mar17a/rawdata/m25mar17a_NY0268_Gr1a_00008gr_00012sq_v02_00002hl_00085enn.frames.tif
+    Iter: '7'
+    MaskSize: 1.000 1.000
+    OutMrc: /h1/jcheung/appion/m25mar17a/ddstack/ddstack1/m25mar17a_NY0268_Gr1a_00008gr_00012sq_v02_00002hl_00085enn_c.mrc
+    Patch: 7 5
+    PixSize: '0.826'
+    RotGain: '0'
+    Tol: '0.500'
+    kV: '300'
+  imgmetadata:
+    bad_cols: ()
+    bad_pixels: ()
+    bad_rows: ()
+    binning: 2
+    camera_id: 19631690
+    camera_name: GatanK3
+    ccdcamera: 24
+    dark_id: null
+    dark_input: null
+    dark_nframes: null
+    dose: 5.454610165461196e+21
+    dx: 5760
+    dy: 4092
+    eer_frames: false
+    exposure_time: 1500.0
+    frame_aligner_flat: true
+    frame_flip: 0
+    frame_rotate: 0
+    frame_time: 30.0
+    gain_input: /h1/jcheung/frames/m25mar17a/rawdata/m22sep14b_g2_00001gr_00002sq940_v02_00006hl_00022enn-a.mrc
+    high_tension: 300000
+    image_filename: m25mar17a_NY0268_Gr1a_00008gr_00012sq_v02_00002hl_00085enn
+    imageid: '28491517'
+    imgdata_timestamp: *id055
+    magnification: 105000
+    nframes: 50
+    pixelsizedata: *id056
+    preset_id: 103480
+    session_frame_path: /h1/jcheung/frames/m25mar17a/rawdata
+    session_id: 7472
+    session_image_path: /h1/jcheung/leginon/m25mar17a/rawdata
+    tem: 25
+    total_raw_frames: 50
+  input_path: /h1/jcheung/appion/m25mar17a/ddstack/ddstack1/m25mar17a_NY0268_Gr1a_00008gr_00012sq_v02_00002hl_00085enn.frames.tif
+- args:
+    Bft_global: 500
+    Bft_local: 100
+    FmRef: 0
+    Iter: '7'
+    MaskCentcol: '0'
+    MaskCentrow: '0'
+    MaskSizecols: '1'
+    MaskSizerows: '1'
+    Patchcols: '5'
+    Patchrows: '5'
+    Tol: 0.5
+    align: ''
+    alignlabel: a
+    bin: 1.0
+    commit: ''
+    continue: ''
+    ddstartframe: '0'
+    doseweight: ''
+    expid: '7488'
+    force_cpu_flat: false
+    gpuids: '0'
+    jobid: '31'
+    jobtype: makeddrawframestack
+    no-rejects: ''
+    nodes: '1'
+    nrw: '1'
+    parallel: ''
+    ppn: '1'
+    preset: enn
+    projectid: '1187'
+    queue: preprocessing
+    rendered_frame_size: '1'
+    rundir: /h1/bwimberly/appion/m25mar19b/ddstack/ddstack1
+    runname: ddstack1
+    session: m25mar19b
+    walltime: '120'
+  expected_kwargs:
+    Bft: 500 100
+    Dark: /h1/bwimberly/appion/m25mar19b/ddstack/ddstack1/dark-semc-cpu02-0-140690.mrc
+    DefectMap: /h1/bwimberly/appion/m25mar19b/ddstack/ddstack1/defect-semc-cpu02-0-140690.mrc
+    FlipGain: '0'
+    FmDose: '1.262'
+    Gain: /h1/bwimberly/appion/m25mar19b/ddstack/ddstack1/norm-semc-cpu02-0-140690.mrc
+    Gpu: '0'
+    Group: '1'
+    InTiff: /h1/bwimberly/frames/m25mar19b/rawdata/m25mar19b_G4_00018gr_00056sq_v02_00003hl_00015enn.frames.tif
+    Iter: '7'
+    MaskSize: 1.000 1.000
+    OutMrc: /h1/bwimberly/appion/m25mar19b/ddstack/ddstack1/m25mar19b_G4_00018gr_00056sq_v02_00003hl_00015enn_c.mrc
+    Patch: 5 5
+    PixSize: '1.083'
+    RotGain: '0'
+    Tol: '0.500'
+    kV: '300'
+  imgmetadata:
+    bad_cols: (1151, 1152)
+    bad_pixels: ()
+    bad_rows: ()
+    binning: 2
+    camera_id: 19681246
+    camera_name: GatanK3
+    ccdcamera: 22
+    dark_id: null
+    dark_input: null
+    dark_nframes: null
+    dose: 5.046550232123652e+21
+    dx: 5760
+    dy: 4092
+    eer_frames: false
+    exposure_time: 2000.0
+    frame_aligner_flat: true
+    frame_flip: 0
+    frame_rotate: 0
+    frame_time: 50.0
+    gain_input: /h1/bwimberly/frames/m25mar19b/rawdata/m22sep14b_g2_00001gr_00002sq940_v02_00006hl_00036enn.mrc
+    high_tension: 300000
+    image_filename: m25mar19b_G4_00018gr_00056sq_v02_00003hl_00015enn
+    imageid: '28564562'
+    imgdata_timestamp: *id057
+    magnification: 81000
+    nframes: 40
+    pixelsizedata: *id058
+    preset_id: 103823
+    session_frame_path: /h1/bwimberly/frames/m25mar19b/rawdata
+    session_id: 7488
+    session_image_path: /h1/bwimberly/leginon/m25mar19b/rawdata
+    tem: 13
+    total_raw_frames: 40
+  input_path: /h1/bwimberly/appion/m25mar19b/ddstack/ddstack1/m25mar19b_G4_00018gr_00056sq_v02_00003hl_00015enn.frames.tif
+- args:
+    Bft_global: 500
+    Bft_local: 100
+    FmRef: 0
+    Iter: '7'
+    MaskCentcol: '0'
+    MaskCentrow: '0'
+    MaskSizecols: '1'
+    MaskSizerows: '1'
+    Patchcols: '7'
+    Patchrows: '5'
+    Tol: 0.5
+    align: ''
+    alignlabel: a
+    bin: 1.0
+    commit: ''
+    continue: ''
+    ddstartframe: '0'
+    doseweight: ''
+    expid: '7489'
+    force_cpu_flat: false
+    gpuids: '0'
+    jobid: '115'
+    jobtype: makeddrawframestack
+    no-rejects: ''
+    nodes: '1'
+    nrw: '1'
+    parallel: ''
+    ppn: '1'
+    preset: enn
+    projectid: '1089'
+    queue: preprocessing
+    rendered_frame_size: '1'
+    rundir: /h1/iishigami/appion/m25mar19c/ddstack/ddstack1
+    runname: ddstack1
+    session: m25mar19c
+    walltime: '120'
+  expected_kwargs:
+    Bft: 500 100
+    Dark: /h1/iishigami/appion/m25mar19c/ddstack/ddstack1/dark-semc-cpu02-0-393880.mrc
+    FlipGain: '0'
+    FmDose: '1.090'
+    Gain: /h1/iishigami/appion/m25mar19c/ddstack/ddstack1/norm-semc-cpu02-0-393880.mrc
+    Gpu: '0'
+    Group: '1'
+    InTiff: /h1/iishigami/frames/m25mar19c/rawdata/m25mar19c_White_Gr3_00020gr_00047sq_v03_00007hl_00023enn.frames.tif
+    Iter: '7'
+    MaskSize: 1.000 1.000
+    OutMrc: /h1/iishigami/appion/m25mar19c/ddstack/ddstack1/m25mar19c_White_Gr3_00020gr_00047sq_v03_00007hl_00023enn_c.mrc
+    Patch: 7 5
+    PixSize: '0.826'
+    RotGain: '0'
+    Tol: '0.500'
+    kV: '300'
+  imgmetadata:
+    bad_cols: ()
+    bad_pixels: ()
+    bad_rows: ()
+    binning: 2
+    camera_id: 19716627
+    camera_name: GatanK3
+    ccdcamera: 24
+    dark_id: null
+    dark_input: null
+    dark_nframes: null
+    dose: 5.447922320539047e+21
+    dx: 5760
+    dy: 4092
+    eer_frames: false
+    exposure_time: 1500.0
+    frame_aligner_flat: true
+    frame_flip: 0
+    frame_rotate: 0
+    frame_time: 30.0
+    gain_input: /h1/iishigami/frames/m25mar19c/rawdata/m22sep14b_g2_00001gr_00002sq940_v02_00006hl_00023enn-a-DW.mrc
+    high_tension: 300000
+    image_filename: m25mar19c_White_Gr3_00020gr_00047sq_v03_00007hl_00023enn
+    imageid: '28628589'
+    imgdata_timestamp: *id059
+    magnification: 105000
+    nframes: 50
+    pixelsizedata: *id060
+    preset_id: 103782
+    session_frame_path: /h1/iishigami/frames/m25mar19c/rawdata
+    session_id: 7489
+    session_image_path: /h1/iishigami/leginon/m25mar19c/rawdata
+    tem: 25
+    total_raw_frames: 50
+  input_path: /h1/iishigami/appion/m25mar19c/ddstack/ddstack1/m25mar19c_White_Gr3_00020gr_00047sq_v03_00007hl_00023enn.frames.tif
+- args:
+    Bft_global: 500
+    Bft_local: 100
+    FmRef: 0
+    Iter: '7'
+    MaskCentcol: '0'
+    MaskCentrow: '0'
+    MaskSizecols: '1'
+    MaskSizerows: '1'
+    Patchcols: '7'
+    Patchrows: '5'
+    Tol: 0.5
+    align: ''
+    alignlabel: a
+    bin: 1.0
+    commit: ''
+    continue: ''
+    ddstartframe: '0'
+    doseweight: ''
+    expid: '7591'
+    force_cpu_flat: false
+    gpuids: '0'
+    jobid: '71'
+    jobtype: makeddrawframestack
+    no-rejects: ''
+    nodes: '1'
+    nrw: '1'
+    parallel: ''
+    ppn: '1'
+    preset: enn
+    projectid: '203'
+    queue: preprocessing
+    rendered_frame_size: '1'
+    rundir: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1
+    runname: ddstack1
+    session: m25mar31b
+    walltime: '120'
+  expected_kwargs:
+    Bft: 500 100
+    Dark: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/dark-semc-gpu01-0-489991.mrc
+    FlipGain: '0'
+    FmDose: '1.574'
+    Gain: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/norm-semc-gpu01-0-489991.mrc
+    Gpu: '0'
+    Group: '1'
+    InTiff: /h1/hsosa/frames/m25mar31b/rawdata/m25mar31b_B1G2_00011gr_00033sq_v02_00002hl_00004enn.frames.tif
+    Iter: '7'
+    MaskSize: 1.000 1.000
+    OutMrc: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/m25mar31b_B1G2_00011gr_00033sq_v02_00002hl_00004enn_c.mrc
+    Patch: 7 5
+    PixSize: '0.826'
+    RotGain: '0'
+    Tol: '0.500'
+    kV: '300'
+  imgmetadata:
+    bad_cols: ()
+    bad_pixels: ()
+    bad_rows: ()
+    binning: 2
+    camera_id: 19992268
+    camera_name: GatanK3
+    ccdcamera: 24
+    dark_id: null
+    dark_input: null
+    dark_nframes: null
+    dose: 5.036889516485281e+21
+    dx: 5760
+    dy: 4092
+    eer_frames: false
+    exposure_time: 1600.0
+    frame_aligner_flat: true
+    frame_flip: 0
+    frame_rotate: 0
+    frame_time: 50.0
+    gain_input: /h1/hsosa/frames/m25mar31b/rawdata/m22sep14b_g2_00001gr_00002sq940_v02_00006hl_00038enn-a.mrc
+    high_tension: 300000
+    image_filename: m25mar31b_B1G2_00011gr_00033sq_v02_00002hl_00004enn
+    imageid: '29054202'
+    imgdata_timestamp: *id061
+    magnification: 105000
+    nframes: 32
+    pixelsizedata: *id062
+    preset_id: 105219
+    session_frame_path: /h1/hsosa/frames/m25mar31b/rawdata
+    session_id: 7591
+    session_image_path: /h1/hsosa/leginon/m25mar31b/rawdata
+    tem: 25
+    total_raw_frames: 32
+  input_path: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/m25mar31b_B1G2_00011gr_00033sq_v02_00002hl_00004enn.frames.tif
+- args:
+    Bft_global: 500
+    Bft_local: 100
+    FmRef: 0
+    Iter: '7'
+    MaskCentcol: '0'
+    MaskCentrow: '0'
+    MaskSizecols: '1'
+    MaskSizerows: '1'
+    Patchcols: '7'
+    Patchrows: '5'
+    Tol: 0.5
+    align: ''
+    alignlabel: a
+    bin: 2.0
+    commit: ''
+    continue: ''
+    ddstartframe: '0'
+    doseweight: ''
+    expid: '7590'
+    force_cpu_flat: false
+    gpuids: '0'
+    jobid: '40'
+    jobtype: makeddrawframestack
+    no-rejects: ''
+    nodes: '1'
+    nrw: '1'
+    parallel: ''
+    ppn: '1'
+    preset: esn
+    projectid: '1169'
+    queue: preprocessing
+    rendered_frame_size: '1'
+    rundir: /h1/jsun4/appion/m25mar31a/ddstack/ddstack1
+    runname: ddstack1
+    session: m25mar31a
+    totaldose: 54.0
+    walltime: '120'
+  expected_kwargs:
+    Bft: 500 100
+    Dark: /h1/jsun4/appion/m25mar31a/ddstack/ddstack1/dark-semc-cpu02-0-1720961.mrc
+    FlipGain: '0'
+    FmDose: '1.350'
+    FtBin: '2.0'
+    Gain: /h1/jsun4/appion/m25mar31a/ddstack/ddstack1/norm-semc-cpu02-0-1720961.mrc
+    Gpu: '0'
+    Group: '1'
+    InTiff: /h1/jsun4/frames/m25mar31a/rawdata/m25mar31a_yellow1_00011gr_00025sq_v02_00007hl_00024esn.frames.tif
+    Iter: '7'
+    MaskSize: 1.000 1.000
+    OutMrc: /h1/jsun4/appion/m25mar31a/ddstack/ddstack1/m25mar31a_yellow1_00011gr_00025sq_v02_00007hl_00024esn_c.mrc
+    Patch: 7 5
+    PixSize: '0.428'
+    RotGain: '0'
+    Tol: '0.500'
+    kV: '300'
+  imgmetadata:
+    bad_cols: ()
+    bad_pixels: ()
+    bad_rows: ()
+    binning: 1
+    camera_id: 19988687
+    camera_name: GatanK3
+    ccdcamera: 23
+    dark_id: null
+    dark_input: null
+    dark_nframes: null
+    dose: null
+    dx: 11520
+    dy: 8184
+    eer_frames: false
+    exposure_time: 1600.0
+    frame_aligner_flat: true
+    frame_flip: 0
+    frame_rotate: 0
+    frame_time: 40.0
+    gain_input: /h1/jsun4/frames/m25mar31a/rawdata/m22sep14b_g2_00001gr_00002sq940_v02_00006hl_00042enn.mrc
+    high_tension: 300000
+    image_filename: m25mar31a_yellow1_00011gr_00025sq_v02_00007hl_00024esn
+    imageid: '29048859'
+    imgdata_timestamp: *id063
+    magnification: 81000
+    nframes: 40
+    pixelsizedata: *id064
+    preset_id: 105209
+    session_frame_path: /h1/jsun4/frames/m25mar31a/rawdata
+    session_id: 7590
+    session_image_path: /h1/jsun4/leginon/m25mar31a/rawdata
+    tem: 11
+    total_raw_frames: 40
+  input_path: /h1/jsun4/appion/m25mar31a/ddstack/ddstack1/m25mar31a_yellow1_00011gr_00025sq_v02_00007hl_00024esn.frames.tif
+- args:
+    Bft_global: 500
+    Bft_local: 100
+    FmRef: 0
+    Iter: '7'
+    MaskCentcol: '0'
+    MaskCentrow: '0'
+    MaskSizecols: '1'
+    MaskSizerows: '1'
+    Patchcols: '7'
+    Patchrows: '5'
+    Tol: 0.5
+    align: ''
+    alignlabel: a
+    bin: 2.0
+    commit: ''
+    continue: ''
+    ddstartframe: '0'
+    doseweight: ''
+    expid: '7487'
+    force_cpu_flat: false
+    gpuids: '0'
+    jobid: '8'
+    jobtype: makeddrawframestack
+    no-rejects: ''
+    nodes: '1'
+    nrw: '1'
+    parallel: ''
+    ppn: '1'
+    preset: esn
+    projectid: '1309'
+    queue: preprocessing
+    rendered_frame_size: '1'
+    rundir: /h1/wgong/appion/m25mar19a/ddstack/ddstack1
+    runname: ddstack1
+    session: m25mar19a
+    walltime: '120'
+  expected_kwargs:
+    Bft: 500 100
+    Dark: /h1/wgong/appion/m25mar19a/ddstack/ddstack1/dark-semc-cpu02-0-122919.mrc
+    FlipGain: '0'
+    FmDose: '1.365'
+    FtBin: '2.0'
+    Gain: /h1/wgong/appion/m25mar19a/ddstack/ddstack1/norm-semc-cpu02-0-122919.mrc
+    Gpu: '0'
+    Group: '1'
+    InTiff: /h1/wgong/frames/m25mar19a/rawdata/m25mar19a_g2_00021gr_00042sq_v03_00010hl_00021esn.frames.tif
+    Iter: '7'
+    MaskSize: 1.000 1.000
+    OutMrc: /h1/wgong/appion/m25mar19a/ddstack/ddstack1/m25mar19a_g2_00021gr_00042sq_v03_00010hl_00021esn_c.mrc
+    Patch: 7 5
+    PixSize: '0.428'
+    RotGain: '0'
+    Tol: '0.500'
+    kV: '300'
+  imgmetadata:
+    bad_cols: ()
+    bad_pixels: ()
+    bad_rows: ()
+    binning: 1
+    camera_id: 19737456
+    camera_name: GatanK3
+    ccdcamera: 23
+    dark_id: null
+    dark_input: null
+    dark_nframes: null
+    dose: 5.458074922452264e+21
+    dx: 11520
+    dy: 8184
+    eer_frames: false
+    exposure_time: 1600.0
+    frame_aligner_flat: true
+    frame_flip: 0
+    frame_rotate: 0
+    frame_time: 40.0
+    gain_input: /h1/wgong/frames/m25mar19a/rawdata/m22sep14b_g2_00001gr_00002sq940_v02_00006hl_00033enn.mrc
+    high_tension: 300000
+    image_filename: m25mar19a_g2_00021gr_00042sq_v03_00010hl_00021esn
+    imageid: '28678148'
+    imgdata_timestamp: *id065
+    magnification: 81000
+    nframes: 40
+    pixelsizedata: *id066
+    preset_id: 103924
+    session_frame_path: /h1/wgong/frames/m25mar19a/rawdata
+    session_id: 7487
+    session_image_path: /h1/wgong/leginon/m25mar19a/rawdata
+    tem: 11
+    total_raw_frames: 40
+  input_path: /h1/wgong/appion/m25mar19a/ddstack/ddstack1/m25mar19a_g2_00021gr_00042sq_v03_00010hl_00021esn.frames.tif
+- args:
+    Bft_global: 500
+    Bft_local: 100
+    FmRef: 0
+    Iter: '7'
+    MaskCentcol: '0'
+    MaskCentrow: '0'
+    MaskSizecols: '1'
+    MaskSizerows: '1'
+    Patchcols: '7'
+    Patchrows: '5'
+    Tol: 0.5
+    align: ''
+    alignlabel: a
+    bin: 1.0
+    commit: ''
+    continue: ''
+    ddstartframe: '0'
+    doseweight: ''
+    expid: '7591'
+    force_cpu_flat: false
+    gpuids: '0'
+    jobid: '71'
+    jobtype: makeddrawframestack
+    no-rejects: ''
+    nodes: '1'
+    nrw: '1'
+    parallel: ''
+    ppn: '1'
+    preset: enn
+    projectid: '203'
+    queue: preprocessing
+    rendered_frame_size: '1'
+    rundir: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1
+    runname: ddstack1
+    session: m25mar31b
+    walltime: '120'
+  expected_kwargs:
+    Bft: 500 100
+    Dark: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/dark-semc-gpu01-0-490002.mrc
+    FlipGain: '0'
+    FmDose: '1.574'
+    Gain: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/norm-semc-gpu01-0-490002.mrc
+    Gpu: '0'
+    Group: '1'
+    InTiff: /h1/hsosa/frames/m25mar31b/rawdata/m25mar31b_B1G2_00002gr_00054sq_v03_00003hl_00085enn.frames.tif
+    Iter: '7'
+    MaskSize: 1.000 1.000
+    OutMrc: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/m25mar31b_B1G2_00002gr_00054sq_v03_00003hl_00085enn_c.mrc
+    Patch: 7 5
+    PixSize: '0.826'
+    RotGain: '0'
+    Tol: '0.500'
+    kV: '300'
+  imgmetadata:
+    bad_cols: ()
+    bad_pixels: ()
+    bad_rows: ()
+    binning: 2
+    camera_id: 20007079
+    camera_name: GatanK3
+    ccdcamera: 24
+    dark_id: null
+    dark_input: null
+    dark_nframes: null
+    dose: 5.036889516485281e+21
+    dx: 5760
+    dy: 4092
+    eer_frames: false
+    exposure_time: 1600.0
+    frame_aligner_flat: true
+    frame_flip: 0
+    frame_rotate: 0
+    frame_time: 50.0
+    gain_input: /h1/hsosa/frames/m25mar31b/rawdata/m22sep14b_g2_00001gr_00002sq940_v02_00006hl_00038enn-a.mrc
+    high_tension: 300000
+    image_filename: m25mar31b_B1G2_00002gr_00054sq_v03_00003hl_00085enn
+    imageid: '29076133'
+    imgdata_timestamp: *id067
+    magnification: 105000
+    nframes: 32
+    pixelsizedata: *id068
+    preset_id: 105219
+    session_frame_path: /h1/hsosa/frames/m25mar31b/rawdata
+    session_id: 7591
+    session_image_path: /h1/hsosa/leginon/m25mar31b/rawdata
+    tem: 25
+    total_raw_frames: 32
+  input_path: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/m25mar31b_B1G2_00002gr_00054sq_v03_00003hl_00085enn.frames.tif
+- args:
+    Bft_global: 500
+    Bft_local: 100
+    FmRef: 0
+    Iter: '7'
+    MaskCentcol: '0'
+    MaskCentrow: '0'
+    MaskSizecols: '1'
+    MaskSizerows: '1'
+    Patchcols: '7'
+    Patchrows: '5'
+    Tol: 0.5
+    align: ''
+    alignlabel: a
+    bin: 1.0
+    commit: ''
+    continue: ''
+    ddstartframe: '0'
+    doseweight: ''
+    expid: '7591'
+    force_cpu_flat: false
+    gpuids: '0'
+    jobid: '71'
+    jobtype: makeddrawframestack
+    no-rejects: ''
+    nodes: '1'
+    nrw: '1'
+    parallel: ''
+    ppn: '1'
+    preset: enn
+    projectid: '203'
+    queue: preprocessing
+    rendered_frame_size: '1'
+    rundir: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1
+    runname: ddstack1
+    session: m25mar31b
+    walltime: '120'
+  expected_kwargs:
+    Bft: 500 100
+    Dark: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/dark-semc-gpu01-0-489993.mrc
+    FlipGain: '0'
+    FmDose: '1.574'
+    Gain: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/norm-semc-gpu01-0-489993.mrc
+    Gpu: '0'
+    Group: '1'
+    InTiff: /h1/hsosa/frames/m25mar31b/rawdata/m25mar31b_B1G2_00017gr_00027sq_v02_00005hl_00033enn.frames.tif
+    Iter: '7'
+    MaskSize: 1.000 1.000
+    OutMrc: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/m25mar31b_B1G2_00017gr_00027sq_v02_00005hl_00033enn_c.mrc
+    Patch: 7 5
+    PixSize: '0.826'
+    RotGain: '0'
+    Tol: '0.500'
+    kV: '300'
+  imgmetadata:
+    bad_cols: ()
+    bad_pixels: ()
+    bad_rows: ()
+    binning: 2
+    camera_id: 19989278
+    camera_name: GatanK3
+    ccdcamera: 24
+    dark_id: null
+    dark_input: null
+    dark_nframes: null
+    dose: 5.036889516485281e+21
+    dx: 5760
+    dy: 4092
+    eer_frames: false
+    exposure_time: 1600.0
+    frame_aligner_flat: true
+    frame_flip: 0
+    frame_rotate: 0
+    frame_time: 50.0
+    gain_input: /h1/hsosa/frames/m25mar31b/rawdata/m22sep14b_g2_00001gr_00002sq940_v02_00006hl_00038enn-a.mrc
+    high_tension: 300000
+    image_filename: m25mar31b_B1G2_00017gr_00027sq_v02_00005hl_00033enn
+    imageid: '29049738'
+    imgdata_timestamp: *id069
+    magnification: 105000
+    nframes: 32
+    pixelsizedata: *id070
+    preset_id: 105219
+    session_frame_path: /h1/hsosa/frames/m25mar31b/rawdata
+    session_id: 7591
+    session_image_path: /h1/hsosa/leginon/m25mar31b/rawdata
+    tem: 25
+    total_raw_frames: 32
+  input_path: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/m25mar31b_B1G2_00017gr_00027sq_v02_00005hl_00033enn.frames.tif
+- args:
+    Bft_global: 500
+    Bft_local: 100
+    FmRef: 0
+    Iter: '7'
+    MaskCentcol: '0'
+    MaskCentrow: '0'
+    MaskSizecols: '1'
+    MaskSizerows: '1'
+    Patchcols: '7'
+    Patchrows: '5'
+    Tol: 0.5
+    align: ''
+    alignlabel: a
+    bin: 1.0
+    commit: ''
+    continue: ''
+    ddstartframe: '0'
+    doseweight: ''
+    expid: '7489'
+    force_cpu_flat: false
+    gpuids: '0'
+    jobid: '115'
+    jobtype: makeddrawframestack
+    no-rejects: ''
+    nodes: '1'
+    nrw: '1'
+    parallel: ''
+    ppn: '1'
+    preset: enn
+    projectid: '1089'
+    queue: preprocessing
+    rendered_frame_size: '1'
+    rundir: /h1/iishigami/appion/m25mar19c/ddstack/ddstack1
+    runname: ddstack1
+    session: m25mar19c
+    walltime: '120'
+  expected_kwargs:
+    Bft: 500 100
+    Dark: /h1/iishigami/appion/m25mar19c/ddstack/ddstack1/dark-semc-cpu02-0-393880.mrc
+    FlipGain: '0'
+    FmDose: '1.090'
+    Gain: /h1/iishigami/appion/m25mar19c/ddstack/ddstack1/norm-semc-cpu02-0-393880.mrc
+    Gpu: '0'
+    Group: '1'
+    InTiff: /h1/iishigami/frames/m25mar19c/rawdata/m25mar19c_White_Gr3_00017gr_00058sq_v02_00002hl_00059enn.frames.tif
+    Iter: '7'
+    MaskSize: 1.000 1.000
+    OutMrc: /h1/iishigami/appion/m25mar19c/ddstack/ddstack1/m25mar19c_White_Gr3_00017gr_00058sq_v02_00002hl_00059enn_c.mrc
+    Patch: 7 5
+    PixSize: '0.826'
+    RotGain: '0'
+    Tol: '0.500'
+    kV: '300'
+  imgmetadata:
+    bad_cols: ()
+    bad_pixels: ()
+    bad_rows: ()
+    binning: 2
+    camera_id: 19732501
+    camera_name: GatanK3
+    ccdcamera: 24
+    dark_id: null
+    dark_input: null
+    dark_nframes: null
+    dose: 5.447922320539047e+21
+    dx: 5760
+    dy: 4092
+    eer_frames: false
+    exposure_time: 1500.0
+    frame_aligner_flat: true
+    frame_flip: 0
+    frame_rotate: 0
+    frame_time: 30.0
+    gain_input: /h1/iishigami/frames/m25mar19c/rawdata/m22sep14b_g2_00001gr_00002sq940_v02_00006hl_00023enn-a-DW.mrc
+    high_tension: 300000
+    image_filename: m25mar19c_White_Gr3_00017gr_00058sq_v02_00002hl_00059enn
+    imageid: '28666345'
+    imgdata_timestamp: *id071
+    magnification: 105000
+    nframes: 50
+    pixelsizedata: *id072
+    preset_id: 103782
+    session_frame_path: /h1/iishigami/frames/m25mar19c/rawdata
+    session_id: 7489
+    session_image_path: /h1/iishigami/leginon/m25mar19c/rawdata
+    tem: 25
+    total_raw_frames: 50
+  input_path: /h1/iishigami/appion/m25mar19c/ddstack/ddstack1/m25mar19c_White_Gr3_00017gr_00058sq_v02_00002hl_00059enn.frames.tif
+- args:
+    Bft_global: 500
+    Bft_local: 100
+    FmRef: 0
+    Iter: '7'
+    MaskCentcol: '0'
+    MaskCentrow: '0'
+    MaskSizecols: '1'
+    MaskSizerows: '1'
+    Patchcols: '5'
+    Patchrows: '5'
+    Tol: 0.5
+    align: ''
+    alignlabel: a
+    bin: 1.0
+    commit: ''
+    continue: ''
+    ddstartframe: '0'
+    doseweight: ''
+    expid: '7488'
+    force_cpu_flat: false
+    gpuids: '0'
+    jobid: '31'
+    jobtype: makeddrawframestack
+    no-rejects: ''
+    nodes: '1'
+    nrw: '1'
+    parallel: ''
+    ppn: '1'
+    preset: enn
+    projectid: '1187'
+    queue: preprocessing
+    rendered_frame_size: '1'
+    rundir: /h1/bwimberly/appion/m25mar19b/ddstack/ddstack1
+    runname: ddstack1
+    session: m25mar19b
+    walltime: '120'
+  expected_kwargs:
+    Bft: 500 100
+    Dark: /h1/bwimberly/appion/m25mar19b/ddstack/ddstack1/dark-semc-cpu02-0-140703.mrc
+    DefectMap: /h1/bwimberly/appion/m25mar19b/ddstack/ddstack1/defect-semc-cpu02-0-140703.mrc
+    FlipGain: '0'
+    FmDose: '1.262'
+    Gain: /h1/bwimberly/appion/m25mar19b/ddstack/ddstack1/norm-semc-cpu02-0-140703.mrc
+    Gpu: '0'
+    Group: '1'
+    InTiff: /h1/bwimberly/frames/m25mar19b/rawdata/m25mar19b_G4_00018gr_00058sq_v02_00004hl_00019enn.frames.tif
+    Iter: '7'
+    MaskSize: 1.000 1.000
+    OutMrc: /h1/bwimberly/appion/m25mar19b/ddstack/ddstack1/m25mar19b_G4_00018gr_00058sq_v02_00004hl_00019enn_c.mrc
+    Patch: 5 5
+    PixSize: '1.083'
+    RotGain: '0'
+    Tol: '0.500'
+    kV: '300'
+  imgmetadata:
+    bad_cols: (1151, 1152)
+    bad_pixels: ()
+    bad_rows: ()
+    binning: 2
+    camera_id: 19683192
+    camera_name: GatanK3
+    ccdcamera: 22
+    dark_id: null
+    dark_input: null
+    dark_nframes: null
+    dose: 5.046550232123652e+21
+    dx: 5760
+    dy: 4092
+    eer_frames: false
+    exposure_time: 2000.0
+    frame_aligner_flat: true
+    frame_flip: 0
+    frame_rotate: 0
+    frame_time: 50.0
+    gain_input: /h1/bwimberly/frames/m25mar19b/rawdata/m22sep14b_g2_00001gr_00002sq940_v02_00006hl_00036enn.mrc
+    high_tension: 300000
+    image_filename: m25mar19b_G4_00018gr_00058sq_v02_00004hl_00019enn
+    imageid: '28567421'
+    imgdata_timestamp: *id073
+    magnification: 81000
+    nframes: 40
+    pixelsizedata: *id074
+    preset_id: 103823
+    session_frame_path: /h1/bwimberly/frames/m25mar19b/rawdata
+    session_id: 7488
+    session_image_path: /h1/bwimberly/leginon/m25mar19b/rawdata
+    tem: 13
+    total_raw_frames: 40
+  input_path: /h1/bwimberly/appion/m25mar19b/ddstack/ddstack1/m25mar19b_G4_00018gr_00058sq_v02_00004hl_00019enn.frames.tif
+- args:
+    Bft_global: 500
+    Bft_local: 100
+    FmRef: 0
+    Iter: '7'
+    MaskCentcol: '0'
+    MaskCentrow: '0'
+    MaskSizecols: '1'
+    MaskSizerows: '1'
+    Patchcols: '7'
+    Patchrows: '5'
+    Tol: 0.5
+    align: ''
+    alignlabel: a
+    bin: 1.0
+    commit: ''
+    continue: ''
+    ddstartframe: '0'
+    doseweight: ''
+    expid: '7517'
+    force_cpu_flat: false
+    gpuids: '0'
+    jobid: '9'
+    jobtype: makeddrawframestack
+    no-rejects: ''
+    nodes: '1'
+    nrw: '1'
+    parallel: ''
+    ppn: '1'
+    preset: enn
+    projectid: '1283'
+    queue: preprocessing
+    rendered_frame_size: '1'
+    rundir: /h1/yli5/appion/m25mar24a/ddstack/ddstack1
+    runname: ddstack1
+    session: m25mar24a
+    walltime: '120'
+  expected_kwargs:
+    Bft: 500 100
+    Dark: /h1/yli5/appion/m25mar24a/ddstack/ddstack1/dark-semc-gpu09-0-4190312.mrc
+    FlipGain: '0'
+    FmDose: '1.304'
+    Gain: /h1/yli5/appion/m25mar24a/ddstack/ddstack1/norm-semc-gpu09-0-4190312.mrc
+    Gpu: '0'
+    Group: '1'
+    InTiff: /h1/yli5/frames/m25mar24a/rawdata/m25mar24a_G4_00007gr_00067sq_v02_00003hl_00010enn.frames.tif
+    Iter: '7'
+    MaskSize: 1.000 1.000
+    OutMrc: /h1/yli5/appion/m25mar24a/ddstack/ddstack1/m25mar24a_G4_00007gr_00067sq_v02_00003hl_00010enn_c.mrc
+    Patch: 7 5
+    PixSize: '1.073'
+    RotGain: '0'
+    Tol: '0.500'
+    kV: '300'
+  imgmetadata:
+    bad_cols: null
+    bad_pixels: null
+    bad_rows: null
+    binning: 2
+    camera_id: 19808652
+    camera_name: GatanK3
+    ccdcamera: 23
+    dark_id: null
+    dark_input: null
+    dark_nframes: null
+    dose: 5.215582512172212e+21
+    dx: 5760
+    dy: 4092
+    eer_frames: false
+    exposure_time: 2000.0
+    frame_aligner_flat: true
+    frame_flip: 0
+    frame_rotate: 0
+    frame_time: 50.0
+    gain_input: /h1/yli5/frames/m25mar24a/rawdata/m22sep14b_g2_00001gr_00002sq940_v02_00006hl_00030enn-a-DW.mrc
+    high_tension: 300000
+    image_filename: m25mar24a_G4_00007gr_00067sq_v02_00003hl_00010enn
+    imageid: '28786119'
+    imgdata_timestamp: *id075
+    magnification: 64000
+    nframes: 40
+    pixelsizedata: *id076
+    preset_id: 104386
+    session_frame_path: /h1/yli5/frames/m25mar24a/rawdata
+    session_id: 7517
+    session_image_path: /h1/yli5/leginon/m25mar24a/rawdata
+    tem: 11
+    total_raw_frames: 40
+  input_path: /h1/yli5/appion/m25mar24a/ddstack/ddstack1/m25mar24a_G4_00007gr_00067sq_v02_00003hl_00010enn.frames.tif
+- args:
+    Bft_global: 500
+    Bft_local: 100
+    FmRef: 0
+    Iter: '7'
+    MaskCentcol: '0'
+    MaskCentrow: '0'
+    MaskSizecols: '1'
+    MaskSizerows: '1'
+    Patchcols: '7'
+    Patchrows: '5'
+    Tol: 0.5
+    align: ''
+    alignlabel: a
+    bin: 1.0
+    commit: ''
+    continue: ''
+    ddstartframe: '0'
+    doseweight: ''
+    expid: '7591'
+    force_cpu_flat: false
+    gpuids: '0'
+    jobid: '71'
+    jobtype: makeddrawframestack
+    no-rejects: ''
+    nodes: '1'
+    nrw: '1'
+    parallel: ''
+    ppn: '1'
+    preset: enn
+    projectid: '203'
+    queue: preprocessing
+    rendered_frame_size: '1'
+    rundir: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1
+    runname: ddstack1
+    session: m25mar31b
+    walltime: '120'
+  expected_kwargs:
+    Bft: 500 100
+    Dark: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/dark-semc-gpu01-0-490002.mrc
+    FlipGain: '0'
+    FmDose: '1.574'
+    Gain: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/norm-semc-gpu01-0-490002.mrc
+    Gpu: '0'
+    Group: '1'
+    InTiff: /h1/hsosa/frames/m25mar31b/rawdata/m25mar31b_B1G2_00008gr_00047sq_v02_00002hl_00064enn.frames.tif
+    Iter: '7'
+    MaskSize: 1.000 1.000
+    OutMrc: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/m25mar31b_B1G2_00008gr_00047sq_v02_00002hl_00064enn_c.mrc
+    Patch: 7 5
+    PixSize: '0.826'
+    RotGain: '0'
+    Tol: '0.500'
+    kV: '300'
+  imgmetadata:
+    bad_cols: ()
+    bad_pixels: ()
+    bad_rows: ()
+    binning: 2
+    camera_id: 20001238
+    camera_name: GatanK3
+    ccdcamera: 24
+    dark_id: null
+    dark_input: null
+    dark_nframes: null
+    dose: 5.036889516485281e+21
+    dx: 5760
+    dy: 4092
+    eer_frames: false
+    exposure_time: 1600.0
+    frame_aligner_flat: true
+    frame_flip: 0
+    frame_rotate: 0
+    frame_time: 50.0
+    gain_input: /h1/hsosa/frames/m25mar31b/rawdata/m22sep14b_g2_00001gr_00002sq940_v02_00006hl_00038enn-a.mrc
+    high_tension: 300000
+    image_filename: m25mar31b_B1G2_00008gr_00047sq_v02_00002hl_00064enn
+    imageid: '29067553'
+    imgdata_timestamp: *id077
+    magnification: 105000
+    nframes: 32
+    pixelsizedata: *id078
+    preset_id: 105219
+    session_frame_path: /h1/hsosa/frames/m25mar31b/rawdata
+    session_id: 7591
+    session_image_path: /h1/hsosa/leginon/m25mar31b/rawdata
+    tem: 25
+    total_raw_frames: 32
+  input_path: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/m25mar31b_B1G2_00008gr_00047sq_v02_00002hl_00064enn.frames.tif
 test_filterFrameList:
 - expected: *id001
   nframes: 50

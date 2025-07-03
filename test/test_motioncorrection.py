@@ -4,6 +4,7 @@ import appion
 import os
 import numpy
 from appion.motioncorrection.calc.internal import calcInputType, calcImageDefectMap, calcFmDose, calcFrameStats, calcTotalRenderedFrames, calcKV, calcTotalFrames, calcTrunc, calcPixelSize, filterFrameList, calcRotFlipGain, calcFrameShiftFromPositions, calcAlignedCamera, calcMotionCorrLogPath
+from appion.motioncorrection.cli.constructors import constructMotionCorKwargs
 
 @parametrize_from_file
 def test_calcInputType(fpath, expected):
@@ -94,3 +95,73 @@ def test_calcAlignedCamera(subd_dimension_x, subd_dimension_y, square_output, su
 def test_calcMotionCorrLogPath(framestackpath, expected):
     assert calcMotionCorrLogPath(framestackpath) == expected
 
+@parametrize_from_file
+def test_constructMotionCorKwargs(imgmetadata, args, input_path, expected_kwargs):
+    kwargs=constructMotionCorKwargs(imgmetadata, args, input_path)
+    if "InMrc" in expected_kwargs.keys():
+        assert "InMrc" in kwargs.keys()
+    elif "InTiff" in expected_kwargs.keys():
+        assert "InTiff" in kwargs.keys()
+    elif "InEer" in expected_kwargs.keys():
+        assert "InEer" in kwargs.keys()
+    assert "%.3f" % kwargs["FmDose"] == expected_kwargs["FmDose"]
+    if 'FmIntFile' in expected_kwargs.keys() and 'FmIntFile' in kwargs.keys():
+        assert kwargs['FmIntFile'] == expected_kwargs['FmIntFile']
+    elif 'FmIntFile' in expected_kwargs.keys() or 'FmIntFile' in kwargs.keys():
+        assert False
+    assert "%d" % kwargs["kV"] == expected_kwargs["kV"]
+    assert "%d" % kwargs["RotGain"] == expected_kwargs["RotGain"]
+    assert "%d" % kwargs["FlipGain"] == expected_kwargs["FlipGain"]
+    assert "%.3f" % kwargs["PixSize"] == expected_kwargs["PixSize"]
+    if "Trunc" in kwargs.keys():
+        assert "%.3f" % kwargs["Trunc"] == expected_kwargs["Trunc"]
+    if 'EerSampling' in expected_kwargs.keys() and 'EerSampling' in kwargs.keys():
+        assert kwargs['EerSampling'] == expected_kwargs['EerSampling']
+    elif 'EerSampling' in expected_kwargs.keys() or 'EerSampling' in kwargs.keys():
+        assert False
+    if 'Patch' in expected_kwargs.keys() and 'Patch' in kwargs.keys():
+        assert kwargs['Patch'] == expected_kwargs['Patch']
+    elif 'Patch' in expected_kwargs.keys() or 'Patch' in kwargs.keys():
+        assert False
+    if 'Iter' in expected_kwargs.keys() and 'Iter' in kwargs.keys():
+        assert kwargs['Iter'] == expected_kwargs['Iter']
+    elif 'Iter' in expected_kwargs.keys() or 'Iter' in kwargs.keys():
+        assert False
+    if 'Tol' in expected_kwargs.keys() and 'Tol' in kwargs.keys():
+       assert kwargs['Tol'] == float(expected_kwargs['Tol'])
+    elif 'Tol' in expected_kwargs.keys() or 'Tol' in kwargs.keys():
+        if not 'Tol' in expected_kwargs.keys():
+            raise AssertionError("%s not in expected_kwargs but present in kwargs." % "Tol")
+        elif not 'Tol' in kwargs.keys():
+            raise AssertionError("%s not in kwargs but present in expected_kwargs." % "Tol")
+    if 'Bft' in expected_kwargs.keys() and 'Bft' in kwargs.keys():
+        assert kwargs['Bft'] == expected_kwargs['Bft']
+    elif 'Bft' in expected_kwargs.keys() or 'Bft' in kwargs.keys():
+        assert False
+    if 'FtBin' in expected_kwargs.keys() and 'FtBin' in kwargs.keys():
+        assert kwargs['FtBin'] == float(expected_kwargs['FtBin'])
+    elif 'FtBin' in expected_kwargs.keys() or 'FtBin' in kwargs.keys():
+        if not 'FtBin' in expected_kwargs.keys():
+            raise AssertionError("%s not in expected_kwargs but present in kwargs." % "FtBin")
+        elif not 'FtBin' in kwargs.keys():
+            raise AssertionError("%s not in kwargs but present in expected_kwargs." % "FtBin")
+    if 'Throw' in expected_kwargs.keys() and 'Throw' in kwargs.keys():
+        assert kwargs['Throw'] == expected_kwargs['Throw']
+    elif 'Throw' in expected_kwargs.keys() or 'Throw' in kwargs.keys():
+        assert False
+    if 'Group' in expected_kwargs.keys() and 'Group' in kwargs.keys():
+        assert kwargs['Group'] == expected_kwargs['Group']
+    elif 'Group' in expected_kwargs.keys() or 'Group' in kwargs.keys():
+        assert False
+    if 'FmRef' in expected_kwargs.keys() and 'FmRef' in kwargs.keys():
+       assert kwargs['FmRef'] == expected_kwargs['FmRef']
+    elif 'FmRef' in expected_kwargs.keys() or 'FmRef' in kwargs.keys():
+        if not 'FmRef' in expected_kwargs.keys():
+            raise AssertionError("%s not in expected_kwargs but present in kwargs." % "FmRef")
+        elif not 'FmRef' in kwargs.keys():
+            raise AssertionError("%s not in kwargs but present in expected_kwargs." % "FmRef")
+    if 'Gpu' in expected_kwargs.keys() and 'Gpu' in kwargs.keys():
+        assert kwargs['Gpu'] == expected_kwargs['Gpu']
+    elif 'Gpu' in expected_kwargs.keys() or 'Gpu' in kwargs.keys():
+        assert False
+        

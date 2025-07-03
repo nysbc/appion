@@ -27,6 +27,7 @@ params["test_calcFrameStats"]=[]
 params["test_calcFrameShiftFromPositions"]=[]
 params['test_calcAlignedCamera']=[]
 params['test_calcMotionCorrLogPath']=[]
+params['test_constructMotionCorKwargs']=[]
 
 for imageid in validationData.keys():
     imgmetadata=readImageMetadata(imageid, False, True, False)
@@ -143,6 +144,31 @@ for imageid in validationData.keys():
     framestackpath=os.path.join(validationData[imageid]["appionflags"]["rundir"],os.path.basename(framestackpath))
     motioncorr_log_path=calcMotionCorrLogPath(framestackpath)
     params['test_calcMotionCorrLogPath'].append({"framestackpath":framestackpath, "expected": motioncorr_log_path})
+    test_constructMotionCorKwargs={}
+    test_constructMotionCorKwargs['imgmetadata']=imgmetadata
+    test_constructMotionCorKwargs['args']=validationData[imageid]["appionflags"]
+    test_constructMotionCorKwargs['args']['Bft_global'] = int(test_constructMotionCorKwargs['args']['Bft_global'])
+    test_constructMotionCorKwargs['args']['Bft_local'] = int(test_constructMotionCorKwargs['args']['Bft_local'])
+    test_constructMotionCorKwargs['args']['bin'] = float(test_constructMotionCorKwargs['args']['bin'])
+    if "Tol" not in test_constructMotionCorKwargs['args'].keys():
+        test_constructMotionCorKwargs['args']["Tol"]=0.5
+    if "bin" not in test_constructMotionCorKwargs['args'].keys():
+        test_constructMotionCorKwargs['args']["bin"]=1.0
+    if 'force_cpu_flat' not in test_constructMotionCorKwargs['args'].keys():
+        test_constructMotionCorKwargs['args']['force_cpu_flat']=False
+    else:
+        test_constructMotionCorKwargs['args']['force_cpu_flat']=True
+    if 'totaldose' in test_constructMotionCorKwargs['args'].keys():
+        test_constructMotionCorKwargs['args']['totaldose']=float(test_constructMotionCorKwargs['args']['totaldose'])
+    if 'FmRef' in test_constructMotionCorKwargs['args'].keys():
+        test_constructMotionCorKwargs['args']['FmRef']=int(test_constructMotionCorKwargs['args']['FmRef'])
+    test_constructMotionCorKwargs['input_path']=framestackpath
+    test_constructMotionCorKwargs['expected_kwargs']=validationData[imageid]["motioncorflags"]
+    #if "FtBin" not in test_constructMotionCorKwargs['expected_kwargs'].keys():
+    #    test_constructMotionCorKwargs['expected_kwargs']["FtBin"]="1.0"
+    #if "FmRef" not in test_constructMotionCorKwargs['expected_kwargs'].keys():
+    #    test_constructMotionCorKwargs['expected_kwargs']["FmRef"]="0"
+    params['test_constructMotionCorKwargs'].append(test_constructMotionCorKwargs)
 
 # m25apr22e (7858), m25apr23d (7873), m25apr02e (7605)
 
