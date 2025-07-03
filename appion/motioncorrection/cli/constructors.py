@@ -7,7 +7,7 @@ def constructMotionCorKwargs(imgmetadata : dict, cli_args : dict, input_path : s
     if 'eer_sampling' in cli_args.keys():
         kwargs['EerSampling'] = cli_args['eer_sampling']
     if 'Patchrows' in cli_args.keys() and 'Patchcols' in cli_args.keys():
-        kwargs["Patch"] = "%s %s" % (str(cli_args["Patchrows"]), str(cli_args["Patchcols"]))
+        kwargs["Patch"] = "%s %s" % (str(cli_args["Patchcols"]), str(cli_args["Patchrows"]))
     if 'Iter' in cli_args.keys():
         kwargs["Iter"] = cli_args["Iter"]
     if 'Tol' in cli_args.keys():
@@ -15,7 +15,8 @@ def constructMotionCorKwargs(imgmetadata : dict, cli_args : dict, input_path : s
     if 'Bft_global' in cli_args.keys() and 'Bft_local' in cli_args.keys():
         kwargs["Bft"] = "%d %d" % (cli_args["Bft_global"], cli_args["Bft_local"])
     if 'bin' in cli_args.keys():
-        kwargs["FtBin"] = cli_args["bin"]
+        if cli_args["bin"] != 1.0:
+            kwargs["FtBin"] = cli_args["bin"]
     if 'startframe' in cli_args.keys():
         kwargs["Throw"] = cli_args["startframe"]
     if 'nrw' in cli_args.keys():
@@ -24,7 +25,8 @@ def constructMotionCorKwargs(imgmetadata : dict, cli_args : dict, input_path : s
     #if 'MaskSizecols' in cli_args.keys() and 'MaskSizerows' in cli_args.keys():
     #    kwargs["MaskSize"] = "%d %d" % (cli_args["MaskSizecols"], cli_args["MaskSizerows"])
     if 'FmRef' in cli_args.keys():
-        kwargs["FmRef"] = cli_args["FmRef"]
+        if cli_args["FmRef"] != 0:
+            kwargs["FmRef"] = cli_args["FmRef"]
     if 'gpuids' in cli_args.keys():
         kwargs["Gpu"] = cli_args["gpuids"]
 # TODO Figure out how user input might interact with Trunc calculation
