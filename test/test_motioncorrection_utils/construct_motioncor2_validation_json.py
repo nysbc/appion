@@ -14,9 +14,9 @@ This will be used to identify regressions in the logic used to generate motionco
 '''
 
 # Pre-computed grep outputs.
-MEMC_APPION_CMDS="/h2/jpellman/18169/motioncor_commands/memc_mar2025_appion_commands"
+MEMC_APPION_CMDS="/srv/appion/test/motioncor_commands/memc_mar2025_appion_commands"
 #NCCAT_APPION_CMDS="/h2/jpellman/18169/motioncor_commands/nccat_mar2025_appion_commands"
-MEMC_MOTIONCOR_CMDS="/h2/jpellman/18169/motioncor_commands/memc_mar2025_motioncor2_commands"
+MEMC_MOTIONCOR_CMDS="/srv/appion/test/motioncor_commands/memc_mar2025_motioncor2_commands"
 #NCCAT_MOTIONCOR_CMDS="/h2/jpellman/18169/motioncor_commands/nccat_mar2025_motioncor2_commands"
 
 appionflags=[]
@@ -41,7 +41,7 @@ for c in motioncorcmds:
             # Symlinks
             links+=re.findall("\.\.\. link (.+) to (.+)\.", line)
             # Motioncor2 Params
-            motioncorflags+=[re.findall("(?:-)([A-Zk]\w+) ([\S]+)", line)]
+            motioncorflags+=[re.findall("(?:-)([A-Zk]\w+) ([\S]+) ([\S]+)", line)]
 
 appionflags=[dict(flaglist) for flaglist in appionflags if flaglist]
 links=dict([(dst, src) for src, dst in links if os.path.exists(src)])
