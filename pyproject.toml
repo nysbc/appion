@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [project]
 name = "appion"
-version = "2025.07.03a"
+version = "2025.07.07b"
 readme = "README.md"
 description = "A data quality workflow for assessing images produced with Cryo-EM.  Performs motion correction and CTF estimation using user-provided inputs and information stored in a database that uses the Leginon data model."
 license = "Apache-2.0"
@@ -38,5 +38,5 @@ dependencies = [
 requires-python = ">=3.10,<4.0"
 
 [project.urls]
-Homepage = "https://github.com/nysbc/semc-appion/"
-Issues = "https://github.com/nysbc/semc-appion/issues"
+Homepage = "https://github.com/nysbc/appion/"
+Issues = "https://github.com/nysbc/appion/issues"
