@@ -46,6 +46,9 @@ def loop(pipeline, args: dict, cluster : Cluster, retrieveDoneImages : Callable 
 
     jobmetadata=preLoop()
     waitTime=30
+    prev_tasklist=set()
+    max_failures=10
+    failures={}
     while True:
         t0=time()
         all_images=readImageSet(args["sessionname"], args["preset"])
@@ -54,6 +57,15 @@ def loop(pipeline, args: dict, cluster : Cluster, retrieveDoneImages : Callable 
         # Not used by motioncor2; used by ctffind4
         reprocess_images=retrieveReprocessImages()
         tasklist=filterImages(all_images, done_images, reprocess_images, rejected_images)
+        if prev_tasklist:
+            failureset=tasklist & prev_tasklist
+            for imageid in failureset:
+                if imageid in failures.keys():
+                    failures[imageid]+=1
+                else:
+                    failures[imageid]=1
+                if failures[imageid] >= max_failures:
+                    tasklist.remove(imageid)
         t1=time()
         logger.info("Constructed task list in %d seconds." % (t1-t0))
         logger.info("Image counts: %d total images, %d done images, %d rejected images, and %d images marked for reprocessing." % (len(all_images), len(done_images), len(rejected_images), len(reprocess_images)))
@@ -79,6 +91,7 @@ def loop(pipeline, args: dict, cluster : Cluster, retrieveDoneImages : Callable 
                     images_processed_total_t0=images_processed_total
             pipeline_t1=time()
             logger.info("Finished processing %d images in %d seconds." % (len(tasklist), (pipeline_t1-pipeline_t0)))
+            prev_tasklist=tasklist
         else:
             logger.info(f"No new images.  Waiting {waitTime} seconds.")
             sleep(waitTime)
