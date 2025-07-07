@@ -47,8 +47,8 @@ def loop(pipeline, args: dict, cluster : Cluster, retrieveDoneImages : Callable 
     jobmetadata=preLoop()
     waitTime=30
     prev_tasklist=set()
-    max_failures=10
-    failures={}
+    failure_cooldown=10
+    failure_waits=0
     while True:
         t0=time()
         all_images=readImageSet(args["sessionname"], args["preset"])
@@ -59,13 +59,7 @@ def loop(pipeline, args: dict, cluster : Cluster, retrieveDoneImages : Callable 
         tasklist=filterImages(all_images, done_images, reprocess_images, rejected_images)
         if prev_tasklist:
             failureset=tasklist & prev_tasklist
-            for imageid in failureset:
-                if imageid in failures.keys():
-                    failures[imageid]+=1
-                else:
-                    failures[imageid]=1
-                if failures[imageid] >= max_failures:
-                    tasklist.remove(imageid)
+            tasklist=tasklist-failureset
         t1=time()
         logger.info("Constructed task list in %d seconds." % (t1-t0))
         logger.info("Image counts: %d total images, %d done images, %d rejected images, and %d images marked for reprocessing." % (len(all_images), len(done_images), len(rejected_images), len(reprocess_images)))
@@ -95,3 +89,8 @@ def loop(pipeline, args: dict, cluster : Cluster, retrieveDoneImages : Callable 
         else:
             logger.info(f"No new images.  Waiting {waitTime} seconds.")
             sleep(waitTime)
+            if prev_tasklist:
+                failure_waits+=1
+                if failure_waits >= failure_cooldown:
+                    prev_tasklist=set()
+                    failure_waits=0
