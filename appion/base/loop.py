@@ -60,6 +60,7 @@ def loop(pipeline, args: dict, cluster : Cluster, retrieveDoneImages : Callable 
         if prev_tasklist:
             failureset=tasklist & prev_tasklist
             tasklist=tasklist-failureset
+            logger.info("%d previously failed images will not be processed this iteration." % len(failureset))
         t1=time()
         logger.info("Constructed task list in %d seconds." % (t1-t0))
         logger.info("Image counts: %d total images, %d done images, %d rejected images, and %d images marked for reprocessing." % (len(all_images), len(done_images), len(rejected_images), len(reprocess_images)))
