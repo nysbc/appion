@@ -26,13 +26,21 @@ def validateMotionCorArgs(version : str, passedParams : set) -> bool:
         return False, validParams
     return True, validParams
 
-def motioncor(dryrun : bool = False, version: str = "", executable="motioncor2", **kwargs) -> tuple:
+#TODO Write unit test.
+def constructMotionCorCmd(cmd, kwargs):
+    cmd=[cmd]
+    for k,v in kwargs.items():
+        if type(v) in [tuple, list]:
+            kwargs[k]=" ".join([str(e) for e in v])
+    cmd+=["-%s" % item[idx] if idx == 0 else str(item[idx]) for item in kwargs.items() for idx in range(2)]
+    return cmd
+
+def motioncor(executable="motioncor2", **kwargs) -> tuple:
     cmd=which(executable)
     if not cmd:
         raise RuntimeError("%s binary is not in path.  Cannot execute." % executable)
     else:
-        if not version:
-            version=readMotionCorVersion(cmd)
+        version=readMotionCorVersion(cmd)
         if not version:
             raise RuntimeError("Could not determine motioncor version.")
         supported=compareSupportedVersion(version)
@@ -48,21 +56,12 @@ def motioncor(dryrun : bool = False, version: str = "", executable="motioncor2",
         logparser=retrieveLogParser(version)
         if not logparser:
             raise RuntimeError("No supported log parser for motioncor version %s." % version)
-        cmd=[cmd]
-    for k,v in kwargs.items():
-        if type(v) in [tuple, list]:
-            kwargs[k]=" ".join([str(e) for e in v])
-    cmd+=["-%s" % item[idx] if idx == 0 else str(item[idx]) for item in kwargs.items() for idx in range(2)]
-    if dryrun:
-        print(" ".join(cmd))
-        rawoutput=""
-        output={}
-    else:
-        try:
-            proc=subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=True, text=True, encoding="utf-8")
-        except CalledProcessError as e:
-            raise RuntimeError("motioncor2 failed to run.  \n\nStdOut: %s\n\nStdErr: %s" % (e.stdout, e.stderr)) from e
-        rawoutput=proc.stdout
-        output=rawoutput.split("\n")
-        output=logparser(output)
+    cmd=constructMotionCorCmd(cmd, kwargs)
+    try:
+        proc=subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=True, text=True, encoding="utf-8")
+    except CalledProcessError as e:
+        raise RuntimeError("motioncor2 failed to run.  \n\nStdOut: %s\n\nStdErr: %s" % (e.stdout, e.stderr)) from e
+    rawoutput=proc.stdout
+    output=rawoutput.split("\n")
+    output=logparser(output)
     return output, rawoutput
