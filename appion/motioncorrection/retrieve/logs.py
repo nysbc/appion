@@ -1,9 +1,15 @@
 from typing import Callable
-#TODO create multiple implementations of parseMotionCorLog and return them with a switch.
-def retrieveLogParser(version : str) -> Callable:
-    return parseMotionCorLog
 
-def parseMotionCorLog(outbuffer: list) -> dict:
+def retrieveLogParser(version : str) -> Callable:
+    if version.strip() == "MotionCor2 version 1.6.4":
+        # motioncor2 1.6.4 uses a tabular format for the alignment shift outputs, but motioncor3 and older versions of motioncor2 don't.
+        # This ensures that shifts are read after the table header.
+        return lambda outbuffer : parseMotionCorLog(outbuffer, "Frame   x Shift   y Shift")
+    # All other versions of motioncor2/motioncor2 seem to use the same output format.
+    return lambda outbuffer : parseMotionCorLog(outbuffer, "Full-frame alignment shift")
+
+
+def parseMotionCorLog(outbuffer: list, shift_start: str) -> dict:
     '''
     Parses the output log from motioncor2/motioncor3 and converts it into a dict.
     '''
@@ -11,9 +17,7 @@ def parseMotionCorLog(outbuffer: list) -> dict:
 
     # Discard all output before the alignment shifts.
     line=outbuffer.pop(0)
-    # For some reason motioncor2 1.6.4 uses a tabular format for the alignment shift outputs, but motioncor3 and older versions of motioncor2 don't.
-    # The initial line denoting the shift outputs omits the word "shift".
-    while ("Full-frame alignment shift" not in line) and (line.strip() != "Full-frame alignment"):
+    while (shift_start not in line):
         if not outbuffer:
             raise RuntimeError("Alignment shift line not found in stdout.")
         line=outbuffer.pop(0)
@@ -22,11 +26,6 @@ def parseMotionCorLog(outbuffer: list) -> dict:
     while ("Global shifts are corrected" not in line) and outbuffer:
         # Remove empty lines
         if not line and outbuffer:
-            line=outbuffer.pop(0)
-            continue
-        # For some reason motioncor2 1.6.4 uses a tabular format for the alignment shift outputs, but motioncor3 and older versions of motioncor2 don't.
-        # This removes a header from that table.
-        if "Frame   x Shift   y Shift" in line:
             line=outbuffer.pop(0)
             continue
         try:
