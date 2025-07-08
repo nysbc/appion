@@ -2166,222 +2166,222 @@ test_calcMotionCorrLogPath:
 test_calcPixelSize:
 - binning: 2
   expected: 0.826
-  imgdata_timestamp: &id029 2025-03-19 13:03:11
+  imgdata_timestamp: &id029 2025-03-19 13:03:11+00:00
   pixelsizedatas: &id030
   - pixelsize: 4.13e-11
-    timestamp: 2024-07-31 15:13:09
+    timestamp: 2024-07-31 15:13:09+00:00
   - pixelsize: 4.13e-11
-    timestamp: 2024-07-31 15:12:44
+    timestamp: 2024-07-31 15:12:44+00:00
   - pixelsize: 4.2215e-11
-    timestamp: 2022-09-02 14:49:10
+    timestamp: 2022-09-02 14:49:10+00:00
 - binning: 2
   expected: 0.856
-  imgdata_timestamp: &id031 2025-03-29 21:17:44
+  imgdata_timestamp: &id031 2025-03-29 21:17:44+00:00
   pixelsizedatas: &id032
   - pixelsize: 4.28e-11
-    timestamp: 2024-03-04 15:05:49
+    timestamp: 2024-03-04 15:05:49+00:00
   - pixelsize: 4.23e-11
-    timestamp: 2022-09-02 14:49:08
+    timestamp: 2022-09-02 14:49:08+00:00
 - binning: 1
   expected: 0.428
-  imgdata_timestamp: &id033 2025-04-01 01:28:14
+  imgdata_timestamp: &id033 2025-04-01 01:28:14+00:00
   pixelsizedatas: &id034
   - pixelsize: 4.28e-11
-    timestamp: 2024-03-04 15:05:49
+    timestamp: 2024-03-04 15:05:49+00:00
   - pixelsize: 4.23e-11
-    timestamp: 2022-09-02 14:49:08
+    timestamp: 2022-09-02 14:49:08+00:00
 - binning: 2
   expected: 1.073
-  imgdata_timestamp: &id035 2025-03-25 03:30:11
+  imgdata_timestamp: &id035 2025-03-25 03:30:11+00:00
   pixelsizedatas: &id036
   - pixelsize: 5.365e-11
-    timestamp: 2024-03-04 15:05:31
+    timestamp: 2024-03-04 15:05:31+00:00
   - pixelsize: 5.38e-11
-    timestamp: 2022-09-02 14:49:08
+    timestamp: 2022-09-02 14:49:08+00:00
 - binning: 2
   expected: 0.856
-  imgdata_timestamp: &id037 2025-03-21 22:21:00
+  imgdata_timestamp: &id037 2025-03-21 22:21:00+00:00
   pixelsizedatas: &id038
   - pixelsize: 4.28e-11
-    timestamp: 2024-03-04 15:05:49
+    timestamp: 2024-03-04 15:05:49+00:00
   - pixelsize: 4.23e-11
-    timestamp: 2022-09-02 14:49:08
+    timestamp: 2022-09-02 14:49:08+00:00
 - binning: 2
   expected: 0.856
-  imgdata_timestamp: &id039 2025-03-29 06:34:10
+  imgdata_timestamp: &id039 2025-03-29 06:34:10+00:00
   pixelsizedatas: &id040
   - pixelsize: 4.28e-11
-    timestamp: 2024-03-04 15:05:49
+    timestamp: 2024-03-04 15:05:49+00:00
   - pixelsize: 4.23e-11
-    timestamp: 2022-09-02 14:49:08
+    timestamp: 2022-09-02 14:49:08+00:00
 - binning: 2
   expected: 0.856
-  imgdata_timestamp: &id041 2025-03-22 15:05:14
+  imgdata_timestamp: &id041 2025-03-22 15:05:14+00:00
   pixelsizedatas: &id042
   - pixelsize: 4.28e-11
-    timestamp: 2024-03-04 15:05:49
+    timestamp: 2024-03-04 15:05:49+00:00
   - pixelsize: 4.23e-11
-    timestamp: 2022-09-02 14:49:08
+    timestamp: 2022-09-02 14:49:08+00:00
 - binning: 2
   expected: 0.826
-  imgdata_timestamp: &id043 2025-04-01 19:40:32
+  imgdata_timestamp: &id043 2025-04-01 19:40:32+00:00
   pixelsizedatas: &id044
   - pixelsize: 4.13e-11
-    timestamp: 2024-07-31 15:13:09
+    timestamp: 2024-07-31 15:13:09+00:00
   - pixelsize: 4.13e-11
-    timestamp: 2024-07-31 15:12:44
+    timestamp: 2024-07-31 15:12:44+00:00
   - pixelsize: 4.2215e-11
-    timestamp: 2022-09-02 14:49:10
+    timestamp: 2022-09-02 14:49:10+00:00
 - binning: 2
   expected: 1.073
-  imgdata_timestamp: &id045 2025-03-25 01:17:07
+  imgdata_timestamp: &id045 2025-03-25 01:17:07+00:00
   pixelsizedatas: &id046
   - pixelsize: 5.365e-11
-    timestamp: 2024-03-04 15:05:31
+    timestamp: 2024-03-04 15:05:31+00:00
   - pixelsize: 5.38e-11
-    timestamp: 2022-09-02 14:49:08
+    timestamp: 2022-09-02 14:49:08+00:00
 - binning: 2
   expected: 0.826
-  imgdata_timestamp: &id047 2025-03-20 12:39:48
+  imgdata_timestamp: &id047 2025-03-20 12:39:48+00:00
   pixelsizedatas: &id048
   - pixelsize: 4.13e-11
-    timestamp: 2024-07-31 15:13:09
+    timestamp: 2024-07-31 15:13:09+00:00
   - pixelsize: 4.13e-11
-    timestamp: 2024-07-31 15:12:44
+    timestamp: 2024-07-31 15:12:44+00:00
   - pixelsize: 4.2215e-11
-    timestamp: 2022-09-02 14:49:10
+    timestamp: 2022-09-02 14:49:10+00:00
 - binning: 2
   expected: 0.826
-  imgdata_timestamp: &id049 2025-04-01 00:57:59
+  imgdata_timestamp: &id049 2025-04-01 00:57:59+00:00
   pixelsizedatas: &id050
   - pixelsize: 4.13e-11
-    timestamp: 2024-07-31 15:13:09
+    timestamp: 2024-07-31 15:13:09+00:00
   - pixelsize: 4.13e-11
-    timestamp: 2024-07-31 15:12:44
+    timestamp: 2024-07-31 15:12:44+00:00
   - pixelsize: 4.2215e-11
-    timestamp: 2022-09-02 14:49:10
+    timestamp: 2022-09-02 14:49:10+00:00
 - binning: 1
   expected: 0.428
-  imgdata_timestamp: &id051 2025-04-01 08:48:01
+  imgdata_timestamp: &id051 2025-04-01 08:48:01+00:00
   pixelsizedatas: &id052
   - pixelsize: 4.28e-11
-    timestamp: 2024-03-04 15:05:49
+    timestamp: 2024-03-04 15:05:49+00:00
   - pixelsize: 4.23e-11
-    timestamp: 2022-09-02 14:49:08
+    timestamp: 2022-09-02 14:49:08+00:00
 - binning: 1
   expected: 0.428
-  imgdata_timestamp: &id053 2025-03-20 20:42:31
+  imgdata_timestamp: &id053 2025-03-20 20:42:31+00:00
   pixelsizedatas: &id054
   - pixelsize: 4.28e-11
-    timestamp: 2024-03-04 15:05:49
+    timestamp: 2024-03-04 15:05:49+00:00
   - pixelsize: 4.23e-11
-    timestamp: 2022-09-02 14:49:08
+    timestamp: 2022-09-02 14:49:08+00:00
 - binning: 2
   expected: 0.826
-  imgdata_timestamp: &id055 2025-03-18 21:14:04
+  imgdata_timestamp: &id055 2025-03-18 21:14:04+00:00
   pixelsizedatas: &id056
   - pixelsize: 4.13e-11
-    timestamp: 2024-07-31 15:13:09
+    timestamp: 2024-07-31 15:13:09+00:00
   - pixelsize: 4.13e-11
-    timestamp: 2024-07-31 15:12:44
+    timestamp: 2024-07-31 15:12:44+00:00
   - pixelsize: 4.2215e-11
-    timestamp: 2022-09-02 14:49:10
+    timestamp: 2022-09-02 14:49:10+00:00
 - binning: 2
   expected: 1.083
-  imgdata_timestamp: &id057 2025-03-20 10:02:29
+  imgdata_timestamp: &id057 2025-03-20 10:02:29+00:00
   pixelsizedatas: &id058
   - pixelsize: 5.4125e-11
-    timestamp: 2022-09-02 14:49:06
+    timestamp: 2022-09-02 14:49:06+00:00
 - binning: 2
   expected: 0.826
-  imgdata_timestamp: &id059 2025-03-21 03:25:49
+  imgdata_timestamp: &id059 2025-03-21 03:25:49+00:00
   pixelsizedatas: &id060
   - pixelsize: 4.13e-11
-    timestamp: 2024-07-31 15:13:09
+    timestamp: 2024-07-31 15:13:09+00:00
   - pixelsize: 4.13e-11
-    timestamp: 2024-07-31 15:12:44
+    timestamp: 2024-07-31 15:12:44+00:00
   - pixelsize: 4.2215e-11
-    timestamp: 2022-09-02 14:49:10
+    timestamp: 2022-09-02 14:49:10+00:00
 - binning: 2
   expected: 0.826
-  imgdata_timestamp: &id061 2025-04-01 08:27:02
+  imgdata_timestamp: &id061 2025-04-01 08:27:02+00:00
   pixelsizedatas: &id062
   - pixelsize: 4.13e-11
-    timestamp: 2024-07-31 15:13:09
+    timestamp: 2024-07-31 15:13:09+00:00
   - pixelsize: 4.13e-11
-    timestamp: 2024-07-31 15:12:44
+    timestamp: 2024-07-31 15:12:44+00:00
   - pixelsize: 4.2215e-11
-    timestamp: 2022-09-02 14:49:10
+    timestamp: 2022-09-02 14:49:10+00:00
 - binning: 1
   expected: 0.428
-  imgdata_timestamp: &id063 2025-04-01 05:58:59
+  imgdata_timestamp: &id063 2025-04-01 05:58:59+00:00
   pixelsizedatas: &id064
   - pixelsize: 4.28e-11
-    timestamp: 2024-03-04 15:05:49
+    timestamp: 2024-03-04 15:05:49+00:00
   - pixelsize: 4.23e-11
-    timestamp: 2022-09-02 14:49:08
+    timestamp: 2022-09-02 14:49:08+00:00
 - binning: 1
   expected: 0.428
-  imgdata_timestamp: &id065 2025-03-21 12:40:28
+  imgdata_timestamp: &id065 2025-03-21 12:40:28+00:00
   pixelsizedatas: &id066
   - pixelsize: 4.28e-11
-    timestamp: 2024-03-04 15:05:49
+    timestamp: 2024-03-04 15:05:49+00:00
   - pixelsize: 4.23e-11
-    timestamp: 2022-09-02 14:49:08
+    timestamp: 2022-09-02 14:49:08+00:00
 - binning: 2
   expected: 0.826
-  imgdata_timestamp: &id067 2025-04-01 18:00:24
+  imgdata_timestamp: &id067 2025-04-01 18:00:24+00:00
   pixelsizedatas: &id068
   - pixelsize: 4.13e-11
-    timestamp: 2024-07-31 15:13:09
+    timestamp: 2024-07-31 15:13:09+00:00
   - pixelsize: 4.13e-11
-    timestamp: 2024-07-31 15:12:44
+    timestamp: 2024-07-31 15:12:44+00:00
   - pixelsize: 4.2215e-11
-    timestamp: 2022-09-02 14:49:10
+    timestamp: 2022-09-02 14:49:10+00:00
 - binning: 2
   expected: 0.826
-  imgdata_timestamp: &id069 2025-04-01 06:23:22
+  imgdata_timestamp: &id069 2025-04-01 06:23:22+00:00
   pixelsizedatas: &id070
   - pixelsize: 4.13e-11
-    timestamp: 2024-07-31 15:13:09
+    timestamp: 2024-07-31 15:13:09+00:00
   - pixelsize: 4.13e-11
-    timestamp: 2024-07-31 15:12:44
+    timestamp: 2024-07-31 15:12:44+00:00
   - pixelsize: 4.2215e-11
-    timestamp: 2022-09-02 14:49:10
+    timestamp: 2022-09-02 14:49:10+00:00
 - binning: 2
   expected: 0.826
-  imgdata_timestamp: &id071 2025-03-21 10:11:02
+  imgdata_timestamp: &id071 2025-03-21 10:11:02+00:00
   pixelsizedatas: &id072
   - pixelsize: 4.13e-11
-    timestamp: 2024-07-31 15:13:09
+    timestamp: 2024-07-31 15:13:09+00:00
   - pixelsize: 4.13e-11
-    timestamp: 2024-07-31 15:12:44
+    timestamp: 2024-07-31 15:12:44+00:00
   - pixelsize: 4.2215e-11
-    timestamp: 2022-09-02 14:49:10
+    timestamp: 2022-09-02 14:49:10+00:00
 - binning: 2
   expected: 1.083
-  imgdata_timestamp: &id073 2025-03-20 11:02:48
+  imgdata_timestamp: &id073 2025-03-20 11:02:48+00:00
   pixelsizedatas: &id074
   - pixelsize: 5.4125e-11
-    timestamp: 2022-09-02 14:49:06
+    timestamp: 2022-09-02 14:49:06+00:00
 - binning: 2
   expected: 1.073
-  imgdata_timestamp: &id075 2025-03-25 11:35:27
+  imgdata_timestamp: &id075 2025-03-25 11:35:27+00:00
   pixelsizedatas: &id076
   - pixelsize: 5.365e-11
-    timestamp: 2024-03-04 15:05:31
+    timestamp: 2024-03-04 15:05:31+00:00
   - pixelsize: 5.38e-11
-    timestamp: 2022-09-02 14:49:08
+    timestamp: 2022-09-02 14:49:08+00:00
 - binning: 2
   expected: 0.826
-  imgdata_timestamp: &id077 2025-04-01 14:17:57
+  imgdata_timestamp: &id077 2025-04-01 14:17:57+00:00
   pixelsizedatas: &id078
   - pixelsize: 4.13e-11
-    timestamp: 2024-07-31 15:13:09
+    timestamp: 2024-07-31 15:13:09+00:00
   - pixelsize: 4.13e-11
-    timestamp: 2024-07-31 15:12:44
+    timestamp: 2024-07-31 15:12:44+00:00
   - pixelsize: 4.2215e-11
-    timestamp: 2022-09-02 14:49:10
+    timestamp: 2022-09-02 14:49:10+00:00
 test_calcRotFlipGain:
 - expected_FlipGain: 0
   expected_RotGain: 0
@@ -3830,6 +3830,1328 @@ test_calcTrunc:
   - 30
   - 31
   total_frames: 32
+test_constructMotionCorCmd:
+- executable: motioncor2
+  expected:
+  - motioncor2
+  - -InTiff
+  - /h1/jcheung/frames/m25mar17a/rawdata/m25mar17a_NY0268_Gr1a_00007gr_00038sq_v02_00003hl_v01_00022enn.frames.tif
+  - -OutMrc
+  - /h1/jcheung/appion/m25mar17a/ddstack/ddstack1/m25mar17a_NY0268_Gr1a_00007gr_00038sq_v02_00003hl_v01_00022enn_c.mrc
+  - -Bft
+  - 500 100
+  - -Iter
+  - '7'
+  - -Tol
+  - '0.500'
+  - -Patch
+  - 7 5
+  - -Group
+  - '1'
+  - -MaskSize
+  - 1.000 1.000
+  - -FmDose
+  - '1.091'
+  - -PixSize
+  - '0.826'
+  - -kV
+  - '300'
+  - -Dark
+  - /h1/jcheung/appion/m25mar17a/ddstack/ddstack1/dark-semc-gpu01-0-1705747.mrc
+  - -Gain
+  - /h1/jcheung/appion/m25mar17a/ddstack/ddstack1/norm-semc-gpu01-0-1705747.mrc
+  - -FlipGain
+  - '0'
+  - -RotGain
+  - '0'
+  - -Gpu
+  - '0'
+  kwargs:
+    Bft: 500 100
+    Dark: /h1/jcheung/appion/m25mar17a/ddstack/ddstack1/dark-semc-gpu01-0-1705747.mrc
+    FlipGain: 0
+    FmDose: 1.091
+    Gain: /h1/jcheung/appion/m25mar17a/ddstack/ddstack1/norm-semc-gpu01-0-1705747.mrc
+    Gpu: '0'
+    Group: '1'
+    InTiff: /h1/jcheung/frames/m25mar17a/rawdata/m25mar17a_NY0268_Gr1a_00007gr_00038sq_v02_00003hl_v01_00022enn.frames.tif
+    Iter: '7'
+    MaskSize: 1.000 1.000
+    OutMrc: /h1/jcheung/appion/m25mar17a/ddstack/ddstack1/m25mar17a_NY0268_Gr1a_00007gr_00038sq_v02_00003hl_v01_00022enn_c.mrc
+    Patch: 7 5
+    PixSize: 0.826
+    RotGain: 0
+    Tol: '0.500'
+    kV: 300
+- executable: motioncor2
+  expected:
+  - motioncor2
+  - -InTiff
+  - /h1/jclosson/frames/m25mar28a/rawdata/m25mar28a_gr4_00012gr_00104sq_v03_00004hl_00007enn.frames.tif
+  - -OutMrc
+  - /h1/jclosson/appion/m25mar28a/ddstack/ddstack1/m25mar28a_gr4_00012gr_00104sq_v03_00004hl_00007enn_c.mrc
+  - -Bft
+  - 500 100
+  - -Iter
+  - '7'
+  - -Tol
+  - '0.500'
+  - -Patch
+  - 7 5
+  - -Group
+  - '1'
+  - -MaskSize
+  - 1.000 1.000
+  - -FmDose
+  - '1.642'
+  - -PixSize
+  - '0.856'
+  - -kV
+  - '300'
+  - -Dark
+  - /h1/jclosson/appion/m25mar28a/ddstack/ddstack1/dark-semc-gpu01-0-2324801.mrc
+  - -Gain
+  - /h1/jclosson/appion/m25mar28a/ddstack/ddstack1/norm-semc-gpu01-0-2324801.mrc
+  - -FlipGain
+  - '0'
+  - -RotGain
+  - '0'
+  - -Gpu
+  - '0'
+  kwargs:
+    Bft: 500 100
+    Dark: /h1/jclosson/appion/m25mar28a/ddstack/ddstack1/dark-semc-gpu01-0-2324801.mrc
+    FlipGain: 0
+    FmDose: 1.642
+    Gain: /h1/jclosson/appion/m25mar28a/ddstack/ddstack1/norm-semc-gpu01-0-2324801.mrc
+    Gpu: '0'
+    Group: '1'
+    InTiff: /h1/jclosson/frames/m25mar28a/rawdata/m25mar28a_gr4_00012gr_00104sq_v03_00004hl_00007enn.frames.tif
+    Iter: '7'
+    MaskSize: 1.000 1.000
+    OutMrc: /h1/jclosson/appion/m25mar28a/ddstack/ddstack1/m25mar28a_gr4_00012gr_00104sq_v03_00004hl_00007enn_c.mrc
+    Patch: 7 5
+    PixSize: 0.856
+    RotGain: 0
+    Tol: '0.500'
+    kV: 300
+- executable: motioncor2
+  expected:
+  - motioncor2
+  - -InTiff
+  - /h1/jsun4/frames/m25mar31a/rawdata/m25mar31a_yellow1_00011gr_00018sq_v02_00003hl_00029esn.frames.tif
+  - -OutMrc
+  - /h1/jsun4/appion/m25mar31a/ddstack/ddstack1/m25mar31a_yellow1_00011gr_00018sq_v02_00003hl_00029esn_c.mrc
+  - -FtBin
+  - '2.0'
+  - -Bft
+  - 500 100
+  - -Iter
+  - '7'
+  - -Tol
+  - '0.500'
+  - -Patch
+  - 7 5
+  - -Group
+  - '1'
+  - -MaskSize
+  - 1.000 1.000
+  - -FmDose
+  - '1.35'
+  - -PixSize
+  - '0.428'
+  - -kV
+  - '300'
+  - -Dark
+  - /h1/jsun4/appion/m25mar31a/ddstack/ddstack1/dark-semc-cpu02-0-1720956.mrc
+  - -Gain
+  - /h1/jsun4/appion/m25mar31a/ddstack/ddstack1/norm-semc-cpu02-0-1720956.mrc
+  - -FlipGain
+  - '0'
+  - -RotGain
+  - '0'
+  - -Gpu
+  - '0'
+  kwargs:
+    Bft: 500 100
+    Dark: /h1/jsun4/appion/m25mar31a/ddstack/ddstack1/dark-semc-cpu02-0-1720956.mrc
+    FlipGain: 0
+    FmDose: 1.35
+    FtBin: '2.0'
+    Gain: /h1/jsun4/appion/m25mar31a/ddstack/ddstack1/norm-semc-cpu02-0-1720956.mrc
+    Gpu: '0'
+    Group: '1'
+    InTiff: /h1/jsun4/frames/m25mar31a/rawdata/m25mar31a_yellow1_00011gr_00018sq_v02_00003hl_00029esn.frames.tif
+    Iter: '7'
+    MaskSize: 1.000 1.000
+    OutMrc: /h1/jsun4/appion/m25mar31a/ddstack/ddstack1/m25mar31a_yellow1_00011gr_00018sq_v02_00003hl_00029esn_c.mrc
+    Patch: 7 5
+    PixSize: 0.428
+    RotGain: 0
+    Tol: '0.500'
+    kV: 300
+- executable: motioncor2
+  expected:
+  - motioncor2
+  - -InTiff
+  - /h1/yli5/frames/m25mar24a/rawdata/m25mar24a_G4_00002gr_00033sq_v02_00008hl_00005enn.frames.tif
+  - -OutMrc
+  - /h1/yli5/appion/m25mar24a/ddstack/ddstack1/m25mar24a_G4_00002gr_00033sq_v02_00008hl_00005enn_c.mrc
+  - -Bft
+  - 500 100
+  - -Iter
+  - '7'
+  - -Tol
+  - '0.500'
+  - -Patch
+  - 7 5
+  - -Group
+  - '1'
+  - -MaskSize
+  - 1.000 1.000
+  - -FmDose
+  - '1.304'
+  - -PixSize
+  - '1.073'
+  - -kV
+  - '300'
+  - -Dark
+  - /h1/yli5/appion/m25mar24a/ddstack/ddstack1/dark-semc-gpu09-0-4190314.mrc
+  - -Gain
+  - /h1/yli5/appion/m25mar24a/ddstack/ddstack1/norm-semc-gpu09-0-4190314.mrc
+  - -FlipGain
+  - '0'
+  - -RotGain
+  - '0'
+  - -Gpu
+  - '0'
+  kwargs:
+    Bft: 500 100
+    Dark: /h1/yli5/appion/m25mar24a/ddstack/ddstack1/dark-semc-gpu09-0-4190314.mrc
+    FlipGain: 0
+    FmDose: 1.304
+    Gain: /h1/yli5/appion/m25mar24a/ddstack/ddstack1/norm-semc-gpu09-0-4190314.mrc
+    Gpu: '0'
+    Group: '1'
+    InTiff: /h1/yli5/frames/m25mar24a/rawdata/m25mar24a_G4_00002gr_00033sq_v02_00008hl_00005enn.frames.tif
+    Iter: '7'
+    MaskSize: 1.000 1.000
+    OutMrc: /h1/yli5/appion/m25mar24a/ddstack/ddstack1/m25mar24a_G4_00002gr_00033sq_v02_00008hl_00005enn_c.mrc
+    Patch: 7 5
+    PixSize: 1.073
+    RotGain: 0
+    Tol: '0.500'
+    kV: 300
+- executable: motioncor2
+  expected:
+  - motioncor2
+  - -InTiff
+  - /h2/aowji3/frames/m25mar21e/rawdata/m25mar21e_241111C3-tilt45_00005gr_00007sq_v03_00004hl_00013enn.frames.tif
+  - -OutMrc
+  - /h2/aowji3/appion/m25mar21e/ddstack/ddstack1/m25mar21e_241111C3-tilt45_00005gr_00007sq_v03_00004hl_00013enn_c.mrc
+  - -Bft
+  - 500 100
+  - -Iter
+  - '7'
+  - -Tol
+  - '0.500'
+  - -Patch
+  - 7 5
+  - -Group
+  - '1'
+  - -MaskSize
+  - 1.000 1.000
+  - -FmDose
+  - '1.35'
+  - -PixSize
+  - '0.856'
+  - -kV
+  - '300'
+  - -Dark
+  - /h2/aowji3/appion/m25mar21e/ddstack/ddstack1/dark-semc-gpu14-0-1087484.mrc
+  - -Gain
+  - /h2/aowji3/appion/m25mar21e/ddstack/ddstack1/norm-semc-gpu14-0-1087484.mrc
+  - -FlipGain
+  - '0'
+  - -RotGain
+  - '0'
+  - -Gpu
+  - '0'
+  kwargs:
+    Bft: 500 100
+    Dark: /h2/aowji3/appion/m25mar21e/ddstack/ddstack1/dark-semc-gpu14-0-1087484.mrc
+    FlipGain: 0
+    FmDose: 1.35
+    Gain: /h2/aowji3/appion/m25mar21e/ddstack/ddstack1/norm-semc-gpu14-0-1087484.mrc
+    Gpu: '0'
+    Group: '1'
+    InTiff: /h2/aowji3/frames/m25mar21e/rawdata/m25mar21e_241111C3-tilt45_00005gr_00007sq_v03_00004hl_00013enn.frames.tif
+    Iter: '7'
+    MaskSize: 1.000 1.000
+    OutMrc: /h2/aowji3/appion/m25mar21e/ddstack/ddstack1/m25mar21e_241111C3-tilt45_00005gr_00007sq_v03_00004hl_00013enn_c.mrc
+    Patch: 7 5
+    PixSize: 0.856
+    RotGain: 0
+    Tol: '0.500'
+    kV: 300
+- executable: motioncor2
+  expected:
+  - motioncor2
+  - -InTiff
+  - /h1/jclosson/frames/m25mar28a/rawdata/m25mar28a_gr4_00013gr_00044sq_v02_00003hl_00023enn.frames.tif
+  - -OutMrc
+  - /h1/jclosson/appion/m25mar28a/ddstack/ddstack1/m25mar28a_gr4_00013gr_00044sq_v02_00003hl_00023enn_c.mrc
+  - -Bft
+  - 500 100
+  - -Iter
+  - '7'
+  - -Tol
+  - '0.500'
+  - -Patch
+  - 7 5
+  - -Group
+  - '1'
+  - -MaskSize
+  - 1.000 1.000
+  - -FmDose
+  - '1.642'
+  - -PixSize
+  - '0.856'
+  - -kV
+  - '300'
+  - -Dark
+  - /h1/jclosson/appion/m25mar28a/ddstack/ddstack1/dark-semc-gpu01-0-2324810.mrc
+  - -Gain
+  - /h1/jclosson/appion/m25mar28a/ddstack/ddstack1/norm-semc-gpu01-0-2324810.mrc
+  - -FlipGain
+  - '0'
+  - -RotGain
+  - '0'
+  - -Gpu
+  - '0'
+  kwargs:
+    Bft: 500 100
+    Dark: /h1/jclosson/appion/m25mar28a/ddstack/ddstack1/dark-semc-gpu01-0-2324810.mrc
+    FlipGain: 0
+    FmDose: 1.642
+    Gain: /h1/jclosson/appion/m25mar28a/ddstack/ddstack1/norm-semc-gpu01-0-2324810.mrc
+    Gpu: '0'
+    Group: '1'
+    InTiff: /h1/jclosson/frames/m25mar28a/rawdata/m25mar28a_gr4_00013gr_00044sq_v02_00003hl_00023enn.frames.tif
+    Iter: '7'
+    MaskSize: 1.000 1.000
+    OutMrc: /h1/jclosson/appion/m25mar28a/ddstack/ddstack1/m25mar28a_gr4_00013gr_00044sq_v02_00003hl_00023enn_c.mrc
+    Patch: 7 5
+    PixSize: 0.856
+    RotGain: 0
+    Tol: '0.500'
+    kV: 300
+- executable: motioncor2
+  expected:
+  - motioncor2
+  - -InTiff
+  - /h2/aowji3/frames/m25mar21e/rawdata/m25mar21e_241111C3-tilt45_00002gr_00010sq_v03_00003hl_00029enn.frames.tif
+  - -OutMrc
+  - /h2/aowji3/appion/m25mar21e/ddstack/ddstack1/m25mar21e_241111C3-tilt45_00002gr_00010sq_v03_00003hl_00029enn_c.mrc
+  - -Bft
+  - 500 100
+  - -Iter
+  - '7'
+  - -Tol
+  - '0.500'
+  - -Patch
+  - 7 5
+  - -Group
+  - '1'
+  - -MaskSize
+  - 1.000 1.000
+  - -FmDose
+  - '1.35'
+  - -PixSize
+  - '0.856'
+  - -kV
+  - '300'
+  - -Dark
+  - /h2/aowji3/appion/m25mar21e/ddstack/ddstack1/dark-semc-cpu02-0-788024.mrc
+  - -Gain
+  - /h2/aowji3/appion/m25mar21e/ddstack/ddstack1/norm-semc-cpu02-0-788024.mrc
+  - -FlipGain
+  - '0'
+  - -RotGain
+  - '0'
+  - -Gpu
+  - '0'
+  kwargs:
+    Bft: 500 100
+    Dark: /h2/aowji3/appion/m25mar21e/ddstack/ddstack1/dark-semc-cpu02-0-788024.mrc
+    FlipGain: 0
+    FmDose: 1.35
+    Gain: /h2/aowji3/appion/m25mar21e/ddstack/ddstack1/norm-semc-cpu02-0-788024.mrc
+    Gpu: '0'
+    Group: '1'
+    InTiff: /h2/aowji3/frames/m25mar21e/rawdata/m25mar21e_241111C3-tilt45_00002gr_00010sq_v03_00003hl_00029enn.frames.tif
+    Iter: '7'
+    MaskSize: 1.000 1.000
+    OutMrc: /h2/aowji3/appion/m25mar21e/ddstack/ddstack1/m25mar21e_241111C3-tilt45_00002gr_00010sq_v03_00003hl_00029enn_c.mrc
+    Patch: 7 5
+    PixSize: 0.856
+    RotGain: 0
+    Tol: '0.500'
+    kV: 300
+- executable: motioncor2
+  expected:
+  - motioncor2
+  - -InTiff
+  - /h1/hsosa/frames/m25mar31b/rawdata/m25mar31b_B1G2_00007gr_00059sq_v02_00002hl_v01_00011enn.frames.tif
+  - -OutMrc
+  - /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/m25mar31b_B1G2_00007gr_00059sq_v02_00002hl_v01_00011enn_c.mrc
+  - -Bft
+  - 500 100
+  - -Iter
+  - '7'
+  - -Tol
+  - '0.500'
+  - -Patch
+  - 7 5
+  - -Group
+  - '1'
+  - -MaskSize
+  - 1.000 1.000
+  - -FmDose
+  - '1.574'
+  - -PixSize
+  - '0.826'
+  - -kV
+  - '300'
+  - -Dark
+  - /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/dark-semc-gpu01-0-489993.mrc
+  - -Gain
+  - /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/norm-semc-gpu01-0-489993.mrc
+  - -FlipGain
+  - '0'
+  - -RotGain
+  - '0'
+  - -Gpu
+  - '0'
+  kwargs:
+    Bft: 500 100
+    Dark: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/dark-semc-gpu01-0-489993.mrc
+    FlipGain: 0
+    FmDose: 1.574
+    Gain: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/norm-semc-gpu01-0-489993.mrc
+    Gpu: '0'
+    Group: '1'
+    InTiff: /h1/hsosa/frames/m25mar31b/rawdata/m25mar31b_B1G2_00007gr_00059sq_v02_00002hl_v01_00011enn.frames.tif
+    Iter: '7'
+    MaskSize: 1.000 1.000
+    OutMrc: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/m25mar31b_B1G2_00007gr_00059sq_v02_00002hl_v01_00011enn_c.mrc
+    Patch: 7 5
+    PixSize: 0.826
+    RotGain: 0
+    Tol: '0.500'
+    kV: 300
+- executable: motioncor2
+  expected:
+  - motioncor2
+  - -InTiff
+  - /h1/yli5/frames/m25mar24a/rawdata/m25mar24a_G4_00005gr_00026sq_v02_00004hl_00031enn.frames.tif
+  - -OutMrc
+  - /h1/yli5/appion/m25mar24a/ddstack/ddstack1/m25mar24a_G4_00005gr_00026sq_v02_00004hl_00031enn_c.mrc
+  - -Bft
+  - 500 100
+  - -Iter
+  - '7'
+  - -Tol
+  - '0.500'
+  - -Patch
+  - 7 5
+  - -Group
+  - '1'
+  - -MaskSize
+  - 1.000 1.000
+  - -FmDose
+  - '1.304'
+  - -PixSize
+  - '1.073'
+  - -kV
+  - '300'
+  - -Dark
+  - /h1/yli5/appion/m25mar24a/ddstack/ddstack1/dark-semc-gpu09-0-4190317.mrc
+  - -Gain
+  - /h1/yli5/appion/m25mar24a/ddstack/ddstack1/norm-semc-gpu09-0-4190317.mrc
+  - -FlipGain
+  - '0'
+  - -RotGain
+  - '0'
+  - -Gpu
+  - '0'
+  kwargs:
+    Bft: 500 100
+    Dark: /h1/yli5/appion/m25mar24a/ddstack/ddstack1/dark-semc-gpu09-0-4190317.mrc
+    FlipGain: 0
+    FmDose: 1.304
+    Gain: /h1/yli5/appion/m25mar24a/ddstack/ddstack1/norm-semc-gpu09-0-4190317.mrc
+    Gpu: '0'
+    Group: '1'
+    InTiff: /h1/yli5/frames/m25mar24a/rawdata/m25mar24a_G4_00005gr_00026sq_v02_00004hl_00031enn.frames.tif
+    Iter: '7'
+    MaskSize: 1.000 1.000
+    OutMrc: /h1/yli5/appion/m25mar24a/ddstack/ddstack1/m25mar24a_G4_00005gr_00026sq_v02_00004hl_00031enn_c.mrc
+    Patch: 7 5
+    PixSize: 1.073
+    RotGain: 0
+    Tol: '0.500'
+    kV: 300
+- executable: motioncor2
+  expected:
+  - motioncor2
+  - -InTiff
+  - /h1/iishigami/frames/m25mar19c/rawdata/m25mar19c_White_Gr3_00021gr_00029sq_v03_00004hl_00041enn.frames.tif
+  - -OutMrc
+  - /h1/iishigami/appion/m25mar19c/ddstack/ddstack1/m25mar19c_White_Gr3_00021gr_00029sq_v03_00004hl_00041enn_c.mrc
+  - -Bft
+  - 500 100
+  - -Iter
+  - '7'
+  - -Tol
+  - '0.500'
+  - -Patch
+  - 7 5
+  - -Group
+  - '1'
+  - -MaskSize
+  - 1.000 1.000
+  - -FmDose
+  - '1.09'
+  - -PixSize
+  - '0.826'
+  - -kV
+  - '300'
+  - -Dark
+  - /h1/iishigami/appion/m25mar19c/ddstack/ddstack1/dark-semc-cpu02-0-128378.mrc
+  - -Gain
+  - /h1/iishigami/appion/m25mar19c/ddstack/ddstack1/norm-semc-cpu02-0-128378.mrc
+  - -FlipGain
+  - '0'
+  - -RotGain
+  - '0'
+  - -Gpu
+  - '0'
+  kwargs:
+    Bft: 500 100
+    Dark: /h1/iishigami/appion/m25mar19c/ddstack/ddstack1/dark-semc-cpu02-0-128378.mrc
+    FlipGain: 0
+    FmDose: 1.09
+    Gain: /h1/iishigami/appion/m25mar19c/ddstack/ddstack1/norm-semc-cpu02-0-128378.mrc
+    Gpu: '0'
+    Group: '1'
+    InTiff: /h1/iishigami/frames/m25mar19c/rawdata/m25mar19c_White_Gr3_00021gr_00029sq_v03_00004hl_00041enn.frames.tif
+    Iter: '7'
+    MaskSize: 1.000 1.000
+    OutMrc: /h1/iishigami/appion/m25mar19c/ddstack/ddstack1/m25mar19c_White_Gr3_00021gr_00029sq_v03_00004hl_00041enn_c.mrc
+    Patch: 7 5
+    PixSize: 0.826
+    RotGain: 0
+    Tol: '0.500'
+    kV: 300
+- executable: motioncor2
+  expected:
+  - motioncor2
+  - -InTiff
+  - /h1/hsosa/frames/m25mar31b/rawdata/m25mar31b_B1G2_00012gr_00016sq_v02_00002hl_v01_00016enn.frames.tif
+  - -OutMrc
+  - /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/m25mar31b_B1G2_00012gr_00016sq_v02_00002hl_v01_00016enn_c.mrc
+  - -Bft
+  - 500 100
+  - -Iter
+  - '7'
+  - -Tol
+  - '0.500'
+  - -Patch
+  - 7 5
+  - -Group
+  - '1'
+  - -MaskSize
+  - 1.000 1.000
+  - -FmDose
+  - '1.574'
+  - -PixSize
+  - '0.826'
+  - -kV
+  - '300'
+  - -Dark
+  - /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/dark-semc-gpu01-0-490002.mrc
+  - -Gain
+  - /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/norm-semc-gpu01-0-490002.mrc
+  - -FlipGain
+  - '0'
+  - -RotGain
+  - '0'
+  - -Gpu
+  - '0'
+  kwargs:
+    Bft: 500 100
+    Dark: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/dark-semc-gpu01-0-490002.mrc
+    FlipGain: 0
+    FmDose: 1.574
+    Gain: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/norm-semc-gpu01-0-490002.mrc
+    Gpu: '0'
+    Group: '1'
+    InTiff: /h1/hsosa/frames/m25mar31b/rawdata/m25mar31b_B1G2_00012gr_00016sq_v02_00002hl_v01_00016enn.frames.tif
+    Iter: '7'
+    MaskSize: 1.000 1.000
+    OutMrc: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/m25mar31b_B1G2_00012gr_00016sq_v02_00002hl_v01_00016enn_c.mrc
+    Patch: 7 5
+    PixSize: 0.826
+    RotGain: 0
+    Tol: '0.500'
+    kV: 300
+- executable: motioncor2
+  expected:
+  - motioncor2
+  - -InTiff
+  - /h1/jsun4/frames/m25mar31a/rawdata/m25mar31a_yellow1_00010gr_00032sq_v02_00003hl_00062esn.frames.tif
+  - -OutMrc
+  - /h1/jsun4/appion/m25mar31a/ddstack/ddstack1/m25mar31a_yellow1_00010gr_00032sq_v02_00003hl_00062esn_c.mrc
+  - -FtBin
+  - '2.0'
+  - -Bft
+  - 500 100
+  - -Iter
+  - '7'
+  - -Tol
+  - '0.500'
+  - -Patch
+  - 7 5
+  - -Group
+  - '1'
+  - -MaskSize
+  - 1.000 1.000
+  - -FmDose
+  - '1.35'
+  - -PixSize
+  - '0.428'
+  - -kV
+  - '300'
+  - -Dark
+  - /h1/jsun4/appion/m25mar31a/ddstack/ddstack1/dark-semc-cpu02-0-1720955.mrc
+  - -Gain
+  - /h1/jsun4/appion/m25mar31a/ddstack/ddstack1/norm-semc-cpu02-0-1720955.mrc
+  - -FlipGain
+  - '0'
+  - -RotGain
+  - '0'
+  - -Gpu
+  - '0'
+  kwargs:
+    Bft: 500 100
+    Dark: /h1/jsun4/appion/m25mar31a/ddstack/ddstack1/dark-semc-cpu02-0-1720955.mrc
+    FlipGain: 0
+    FmDose: 1.35
+    FtBin: '2.0'
+    Gain: /h1/jsun4/appion/m25mar31a/ddstack/ddstack1/norm-semc-cpu02-0-1720955.mrc
+    Gpu: '0'
+    Group: '1'
+    InTiff: /h1/jsun4/frames/m25mar31a/rawdata/m25mar31a_yellow1_00010gr_00032sq_v02_00003hl_00062esn.frames.tif
+    Iter: '7'
+    MaskSize: 1.000 1.000
+    OutMrc: /h1/jsun4/appion/m25mar31a/ddstack/ddstack1/m25mar31a_yellow1_00010gr_00032sq_v02_00003hl_00062esn_c.mrc
+    Patch: 7 5
+    PixSize: 0.428
+    RotGain: 0
+    Tol: '0.500'
+    kV: 300
+- executable: motioncor2
+  expected:
+  - motioncor2
+  - -InTiff
+  - /h1/wgong/frames/m25mar19a/rawdata/m25mar19a_g2_00018gr_00014sq_v02_00008hl_00016esn.frames.tif
+  - -OutMrc
+  - /h1/wgong/appion/m25mar19a/ddstack/ddstack1/m25mar19a_g2_00018gr_00014sq_v02_00008hl_00016esn_c.mrc
+  - -FtBin
+  - '2.0'
+  - -Bft
+  - 500 100
+  - -Iter
+  - '7'
+  - -Tol
+  - '0.500'
+  - -Patch
+  - 7 5
+  - -Group
+  - '1'
+  - -MaskSize
+  - 1.000 1.000
+  - -FmDose
+  - '1.365'
+  - -PixSize
+  - '0.428'
+  - -kV
+  - '300'
+  - -Dark
+  - /h1/wgong/appion/m25mar19a/ddstack/ddstack1/dark-semc-gpu09-0-3776974.mrc
+  - -Gain
+  - /h1/wgong/appion/m25mar19a/ddstack/ddstack1/norm-semc-gpu09-0-3776974.mrc
+  - -FlipGain
+  - '0'
+  - -RotGain
+  - '0'
+  - -Gpu
+  - '0'
+  kwargs:
+    Bft: 500 100
+    Dark: /h1/wgong/appion/m25mar19a/ddstack/ddstack1/dark-semc-gpu09-0-3776974.mrc
+    FlipGain: 0
+    FmDose: 1.365
+    FtBin: '2.0'
+    Gain: /h1/wgong/appion/m25mar19a/ddstack/ddstack1/norm-semc-gpu09-0-3776974.mrc
+    Gpu: '0'
+    Group: '1'
+    InTiff: /h1/wgong/frames/m25mar19a/rawdata/m25mar19a_g2_00018gr_00014sq_v02_00008hl_00016esn.frames.tif
+    Iter: '7'
+    MaskSize: 1.000 1.000
+    OutMrc: /h1/wgong/appion/m25mar19a/ddstack/ddstack1/m25mar19a_g2_00018gr_00014sq_v02_00008hl_00016esn_c.mrc
+    Patch: 7 5
+    PixSize: 0.428
+    RotGain: 0
+    Tol: '0.500'
+    kV: 300
+- executable: motioncor2
+  expected:
+  - motioncor2
+  - -InTiff
+  - /h1/jcheung/frames/m25mar17a/rawdata/m25mar17a_NY0268_Gr1a_00008gr_00012sq_v02_00002hl_00085enn.frames.tif
+  - -OutMrc
+  - /h1/jcheung/appion/m25mar17a/ddstack/ddstack1/m25mar17a_NY0268_Gr1a_00008gr_00012sq_v02_00002hl_00085enn_c.mrc
+  - -Bft
+  - 500 100
+  - -Iter
+  - '7'
+  - -Tol
+  - '0.500'
+  - -Patch
+  - 7 5
+  - -Group
+  - '1'
+  - -MaskSize
+  - 1.000 1.000
+  - -FmDose
+  - '1.091'
+  - -PixSize
+  - '0.826'
+  - -kV
+  - '300'
+  - -Dark
+  - /h1/jcheung/appion/m25mar17a/ddstack/ddstack1/dark-semc-gpu01-0-1705744.mrc
+  - -Gain
+  - /h1/jcheung/appion/m25mar17a/ddstack/ddstack1/norm-semc-gpu01-0-1705744.mrc
+  - -FlipGain
+  - '0'
+  - -RotGain
+  - '0'
+  - -Gpu
+  - '0'
+  kwargs:
+    Bft: 500 100
+    Dark: /h1/jcheung/appion/m25mar17a/ddstack/ddstack1/dark-semc-gpu01-0-1705744.mrc
+    FlipGain: 0
+    FmDose: 1.091
+    Gain: /h1/jcheung/appion/m25mar17a/ddstack/ddstack1/norm-semc-gpu01-0-1705744.mrc
+    Gpu: '0'
+    Group: '1'
+    InTiff: /h1/jcheung/frames/m25mar17a/rawdata/m25mar17a_NY0268_Gr1a_00008gr_00012sq_v02_00002hl_00085enn.frames.tif
+    Iter: '7'
+    MaskSize: 1.000 1.000
+    OutMrc: /h1/jcheung/appion/m25mar17a/ddstack/ddstack1/m25mar17a_NY0268_Gr1a_00008gr_00012sq_v02_00002hl_00085enn_c.mrc
+    Patch: 7 5
+    PixSize: 0.826
+    RotGain: 0
+    Tol: '0.500'
+    kV: 300
+- executable: motioncor2
+  expected:
+  - motioncor2
+  - -InTiff
+  - /h1/bwimberly/frames/m25mar19b/rawdata/m25mar19b_G4_00018gr_00056sq_v02_00003hl_00015enn.frames.tif
+  - -OutMrc
+  - /h1/bwimberly/appion/m25mar19b/ddstack/ddstack1/m25mar19b_G4_00018gr_00056sq_v02_00003hl_00015enn_c.mrc
+  - -Bft
+  - 500 100
+  - -Iter
+  - '7'
+  - -Tol
+  - '0.500'
+  - -Patch
+  - 5 5
+  - -Group
+  - '1'
+  - -MaskSize
+  - 1.000 1.000
+  - -FmDose
+  - '1.262'
+  - -PixSize
+  - '1.083'
+  - -kV
+  - '300'
+  - -Dark
+  - /h1/bwimberly/appion/m25mar19b/ddstack/ddstack1/dark-semc-cpu02-0-140690.mrc
+  - -Gain
+  - /h1/bwimberly/appion/m25mar19b/ddstack/ddstack1/norm-semc-cpu02-0-140690.mrc
+  - -DefectMap
+  - /h1/bwimberly/appion/m25mar19b/ddstack/ddstack1/defect-semc-cpu02-0-140690.mrc
+  - -FlipGain
+  - '0'
+  - -RotGain
+  - '0'
+  - -Gpu
+  - '0'
+  kwargs:
+    Bft: 500 100
+    Dark: /h1/bwimberly/appion/m25mar19b/ddstack/ddstack1/dark-semc-cpu02-0-140690.mrc
+    DefectMap: /h1/bwimberly/appion/m25mar19b/ddstack/ddstack1/defect-semc-cpu02-0-140690.mrc
+    FlipGain: 0
+    FmDose: 1.262
+    Gain: /h1/bwimberly/appion/m25mar19b/ddstack/ddstack1/norm-semc-cpu02-0-140690.mrc
+    Gpu: '0'
+    Group: '1'
+    InTiff: /h1/bwimberly/frames/m25mar19b/rawdata/m25mar19b_G4_00018gr_00056sq_v02_00003hl_00015enn.frames.tif
+    Iter: '7'
+    MaskSize: 1.000 1.000
+    OutMrc: /h1/bwimberly/appion/m25mar19b/ddstack/ddstack1/m25mar19b_G4_00018gr_00056sq_v02_00003hl_00015enn_c.mrc
+    Patch: 5 5
+    PixSize: 1.083
+    RotGain: 0
+    Tol: '0.500'
+    kV: 300
+- executable: motioncor2
+  expected:
+  - motioncor2
+  - -InTiff
+  - /h1/iishigami/frames/m25mar19c/rawdata/m25mar19c_White_Gr3_00020gr_00047sq_v03_00007hl_00023enn.frames.tif
+  - -OutMrc
+  - /h1/iishigami/appion/m25mar19c/ddstack/ddstack1/m25mar19c_White_Gr3_00020gr_00047sq_v03_00007hl_00023enn_c.mrc
+  - -Bft
+  - 500 100
+  - -Iter
+  - '7'
+  - -Tol
+  - '0.500'
+  - -Patch
+  - 7 5
+  - -Group
+  - '1'
+  - -MaskSize
+  - 1.000 1.000
+  - -FmDose
+  - '1.09'
+  - -PixSize
+  - '0.826'
+  - -kV
+  - '300'
+  - -Dark
+  - /h1/iishigami/appion/m25mar19c/ddstack/ddstack1/dark-semc-cpu02-0-393880.mrc
+  - -Gain
+  - /h1/iishigami/appion/m25mar19c/ddstack/ddstack1/norm-semc-cpu02-0-393880.mrc
+  - -FlipGain
+  - '0'
+  - -RotGain
+  - '0'
+  - -Gpu
+  - '0'
+  kwargs:
+    Bft: 500 100
+    Dark: /h1/iishigami/appion/m25mar19c/ddstack/ddstack1/dark-semc-cpu02-0-393880.mrc
+    FlipGain: 0
+    FmDose: 1.09
+    Gain: /h1/iishigami/appion/m25mar19c/ddstack/ddstack1/norm-semc-cpu02-0-393880.mrc
+    Gpu: '0'
+    Group: '1'
+    InTiff: /h1/iishigami/frames/m25mar19c/rawdata/m25mar19c_White_Gr3_00020gr_00047sq_v03_00007hl_00023enn.frames.tif
+    Iter: '7'
+    MaskSize: 1.000 1.000
+    OutMrc: /h1/iishigami/appion/m25mar19c/ddstack/ddstack1/m25mar19c_White_Gr3_00020gr_00047sq_v03_00007hl_00023enn_c.mrc
+    Patch: 7 5
+    PixSize: 0.826
+    RotGain: 0
+    Tol: '0.500'
+    kV: 300
+- executable: motioncor2
+  expected:
+  - motioncor2
+  - -InTiff
+  - /h1/hsosa/frames/m25mar31b/rawdata/m25mar31b_B1G2_00011gr_00033sq_v02_00002hl_00004enn.frames.tif
+  - -OutMrc
+  - /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/m25mar31b_B1G2_00011gr_00033sq_v02_00002hl_00004enn_c.mrc
+  - -Bft
+  - 500 100
+  - -Iter
+  - '7'
+  - -Tol
+  - '0.500'
+  - -Patch
+  - 7 5
+  - -Group
+  - '1'
+  - -MaskSize
+  - 1.000 1.000
+  - -FmDose
+  - '1.574'
+  - -PixSize
+  - '0.826'
+  - -kV
+  - '300'
+  - -Dark
+  - /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/dark-semc-gpu01-0-489991.mrc
+  - -Gain
+  - /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/norm-semc-gpu01-0-489991.mrc
+  - -FlipGain
+  - '0'
+  - -RotGain
+  - '0'
+  - -Gpu
+  - '0'
+  kwargs:
+    Bft: 500 100
+    Dark: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/dark-semc-gpu01-0-489991.mrc
+    FlipGain: 0
+    FmDose: 1.574
+    Gain: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/norm-semc-gpu01-0-489991.mrc
+    Gpu: '0'
+    Group: '1'
+    InTiff: /h1/hsosa/frames/m25mar31b/rawdata/m25mar31b_B1G2_00011gr_00033sq_v02_00002hl_00004enn.frames.tif
+    Iter: '7'
+    MaskSize: 1.000 1.000
+    OutMrc: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/m25mar31b_B1G2_00011gr_00033sq_v02_00002hl_00004enn_c.mrc
+    Patch: 7 5
+    PixSize: 0.826
+    RotGain: 0
+    Tol: '0.500'
+    kV: 300
+- executable: motioncor2
+  expected:
+  - motioncor2
+  - -InTiff
+  - /h1/jsun4/frames/m25mar31a/rawdata/m25mar31a_yellow1_00011gr_00025sq_v02_00007hl_00024esn.frames.tif
+  - -OutMrc
+  - /h1/jsun4/appion/m25mar31a/ddstack/ddstack1/m25mar31a_yellow1_00011gr_00025sq_v02_00007hl_00024esn_c.mrc
+  - -FtBin
+  - '2.0'
+  - -Bft
+  - 500 100
+  - -Iter
+  - '7'
+  - -Tol
+  - '0.500'
+  - -Patch
+  - 7 5
+  - -Group
+  - '1'
+  - -MaskSize
+  - 1.000 1.000
+  - -FmDose
+  - '1.35'
+  - -PixSize
+  - '0.428'
+  - -kV
+  - '300'
+  - -Dark
+  - /h1/jsun4/appion/m25mar31a/ddstack/ddstack1/dark-semc-cpu02-0-1720961.mrc
+  - -Gain
+  - /h1/jsun4/appion/m25mar31a/ddstack/ddstack1/norm-semc-cpu02-0-1720961.mrc
+  - -FlipGain
+  - '0'
+  - -RotGain
+  - '0'
+  - -Gpu
+  - '0'
+  kwargs:
+    Bft: 500 100
+    Dark: /h1/jsun4/appion/m25mar31a/ddstack/ddstack1/dark-semc-cpu02-0-1720961.mrc
+    FlipGain: 0
+    FmDose: 1.35
+    FtBin: '2.0'
+    Gain: /h1/jsun4/appion/m25mar31a/ddstack/ddstack1/norm-semc-cpu02-0-1720961.mrc
+    Gpu: '0'
+    Group: '1'
+    InTiff: /h1/jsun4/frames/m25mar31a/rawdata/m25mar31a_yellow1_00011gr_00025sq_v02_00007hl_00024esn.frames.tif
+    Iter: '7'
+    MaskSize: 1.000 1.000
+    OutMrc: /h1/jsun4/appion/m25mar31a/ddstack/ddstack1/m25mar31a_yellow1_00011gr_00025sq_v02_00007hl_00024esn_c.mrc
+    Patch: 7 5
+    PixSize: 0.428
+    RotGain: 0
+    Tol: '0.500'
+    kV: 300
+- executable: motioncor2
+  expected:
+  - motioncor2
+  - -InTiff
+  - /h1/wgong/frames/m25mar19a/rawdata/m25mar19a_g2_00021gr_00042sq_v03_00010hl_00021esn.frames.tif
+  - -OutMrc
+  - /h1/wgong/appion/m25mar19a/ddstack/ddstack1/m25mar19a_g2_00021gr_00042sq_v03_00010hl_00021esn_c.mrc
+  - -FtBin
+  - '2.0'
+  - -Bft
+  - 500 100
+  - -Iter
+  - '7'
+  - -Tol
+  - '0.500'
+  - -Patch
+  - 7 5
+  - -Group
+  - '1'
+  - -MaskSize
+  - 1.000 1.000
+  - -FmDose
+  - '1.365'
+  - -PixSize
+  - '0.428'
+  - -kV
+  - '300'
+  - -Dark
+  - /h1/wgong/appion/m25mar19a/ddstack/ddstack1/dark-semc-cpu02-0-122919.mrc
+  - -Gain
+  - /h1/wgong/appion/m25mar19a/ddstack/ddstack1/norm-semc-cpu02-0-122919.mrc
+  - -FlipGain
+  - '0'
+  - -RotGain
+  - '0'
+  - -Gpu
+  - '0'
+  kwargs:
+    Bft: 500 100
+    Dark: /h1/wgong/appion/m25mar19a/ddstack/ddstack1/dark-semc-cpu02-0-122919.mrc
+    FlipGain: 0
+    FmDose: 1.365
+    FtBin: '2.0'
+    Gain: /h1/wgong/appion/m25mar19a/ddstack/ddstack1/norm-semc-cpu02-0-122919.mrc
+    Gpu: '0'
+    Group: '1'
+    InTiff: /h1/wgong/frames/m25mar19a/rawdata/m25mar19a_g2_00021gr_00042sq_v03_00010hl_00021esn.frames.tif
+    Iter: '7'
+    MaskSize: 1.000 1.000
+    OutMrc: /h1/wgong/appion/m25mar19a/ddstack/ddstack1/m25mar19a_g2_00021gr_00042sq_v03_00010hl_00021esn_c.mrc
+    Patch: 7 5
+    PixSize: 0.428
+    RotGain: 0
+    Tol: '0.500'
+    kV: 300
+- executable: motioncor2
+  expected:
+  - motioncor2
+  - -InTiff
+  - /h1/hsosa/frames/m25mar31b/rawdata/m25mar31b_B1G2_00002gr_00054sq_v03_00003hl_00085enn.frames.tif
+  - -OutMrc
+  - /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/m25mar31b_B1G2_00002gr_00054sq_v03_00003hl_00085enn_c.mrc
+  - -Bft
+  - 500 100
+  - -Iter
+  - '7'
+  - -Tol
+  - '0.500'
+  - -Patch
+  - 7 5
+  - -Group
+  - '1'
+  - -MaskSize
+  - 1.000 1.000
+  - -FmDose
+  - '1.574'
+  - -PixSize
+  - '0.826'
+  - -kV
+  - '300'
+  - -Dark
+  - /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/dark-semc-gpu01-0-490002.mrc
+  - -Gain
+  - /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/norm-semc-gpu01-0-490002.mrc
+  - -FlipGain
+  - '0'
+  - -RotGain
+  - '0'
+  - -Gpu
+  - '0'
+  kwargs:
+    Bft: 500 100
+    Dark: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/dark-semc-gpu01-0-490002.mrc
+    FlipGain: 0
+    FmDose: 1.574
+    Gain: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/norm-semc-gpu01-0-490002.mrc
+    Gpu: '0'
+    Group: '1'
+    InTiff: /h1/hsosa/frames/m25mar31b/rawdata/m25mar31b_B1G2_00002gr_00054sq_v03_00003hl_00085enn.frames.tif
+    Iter: '7'
+    MaskSize: 1.000 1.000
+    OutMrc: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/m25mar31b_B1G2_00002gr_00054sq_v03_00003hl_00085enn_c.mrc
+    Patch: 7 5
+    PixSize: 0.826
+    RotGain: 0
+    Tol: '0.500'
+    kV: 300
+- executable: motioncor2
+  expected:
+  - motioncor2
+  - -InTiff
+  - /h1/hsosa/frames/m25mar31b/rawdata/m25mar31b_B1G2_00017gr_00027sq_v02_00005hl_00033enn.frames.tif
+  - -OutMrc
+  - /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/m25mar31b_B1G2_00017gr_00027sq_v02_00005hl_00033enn_c.mrc
+  - -Bft
+  - 500 100
+  - -Iter
+  - '7'
+  - -Tol
+  - '0.500'
+  - -Patch
+  - 7 5
+  - -Group
+  - '1'
+  - -MaskSize
+  - 1.000 1.000
+  - -FmDose
+  - '1.574'
+  - -PixSize
+  - '0.826'
+  - -kV
+  - '300'
+  - -Dark
+  - /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/dark-semc-gpu01-0-489993.mrc
+  - -Gain
+  - /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/norm-semc-gpu01-0-489993.mrc
+  - -FlipGain
+  - '0'
+  - -RotGain
+  - '0'
+  - -Gpu
+  - '0'
+  kwargs:
+    Bft: 500 100
+    Dark: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/dark-semc-gpu01-0-489993.mrc
+    FlipGain: 0
+    FmDose: 1.574
+    Gain: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/norm-semc-gpu01-0-489993.mrc
+    Gpu: '0'
+    Group: '1'
+    InTiff: /h1/hsosa/frames/m25mar31b/rawdata/m25mar31b_B1G2_00017gr_00027sq_v02_00005hl_00033enn.frames.tif
+    Iter: '7'
+    MaskSize: 1.000 1.000
+    OutMrc: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/m25mar31b_B1G2_00017gr_00027sq_v02_00005hl_00033enn_c.mrc
+    Patch: 7 5
+    PixSize: 0.826
+    RotGain: 0
+    Tol: '0.500'
+    kV: 300
+- executable: motioncor2
+  expected:
+  - motioncor2
+  - -InTiff
+  - /h1/iishigami/frames/m25mar19c/rawdata/m25mar19c_White_Gr3_00017gr_00058sq_v02_00002hl_00059enn.frames.tif
+  - -OutMrc
+  - /h1/iishigami/appion/m25mar19c/ddstack/ddstack1/m25mar19c_White_Gr3_00017gr_00058sq_v02_00002hl_00059enn_c.mrc
+  - -Bft
+  - 500 100
+  - -Iter
+  - '7'
+  - -Tol
+  - '0.500'
+  - -Patch
+  - 7 5
+  - -Group
+  - '1'
+  - -MaskSize
+  - 1.000 1.000
+  - -FmDose
+  - '1.09'
+  - -PixSize
+  - '0.826'
+  - -kV
+  - '300'
+  - -Dark
+  - /h1/iishigami/appion/m25mar19c/ddstack/ddstack1/dark-semc-cpu02-0-393880.mrc
+  - -Gain
+  - /h1/iishigami/appion/m25mar19c/ddstack/ddstack1/norm-semc-cpu02-0-393880.mrc
+  - -FlipGain
+  - '0'
+  - -RotGain
+  - '0'
+  - -Gpu
+  - '0'
+  kwargs:
+    Bft: 500 100
+    Dark: /h1/iishigami/appion/m25mar19c/ddstack/ddstack1/dark-semc-cpu02-0-393880.mrc
+    FlipGain: 0
+    FmDose: 1.09
+    Gain: /h1/iishigami/appion/m25mar19c/ddstack/ddstack1/norm-semc-cpu02-0-393880.mrc
+    Gpu: '0'
+    Group: '1'
+    InTiff: /h1/iishigami/frames/m25mar19c/rawdata/m25mar19c_White_Gr3_00017gr_00058sq_v02_00002hl_00059enn.frames.tif
+    Iter: '7'
+    MaskSize: 1.000 1.000
+    OutMrc: /h1/iishigami/appion/m25mar19c/ddstack/ddstack1/m25mar19c_White_Gr3_00017gr_00058sq_v02_00002hl_00059enn_c.mrc
+    Patch: 7 5
+    PixSize: 0.826
+    RotGain: 0
+    Tol: '0.500'
+    kV: 300
+- executable: motioncor2
+  expected:
+  - motioncor2
+  - -InTiff
+  - /h1/bwimberly/frames/m25mar19b/rawdata/m25mar19b_G4_00018gr_00058sq_v02_00004hl_00019enn.frames.tif
+  - -OutMrc
+  - /h1/bwimberly/appion/m25mar19b/ddstack/ddstack1/m25mar19b_G4_00018gr_00058sq_v02_00004hl_00019enn_c.mrc
+  - -Bft
+  - 500 100
+  - -Iter
+  - '7'
+  - -Tol
+  - '0.500'
+  - -Patch
+  - 5 5
+  - -Group
+  - '1'
+  - -MaskSize
+  - 1.000 1.000
+  - -FmDose
+  - '1.262'
+  - -PixSize
+  - '1.083'
+  - -kV
+  - '300'
+  - -Dark
+  - /h1/bwimberly/appion/m25mar19b/ddstack/ddstack1/dark-semc-cpu02-0-140703.mrc
+  - -Gain
+  - /h1/bwimberly/appion/m25mar19b/ddstack/ddstack1/norm-semc-cpu02-0-140703.mrc
+  - -DefectMap
+  - /h1/bwimberly/appion/m25mar19b/ddstack/ddstack1/defect-semc-cpu02-0-140703.mrc
+  - -FlipGain
+  - '0'
+  - -RotGain
+  - '0'
+  - -Gpu
+  - '0'
+  kwargs:
+    Bft: 500 100
+    Dark: /h1/bwimberly/appion/m25mar19b/ddstack/ddstack1/dark-semc-cpu02-0-140703.mrc
+    DefectMap: /h1/bwimberly/appion/m25mar19b/ddstack/ddstack1/defect-semc-cpu02-0-140703.mrc
+    FlipGain: 0
+    FmDose: 1.262
+    Gain: /h1/bwimberly/appion/m25mar19b/ddstack/ddstack1/norm-semc-cpu02-0-140703.mrc
+    Gpu: '0'
+    Group: '1'
+    InTiff: /h1/bwimberly/frames/m25mar19b/rawdata/m25mar19b_G4_00018gr_00058sq_v02_00004hl_00019enn.frames.tif
+    Iter: '7'
+    MaskSize: 1.000 1.000
+    OutMrc: /h1/bwimberly/appion/m25mar19b/ddstack/ddstack1/m25mar19b_G4_00018gr_00058sq_v02_00004hl_00019enn_c.mrc
+    Patch: 5 5
+    PixSize: 1.083
+    RotGain: 0
+    Tol: '0.500'
+    kV: 300
+- executable: motioncor2
+  expected:
+  - motioncor2
+  - -InTiff
+  - /h1/yli5/frames/m25mar24a/rawdata/m25mar24a_G4_00007gr_00067sq_v02_00003hl_00010enn.frames.tif
+  - -OutMrc
+  - /h1/yli5/appion/m25mar24a/ddstack/ddstack1/m25mar24a_G4_00007gr_00067sq_v02_00003hl_00010enn_c.mrc
+  - -Bft
+  - 500 100
+  - -Iter
+  - '7'
+  - -Tol
+  - '0.500'
+  - -Patch
+  - 7 5
+  - -Group
+  - '1'
+  - -MaskSize
+  - 1.000 1.000
+  - -FmDose
+  - '1.304'
+  - -PixSize
+  - '1.073'
+  - -kV
+  - '300'
+  - -Dark
+  - /h1/yli5/appion/m25mar24a/ddstack/ddstack1/dark-semc-gpu09-0-4190312.mrc
+  - -Gain
+  - /h1/yli5/appion/m25mar24a/ddstack/ddstack1/norm-semc-gpu09-0-4190312.mrc
+  - -FlipGain
+  - '0'
+  - -RotGain
+  - '0'
+  - -Gpu
+  - '0'
+  kwargs:
+    Bft: 500 100
+    Dark: /h1/yli5/appion/m25mar24a/ddstack/ddstack1/dark-semc-gpu09-0-4190312.mrc
+    FlipGain: 0
+    FmDose: 1.304
+    Gain: /h1/yli5/appion/m25mar24a/ddstack/ddstack1/norm-semc-gpu09-0-4190312.mrc
+    Gpu: '0'
+    Group: '1'
+    InTiff: /h1/yli5/frames/m25mar24a/rawdata/m25mar24a_G4_00007gr_00067sq_v02_00003hl_00010enn.frames.tif
+    Iter: '7'
+    MaskSize: 1.000 1.000
+    OutMrc: /h1/yli5/appion/m25mar24a/ddstack/ddstack1/m25mar24a_G4_00007gr_00067sq_v02_00003hl_00010enn_c.mrc
+    Patch: 7 5
+    PixSize: 1.073
+    RotGain: 0
+    Tol: '0.500'
+    kV: 300
+- executable: motioncor2
+  expected:
+  - motioncor2
+  - -InTiff
+  - /h1/hsosa/frames/m25mar31b/rawdata/m25mar31b_B1G2_00008gr_00047sq_v02_00002hl_00064enn.frames.tif
+  - -OutMrc
+  - /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/m25mar31b_B1G2_00008gr_00047sq_v02_00002hl_00064enn_c.mrc
+  - -Bft
+  - 500 100
+  - -Iter
+  - '7'
+  - -Tol
+  - '0.500'
+  - -Patch
+  - 7 5
+  - -Group
+  - '1'
+  - -MaskSize
+  - 1.000 1.000
+  - -FmDose
+  - '1.574'
+  - -PixSize
+  - '0.826'
+  - -kV
+  - '300'
+  - -Dark
+  - /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/dark-semc-gpu01-0-490002.mrc
+  - -Gain
+  - /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/norm-semc-gpu01-0-490002.mrc
+  - -FlipGain
+  - '0'
+  - -RotGain
+  - '0'
+  - -Gpu
+  - '0'
+  kwargs:
+    Bft: 500 100
+    Dark: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/dark-semc-gpu01-0-490002.mrc
+    FlipGain: 0
+    FmDose: 1.574
+    Gain: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/norm-semc-gpu01-0-490002.mrc
+    Gpu: '0'
+    Group: '1'
+    InTiff: /h1/hsosa/frames/m25mar31b/rawdata/m25mar31b_B1G2_00008gr_00047sq_v02_00002hl_00064enn.frames.tif
+    Iter: '7'
+    MaskSize: 1.000 1.000
+    OutMrc: /h1/hsosa/appion/m25mar31b/ddstack/ddstack1/m25mar31b_B1G2_00008gr_00047sq_v02_00002hl_00064enn_c.mrc
+    Patch: 7 5
+    PixSize: 0.826
+    RotGain: 0
+    Tol: '0.500'
+    kV: 300
 test_constructMotionCorKwargs:
 - args:
     Bft_global: 500

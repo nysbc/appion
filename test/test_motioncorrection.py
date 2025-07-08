@@ -4,6 +4,7 @@ import appion
 import os
 import numpy
 from appion.motioncorrection.calc.internal import calcInputType, calcImageDefectMap, calcFmDose, calcFrameStats, calcTotalRenderedFrames, calcKV, calcTotalFrames, calcTrunc, calcPixelSize, filterFrameList, calcRotFlipGain, calcFrameShiftFromPositions, calcAlignedCamera, calcMotionCorrLogPath
+from appion.motioncorrection.calc.external import constructMotionCorCmd
 from appion.motioncorrection.cli.constructors import constructMotionCorKwargs
 
 """
@@ -184,3 +185,14 @@ def test_constructMotionCorKwargs(imgmetadata, args, input_path, expected_kwargs
     elif 'Gpu' in expected_kwargs.keys() or 'Gpu' in kwargs.keys():
         assert False
         
+@parametrize_from_file
+def test_constructMotionCorCmd(kwargs, executable, expected):
+    calculated=constructMotionCorCmd(executable, kwargs)
+    # Ensure that the command is correct.
+    assert calculated.pop(0) == expected.pop(0)
+    # Flag ordering is non-deterministic so we sort here.
+    assert sorted(calculated) == sorted(expected)
+
+#TODO
+def test_parseMotionCorLog():
+    pass

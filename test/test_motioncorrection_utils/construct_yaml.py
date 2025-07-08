@@ -1,6 +1,7 @@
 import os
 from glob import glob
 #import shutil
+import copy
 import appion
 import json, yaml
 import sinedon.setup
@@ -8,6 +9,7 @@ sinedon.setup()
 from appion.motioncorrection.retrieve.params import readImageMetadata
 from appion.motioncorrection.retrieve.logs import retrieveLogParser
 from appion.motioncorrection.calc.internal import calcMotionCorrLogPath, filterFrameList, calcTotalFrames, calcTotalRenderedFrames, calcFrameShiftFromPositions, calcFrameStats, calcAlignedCamera
+from appion.motioncorrection.calc.external import constructMotionCorCmd
 from sinedon.models.leginon import CameraEMData
 
 with open(os.path.join(os.path.dirname(appion.__file__),"../test","test_motioncorrection_utils","motioncor2_validation.json"), "r") as f:
@@ -28,6 +30,7 @@ params["test_calcFrameShiftFromPositions"]=[]
 params['test_calcAlignedCamera']=[]
 params['test_calcMotionCorrLogPath']=[]
 params['test_constructMotionCorKwargs']=[]
+params['test_constructMotionCorCmd']=[]
 
 for imageid in validationData.keys():
     imgmetadata=readImageMetadata(imageid, False, True, False)
@@ -170,9 +173,23 @@ for imageid in validationData.keys():
     #    test_constructMotionCorKwargs['expected_kwargs']["FmRef"]="0"
     params['test_constructMotionCorKwargs'].append(test_constructMotionCorKwargs)
 
+    kwargs=copy.deepcopy(validationData[imageid]["motioncorflags"])
+    kwargs["FmDose"] = float(kwargs["FmDose"])
+    kwargs["kV"] = int(kwargs["kV"])
+    kwargs["RotGain"] = int(kwargs["RotGain"])
+    kwargs["FlipGain"] = int(kwargs["FlipGain"])
+    kwargs["PixSize"] = float(kwargs["PixSize"])
+    if "Trunc" in kwargs.keys():
+        kwargs["Trunc"] = float(kwargs["Trunc"])
+    if "FtBin" in kwargs.keys():
+        kwargs['FtBin'] == float(kwargs['FtBin'])
+    params['test_constructMotionCorCmd'].append({"kwargs" : kwargs,
+                                                 "executable" : "motioncor2",
+                                                 "expected" : constructMotionCorCmd("motioncor2", kwargs)})
+
 # m25apr22e (7858), m25apr23d (7873), m25apr02e (7605)
 
-logparser=retrieveLogParser("1.5.0")
+logparser=retrieveLogParser("MotionCor2 version 1.5.0")
 uploadAlignStatsTest=[30117940, 30157838, 29123499]
 for imageid in uploadAlignStatsTest:
     imgmetadata=readImageMetadata(imageid, False, True, False)
@@ -196,6 +213,7 @@ for imageid in uploadAlignStatsTest:
     params["test_calcFrameStats"].append({"pixel_shifts": pixel_shifts,
                                           "expected_max_drifts" : list(max_drifts),
                                           "expected_median" : float(median)})
+    
 
 params['test_calcImageDefectMap']=[]
 for dm in glob(os.path.join(os.path.dirname(appion.__file__),"../test","*.npz")):
