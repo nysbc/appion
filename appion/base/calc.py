@@ -12,6 +12,8 @@ def filterImages(all_images, done_images, reprocess_images : set = set(), reject
 def calcSkipTiltAngle(tilt_angle, tilt_angle_type, unit : str = "radians") -> bool:
     if unit == "radians":
         tilt_angle=degrees(tilt_angle)
+    elif unit != "degrees":
+        raise RuntimeError("Invalid angle unit: %s." % str(unit))
     if (tilt_angle_type == 'notilt' and abs(tilt_angle) > 3.0 ):
         return True
     elif (tilt_angle_type == 'hightilt' and abs(tilt_angle) < 30.0 ):
