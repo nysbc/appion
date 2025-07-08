@@ -31,6 +31,7 @@ params['test_calcAlignedCamera']=[]
 params['test_calcMotionCorrLogPath']=[]
 params['test_constructMotionCorKwargs']=[]
 params['test_constructMotionCorCmd']=[]
+params['test_parseMotionCorLog']=[]
 
 for imageid in validationData.keys():
     imgmetadata=readImageMetadata(imageid, False, True, False)
@@ -218,6 +219,32 @@ for imageid in uploadAlignStatsTest:
 params['test_calcImageDefectMap']=[]
 for dm in glob(os.path.join(os.path.dirname(appion.__file__),"../test","*.npz")):
     params['test_calcImageDefectMap'].append({"dm":os.path.basename(dm)})
+
+outbuffer=[]
+with open(os.path.join(os.path.dirname(appion.__file__),"../test","test_motioncorrection_utils","motioncor2_1.5.0_log.txt"), "r") as f:
+    for line in f:
+        outbuffer.append(line.rstrip("\n"))
+logparser=retrieveLogParser("MotionCor2 version 1.5.0")
+logdata=logparser(copy.deepcopy(outbuffer))
+logdata["shifts"]=[list(coords) for coords in logdata["shifts"]]
+params['test_parseMotionCorLog'].append({
+    "outbuffer" : outbuffer,
+    "shift_start" : "Full-frame alignment shift",
+    "expected" : logdata
+})
+
+outbuffer=[]
+with open(os.path.join(os.path.dirname(appion.__file__),"../test","test_motioncorrection_utils","motioncor2_1.6.4_log.txt"), "r") as f:
+    for line in f:
+        outbuffer.append(line.rstrip("\n"))
+logparser=retrieveLogParser("MotionCor2 version 1.6.4")
+logdata=logparser(copy.deepcopy(outbuffer))
+logdata["shifts"]=[list(coords) for coords in logdata["shifts"]]
+params['test_parseMotionCorLog'].append({
+    "outbuffer" : outbuffer,
+    "shift_start" : "Frame   x Shift   y Shift",
+    "expected" : logdata
+})
 
 with open(os.path.join(os.path.dirname(appion.__file__),"../test","./test_motioncorrection.yml"),"w") as f:
     yaml.dump(params, f)

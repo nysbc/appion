@@ -6,6 +6,7 @@ import numpy
 from appion.motioncorrection.calc.internal import calcInputType, calcImageDefectMap, calcFmDose, calcFrameStats, calcTotalRenderedFrames, calcKV, calcTotalFrames, calcTrunc, calcPixelSize, filterFrameList, calcRotFlipGain, calcFrameShiftFromPositions, calcAlignedCamera, calcMotionCorrLogPath
 from appion.motioncorrection.calc.external import constructMotionCorCmd
 from appion.motioncorrection.cli.constructors import constructMotionCorKwargs
+from appion.motioncorrection.retrieve.logs import parseMotionCorLog
 
 """
 This file contains tests for the motioncor2 related functionality of Appion.
@@ -191,8 +192,11 @@ def test_constructMotionCorCmd(kwargs, executable, expected):
     # Ensure that the command is correct.
     assert calculated.pop(0) == expected.pop(0)
     # Flag ordering is non-deterministic so we sort here.
+    # TODO Group flags and arguments together when sorting.
     assert sorted(calculated) == sorted(expected)
 
-#TODO
-def test_parseMotionCorLog():
-    pass
+@parametrize_from_file
+def test_parseMotionCorLog(outbuffer, shift_start, expected):
+    calculated=parseMotionCorLog(outbuffer, shift_start)
+    calculated["shifts"]=[list(coords) for coords in calculated["shifts"]]
+    assert calculated["shifts"] == expected["shifts"]
