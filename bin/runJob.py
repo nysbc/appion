@@ -42,7 +42,18 @@ def main():
         raise RuntimeError("Could not find rundir argument")
     template_dir=os.environ.get("APPION_TEMPLATE_DIR","/etc/appion/templates")
     template_file=os.environ.get("APPION_JOB_TEMPLATE","slurm_job.sh.j2")
-    batch_script_path = renderJobScript(rundir, template_dir, template_file, " ".join(sys.argv[1:]))
+    appion_wrapper_path=os.environ.get("APPION_WRAPPER_PATH",None)
+    cmd=copy.deepcopy(sys.argv)
+    cmd_str=""
+    if appion_wrapper_path:
+        cmd.pop(0)
+        while cmd:
+            cmd_token=cmd.pop(0)
+            if cmd_token.strip() != appion_wrapper_path.strip():
+                cmd_str+=" %s" % cmd_token.strip()
+    else:
+        cmd_str=" ".join(cmd[1:])
+    batch_script_path = renderJobScript(rundir, template_dir, template_file, cmd_str)
     stdout = sbatch(batch_script_path)
     print(stdout)
 
