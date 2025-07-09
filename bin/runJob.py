@@ -29,8 +29,14 @@ def renderJobScript(rundir: str, template_dir : str, template_file : str, comman
     return batch_script_path
 
 def main():
+    template_dir=os.environ.get("APPION_TEMPLATE_DIR","/etc/appion/templates")
+    template_file=os.environ.get("APPION_JOB_TEMPLATE","slurm_job.sh.j2")
+    appion_wrapper_path=os.environ.get("APPION_WRAPPER_PATH",None)
+    remove_flags=["--ppn", "--nodes", "--walltime", "--queue", "--jobid"] 
     cmd=copy.deepcopy(sys.argv)
     rundir=""
+    cmd_str=""
+    cmd.pop(0)
     while cmd:
         cmd_token=cmd.pop(0)
         if "=" in cmd_token:
@@ -38,19 +44,16 @@ def main():
             if len(cmd_token_split) > 1:
                 if cmd_token_split[0] in ["--rundir", "--outdir", "-R"]:
                     rundir=cmd_token_split[1]
-    if not rundir:
-        raise RuntimeError("Could not find rundir argument")
-    template_dir=os.environ.get("APPION_TEMPLATE_DIR","/etc/appion/templates")
-    template_file=os.environ.get("APPION_JOB_TEMPLATE","slurm_job.sh.j2")
-    appion_wrapper_path=os.environ.get("APPION_WRAPPER_PATH",None)
-    cmd=copy.deepcopy(sys.argv)
-    cmd_str=""
-    if appion_wrapper_path:
-        cmd.pop(0)
-        while cmd:
-            cmd_token=cmd.pop(0)
+                if cmd_token_split[0] in remove_flags:
+                    continue
+        if appion_wrapper_path:
             if cmd_token.strip() != appion_wrapper_path.strip():
                 cmd_str+=" %s" % cmd_token.strip()
+        else:
+            cmd_str+=" %s" % cmd_token.strip()
+    if not rundir:
+        raise RuntimeError("Could not find rundir argument")
+
     else:
         cmd_str=" ".join(cmd[1:])
     batch_script_path = renderJobScript(rundir, template_dir, template_file, cmd_str)
