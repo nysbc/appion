@@ -18,7 +18,7 @@ def validateMotionCorArgs(version : str, passedParams : set) -> bool:
                     "FtBin","InitDose","FmDose","PixSize","kV","Align",
                     "Throw","Trunc","SumRange","Group","Crop","FmRef",
                     "Tilt","RotGain","FlipGain","Mag","InFmMotion",
-                    "Gpu","GpuMemUsage","UseGpus","SplitSum","OutStar", "EerSampling"])
+                    "Gpu","GpuMemUsage","UseGpus","SplitSum","OutStar", "EerSampling", "FmIntFile"])
     validParams=baseParams
     if len(validParams | passedParams) != len(validParams):
         return False, validParams
