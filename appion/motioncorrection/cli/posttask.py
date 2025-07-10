@@ -1,5 +1,5 @@
 
-def postTask(imageid, kwargs, imgmetadata, jobmetadata, args, logData):
+def postTask(imageid, kwargs, imgmetadata, jobmetadata, args, logData, logStdOut):
     # Sinedon needs to be reimported and setup within the local scope of this function
     # because the function runs as a Dask task, which means that it is run in a forked process
     # that doesn't have Django initialized.
@@ -7,7 +7,7 @@ def postTask(imageid, kwargs, imgmetadata, jobmetadata, args, logData):
     sinedon.setup(args['projectid'])
     import os, sys
     import logging
-    from ..calc.internal import calcTotalFrames, filterFrameList, calcMotionCorrLogPath, calcTotalRenderedFrames
+    from ..calc.internal import calcTotalFrames, filterFrameList, calcMotionCorrLogPath, calcMotionCor2LogPath, calcTotalRenderedFrames
     from ..store import saveFrameTrajectory, constructAlignedCamera, constructAlignedPresets, constructAlignedImage, uploadAlignedImage, saveDDStackParamsData, saveMotionCorrLog
     logger=logging.getLogger(__name__)
     logHandler=logging.StreamHandler(sys.stdout)
@@ -75,7 +75,12 @@ def postTask(imageid, kwargs, imgmetadata, jobmetadata, args, logData):
         framestackpath=kwargs['InEer']
     # These need to go in the Appion directory / working directory.
     framestackpath=os.path.join(args["rundir"],os.path.basename(framestackpath))
-    motioncorr_log_path=calcMotionCorrLogPath(framestackpath)
+    
+    motioncor2_log_path=calcMotionCor2LogPath(framestackpath)
+    logger.info("Saving out motioncor2-formatted log for %d to %s." % (imageid, motioncor2_log_path))
+    with open(motioncor2_log_path, "w") as f:
+        f.write(logStdOut)
 
+    motioncorr_log_path=calcMotionCorrLogPath(framestackpath)
     logger.info("Saving out motioncorr-formatted log for %d to %s." % (imageid, motioncorr_log_path))
     saveMotionCorrLog(logData, motioncorr_log_path, args['startframe'], calcTotalRenderedFrames(imgmetadata['total_raw_frames'], args['rendered_frame_size']), args['bin'])

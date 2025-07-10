@@ -21,7 +21,7 @@ def pipeline(tasklist: list, args : dict, jobmetadata: dict, client : Client, re
         task_f=client.submit(motioncor_lambda, pretask_f, pure=False, retries=retries, resources={'GPU': 1, "MEMORY" : 64})
         futures.append(task_f)
 
-        postTask_lambda = lambda pretask_data, task_data : postTask(imageid, pretask_data[0], pretask_data[1], jobmetadata, args, task_data[0])
+        postTask_lambda = lambda pretask_data, task_data : postTask(imageid, pretask_data[0], pretask_data[1], jobmetadata, args, task_data[0], task_data[1])
         posttask_f=client.submit(postTask_lambda, pretask_f, task_f, pure=False, retries=retries, resources={"MEMORY" : 16})
         futures.append(posttask_f)
     return futures

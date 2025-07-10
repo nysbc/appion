@@ -8,7 +8,6 @@ def retrieveLogParser(version : str) -> Callable:
     # All other versions of motioncor2/motioncor2 seem to use the same output format.
     return lambda outbuffer : parseMotionCorLog(outbuffer, "Full-frame alignment shift")
 
-
 def parseMotionCorLog(outbuffer: list, shift_start: str) -> dict:
     '''
     Parses the output log from motioncor2/motioncor3 and converts it into a dict.

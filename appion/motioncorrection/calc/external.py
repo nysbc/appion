@@ -18,8 +18,10 @@ def validateMotionCorArgs(version : str, passedParams : set) -> bool:
                     "FtBin","InitDose","FmDose","PixSize","kV","Align",
                     "Throw","Trunc","SumRange","Group","Crop","FmRef",
                     "Tilt","RotGain","FlipGain","Mag","InFmMotion",
-                    "Gpu","GpuMemUsage","UseGpus","SplitSum","OutStar", "EerSampling", "FmIntFile"])
+                    "Gpu","GpuMemUsage","UseGpus","SplitSum","OutStar", "EerSampling"])
     validParams=baseParams
+    if version in ["MotionCor2 version 1.5.0","MotionCor2 version 1.6.4"]:
+        validParams.add("FmIntFile")
     if len(validParams | passedParams) != len(validParams):
         return False, validParams
     if "InTiff" not in passedParams and "InMrc" not in passedParams and "InEer" not in passedParams:
