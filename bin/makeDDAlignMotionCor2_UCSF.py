@@ -51,7 +51,7 @@ def main():
             else:
                 raise RuntimeError("Dask cluster configuration at %s does not exist." % clusterconfig_path)
         session_metadata=readSessionData(args.sessionname)
-        cluster=constructCluster(clusterconfig)
+        cluster=constructCluster(clusterconfig, args.rundir)
         loop(pipeline,
                 vars(args),
                 cluster,
