@@ -30,13 +30,14 @@ def postTask(imageid, kwargs, imgmetadata, jobmetadata, args, logData, logStdOut
     aligned_image_mrc_image = aligned_image_filename + ".mrc"
     if not os.path.exists(imgmetadata["session_image_path"]):
         raise RuntimeError("Session path does not exist at %s." % imgmetadata["session_image_path"])
-    if os.path.lexists(os.path.join(imgmetadata["session_image_path"],aligned_image_mrc_image)):
-        os.unlink(os.path.join(imgmetadata["session_image_path"],aligned_image_mrc_image))
+    abs_path_aligned_image_mrc_image=os.path.join(imgmetadata["session_image_path"],aligned_image_mrc_image)
+    if os.path.lexists(abs_path_aligned_image_mrc_image):
+        os.unlink(abs_path_aligned_image_mrc_image)
     try:
-        os.link(kwargs["OutMrc"], os.path.join(imgmetadata["session_image_path"],aligned_image_mrc_image))
+        os.link(kwargs["OutMrc"], abs_path_aligned_image_mrc_image)
     except OSError:
-        os.symlink(kwargs["OutMrc"], os.path.join(imgmetadata["session_image_path"],aligned_image_mrc_image))
-    logger.info("%s linked to %s." % (os.path.join(imgmetadata["session_image_path"],aligned_image_mrc_image), kwargs["OutMrc"]))
+        os.symlink(kwargs["OutMrc"], abs_path_aligned_image_mrc_image)
+    logger.info("%s linked to %s." % (abs_path_aligned_image_mrc_image, kwargs["OutMrc"]))
     logger.info("Constructing aligned image record for %d." % imageid)
     aligned_image_id = constructAlignedImage(imageid, aligned_preset_id, aligned_camera_id, aligned_image_mrc_image, aligned_image_filename)
     logger.info("Uploading aligned image record for %d." % imageid)
@@ -44,13 +45,16 @@ def postTask(imageid, kwargs, imgmetadata, jobmetadata, args, logData, logStdOut
     aligned_preset_dw_id = constructAlignedPresets(imgmetadata['preset_id'], aligned_camera_id, alignlabel=args['alignlabel']+"-DW")
     aligned_image_dw_filename = imgmetadata['image_filename']+"-%s-DW" % args['alignlabel']
     aligned_image_dw_mrc_image = aligned_image_dw_filename + ".mrc"
-    if os.path.lexists(os.path.join(imgmetadata["session_image_path"],aligned_image_dw_mrc_image)):
-        os.unlink(os.path.join(imgmetadata["session_image_path"],aligned_image_dw_mrc_image))
+    abs_path_aligned_image_dw_mrc_image = os.path.join(imgmetadata["session_image_path"],aligned_image_dw_mrc_image)
+    outmrc_dw=kwargs["OutMrc"].replace(".mrc","_DW.mrc")
+    outmrc_dws=kwargs["OutMrc"].replace(".mrc","_DWS.mrc")
+    if os.path.lexists(abs_path_aligned_image_dw_mrc_image):
+        os.unlink(abs_path_aligned_image_dw_mrc_image)
     try:
-        os.link(kwargs["OutMrc"].replace(".mrc","_DW.mrc"), os.path.join(imgmetadata["session_image_path"],aligned_image_dw_mrc_image))
+        os.link(outmrc_dw, abs_path_aligned_image_dw_mrc_image)
     except OSError:
-        os.symlink(kwargs["OutMrc"].replace(".mrc","_DW.mrc"), os.path.join(imgmetadata["session_image_path"],aligned_image_dw_mrc_image))
-    logger.info("%s linked to %s." % (os.path.join(imgmetadata["session_image_path"],aligned_image_dw_mrc_image), kwargs["OutMrc"].replace(".mrc","_DW.mrc")))
+        os.symlink(outmrc_dw, abs_path_aligned_image_dw_mrc_image)
+    logger.info("%s linked to %s." % (abs_path_aligned_image_dw_mrc_image, kwargs["OutMrc"].replace(".mrc","_DW.mrc")))
     logger.info("Constructing aligned, dose-weighted image record for %d." % imageid)
     aligned_image_dw_id = constructAlignedImage(imageid, aligned_preset_dw_id, aligned_camera_id, aligned_image_dw_mrc_image, aligned_image_dw_filename)
     # Frame trajectory only saved for aligned_image_id: https://github.com/nysbc/appion-slurm/blob/814544a7fee69ba7121e7eb1dd3c8b63bc4bb75a/appion/appionlib/apDDLoop.py#L89-L107
@@ -75,7 +79,7 @@ def postTask(imageid, kwargs, imgmetadata, jobmetadata, args, logData, logStdOut
         framestackpath=kwargs['InEer']
     # These need to go in the Appion directory / working directory.
     framestackpath=os.path.join(args["rundir"],os.path.basename(framestackpath))
-    
+
     motioncor2_log_path=calcMotionCor2LogPath(framestackpath)
     logger.info("Saving out motioncor2-formatted log for %d to %s." % (imageid, motioncor2_log_path))
     with open(motioncor2_log_path, "w") as f:
@@ -84,3 +88,16 @@ def postTask(imageid, kwargs, imgmetadata, jobmetadata, args, logData, logStdOut
     motioncorr_log_path=calcMotionCorrLogPath(framestackpath)
     logger.info("Saving out motioncorr-formatted log for %d to %s." % (imageid, motioncorr_log_path))
     saveMotionCorrLog(logData, motioncorr_log_path, args['startframe'], calcTotalRenderedFrames(imgmetadata['total_raw_frames'], args['rendered_frame_size']), args['bin'])
+
+    if args["clean"]:
+        if os.path.exists(kwargs["Dark"]):
+            os.remove(kwargs["Dark"])
+        # Don't remove if symbolic links were used instead of hard links
+        if not os.path.islink(abs_path_aligned_image_mrc_image):
+            if os.path.exists(os.remove(kwargs["OutMrc"])):
+                os.remove(kwargs["OutMrc"])
+        if not os.path.islink(abs_path_aligned_image_dw_mrc_image):
+            if os.path.exists(outmrc_dw):
+                os.remove(outmrc_dw)
+        if os.path.exists(outmrc_dws):
+            os.remove(outmrc_dws)
