@@ -66,30 +66,6 @@ def ctffind(input : str, output : str, is_movie : str = "", num_frame_avg : str 
     output=parseLog(rawoutput)
     return output, rawoutput
 
-if __name__ == '__main__':
-    output, rawoutput = ctffind(input="/h2/jpellman/18169/n25apr07b_HFDAct3g4_016gr_00100sq_05hl_054esn-a.mrc", 
-            is_movie="no",
-            num_frame_avg=7,
-            output="/h2/jpellman/18169/n25apr07b_HFDAct3g4_016gr_00100sq_05hl_054esn-a-pow.mrc",
-            pixel_size=0.827,
-            kv = 300.0,
-			cs = 2.7,
-			ampcontrast = 0.07,
-			fieldsize = 1024,
-			resmin = 50.0,
-			resmax = 4.0,
-			defmin = 1000.0,
-			defmax = 39742.5,
-			defstep = 1000.0,
-			known_astig = "no",
-			exhaustive_astig_search = "no",
-			restrain_astig = "yes",
-			expect_astig = "500.0",
-			phase = "no",
-			expert_opts = "no")
-    print(output)
-    print(rawoutput)
-
 
     
         
