@@ -60,10 +60,10 @@ def constructGlobalParser():
         help="Job Type of processing run, e.g., partalign", type=str)
     parser.add_argument("--clean", dest="clean",
         help="Clean up intermediate results during the course of processing.", default=True, 
-        action="store_true", type=bool)
+        action="store_true")
     parser.add_argument("--no-clean", dest="clean",
         help="Don't clean up intermediate results during the course of processing.", default=True, 
-        action="store_false", type=bool)
+        action="store_false")
     return parser
 
 def constructJobMetadata(args : dict, progname: str):
