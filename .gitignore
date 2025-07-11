@@ -34,3 +34,4 @@ slack/build
 
 *slurm*out
 *.mrc
+./test/test_ctfestimation_utils/slurm_logs
