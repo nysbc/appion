@@ -65,7 +65,8 @@ def loop(pipeline, args: dict, cluster : Cluster, retrieveDoneImages : Callable 
         logger.info("Constructed task list in %d seconds." % (t1-t0))
         logger.info("Image counts: %d total images, %d done images, %d rejected images, and %d images marked for reprocessing." % (len(all_images), len(done_images), len(rejected_images), len(reprocess_images)))
         node_count=min(max_workers,len(tasklist))
-        logger.info("Scaling up to %d nodes." % node_count)
+        if node_count > 0:
+            logger.info("Scaling up to %d nodes." % node_count)
         cluster.scale(node_count)
         if tasklist:
             pipeline_t0=time()
