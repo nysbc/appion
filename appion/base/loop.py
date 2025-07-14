@@ -89,6 +89,9 @@ def loop(pipeline, args: dict, cluster : Cluster, retrieveDoneImages : Callable 
                     images_processed_total_t0=images_processed_total
             pipeline_t1=time()
             logger.info("Finished processing %d images in %d seconds." % (len(tasklist), (pipeline_t1-pipeline_t0)))
+            # This is here to accommodate an edge case where a scale down event isn't triggered when processing a very
+            # small number of images.
+            cluster.scale(0)
             prev_tasklist=tasklist
         else:
             logger.info(f"No new images.  Waiting {waitTime} seconds.")

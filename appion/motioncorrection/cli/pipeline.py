@@ -4,7 +4,7 @@ from .pretask import preTask
 from ..calc.external import motioncor
 from .posttask import postTask
 
-def pipeline(tasklist: list, args : dict, jobmetadata: dict, client : Client, retries : int = 3):
+def pipeline(tasklist: list, args : dict, jobmetadata: dict, client : Client, retries : int = 0):
     # Sets the prior for tracking task duration to 30s so that adaptive scaling
     # is more accurate (30s is estimated time to run a typical motioncor2 job).
     dask.config.set({"distributed.scheduler.unknown-task-duration":"30s"})
