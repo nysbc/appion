@@ -94,7 +94,7 @@ def postTask(imageid, kwargs, imgmetadata, jobmetadata, args, logData, logStdOut
             os.remove(kwargs["Dark"])
         # Don't remove if symbolic links were used instead of hard links
         if not os.path.islink(abs_path_aligned_image_mrc_image):
-            if os.path.exists(os.remove(kwargs["OutMrc"])):
+            if os.path.exists(kwargs["OutMrc"]):
                 os.remove(kwargs["OutMrc"])
         if not os.path.islink(abs_path_aligned_image_dw_mrc_image):
             if os.path.exists(outmrc_dw):
