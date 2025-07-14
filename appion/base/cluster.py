@@ -29,8 +29,8 @@ def constructCluster(clusterconfig : dict, rundir : str):
         clusterconfig["kwargs"]["shared_temp_directory"] = shared_temp_directory  
 
         cluster = SLURMCluster(**clusterconfig["kwargs"])
-        if "adapt" in clusterconfig.keys():
-            cluster.adapt(**clusterconfig["adapt"])
+        #if "adapt" in clusterconfig.keys():
+        #    cluster.adapt(**clusterconfig["adapt"])
     elif clusterconfig["cluster_type"] == "LocalCluster":
         cluster = LocalCluster()
     else:
