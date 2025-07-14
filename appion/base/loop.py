@@ -64,7 +64,9 @@ def loop(pipeline, args: dict, cluster : Cluster, retrieveDoneImages : Callable 
         t1=time()
         logger.info("Constructed task list in %d seconds." % (t1-t0))
         logger.info("Image counts: %d total images, %d done images, %d rejected images, and %d images marked for reprocessing." % (len(all_images), len(done_images), len(rejected_images), len(reprocess_images)))
-        cluster.scale(min(max_workers,len(tasklist)))
+        node_count=min(max_workers,len(tasklist))
+        logger.info("Scaling up to %d nodes." % node_count)
+        cluster.scale(node_count)
         if tasklist:
             pipeline_t0=time()
             futures=pipeline(tasklist, args, jobmetadata, client)
@@ -90,14 +92,17 @@ def loop(pipeline, args: dict, cluster : Cluster, retrieveDoneImages : Callable 
                     images_processed_total_t0=images_processed_total
             pipeline_t1=time()
             logger.info("Finished processing %d images in %d seconds." % (len(tasklist), (pipeline_t1-pipeline_t0)))
-            # This is here to accommodate an edge case where a scale down event isn't triggered when processing a very
-            # small number of images.
-            cluster.scale(0)
             # Explicitly cancel all futures to prevent dask distributed from recalculating already calculated futures.
             # Possibly unnecessary.
             # See https://github.com/nysbc/appion/issues/17
+            logger.debug("Cancelling all futures.")
             for f in futures:
                 f.cancel()
+            # This is here to accommodate an edge case where a scale down event isn't triggered when processing a very
+            # small number of images.
+            logger.info("Removing all nodes.")
+            cluster.scale(0)
+            logger.debug("Futures cancelled.")
             prev_tasklist=tasklist
         else:
             logger.info(f"No new images.  Waiting {waitTime} seconds.")
