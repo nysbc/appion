@@ -54,6 +54,9 @@ def main():
     if not rundir:
         raise RuntimeError("Could not find rundir argument")
     batch_script_path = renderJobScript(rundir, template_dir, template_file, cmd_str)
+    if not os.path.exists(rundir):
+        os.makedirs(rundir)
+    os.chdir(rundir)
     stdout = sbatch(batch_script_path)
     print(stdout)
 
