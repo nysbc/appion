@@ -93,6 +93,11 @@ def loop(pipeline, args: dict, cluster : Cluster, retrieveDoneImages : Callable 
             # This is here to accommodate an edge case where a scale down event isn't triggered when processing a very
             # small number of images.
             cluster.scale(0)
+            # Explicitly cancel all futures to prevent dask distributed from recalculating already calculated futures.
+            # Possibly unnecessary.
+            # See https://github.com/nysbc/appion/issues/17
+            for f in futures:
+                f.cancel()
             prev_tasklist=tasklist
         else:
             logger.info(f"No new images.  Waiting {waitTime} seconds.")
