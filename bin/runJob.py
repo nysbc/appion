@@ -53,9 +53,6 @@ def main():
             cmd_str+=" %s" % cmd_token.strip()
     if not rundir:
         raise RuntimeError("Could not find rundir argument")
-
-    else:
-        cmd_str=" ".join(cmd[1:])
     batch_script_path = renderJobScript(rundir, template_dir, template_file, cmd_str)
     stdout = sbatch(batch_script_path)
     print(stdout)
