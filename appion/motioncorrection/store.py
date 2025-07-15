@@ -118,7 +118,7 @@ def constructAlignedPresets(preset_id, camera_id, magnification=None, defocus=No
                                                        magnification=align_presetdata.magnification,
                                                        defocus=align_presetdata.defocus,
                                                        ref_instrumentdata_tem=align_presetdata.ref_instrumentdata_tem,
-                                                       ccdcamera=align_presetdata.ref_instrumentdata_ccdcamera,
+                                                       ref_instrumentdata_ccdcamera=align_presetdata.ref_instrumentdata_ccdcamera,
                                                        ref_sessiondata_session=align_presetdata.ref_sessiondata_session)
         return orig_align_presetdata.def_id
     except PresetData.DoesNotExist:
