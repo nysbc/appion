@@ -26,8 +26,15 @@ def constructAlignedImage(image_id, preset_id, camera_id, mrc_image, filename):
         imgdata.ref_cameraemdata_camera=CameraEMData.objects.get(def_id=camera_id)
         imgdata.mrc_image=mrc_image
         imgdata.filename=filename
-        imgdata.save()
-        return imgdata.def_id
+        try:
+            orig_imgdata = AcquisitionImageData.objects.get(ref_presetdata_preset=imgdata.ref_presetdata_preset,
+                                                                       ref_cameraemdata_camera=imgdata.ref_cameraemdata_camera,
+                                                                       mrc_image=imgdata.mrc_image,
+                                                                       filename=imgdata.filename)
+            return orig_imgdata.def_id
+        except AcquisitionImageData.DoesNotExist:
+            imgdata.save()
+            return imgdata.def_id
     return None
 
 # trimming_edge is the same value as kwargs["Trim"]
@@ -59,20 +66,34 @@ def constructAlignedCamera(camera_id, square_output, binning : int = 1, trimming
         else:
             camdata.seq_use_frames=None
         camdata.align_frames=True
-        camdata.save()
-        return camdata.def_id
+        try:
+            orig_camdata = CameraEMData.objects.get(subd_dimension_x=camdata.subd_binning_x,
+                                                    subd_dimension_y=camdata.subd_binning_y,
+                                                    subd_binning_x=camdata.subd_binning_y,
+                                                    subd_binning_y=camdata.subd_binning_y,
+                                                    subd_offset_x=camdata.subd_offset_x,
+                                                    subd_offset_y=camdata.subd_offset_y,
+                                                    seq_use_frames=camdata.seq_use_frames,
+                                                    align_frames=camdata.align_frames)
+            return orig_camdata.def_id
+        except CameraEMData.DoesNotExist:
+            camdata.save()
+            return camdata.def_id
     return None
 
 def constructAlignedPresets(preset_id, camera_id, magnification=None, defocus=None, tem=None, session=None, alignlabel='a'):
-    align_presetdata = PresetData.objects.get(def_id=preset_id)
+    try:
+        align_presetdata = PresetData.objects.get(def_id=preset_id)
+    except PresetData.DoesNotExist:
+        align_presetdata = None
     camdata = CameraEMData.objects.get(def_id=camera_id)
     if not align_presetdata:
         align_presetdata=PresetData(name="ma-%s" % alignlabel,
                                     magnification=magnification,
                                     defocus=defocus,
-                                    tem=tem,
-                                    ccdcamera=camdata,
-                                    session=session)
+                                    ref_instrumentdata_tem=tem,
+                                    ref_instrumentdata_ccdcamera=camdata,
+                                    ref_sessiondata_session=session)
     else:
         # https://docs.djangoproject.com/en/5.2/topics/db/queries/#copying-model-instances
         align_presetdata.pk = None
@@ -85,8 +106,24 @@ def constructAlignedPresets(preset_id, camera_id, magnification=None, defocus=No
     align_presetdata.offset_x = camdata.subd_offset_x
     align_presetdata.offset_y = camdata.subd_offset_y
     align_presetdata.exposure_time = camdata.exposure_time
-    align_presetdata.save()
-    return align_presetdata.def_id
+    try:
+        orig_align_presetdata = PresetData.objects.get(name=align_presetdata.name,
+                                                       dimension_x=align_presetdata.dimension_x,
+                                                       dimension_y=align_presetdata.dimension_y,
+                                                       binning_x=align_presetdata.binning_x,
+                                                       binning_y=align_presetdata.binning_y,
+                                                       offset_x=align_presetdata.offset_x,
+                                                       offset_y=align_presetdata.offset_y,
+                                                       exposure_time=align_presetdata.exposure_time,
+                                                       magnification=align_presetdata.magnification,
+                                                       defocus=align_presetdata.defocus,
+                                                       ref_instrumentdata_tem=align_presetdata.ref_instrumentdata_tem,
+                                                       ccdcamera=align_presetdata.ref_instrumentdata_ccdcamera,
+                                                       ref_sessiondata_session=align_presetdata.ref_sessiondata_session)
+        return orig_align_presetdata.def_id
+    except PresetData.DoesNotExist:
+        align_presetdata.save()
+        return align_presetdata.def_id
 
 def calcVersionedFilename(basepath, filename):
     '''
@@ -115,8 +152,15 @@ def constructAlignedImageData(imageid, presetid, cameraid, aligned_filename):
         imgdata.ref_cameraemdata_camera=CameraEMData.objects.get(def_id=cameraid)
         imgdata.mrc_image = aligned_filename
         imgdata.filename = os.path.splitext(aligned_filename)[0]
-        imgdata.save()
-        return imgdata.def_id
+        try:
+            orig_imgdata=AcquisitionImageData.objects.get(ref_presetdata_preset=imgdata.ref_presetdata_preset,
+                                                          ref_cameraemdata_camera=imgdata.ref_cameraemdata_camera,
+                                                          mrc_image=imgdata.mrc_image,
+                                                          filename=imgdata.filename)
+            return orig_imgdata.def_id
+        except AcquisitionImageData.DoesNotExist:
+            imgdata.save()
+            return imgdata.def_id
     return None
 
 # ApDDAlignImagePairData
@@ -136,8 +180,14 @@ def saveImagePairData(raw_image_def_id, aligned_image_def_id, rundata_def_id):
     pairdata = ApDDAlignImagePairData(ref_acquisitionimagedata_source=raw_image_def_id,
                                     ref_acquisitionimagedata_result=aligned_image_def_id,
                                     ref_apddstackrundata_ddstackrun=rundata_def_id)
-    pairdata.save()
-    return pairdata.def_id
+    try:
+        orig_pairdata = ApDDAlignImagePairData.objects.get(ref_acquisitionimagedata_source=raw_image_def_id,
+                                                           ref_acquisitionimagedata_result=aligned_image_def_id,
+                                                           ref_apddstackrundata_ddstackrun=rundata_def_id)
+        return orig_pairdata.def_id
+    except ApDDAlignImagePairData.DoesNotExist:
+        pairdata.save()
+        return pairdata.def_id
 			
 def copyALSThicknessParams(unaligned,aligned):
 # transfers aperture limited scattering measurements and parameters from the unaligned image to the aligned image
@@ -152,8 +202,16 @@ def copyALSThicknessParams(unaligned,aligned):
                                        intensity = obthdata.intensity,
                                        thickness = obthdata.thickness,
                                        ref_acquisitionimagedata_image = aligned_image)
-        newobjth.save()
-        return newobjth.def_id
+        try:
+            orig_newobjth = ObjIceThicknessData.objects.get(vacuum_intensity = obthdata.vacuum_intensity,
+                                                            mfp = obthdata.mfp,
+                                                            intensity = obthdata.intensity,
+                                                            thickness = obthdata.thickness,
+                                                            ref_acquisitionimagedata_image = aligned_image)
+            return orig_newobjth.def_id
+        except ObjIceThicknessData.DoesNotExist:
+            newobjth.save()
+            return newobjth.def_id
     return None
 		
 
@@ -172,8 +230,17 @@ def copyZLPThicknessParams(unaligned,aligned):
 											  thickness = zlpthdata.thickness,
 											  ref_acquisitionimagedata_image = aligned_image
         )
-        newzlossth.save()
-        return newzlossth.def_id
+        try:
+            orig_newzlossth = ZeroLossIceThicknessData.objects.get(no_slit_mean = zlpthdata.no_slit_mean,
+                                                       no_slit_sd = zlpthdata.no_slit_sd,
+                                                       slit_mean = zlpthdata.slit_mean,
+                                                       slit_sd = zlpthdata.slit_sd,
+                                                       thickness = zlpthdata.thickness,
+                                                       ref_acquisitionimagedata_image = aligned_image)
+            return orig_newzlossth.def_id
+        except ZeroLossIceThicknessData.DoesNotExist:
+            newzlossth.save()
+            return newzlossth.def_id
     return None
 
 def uploadAlignStats(shifts, nframes):
@@ -209,8 +276,25 @@ def saveAlignStats(aligned_image_def_id, rundata_def_id, max_drifts, median, pix
                                             ref_apddstackrundata_ddstackrun=rundata,
                                             median_shift_value=median,
                                             **drifts)
-    alignstatsdata.save()
-    return alignstatsdata.def_id
+    try:
+        if trajdata_def_id:
+            #trajdata = ApDDFrameTrajectoryData.objects.get(def_id=trajdata_def_id)
+            orig_alignstatsdata = ApDDAlignStatsData.objects.get(ref_acquisitionimagedata_image=aligned_image, 
+                                                apix=pixsize,
+                                                ref_apddstackrundata_ddstackrun=rundata,
+                                                median_shift_value=median,
+                                                ref_apddframetrajectorydata_trajectory=trajdata,
+                                                **drifts)
+        else:
+            orig_alignstatsdata = ApDDAlignStatsData.objects.get(ref_acquisitionimagedata_image=aligned_image, 
+                                                apix=pixsize,
+                                                ref_apddstackrundata_ddstackrun=rundata,
+                                                median_shift_value=median,
+                                                **drifts)
+        return orig_alignstatsdata.def_id
+    except ApDDAlignStatsData.DoesNotExist:
+        alignstatsdata.save()
+        return alignstatsdata.def_id
 	
 # ApDDFrameTrajectoryData
 
@@ -238,8 +322,20 @@ def saveFrameTrajectory(image_def_id, rundata_def_id, shifts, limit=20, referenc
                                     last_y=xy['y'][-1],
                                     number_of_positions= n_positions,
                                     reference_index= reference_index)
-    trajdata.save()
-    return trajdata.def_id
+    try:
+        orig_trajdata = ApDDFrameTrajectoryData.objects.get(ref_acquisitionimagedata_image=trajdata.ref_acquisitionimagedata_image,
+                                        ref_apstackparticledata_particle=trajdata.ref_apstackparticledata_particle,
+                                        ref_apddstackrundata_ddstackrun=trajdata.ref_apddstackrundata_ddstackrun,
+                                        seq_pos_x=trajdata.seq_pos_x,
+                                        seq_pos_y=trajdata.seq_pos_y,
+                                        last_x=trajdata.last_x,
+                                        last_y=trajdata.last_y,
+                                        number_of_positions=trajdata.number_of_positions,
+                                        reference_index=trajdata.reference_index)
+        return orig_trajdata.def_id
+    except ApDDFrameTrajectoryData.DoesNotExist:
+        trajdata.save()
+        return trajdata.def_id
 
 #ApDDStackParamsData
 def saveDDStackParamsData(preset, align, binning, ref_apddstackrundata_unaligned_ddstackrun, method, ref_apstackdata_stack=None, ref_apdealignerparamsdata_de_aligner=None):
