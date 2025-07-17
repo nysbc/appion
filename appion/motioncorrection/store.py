@@ -107,19 +107,10 @@ def constructAlignedPresets(preset_id, camera_id, magnification=None, defocus=No
     align_presetdata.offset_y = camdata.subd_offset_y
     align_presetdata.exposure_time = camdata.exposure_time
     try:
-        orig_align_presetdata = PresetData.objects.get(name=align_presetdata.name,
-                                                       dimension_x=align_presetdata.dimension_x,
-                                                       dimension_y=align_presetdata.dimension_y,
-                                                       binning_x=align_presetdata.binning_x,
-                                                       binning_y=align_presetdata.binning_y,
-                                                       offset_x=align_presetdata.offset_x,
-                                                       offset_y=align_presetdata.offset_y,
-                                                       exposure_time=align_presetdata.exposure_time,
-                                                       magnification=align_presetdata.magnification,
-                                                       defocus=align_presetdata.defocus,
-                                                       ref_instrumentdata_tem=align_presetdata.ref_instrumentdata_tem,
-                                                       ref_instrumentdata_ccdcamera=align_presetdata.ref_instrumentdata_ccdcamera,
-                                                       ref_sessiondata_session=align_presetdata.ref_sessiondata_session)
+        fields={}
+        for field in align_presetdata._meta.get_fields():
+            fields[field.name]=getattr(align_presetdata, "field.name")
+        orig_align_presetdata = PresetData.objects.get(**fields)
         return orig_align_presetdata.def_id
     except PresetData.DoesNotExist:
         align_presetdata.save()
