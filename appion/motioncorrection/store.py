@@ -109,7 +109,7 @@ def constructAlignedPresets(preset_id, camera_id, magnification=None, defocus=No
     try:
         fields={}
         for field in align_presetdata._meta.get_fields():
-            fields[field.name]=getattr(align_presetdata, "field.name")
+            fields[field.name]=getattr(align_presetdata, field.name)
         orig_align_presetdata = PresetData.objects.get(**fields)
         return orig_align_presetdata.def_id
     except PresetData.DoesNotExist:
