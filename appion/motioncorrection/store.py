@@ -4,6 +4,7 @@
 import os
 import numpy
 import mrcfile
+import sinedon.base as sb
 from sinedon.models.appion import ApDDAlignImagePairData
 from sinedon.models.appion import ApDDFrameTrajectoryData
 from sinedon.models.appion import ApDDAlignStatsData
@@ -82,40 +83,27 @@ def constructAlignedCamera(camera_id, square_output, binning : int = 1, trimming
     return None
 
 def constructAlignedPresets(preset_id, camera_id, magnification=None, defocus=None, tem=None, session=None, alignlabel='a'):
-    try:
-        align_presetdata = PresetData.objects.get(def_id=preset_id)
-    except PresetData.DoesNotExist:
-        align_presetdata = None
-    camdata = CameraEMData.objects.get(def_id=camera_id)
+    align_presetdata=sb.get("PresetData",{"def_id" : preset_id})
+    camdata = sb.get("CameraEMData",{"def_id" :camera_id})
+    if not camdata:
+        raise RuntimeError("No camera found with ID %d." % camera_id)
     if not align_presetdata:
-        align_presetdata=PresetData(name="ma-%s" % alignlabel,
+        align_presetdata=dict(name="ma-%s" % alignlabel,
                                     magnification=magnification,
                                     defocus=defocus,
                                     ref_instrumentdata_tem=tem,
-                                    ref_instrumentdata_ccdcamera=camdata,
+                                    ref_instrumentdata_ccdcamera=camdata["def_id"],
                                     ref_sessiondata_session=session)
-    else:
-        # https://docs.djangoproject.com/en/5.2/topics/db/queries/#copying-model-instances
-        align_presetdata.pk = None
-        align_presetdata._state.adding = True
-        align_presetdata.name = "%s-%s" % (align_presetdata.name, alignlabel)
-    align_presetdata.dimension_x = camdata.subd_dimension_x
-    align_presetdata.dimension_y = camdata.subd_dimension_y
-    align_presetdata.binning_x = camdata.subd_binning_x
-    align_presetdata.binning_y = camdata.subd_binning_y
-    align_presetdata.offset_x = camdata.subd_offset_x
-    align_presetdata.offset_y = camdata.subd_offset_y
-    align_presetdata.exposure_time = camdata.exposure_time
-    try:
-        fields={}
-        for field in align_presetdata._meta.get_fields():
-            if not field.auto_created and field.get_internal_type() != "AutoField":
-                fields[field.name]=getattr(align_presetdata, field.name)
-        orig_align_presetdata = PresetData.objects.get(**fields)
-        return orig_align_presetdata.def_id
-    except PresetData.DoesNotExist:
-        align_presetdata.save()
-        return align_presetdata.def_id
+    align_presetdata["dimension_x"] = camdata["subd_dimension_x"]
+    align_presetdata["dimension_y"] = camdata["subd_dimension_y"]
+    align_presetdata["binning_x"] = camdata["subd_binning_x"]
+    align_presetdata["binning_y"] = camdata["subd_binning_y"]
+    align_presetdata["offset_x"] = camdata["subd_offset_x"]
+    align_presetdata["offset_y"] = camdata["subd_offset_y"]
+    align_presetdata["exposure_time"] = camdata["exposure_time"]
+    if not sb.set("PresetData",align_presetdata):
+        align_presetdata=sb.get("PresetData",align_presetdata)
+    return align_presetdata["def_id"]
 
 def calcVersionedFilename(basepath, filename):
     '''
