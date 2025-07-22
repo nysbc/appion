@@ -78,7 +78,7 @@ def readImageMetadata(imageid: int, has_bad_pixels : bool = False, is_align : bo
     imgmetadata['image_filename']=imgdata["filename"]
     # Dark inputs
     imgmetadata['dark_id']=imgdata["ref_darkimagedata_dark"]
-    ccdcamera=sb.get("InstrumentData",{"ccdcamera" : cameradata["ref_instrumentdata_ccdcamera"]})
+    ccdcamera=sb.get("InstrumentData",{"def_id" : cameradata["ref_instrumentdata_ccdcamera"]})
     imgmetadata['camera_name']=ccdcamera["name"]
     imgmetadata['eer_frames']=cameradata["eer_frames"]
     # DefectMap inputs
@@ -96,13 +96,12 @@ def readImageMetadata(imageid: int, has_bad_pixels : bool = False, is_align : bo
     imgmetadata['total_raw_frames'] = cameradata["nframes"]
     imgmetadata['exposure_time'] = cameradata["exposure_time"]
     imgmetadata['frame_time'] = cameradata["frame_time"]
-    preset=sb.get("PresetData",{"preset":imgdata["ref_presetdata_preset"]})
+    preset=sb.get("PresetData",{"def_id":imgdata["ref_presetdata_preset"]})
     imgmetadata['dose'] = preset["dose"]
     # PixSize inputs
-    scope=sb.get("ScopeEMData", {"scope":imgdata["ref_scopeemdata_scope"]})
+    scope=sb.get("ScopeEMData", {"def_id":imgdata["ref_scopeemdata_scope"]})
     imgmetadata['magnification']=scope["magnification"]
-    tem=sb.get("InstrumentData",{"tem":scope["ref_instrumentdata_tem"]})
-    imgmetadata['tem']=tem["def_id"]
+    imgmetadata['tem']=scope["ref_instrumentdata_tem"]
     imgmetadata['ccdcamera']=ccdcamera["def_id"]
     imgmetadata['binning']=cameradata["subd_binning_x"]
     imgmetadata['imgdata_timestamp']=imgdata["def_timestamp"]
