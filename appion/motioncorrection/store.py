@@ -95,7 +95,7 @@ def constructAlignedPresets(preset_id, camera_id, magnification=None, defocus=No
                                     ref_instrumentdata_ccdcamera=camdata["def_id"],
                                     ref_sessiondata_session=session)
     else:
-        align_presetdata["name"] = "%s-%s" % (align_presetdata.name, alignlabel)
+        align_presetdata["name"] = "%s-%s" % (align_presetdata["name"], alignlabel)
     align_presetdata["dimension_x"] = camdata["subd_dimension_x"]
     align_presetdata["dimension_y"] = camdata["subd_dimension_y"]
     align_presetdata["binning_x"] = camdata["subd_binning_x"]
