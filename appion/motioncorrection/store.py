@@ -18,24 +18,14 @@ from sinedon.models.leginon import CameraEMData
 from .calc.internal import calcAlignedCamera, calcFrameShiftFromPositions, calcFrameStats, calcTotalRenderedFrames
 
 def constructAlignedImage(image_id, preset_id, camera_id, mrc_image, filename):
-    imgdata = AcquisitionImageData.objects.get(def_id=image_id)
+    imgdata = sb.get("AcquisitionImageData",{"def_id": image_id})
     if imgdata:
-        # https://docs.djangoproject.com/en/5.2/topics/db/queries/#copying-model-instances
-        imgdata.pk = None
-        imgdata._state.adding = True
-        imgdata.ref_presetdata_preset=PresetData.objects.get(def_id=preset_id)
-        imgdata.ref_cameraemdata_camera=CameraEMData.objects.get(def_id=camera_id)
-        imgdata.mrc_image=mrc_image
-        imgdata.filename=filename
-        try:
-            orig_imgdata = AcquisitionImageData.objects.get(ref_presetdata_preset=imgdata.ref_presetdata_preset,
-                                                                       ref_cameraemdata_camera=imgdata.ref_cameraemdata_camera,
-                                                                       mrc_image=imgdata.mrc_image,
-                                                                       filename=imgdata.filename)
-            return orig_imgdata.def_id
-        except AcquisitionImageData.DoesNotExist:
-            imgdata.save()
-            return imgdata.def_id
+        imgdata["ref_presetdata_preset"]=preset_id
+        imgdata["ref_cameraemdata_camera"]=camera_id
+        imgdata["mrc_image"]=mrc_image
+        imgdata["filename"]=filename
+        imgdata=sb.set("AcquisitionImageData", imgdata)
+        return imgdata["def_id"]
     return None
 
 # trimming_edge is the same value as kwargs["Trim"]
