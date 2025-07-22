@@ -63,8 +63,6 @@ def postTask(imageid, kwargs, imgmetadata, jobmetadata, args, logData, logStdOut
     logger.info("%s linked to %s." % (abs_path_aligned_image_mrc_image, kwargs["OutMrc"]))
     logger.info("Constructing aligned image record for %d." % imageid)
     aligned_image_id = constructAlignedImage(imageid, aligned_preset_id, aligned_camera_id, aligned_image_mrc_image, aligned_image_filename)
-    logger.info("Uploading aligned image record for %d." % imageid)
-    uploadAlignedImage(imageid, aligned_image_id, jobmetadata['ref_apddstackrundata_ddstackrun'], logData["shifts"], kwargs["PixSize"], False)
     aligned_preset_dw_id = constructAlignedPresets(imgmetadata['preset_id'], aligned_camera_id, alignlabel=args['alignlabel']+"-DW")
     aligned_image_dw_filename = imgmetadata['image_filename']+"-%s-DW" % args['alignlabel']
     aligned_image_dw_mrc_image = aligned_image_dw_filename + ".mrc"
@@ -82,8 +80,6 @@ def postTask(imageid, kwargs, imgmetadata, jobmetadata, args, logData, logStdOut
     aligned_image_dw_id = constructAlignedImage(imageid, aligned_preset_dw_id, aligned_camera_id, aligned_image_dw_mrc_image, aligned_image_dw_filename)
     # Frame trajectory only saved for aligned_image_id: https://github.com/nysbc/appion-slurm/blob/814544a7fee69ba7121e7eb1dd3c8b63bc4bb75a/appion/appionlib/apDDLoop.py#L89-L107
     trajdata_id=saveFrameTrajectory(aligned_image_id, jobmetadata['ref_apddstackrundata_ddstackrun'], logData["shifts"])
-    logger.info("Uploading aligned, dose-weighted image record for %d." % imageid)
-    uploadAlignedImage(imageid, aligned_image_dw_id, jobmetadata['ref_apddstackrundata_ddstackrun'], logData["shifts"], kwargs["PixSize"], True, trajdata_id)
     # This is only used by manualpicker.py so it can go away.  Just making a note of it in a commit for future me / someone.
     #saveApAssessmentRunData(imgmetadata['session_id'], assessment)
     # Seems mostly unused?  Might have been used with a prior implementation of motion correction?  Fields seem to mostly be filled with nulls in the MEMC database.
@@ -105,3 +101,11 @@ def postTask(imageid, kwargs, imgmetadata, jobmetadata, args, logData, logStdOut
                 os.remove(outmrc_dw)
         if os.path.exists(outmrc_dws):
             os.remove(outmrc_dws)
+
+    # These need to happen last because they create records that are used to determine if an image is done or not in retrieveDoneImages.
+    # Every other step in this function should be idempotent/capable of being run multiple times, but these two function invocations
+    # finalize the image for the specified preset/settings/alignment label.
+    logger.info("Uploading aligned image record for %d." % imageid)
+    uploadAlignedImage(imageid, aligned_image_id, jobmetadata['ref_apddstackrundata_ddstackrun'], logData["shifts"], kwargs["PixSize"], False)
+    logger.info("Uploading aligned, dose-weighted image record for %d." % imageid)
+    uploadAlignedImage(imageid, aligned_image_dw_id, jobmetadata['ref_apddstackrundata_ddstackrun'], logData["shifts"], kwargs["PixSize"], True, trajdata_id)
