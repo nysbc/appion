@@ -138,7 +138,7 @@ def copyZLPThicknessParams(unaligned,aligned):
     # transfers zero loss peak measurements and parameters from the unaligned image to the aligned image
     # should it be here or in a different place???
     unaligned_image = sb.get("AcquisitionImageData",{"def_id" : unaligned})
-    zlpthdata = sb.get("ZeroLossIceThicknessData", {"ref_acquisitionimagedata_image" : unaligned_image})
+    zlpthdata = sb.get("ZeroLossIceThicknessData", {"ref_acquisitionimagedata_image" : unaligned_image["def_id"]})
     aligned_image = sb.get("AcquisitionImageData",{"def_id" : aligned})
     if zlpthdata:
         zlpthdata["ref_acquisitionimagedata_image"]=aligned_image["def_id"]
