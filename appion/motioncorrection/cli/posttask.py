@@ -16,6 +16,29 @@ def postTask(imageid, kwargs, imgmetadata, jobmetadata, args, logData, logStdOut
     logger.setLevel("INFO")
     logHandler.setLevel("INFO")
     logger.addHandler(logHandler)
+
+    # Is this really the right/best way to determine the framestack path?  It works for our purposes ( I think )
+    # but the original codebase has more elaborate logic that works for both aligned and unaligned images:
+    # https://github.com/nysbc/appion-slurm/blob/814544a7fee69ba7121e7eb1dd3c8b63bc4bb75a/appion/appionlib/apDDprocess.py#L104-L123
+    # Not sure that really is necessary for what we're trying to achieve in the immediate future.
+    if 'InMrc' in kwargs.keys():
+        framestackpath=kwargs['InMrc']
+    elif 'InTiff' in kwargs.keys():
+        framestackpath=kwargs['InTiff']
+    elif 'InEer' in kwargs.keys():
+        framestackpath=kwargs['InEer']
+    # These need to go in the Appion directory / working directory.
+    framestackpath=os.path.join(args["rundir"],os.path.basename(framestackpath))
+
+    motioncor2_log_path=calcMotionCor2LogPath(framestackpath)
+    logger.info("Saving out motioncor2-formatted log for %d to %s." % (imageid, motioncor2_log_path))
+    with open(motioncor2_log_path, "w") as f:
+        f.write(logStdOut)
+
+    motioncorr_log_path=calcMotionCorrLogPath(framestackpath)
+    logger.info("Saving out motioncorr-formatted log for %d to %s." % (imageid, motioncorr_log_path))
+    saveMotionCorrLog(logData, motioncorr_log_path, args['startframe'], calcTotalRenderedFrames(imgmetadata['total_raw_frames'], args['rendered_frame_size']), args['bin'])
+
     shifts=[]
     # Find way to not calculate these twice?
     framelist=filterFrameList(kwargs["PixSize"], imgmetadata['nframes'], shifts)
@@ -66,28 +89,6 @@ def postTask(imageid, kwargs, imgmetadata, jobmetadata, args, logData, logStdOut
     # Seems mostly unused?  Might have been used with a prior implementation of motion correction?  Fields seem to mostly be filled with nulls in the MEMC database.
     saveDDStackParamsData(args['preset'], args['align'], args['bin'], None, None, None, None)
     #saveDDStackParamsData(args['preset'], args['align'], args['bin'], ref_apddstackrundata_unaligned_ddstackrun, method, ref_apstackdata_stack, ref_apdealignerparamsdata_de_aligner)
-    
-    # Is this really the right/best way to determine the framestack path?  It works for our purposes ( I think )
-    # but the original codebase has more elaborate logic that works for both aligned and unaligned images:
-    # https://github.com/nysbc/appion-slurm/blob/814544a7fee69ba7121e7eb1dd3c8b63bc4bb75a/appion/appionlib/apDDprocess.py#L104-L123
-    # Not sure that really is necessary for what we're trying to achieve in the immediate future.
-    if 'InMrc' in kwargs.keys():
-        framestackpath=kwargs['InMrc']
-    elif 'InTiff' in kwargs.keys():
-        framestackpath=kwargs['InTiff']
-    elif 'InEer' in kwargs.keys():
-        framestackpath=kwargs['InEer']
-    # These need to go in the Appion directory / working directory.
-    framestackpath=os.path.join(args["rundir"],os.path.basename(framestackpath))
-
-    motioncor2_log_path=calcMotionCor2LogPath(framestackpath)
-    logger.info("Saving out motioncor2-formatted log for %d to %s." % (imageid, motioncor2_log_path))
-    with open(motioncor2_log_path, "w") as f:
-        f.write(logStdOut)
-
-    motioncorr_log_path=calcMotionCorrLogPath(framestackpath)
-    logger.info("Saving out motioncorr-formatted log for %d to %s." % (imageid, motioncorr_log_path))
-    saveMotionCorrLog(logData, motioncorr_log_path, args['startframe'], calcTotalRenderedFrames(imgmetadata['total_raw_frames'], args['rendered_frame_size']), args['bin'])
 
     if args["clean"]:
         if os.path.exists(kwargs["Dark"]):
