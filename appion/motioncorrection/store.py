@@ -103,9 +103,7 @@ def constructAlignedPresets(preset_id, camera_id, magnification=None, defocus=No
     align_presetdata["offset_x"] = camdata["subd_offset_x"]
     align_presetdata["offset_y"] = camdata["subd_offset_y"]
     align_presetdata["exposure_time"] = camdata["exposure_time"]
-    sb.set("PresetData",align_presetdata)
-    # Need to retrieve data again to ensure that the def_id key is properly populated.
-    align_presetdata=sb.get("PresetData",align_presetdata)
+    align_presetdata=sb.set("PresetData",align_presetdata)
     return align_presetdata["def_id"]
 
 def calcVersionedFilename(basepath, filename):
