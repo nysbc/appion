@@ -5,16 +5,14 @@ import os
 import numpy
 import mrcfile
 import sinedon.base as sb
-from sinedon.models.appion import ApDDAlignImagePairData
 from sinedon.models.appion import ApDDFrameTrajectoryData
 from sinedon.models.appion import ApDDAlignStatsData
-from sinedon.models.leginon import AcquisitionImageData, PresetData
+from sinedon.models.leginon import AcquisitionImageData
 from sinedon.models.leginon import ObjIceThicknessData
 from sinedon.models.leginon import ZeroLossIceThicknessData
 from sinedon.models.appion import ApDDStackParamsData
 from sinedon.models.appion import ApDDStackRunData
 from sinedon.models.appion import ApPathData
-from sinedon.models.leginon import CameraEMData
 from .calc.internal import calcAlignedCamera, calcFrameShiftFromPositions, calcFrameStats, calcTotalRenderedFrames
 
 def constructAlignedImage(image_id, preset_id, camera_id, mrc_image, filename):
@@ -33,43 +31,29 @@ def constructAlignedImage(image_id, preset_id, camera_id, mrc_image, filename):
 # framelist is output of filterFrameList
 # nframes is output of calcTotalFrames
 def constructAlignedCamera(camera_id, square_output, binning : int = 1, trimming_edge : int = 0, framelist : list = [], nframes : int = 0):
-    camdata = CameraEMData.objects.get(def_id=camera_id)
+    camdata = sb.get("CameraEMData",{"def_id" : camera_id})
     if camdata:
-        # https://docs.djangoproject.com/en/5.2/topics/db/queries/#copying-model-instances
-        camdata.pk = None
-        camdata._state.adding = True
-        aligned_binning, aligned_dimensions, aligned_offset, use_frames = calcAlignedCamera((camdata.subd_dimension_x, camdata.subd_dimension_y), 
+        aligned_binning, aligned_dimensions, aligned_offset, use_frames = calcAlignedCamera((camdata["subd_dimension_x"], camdata["subd_dimension_y"]), 
                                                                                             square_output, 
-                                                                                            (camdata.subd_binning_x, camdata.subd_binning_y), 
-                                                                                            (camdata.subd_offset_x, camdata.subd_offset_y), 
+                                                                                            (camdata["subd_binning_x"], camdata["subd_binning_y"]), 
+                                                                                            (camdata["subd_offset_x"], camdata["subd_offset_y"]), 
                                                                                             binning, 
                                                                                             trimming_edge, 
                                                                                             framelist, 
                                                                                             nframes)
-        camdata.subd_dimension_x=aligned_dimensions[0]
-        camdata.subd_dimension_y=aligned_dimensions[1]
-        camdata.subd_binning_x=aligned_binning[0]
-        camdata.subd_binning_y=aligned_binning[1]
-        camdata.subd_offset_x=aligned_offset[0]
-        camdata.subd_offset_y=aligned_offset[1]
+        camdata["subd_dimension_x"]=aligned_dimensions[0]
+        camdata["subd_dimension_y"]=aligned_dimensions[1]
+        camdata["subd_binning_x"]=aligned_binning[0]
+        camdata["subd_binning_y"]=aligned_binning[1]
+        camdata["subd_offset_x"]=aligned_offset[0]
+        camdata["subd_offset_y"]=aligned_offset[1]
         if use_frames:
-            camdata.seq_use_frames=str(use_frames)
+            camdata["seq_use_frames"]=str(use_frames)
         else:
-            camdata.seq_use_frames=None
-        camdata.align_frames=True
-        try:
-            orig_camdata = CameraEMData.objects.get(subd_dimension_x=camdata.subd_binning_x,
-                                                    subd_dimension_y=camdata.subd_binning_y,
-                                                    subd_binning_x=camdata.subd_binning_y,
-                                                    subd_binning_y=camdata.subd_binning_y,
-                                                    subd_offset_x=camdata.subd_offset_x,
-                                                    subd_offset_y=camdata.subd_offset_y,
-                                                    seq_use_frames=camdata.seq_use_frames,
-                                                    align_frames=camdata.align_frames)
-            return orig_camdata.def_id
-        except CameraEMData.DoesNotExist:
-            camdata.save()
-            return camdata.def_id
+            camdata["seq_use_frames"]=None
+        camdata["align_frames"]=True
+        camdata=sb.set("CameraEMData", camdata)
+        return camdata["def_id"]
     return None
 
 def constructAlignedPresets(preset_id, camera_id, magnification=None, defocus=None, tem=None, session=None, alignlabel='a'):
@@ -114,24 +98,14 @@ def constructAlignedImageData(imageid, presetid, cameraid, aligned_filename):
     Prepare ImageData to be uploaded after alignment
     '''
     # make new imagedata with the align_preset amd aligned CameraEMData
-    imgdata=AcquisitionImageData.objects.get(def_id=imageid)
+    imgdata=sb.get("AcquisitionImageData",{"def_id" : imageid})
     if imgdata:
-        # https://docs.djangoproject.com/en/5.2/topics/db/queries/#copying-model-instances
-        imgdata.pk = None
-        imgdata._state.adding = True
-        imgdata.ref_presetdata_preset=PresetData.objects.get(def_id=presetid)
-        imgdata.ref_cameraemdata_camera=CameraEMData.objects.get(def_id=cameraid)
-        imgdata.mrc_image = aligned_filename
-        imgdata.filename = os.path.splitext(aligned_filename)[0]
-        try:
-            orig_imgdata=AcquisitionImageData.objects.get(ref_presetdata_preset=imgdata.ref_presetdata_preset,
-                                                          ref_cameraemdata_camera=imgdata.ref_cameraemdata_camera,
-                                                          mrc_image=imgdata.mrc_image,
-                                                          filename=imgdata.filename)
-            return orig_imgdata.def_id
-        except AcquisitionImageData.DoesNotExist:
-            imgdata.save()
-            return imgdata.def_id
+        imgdata["ref_presetdata_preset"]=presetid
+        imgdata["ref_cameraemdata_camera"]=cameraid
+        imgdata["mrc_image"] = aligned_filename
+        imgdata["filename"] = os.path.splitext(aligned_filename)[0]
+        imgdata=sb.set("AcquisitionImageData", imgdata)
+        return imgdata["def_id"]
     return None
 
 # ApDDAlignImagePairData
@@ -139,8 +113,9 @@ def constructAlignedImageData(imageid, presetid, cameraid, aligned_filename):
 # If it weren't for this, we'd probably pass objects directly.
 def uploadAlignedImage(raw_image_def_id, aligned_image_def_id, rundata_def_id, shifts, pixsize, doseweighted=False, trajdata_def_id=None):
     saveImagePairData(raw_image_def_id, aligned_image_def_id, rundata_def_id)
-    aligned_image=AcquisitionImageData.objects.get(def_id=aligned_image_def_id)
-    nframes=aligned_image.ref_cameraemdata_camera.nframes
+    aligned_image=sb.get("AcquisitionImageData",{"def_id" : aligned_image_def_id})
+    camdata=sb.get("CameraEMData", {"def_id" : aligned_image["ref_cameraemdata_camera"]})
+    nframes=camdata["nframes"]
     if not doseweighted:
         max_drifts, median = uploadAlignStats(shifts, nframes)
         saveAlignStats(aligned_image_def_id, rundata_def_id, max_drifts, median, pixsize, trajdata_def_id)
@@ -148,18 +123,12 @@ def uploadAlignedImage(raw_image_def_id, aligned_image_def_id, rundata_def_id, s
     copyZLPThicknessParams(raw_image_def_id,aligned_image_def_id)
 
 def saveImagePairData(raw_image_def_id, aligned_image_def_id, rundata_def_id):
-    pairdata = ApDDAlignImagePairData(ref_acquisitionimagedata_source=raw_image_def_id,
+    pairdata = dict(ref_acquisitionimagedata_source=raw_image_def_id,
                                     ref_acquisitionimagedata_result=aligned_image_def_id,
                                     ref_apddstackrundata_ddstackrun=rundata_def_id)
-    try:
-        orig_pairdata = ApDDAlignImagePairData.objects.get(ref_acquisitionimagedata_source=raw_image_def_id,
-                                                           ref_acquisitionimagedata_result=aligned_image_def_id,
-                                                           ref_apddstackrundata_ddstackrun=rundata_def_id)
-        return orig_pairdata.def_id
-    except ApDDAlignImagePairData.DoesNotExist:
-        pairdata.save()
-        return pairdata.def_id
-			
+    pairdata = sb.set("ApDDAlignImagePairData", pairdata)
+    return pairdata["def_id"]
+
 def copyALSThicknessParams(unaligned,aligned):
 # transfers aperture limited scattering measurements and parameters from the unaligned image to the aligned image
 # should it be here or in a different place???
