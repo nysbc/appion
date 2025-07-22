@@ -6,13 +6,8 @@ import numpy
 import mrcfile
 import sinedon.base as sb
 from sinedon.models.appion import ApDDFrameTrajectoryData
-from sinedon.models.appion import ApDDAlignStatsData
 from sinedon.models.leginon import AcquisitionImageData
-from sinedon.models.leginon import ObjIceThicknessData
 from sinedon.models.leginon import ZeroLossIceThicknessData
-from sinedon.models.appion import ApDDStackParamsData
-from sinedon.models.appion import ApDDStackRunData
-from sinedon.models.appion import ApPathData
 from .calc.internal import calcAlignedCamera, calcFrameShiftFromPositions, calcFrameStats, calcTotalRenderedFrames
 
 def constructAlignedImage(image_id, preset_id, camera_id, mrc_image, filename):
@@ -132,26 +127,17 @@ def saveImagePairData(raw_image_def_id, aligned_image_def_id, rundata_def_id):
 def copyALSThicknessParams(unaligned,aligned):
 # transfers aperture limited scattering measurements and parameters from the unaligned image to the aligned image
 # should it be here or in a different place???
-    unaligned_image = AcquisitionImageData.objects.get(def_id=unaligned)
-    obthdata = ObjIceThicknessData.objects.filter(ref_acquisitionimagedata_image=unaligned_image)
-    aligned_image = AcquisitionImageData.objects.get(def_id=aligned)
+    unaligned_image = sb.get("AcquisitionImageData",{"def_id" : unaligned})
+    obthdata = sb.get("ObjIceThicknessData", {"ref_acquisitionimagedata_image" : unaligned_image["def_id"]})
+    aligned_image = sb.get("AcquisitionImageData",{"def_id" : aligned})
     if obthdata:
-        obthdata = obthdata[len(obthdata) - 1]
-        newobjth = ObjIceThicknessData(vacuum_intensity = obthdata.vacuum_intensity,
-                                       mfp = obthdata.mfp,
-                                       intensity = obthdata.intensity,
-                                       thickness = obthdata.thickness,
+        newobjth = dict(vacuum_intensity = obthdata["vacuum_intensity"],
+                                       mfp = obthdata["mfp"],
+                                       intensity = obthdata["intensity"],
+                                       thickness = obthdata["thickness"],
                                        ref_acquisitionimagedata_image = aligned_image)
-        try:
-            orig_newobjth = ObjIceThicknessData.objects.get(vacuum_intensity = obthdata.vacuum_intensity,
-                                                            mfp = obthdata.mfp,
-                                                            intensity = obthdata.intensity,
-                                                            thickness = obthdata.thickness,
-                                                            ref_acquisitionimagedata_image = aligned_image)
-            return orig_newobjth.def_id
-        except ObjIceThicknessData.DoesNotExist:
-            newobjth.save()
-            return newobjth.def_id
+        newobjth = sb.set("ApDDAlignImagePairData", newobjth)
+        return newobjth["def_id"]
     return None
 		
 
@@ -200,41 +186,17 @@ def saveAlignStats(aligned_image_def_id, rundata_def_id, max_drifts, median, pix
         key = 'top_shift%d' % (i+1,)
         drifts[key+'_index'] = drift_tuple[1]
         drifts[key+'_value'] = drift_tuple[0]
-    aligned_image = AcquisitionImageData.objects.get(def_id=aligned_image_def_id)
-    rundata = ApDDStackRunData.objects.get(def_id=rundata_def_id)
+    aligned_image = sb.get("AcquisitionImageData", {"def_id" : aligned_image_def_id})
+    rundata = sb.get("ApDDStackRunData", {"def_id" : rundata_def_id})
+    alignstatsdata = dict(ref_acquisitionimagedata_image=aligned_image, 
+                                        apix=pixsize,
+                                        ref_apddstackrundata_ddstackrun=rundata,
+                                        median_shift_value=median,
+                                        **drifts)
     if trajdata_def_id:
-        trajdata = ApDDFrameTrajectoryData.objects.get(def_id=trajdata_def_id)
-        alignstatsdata = ApDDAlignStatsData(ref_acquisitionimagedata_image=aligned_image, 
-                                            apix=pixsize,
-                                            ref_apddstackrundata_ddstackrun=rundata,
-                                            median_shift_value=median,
-                                            ref_apddframetrajectorydata_trajectory=trajdata,
-                                            **drifts)
-    else:
-        alignstatsdata = ApDDAlignStatsData(ref_acquisitionimagedata_image=aligned_image, 
-                                            apix=pixsize,
-                                            ref_apddstackrundata_ddstackrun=rundata,
-                                            median_shift_value=median,
-                                            **drifts)
-    try:
-        if trajdata_def_id:
-            #trajdata = ApDDFrameTrajectoryData.objects.get(def_id=trajdata_def_id)
-            orig_alignstatsdata = ApDDAlignStatsData.objects.get(ref_acquisitionimagedata_image=aligned_image, 
-                                                apix=pixsize,
-                                                ref_apddstackrundata_ddstackrun=rundata,
-                                                median_shift_value=median,
-                                                ref_apddframetrajectorydata_trajectory=trajdata,
-                                                **drifts)
-        else:
-            orig_alignstatsdata = ApDDAlignStatsData.objects.get(ref_acquisitionimagedata_image=aligned_image, 
-                                                apix=pixsize,
-                                                ref_apddstackrundata_ddstackrun=rundata,
-                                                median_shift_value=median,
-                                                **drifts)
-        return orig_alignstatsdata.def_id
-    except ApDDAlignStatsData.DoesNotExist:
-        alignstatsdata.save()
-        return alignstatsdata.def_id
+        alignstatsdata["ref_apddframetrajectorydata_trajectory"]=trajdata_def_id
+    alignstatsdata = sb.set("ApDDAlignStatsData",alignstatsdata)
+    return alignstatsdata["def_id"]
 	
 # ApDDFrameTrajectoryData
 
@@ -279,36 +241,23 @@ def saveFrameTrajectory(image_def_id, rundata_def_id, shifts, limit=20, referenc
 
 #ApDDStackParamsData
 def saveDDStackParamsData(preset, align, binning, ref_apddstackrundata_unaligned_ddstackrun, method, ref_apstackdata_stack=None, ref_apdealignerparamsdata_de_aligner=None):
-    ddstackparamsdata = ApDDStackParamsData.objects.filter(preset=preset, align=align, binning=binning, 
+    ddstackparamsdata = sb.set("ApDDStackParamsData",dict(preset=preset, align=align, binning=binning, 
                                                            ref_apddstackrundata_unaligned_ddstackrun=ref_apddstackrundata_unaligned_ddstackrun, 
                                                            ref_apstackdata_stack=ref_apstackdata_stack,
                                                            method=method,
-                                                           ref_apdealignerparamsdata_de_aligner=ref_apdealignerparamsdata_de_aligner)
-    if not ddstackparamsdata:
-        ddstackparamsdata = ApDDStackParamsData(preset=preset, align=align, binning=binning, 
-                                                ref_apddstackrundata_unaligned_ddstackrun=ref_apddstackrundata_unaligned_ddstackrun, 
-                                                ref_apstackdata_stack=ref_apstackdata_stack,
-                                                method=method,
-                                                ref_apdealignerparamsdata_de_aligner=ref_apdealignerparamsdata_de_aligner)
-        ddstackparamsdata.save()
-    else:
-        ddstackparamsdata=ddstackparamsdata[len(ddstackparamsdata)-1]
-    return ddstackparamsdata.def_id
+                                                           ref_apdealignerparamsdata_de_aligner=ref_apdealignerparamsdata_de_aligner))
+    return ddstackparamsdata["def_id"]
 			
 # ApDDStackRunData
 def saveDDStackRunData(preset, align, binning, runname, rundir, ref_sessiondata_session, stack=None):
     # We don't use ApStackData so that stack is always set to None.
-    params = ApDDStackParamsData.objects.filter(preset=preset,align=align,binning=binning,ref_apstackdata_stack=stack)
-    params = params[len(params) - 1]
-    path = ApPathData.objects.filter(path=os.path.abspath(rundir))
-    path = path[len(path) - 1]
-    results = ApDDStackRunData.objects.filter(runname=runname,ref_apddstackparamsdata_params=params.def_id,ref_sessiondata_session=ref_sessiondata_session,ref_appathdata_path=path.def_id)
-    if not results:
-        ddstackrundata = ApDDStackRunData(runname=runname,ref_apddstackparamsdata_params=params.def_id,ref_sessiondata_session=ref_sessiondata_session,ref_appathdata_path=path.def_id)
-        ddstackrundata.save()
-    else:
-        ddstackrundata=ddstackrundata[0]
-    return ddstackrundata.def_id
+    params = sb.get("ApDDStackParamsData",{"preset" : preset, "align" : align, "binning" : binning,"ref_apstackdata_stack" : stack})
+    path = sb.get("ApPathData", {"path" : os.path.abspath(rundir)})
+    ddstackrundata = sb.set("ApDDStackRunData",{"runname" : runname, 
+                                         "ref_apddstackparamsdata_params" : params["def_id"], 
+                                         "ref_sessiondata_session" : ref_sessiondata_session, 
+                                         "ref_appathdata_path" : path["def_id"]})
+    return ddstackrundata["def_id"]
 
 
 def saveMotionCorrLog(logData: dict, outputLogPath: str, throw: int, totalRenderedFrames: int, binning: float = 1.0) -> None:
