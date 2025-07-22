@@ -188,9 +188,9 @@ def saveAlignStats(aligned_image_def_id, rundata_def_id, max_drifts, median, pix
         drifts[key+'_value'] = drift_tuple[0]
     aligned_image = sb.get("AcquisitionImageData", {"def_id" : aligned_image_def_id})
     rundata = sb.get("ApDDStackRunData", {"def_id" : rundata_def_id})
-    alignstatsdata = dict(ref_acquisitionimagedata_image=aligned_image, 
+    alignstatsdata = dict(ref_acquisitionimagedata_image=aligned_image["def_id"], 
                                         apix=pixsize,
-                                        ref_apddstackrundata_ddstackrun=rundata,
+                                        ref_apddstackrundata_ddstackrun=rundata["def_id"],
                                         median_shift_value=median,
                                         **drifts)
     if trajdata_def_id:
