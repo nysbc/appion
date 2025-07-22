@@ -1,5 +1,4 @@
 import sinedon.base as sb
-from sinedon.models.appion import ApAppionJobData
 import sys
 import platform
 import importlib.metadata
@@ -94,10 +93,10 @@ def saveApAssessmentRunData(ref_sessiondata_session, assessment="unassessed"):
 # ApAppionJobData
 
 def updateApAppionJobData(jobid, status):
-    appionjob = ApAppionJobData.objects.get(def_id=jobid)
-    appionjob.status = status
-    appionjob.save()
-    return appionjob.def_id
+    appionjob = sb.get("ApAppionJobData", {"def_id" : jobid})
+    appionjob["status"] = status
+    sb.update("ApAppionJobData",appionjob)
+    return appionjob["def_id"]
 
 def saveApAppionJobData(ref_appathdata_path, jobtype, runname, user, hostname, ref_sessiondata_session):
     #=====================

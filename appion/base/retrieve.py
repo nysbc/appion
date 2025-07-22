@@ -64,7 +64,7 @@ def retrieveSkippedTiltAngleImages(session, tilt_angle_type):
     images = []
     for scope in rejected_scopes:
         q_result = sb.filter("AcquisitionImageData", {"ref_scopeemdata_scope" : scope})
-        images += [image.def_id for image in q_result]
+        images += [image["def_id"] for image in q_result]
     images = set(images)
     return images
 
