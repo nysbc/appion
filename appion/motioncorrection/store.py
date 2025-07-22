@@ -5,9 +5,6 @@ import os
 import numpy
 import mrcfile
 import sinedon.base as sb
-from sinedon.models.appion import ApDDFrameTrajectoryData
-from sinedon.models.leginon import AcquisitionImageData
-from sinedon.models.leginon import ZeroLossIceThicknessData
 from .calc.internal import calcAlignedCamera, calcFrameShiftFromPositions, calcFrameStats, calcTotalRenderedFrames
 
 def constructAlignedImage(image_id, preset_id, camera_id, mrc_image, filename):
@@ -131,42 +128,22 @@ def copyALSThicknessParams(unaligned,aligned):
     obthdata = sb.get("ObjIceThicknessData", {"ref_acquisitionimagedata_image" : unaligned_image["def_id"]})
     aligned_image = sb.get("AcquisitionImageData",{"def_id" : aligned})
     if obthdata:
-        newobjth = dict(vacuum_intensity = obthdata["vacuum_intensity"],
-                                       mfp = obthdata["mfp"],
-                                       intensity = obthdata["intensity"],
-                                       thickness = obthdata["thickness"],
-                                       ref_acquisitionimagedata_image = aligned_image)
-        newobjth = sb.set("ApDDAlignImagePairData", newobjth)
-        return newobjth["def_id"]
+        obthdata["ref_acquisitionimagedata_image"]=aligned_image["def_id"]
+        obthdata = sb.set("ApDDAlignImagePairData", obthdata)
+        return obthdata["def_id"]
     return None
 		
 
 def copyZLPThicknessParams(unaligned,aligned):
     # transfers zero loss peak measurements and parameters from the unaligned image to the aligned image
     # should it be here or in a different place???
-    unaligned_image = AcquisitionImageData.objects.get(def_id=unaligned)
-    zlpthdata = ZeroLossIceThicknessData.objects.filter(ref_acquisitionimagedata_image=unaligned_image)
-    aligned_image = AcquisitionImageData.objects.get(def_id=aligned)
+    unaligned_image = sb.get("AcquisitionImageData",{"def_id" : unaligned})
+    zlpthdata = sb.get("ZeroLossIceThicknessData", {"ref_acquisitionimagedata_image" : unaligned_image})
+    aligned_image = sb.get("AcquisitionImageData",{"def_id" : aligned})
     if zlpthdata:
-        zlpthdata = zlpthdata[len(zlpthdata) - 1]
-        newzlossth = ZeroLossIceThicknessData(no_slit_mean = zlpthdata.no_slit_mean,
-											  no_slit_sd = zlpthdata.no_slit_sd,
-											  slit_mean = zlpthdata.slit_mean,
-											  slit_sd = zlpthdata.slit_sd,
-											  thickness = zlpthdata.thickness,
-											  ref_acquisitionimagedata_image = aligned_image
-        )
-        try:
-            orig_newzlossth = ZeroLossIceThicknessData.objects.get(no_slit_mean = zlpthdata.no_slit_mean,
-                                                       no_slit_sd = zlpthdata.no_slit_sd,
-                                                       slit_mean = zlpthdata.slit_mean,
-                                                       slit_sd = zlpthdata.slit_sd,
-                                                       thickness = zlpthdata.thickness,
-                                                       ref_acquisitionimagedata_image = aligned_image)
-            return orig_newzlossth.def_id
-        except ZeroLossIceThicknessData.DoesNotExist:
-            newzlossth.save()
-            return newzlossth.def_id
+        zlpthdata["ref_acquisitionimagedata_image"]=aligned_image["def_id"]
+        zlpthdata=sb.set("ZeroLossIceThicknessData",zlpthdata)
+        return zlpthdata["def_id"]
     return None
 
 def uploadAlignStats(shifts, nframes):
@@ -215,7 +192,7 @@ def saveFrameTrajectory(image_def_id, rundata_def_id, shifts, limit=20, referenc
         raise ValueError('Not enough frames to save trajectory')
     if reference_index == None:
         reference_index = n_positions // 2
-    trajdata = ApDDFrameTrajectoryData(ref_acquisitionimagedata_image=image_def_id,
+    trajdata = dict(ref_acquisitionimagedata_image=image_def_id,
 									ref_apstackparticledata_particle=particle,
 									ref_apddstackrundata_ddstackrun=rundata_def_id,
                                     seq_pos_x=str(list(xy['x'][:limit])), #position relative to reference
@@ -224,20 +201,8 @@ def saveFrameTrajectory(image_def_id, rundata_def_id, shifts, limit=20, referenc
                                     last_y=xy['y'][-1],
                                     number_of_positions= n_positions,
                                     reference_index= reference_index)
-    try:
-        orig_trajdata = ApDDFrameTrajectoryData.objects.get(ref_acquisitionimagedata_image=trajdata.ref_acquisitionimagedata_image,
-                                        ref_apstackparticledata_particle=trajdata.ref_apstackparticledata_particle,
-                                        ref_apddstackrundata_ddstackrun=trajdata.ref_apddstackrundata_ddstackrun,
-                                        seq_pos_x=trajdata.seq_pos_x,
-                                        seq_pos_y=trajdata.seq_pos_y,
-                                        last_x=trajdata.last_x,
-                                        last_y=trajdata.last_y,
-                                        number_of_positions=trajdata.number_of_positions,
-                                        reference_index=trajdata.reference_index)
-        return orig_trajdata.def_id
-    except ApDDFrameTrajectoryData.DoesNotExist:
-        trajdata.save()
-        return trajdata.def_id
+    trajdata = sb.set("ApDDFrameTrajectoryData", trajdata)
+    return trajdata["def_id"]
 
 #ApDDStackParamsData
 def saveDDStackParamsData(preset, align, binning, ref_apddstackrundata_unaligned_ddstackrun, method, ref_apstackdata_stack=None, ref_apdealignerparamsdata_de_aligner=None):
