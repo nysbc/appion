@@ -9,7 +9,7 @@ from .calc import filterImages
 from typing import Callable
 
 # Parameters passed in using lambdas.
-def loop(pipeline, args: dict, cluster : Cluster, retrieveDoneImages : Callable = lambda : set(), preLoop : Callable = lambda args : {}, postLoop : Callable = lambda jobmetadata : None, retrieveReprocessImages : Callable = lambda : set(), max_workers : int = 32) -> None:
+def loop(pipeline, args: dict, cluster : Cluster, retrieveDoneImages : Callable = lambda : set(), preLoop : Callable = lambda args : {}, postLoop : Callable = lambda jobmetadata : None, retrieveReprocessImages : Callable = lambda : set(), min_workers : int = 0, max_workers : int = 32) -> None:
     jobmetadata={}
     # Signal handler used to ensure that cleanup happens if SIGINT, SIGCONT or SIGTERM is received.
     def handler(signum, frame):
@@ -64,10 +64,10 @@ def loop(pipeline, args: dict, cluster : Cluster, retrieveDoneImages : Callable 
         t1=time()
         logger.info("Constructed task list in %d seconds." % (t1-t0))
         logger.info("Image counts: %d total images, %d done images, %d rejected images, and %d images marked for reprocessing." % (len(all_images), len(done_images), len(rejected_images), len(reprocess_images)))
-        node_count=min(max_workers,len(tasklist))
-        if node_count > 0:
-            logger.info("Scaling up to %d nodes." % node_count)
-        cluster.scale(node_count)
+        local_max_workers=min(max_workers,len(tasklist))
+        if local_max_workers > 0:
+            logger.info("Scaling up to %d nodes." % local_max_workers)
+        cluster.adapt(minimum=min_workers, maximum=local_max_workers)
         if tasklist:
             pipeline_t0=time()
             futures=pipeline(tasklist, args, jobmetadata, client)
@@ -99,11 +99,11 @@ def loop(pipeline, args: dict, cluster : Cluster, retrieveDoneImages : Callable 
             logger.debug("Cancelling all futures.")
             for f in futures:
                 f.cancel()
+            logger.debug("Futures cancelled.")
             # This is here to accommodate an edge case where a scale down event isn't triggered when processing a very
             # small number of images.
             logger.info("Removing all nodes.")
-            cluster.scale(0)
-            logger.debug("Futures cancelled.")
+            cluster.adapt(minimum=min_workers,maximum=min_workers)
             prev_tasklist=tasklist
         else:
             logger.info(f"No new images.  Waiting {waitTime} seconds.")
