@@ -26,13 +26,13 @@ def readImageSet(session, preset = None):
         images = set([image["def_id"] for image in images])
     return images
 
-def retrieveRejectedImages(images, session, start : None, stop : None, tilt_angle_type):
-    skipped_tilt_angle_images = retrieveSkippedTiltAngleImages(session, tilt_angle_type)
+def retrieveRejectedImages(images, sessionname, start : None, stop : None, tilt_angle_type):
+    skipped_tilt_angle_images = retrieveSkippedTiltAngleImages(sessionname, tilt_angle_type)
     if start and stop:
         sliced_images = calcSlicedImageSet(images, start, stop)
     else:
         sliced_images = set()
-    viewer_rejects = retrieveViewerRejects(session)
+    viewer_rejects = retrieveViewerRejects(sessionname)
     assessment_rejects = retrieveAssessmentRejects()
     return skipped_tilt_angle_images | sliced_images | viewer_rejects | assessment_rejects
 
@@ -44,22 +44,22 @@ def retrieveAssessmentRejects():
     else:
         return set()
 
-def retrieveViewerRejects(session):
+def retrieveViewerRejects(sessionname):
     '''
     Images that are hidden in the viewer or are trash are rejected.
     '''
-    session = sb.get("SessionData", {"name":session})
-    hidden_images = sb.filter("ViewerImageStatus", {"ref_sessiondata_session":session, "status" : "hidden"})
-    trash_images = sb.filter("ViewerImageStatus", {"ref_sessiondata_session": session, "status" : "trash"})
+    session = sb.get("SessionData", {"name":sessionname})
+    hidden_images = sb.filter("ViewerImageStatus", {"ref_sessiondata_session":session["def_id"], "status" : "hidden"})
+    trash_images = sb.filter("ViewerImageStatus", {"ref_sessiondata_session": session["def_id"], "status" : "trash"})
     return set([status["ref_acquisitionimagedata_image"] for status in hidden_images] + [status["ref_acquisitionimagedata_image"] for status in trash_images])
 
 
 def retrieveSkippedTiltAngleImages(session, tilt_angle_type):
     session = sb.get("SessionData", {"name" : session})
-    scopes = sb.filter("ScopeEMData", {"ref_sessiondata_session" : session})
+    scopes = sb.filter("ScopeEMData", {"ref_sessiondata_session" : session["def_id"]})
     rejected_scopes=[]
     for scope in scopes:
-        if calcSkipTiltAngle(scope.stage_position_a, tilt_angle_type):
+        if calcSkipTiltAngle(scope["stage_position_a"], tilt_angle_type):
             rejected_scopes.append(scope)
     images = []
     for scope in rejected_scopes:
