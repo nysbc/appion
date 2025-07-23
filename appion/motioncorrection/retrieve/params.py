@@ -66,7 +66,10 @@ def readImageMetadata(imageid: int, has_bad_pixels : bool = False, is_align : bo
     imgmetadata={}
     imgmetadata['imageid']=imageid
     imgdata=sb.get("AcquisitionImageData",{"def_id":imageid})
-    correctorplandata=sb.get("CorrectorPlanData",{"def_id":imgdata["ref_correctorplandata_corrector_plan"]})
+    if "ref_correctorplandata_corrector_plan" in imgdata.keys():
+        correctorplandata=sb.get("CorrectorPlanData",{"def_id":imgdata["ref_correctorplandata_corrector_plan"]})
+    else:
+        correctorplandata=None
     sessiondata=sb.get("SessionData",{"def_id":imgdata["ref_sessiondata_session"]})
     cameradata=sb.get("CameraEMData",{"def_id":imgdata["ref_cameraemdata_camera"]})
     imgmetadata['camera_id']=cameradata["def_id"]
@@ -77,7 +80,10 @@ def readImageMetadata(imageid: int, has_bad_pixels : bool = False, is_align : bo
     imgmetadata['session_frame_path']=sessiondata["frame_path"]
     imgmetadata['image_filename']=imgdata["filename"]
     # Dark inputs
-    imgmetadata['dark_id']=imgdata["ref_darkimagedata_dark"]
+    if "ref_darkimagedata_dark" in imgmetadata.keys():
+        imgmetadata['dark_id']=imgdata["ref_darkimagedata_dark"]
+    else:
+        imgmetadata['dark_id']=None
     ccdcamera=sb.get("InstrumentData",{"def_id" : cameradata["ref_instrumentdata_ccdcamera"]})
     imgmetadata['camera_name']=ccdcamera["name"]
     imgmetadata['eer_frames']=cameradata["eer_frames"]
@@ -95,9 +101,15 @@ def readImageMetadata(imageid: int, has_bad_pixels : bool = False, is_align : bo
     # FmDose, FmIntFile inputs
     imgmetadata['total_raw_frames'] = cameradata["nframes"]
     imgmetadata['exposure_time'] = cameradata["exposure_time"]
-    imgmetadata['frame_time'] = cameradata["frame_time"]
+    if "frame_time" in cameradata.keys():
+        imgmetadata['frame_time'] = cameradata["frame_time"]
+    else:
+        imgmetadata['frame_time'] = None
     preset=sb.get("PresetData",{"def_id":imgdata["ref_presetdata_preset"]})
-    imgmetadata['dose'] = preset["dose"]
+    if "dose" in preset.keys():
+        imgmetadata['dose'] = preset["dose"]
+    else:
+        imgmetadata['dose'] = None
     # PixSize inputs
     scope=sb.get("ScopeEMData", {"def_id":imgdata["ref_scopeemdata_scope"]})
     imgmetadata['magnification']=scope["magnification"]
