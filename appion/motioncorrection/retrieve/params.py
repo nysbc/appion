@@ -4,6 +4,7 @@
 import sinedon.base as sb
 import os
 import math
+from datetime import datetime
 
 # InMrc, InTiff, InEer functions
 def readInputPath(session_frame_path : str, filename : str) -> str:
@@ -116,7 +117,7 @@ def readImageMetadata(imageid: int, has_bad_pixels : bool = False, is_align : bo
     imgmetadata['tem']=scope["ref_instrumentdata_tem"]
     imgmetadata['ccdcamera']=ccdcamera["def_id"]
     imgmetadata['binning']=cameradata["subd_binning_x"]
-    imgmetadata['imgdata_timestamp']=imgdata["def_timestamp"]
+    imgmetadata['imgdata_timestamp']=datetime.fromisoformat(imgdata["def_timestamp"])
     # kV inputs
     imgmetadata['high_tension']=scope["high_tension"]
     # Trunc inputs
@@ -139,7 +140,7 @@ def readImageMetadata(imageid: int, has_bad_pixels : bool = False, is_align : bo
                            imgmetadata['magnification'], 
                            imgmetadata['tem'], 
                            imgmetadata['ccdcamera']))
-    imgmetadata['pixelsizedata']=[{"timestamp": p["def_timestamp"], "pixelsize" : p["pixelsize"] } for p in pixelsizecalibrationdata]
+    imgmetadata['pixelsizedata']=[{"timestamp": datetime.fromisoformat(p["def_timestamp"]), "pixelsize" : p["pixelsize"] } for p in pixelsizecalibrationdata]
     # Gain inputs
     if "ref_normimagedata_norm" in imgdata.keys():
         gaindata=sb.get("AcquisitionImageData", {"def_id" : imgdata["ref_normimagedata_norm"]})
