@@ -129,7 +129,7 @@ def copyALSThicknessParams(unaligned,aligned):
     aligned_image = sb.get("AcquisitionImageData",{"def_id" : aligned})
     if obthdata:
         obthdata["ref_acquisitionimagedata_image"]=aligned_image["def_id"]
-        obthdata = sb.set("ApDDAlignImagePairData", obthdata)
+        obthdata = sb.set("ObjIceThicknessData", obthdata)
         return obthdata["def_id"]
     return None
 		
