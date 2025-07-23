@@ -34,3 +34,4 @@ slack/build
 
 *slurm*out
 *.mrc
+test/test_motioncorrection_utils/readimagemetadata_check/samples/*/*.json
