@@ -83,6 +83,8 @@ def postTask(imageid, kwargs, imgmetadata, jobmetadata, args, logData, logStdOut
     # This is only used by manualpicker.py so it can go away.  Just making a note of it in a commit for future me / someone.
     #saveApAssessmentRunData(imgmetadata['session_id'], assessment)
     # Seems mostly unused?  Might have been used with a prior implementation of motion correction?  Fields seem to mostly be filled with nulls in the MEMC database.
+    # Not entirely sure that we want to pass args["preset"] in here.  Maybe we're supposed to pass in the aligned preset in addition to or instead?
+    # Difficult to know for sure, since it's not obvious what this table even exists for (at least to the author of this comment).
     saveDDStackParamsData(args['preset'], args['align'], args['bin'], None, None, None, None)
     #saveDDStackParamsData(args['preset'], args['align'], args['bin'], ref_apddstackrundata_unaligned_ddstackrun, method, ref_apstackdata_stack, ref_apdealignerparamsdata_de_aligner)
 
