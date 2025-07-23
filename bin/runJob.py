@@ -32,7 +32,7 @@ def main():
     template_dir=os.environ.get("APPION_TEMPLATE_DIR","/etc/appion/templates")
     template_file=os.environ.get("APPION_JOB_TEMPLATE","slurm_job.sh.j2")
     appion_wrapper_path=os.environ.get("APPION_WRAPPER_PATH",None)
-    remove_flags=["--ppn", "--nodes", "--walltime", "--queue", "--jobid"] 
+    remove_flags=["--ppn", "--nodes", "--walltime", "--queue"] 
     cmd=copy.deepcopy(sys.argv)
     rundir=""
     cmd_str=""

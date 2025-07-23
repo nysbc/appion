@@ -64,10 +64,12 @@ def constructGlobalParser():
     parser.add_argument("--no-clean", dest="clean",
         help="Don't clean up intermediate results during the course of processing.", default=True, 
         action="store_false")
+    parser.add_argument("--jobid", dest="jobid", type=int, default=0,
+			help="ApAppionJobId for updating job status")
     return parser
 
 def constructJobMetadata(args : dict, progname: str):
-    from .store import saveScriptProgramName, saveScriptUsername, saveScriptHostName, savePathData, saveApAppionJobData, saveScriptProgramRun, saveScriptParams
+    from .store import saveScriptProgramName, saveScriptUsername, saveScriptHostName, savePathData, saveApAppionJobData, updateApAppionJobData, saveScriptProgramRun, saveScriptParams
     from .retrieve import readSessionData
     sessionmetadata=readSessionData(args['sessionname'])
     jobmetadata={}
@@ -76,7 +78,11 @@ def constructJobMetadata(args : dict, progname: str):
     jobmetadata['ref_scripthostname_hostname']=saveScriptHostName()
     jobmetadata['ref_appathdata_appion_path']=savePathData(os.path.abspath(sys.argv[0]))
     jobmetadata['ref_appathdata_rundir']=savePathData(args['rundir'])
-    jobmetadata['ref_apappionjobdata_job']=saveApAppionJobData(jobmetadata['ref_appathdata_rundir'], progname, args['runname'], pwd.getpwuid(os.getuid())[0], platform.node(), sessionmetadata['session_id'])
+    if args["jobid"]:
+        jobmetadata['ref_apappionjobdata_job']=args["jobid"]
+        updateApAppionJobData(args["jobid"], "R")
+    else:
+        jobmetadata['ref_apappionjobdata_job']=saveApAppionJobData(jobmetadata['ref_appathdata_rundir'], progname, args['runname'], pwd.getpwuid(os.getuid())[0], platform.node(), sessionmetadata['session_id'])
     jobmetadata['ref_scriptprogramrun_progrun']=saveScriptProgramRun(args['runname'], jobmetadata['ref_scriptprogramname_progname'], jobmetadata['ref_scriptusername_username'], jobmetadata['ref_scripthostname_hostname'], jobmetadata['ref_appathdata_appion_path'], jobmetadata['ref_appathdata_rundir'], jobmetadata['ref_apappionjobdata_job'])
     saveScriptParams(args, jobmetadata['ref_scriptprogramname_progname'], jobmetadata['ref_scriptprogramrun_progrun'])
     return jobmetadata
