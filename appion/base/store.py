@@ -92,9 +92,11 @@ def saveApAssessmentRunData(ref_sessiondata_session, assessment="unassessed"):
 
 # ApAppionJobData
 
-def updateApAppionJobData(jobid, status):
+def updateApAppionJobData(jobid, data):
     appionjob = sb.get("ApAppionJobData", {"def_id" : jobid})
-    appionjob["status"] = status
+    for k, v in data.items():
+        if k in appionjob.keys() and data[k] is not None:
+            appionjob[k] = v
     sb.update("ApAppionJobData",appionjob)
     return appionjob["def_id"]
 

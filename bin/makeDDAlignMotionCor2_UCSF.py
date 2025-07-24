@@ -57,7 +57,7 @@ def main():
                 cluster,
                 lambda : retrieveDoneImages(args.rundir, session_metadata['session_id']),
                 lambda : constructMotionCor2JobMetadata(vars(args)),
-                lambda jobmetadata : updateApAppionJobData(jobmetadata['ref_apappionjobdata_job'], "D"))
+                lambda jobmetadata : updateApAppionJobData(jobmetadata['ref_apappionjobdata_job'], dict(status="D")))
         flock(f, LOCK_UN)
  
 if __name__ == '__main__':

@@ -80,7 +80,14 @@ def constructJobMetadata(args : dict, progname: str):
     jobmetadata['ref_appathdata_rundir']=savePathData(args['rundir'])
     if args["jobid"]:
         jobmetadata['ref_apappionjobdata_job']=args["jobid"]
-        updateApAppionJobData(args["jobid"], "R")
+        appionjobdata=dict(name = args['runname']+".appionsub.job",
+                                ref_appathdata_clusterpath = jobmetadata['ref_appathdata_rundir'],
+                                user = pwd.getpwuid(os.getuid())[0],
+                                cluster = platform.node(),
+                                status = "R",
+                                ref_sessiondata_session = sessionmetadata['session_id'],
+                                jobtype=progname)
+        updateApAppionJobData(args["jobid"], appionjobdata)
     else:
         jobmetadata['ref_apappionjobdata_job']=saveApAppionJobData(jobmetadata['ref_appathdata_rundir'], progname, args['runname'], pwd.getpwuid(os.getuid())[0], platform.node(), sessionmetadata['session_id'])
     jobmetadata['ref_scriptprogramrun_progrun']=saveScriptProgramRun(args['runname'], jobmetadata['ref_scriptprogramname_progname'], jobmetadata['ref_scriptusername_username'], jobmetadata['ref_scripthostname_hostname'], jobmetadata['ref_appathdata_appion_path'], jobmetadata['ref_appathdata_rundir'], jobmetadata['ref_apappionjobdata_job'])
