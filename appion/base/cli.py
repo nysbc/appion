@@ -85,8 +85,8 @@ def constructJobMetadata(args : dict, progname: str):
                                 user = pwd.getpwuid(os.getuid())[0],
                                 cluster = platform.node(),
                                 status = "R",
-                                ref_sessiondata_session = sessionmetadata['session_id'],
-                                jobtype=progname)
+                                ref_sessiondata_session = sessionmetadata['session_id'])
+    #                            jobtype=progname)
         updateApAppionJobData(args["jobid"], appionjobdata)
     else:
         jobmetadata['ref_apappionjobdata_job']=saveApAppionJobData(jobmetadata['ref_appathdata_rundir'], progname, args['runname'], pwd.getpwuid(os.getuid())[0], platform.node(), sessionmetadata['session_id'])
