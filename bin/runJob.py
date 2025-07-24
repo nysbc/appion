@@ -58,7 +58,8 @@ def main():
         os.makedirs(rundir)
     os.chdir(rundir)
     stdout = sbatch(batch_script_path)
-    print(stdout)
+    sys.stdout.write((stdout.replace("Submitted batch job ","")))
+    sys.stdout.flush()
 
 if __name__ == '__main__':
     main()
