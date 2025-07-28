@@ -34,6 +34,7 @@ def main():
     appion_wrapper_path=os.environ.get("APPION_WRAPPER_PATH",None)
     remove_flags=["--ppn", "--nodes", "--walltime", "--queue"] 
     cmd=copy.deepcopy(sys.argv)
+    cmd_record=copy.deepcopy(sys.argv)
     rundir=""
     cmd_str=""
     cmd.pop(0)
@@ -57,6 +58,8 @@ def main():
     if not os.path.exists(rundir):
         os.makedirs(rundir)
     os.chdir(rundir)
+    with open(os.path.join(rundir,"run_command.txt"), "a") as f:
+        f.write(" ".join(cmd_record) + "\n")
     stdout = sbatch(batch_script_path)
     sys.stdout.write((stdout.replace("Submitted batch job ","")))
     sys.stdout.flush()
