@@ -217,7 +217,11 @@ def saveDDStackParamsData(preset, align, binning, ref_apddstackrundata_unaligned
 def saveDDStackRunData(preset, align, binning, runname, rundir, ref_sessiondata_session, stack=None):
     # We don't use ApStackData so that stack is always set to None.
     params = sb.get("ApDDStackParamsData",{"preset" : preset, "align" : align, "binning" : binning,"ref_apstackdata_stack" : stack})
+    if not params:
+        params["def_id"]=None
     path = sb.get("ApPathData", {"path" : os.path.abspath(rundir)})
+    if not path:
+        path["def_id"]=None
     ddstackrundata = sb.set("ApDDStackRunData",{"runname" : runname, 
                                          "ref_apddstackparamsdata_params" : params["def_id"], 
                                          "ref_sessiondata_session" : ref_sessiondata_session, 

@@ -12,8 +12,11 @@ def retrieveDoneImages(rundir, session_id):
     runs=set(runs)
     imageIds=set()
     for run in runs:
-        runImageIds=sb.filter("ApDDAlignImagePairData", {"ref_apddstackrundata_ddstackrun" :run})
-        imageIds=imageIds | set([imageid["ref_acquisitionimagedata_source"] for imageid in runImageIds])
+        try:
+            runImageIds=sb.filter("ApDDAlignImagePairData", {"ref_apddstackrundata_ddstackrun" :run})
+            imageIds=imageIds | set([imageid["ref_acquisitionimagedata_source"] for imageid in runImageIds])
+        except:
+            continue
     #TODO double-check to make sure that both aligned and dose-weighted aligned are in ApDDAlignImagePairData
     return imageIds
 
