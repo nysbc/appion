@@ -52,11 +52,16 @@ def main():
                 raise RuntimeError("Dask cluster configuration at %s does not exist." % clusterconfig_path)
         session_metadata=readSessionData(args.sessionname)
         cluster=constructCluster(clusterconfig, args.rundir)
+        arg_dict=vars(args)
+        if 'gpuids' in arg_dict.keys():
+            arg_dict['gpuids']="0"
+        if 'gpuid' in arg_dict.keys():
+            arg_dict['gpuid']=0
         loop(pipeline,
-                vars(args),
+                arg_dict,
                 cluster,
                 lambda : retrieveDoneImages(args.rundir, session_metadata['session_id']),
-                lambda : constructMotionCor2JobMetadata(vars(args)),
+                lambda : constructMotionCor2JobMetadata(arg_dict),
                 lambda jobmetadata : updateApAppionJobData(jobmetadata['ref_apappionjobdata_job'], dict(status="D")))
         flock(f, LOCK_UN)
  
