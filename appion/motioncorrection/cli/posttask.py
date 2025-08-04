@@ -4,7 +4,7 @@ def postTask(imageid, kwargs, imgmetadata, jobmetadata, args, logData, logStdOut
     # because the function runs as a Dask task, which means that it is run in a forked process
     # that doesn't have Django initialized.
     import sinedon.setup
-    sinedon.setup(args['projectid'])
+    sinedon.setup(args['projectid'], False)
     import os, sys
     import logging
     from ..calc.internal import calcTotalFrames, filterFrameList, calcMotionCorrLogPath, calcMotionCor2LogPath, calcTotalRenderedFrames
