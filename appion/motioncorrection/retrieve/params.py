@@ -144,7 +144,8 @@ def readImageMetadata(imageid: int, has_bad_pixels : bool = False, is_align : bo
     # Gain inputs
     if "ref_normimagedata_norm" in imgdata.keys():
         gaindata=sb.get("AcquisitionImageData", {"def_id" : imgdata["ref_normimagedata_norm"]})
-        imgmetadata['gain_input']=os.path.join(imgmetadata['session_frame_path'],gaindata["mrc_image"])
+        gainsessiondata=sb.get("SessionData", {"def_id" : gaindata["ref_sessiondata_session"]})
+        imgmetadata['gain_input']=os.path.join(gainsessiondata["frame_path"],gaindata["mrc_image"])
     else:
         imgmetadata['gain_input']=None
     if imgmetadata['dark_id']:
