@@ -48,7 +48,6 @@ def postTask(imageid, kwargs, imgmetadata, jobmetadata, args, logData, logStdOut
     else:
         trim=0
     aligned_camera_id = constructAlignedCamera(imgmetadata['camera_id'], args['square'], args['bin'], trim, framelist, nframes)
-    aligned_preset_id = constructAlignedPresets(imgmetadata['preset_id'], aligned_camera_id, alignlabel=args['alignlabel'])
     aligned_image_filename = imgmetadata['image_filename']+"-%s" % args['alignlabel']
     aligned_image_mrc_image = aligned_image_filename + ".mrc"
     if not os.path.exists(imgmetadata["session_image_path"]):
@@ -56,14 +55,16 @@ def postTask(imageid, kwargs, imgmetadata, jobmetadata, args, logData, logStdOut
     abs_path_aligned_image_mrc_image=os.path.join(imgmetadata["session_image_path"],aligned_image_mrc_image)
     if os.path.lexists(abs_path_aligned_image_mrc_image):
         os.unlink(abs_path_aligned_image_mrc_image)
-    try:
-        os.link(kwargs["OutMrc"], abs_path_aligned_image_mrc_image)
-    except OSError:
-        os.symlink(kwargs["OutMrc"], abs_path_aligned_image_mrc_image)
-    logger.info("%s linked to %s." % (abs_path_aligned_image_mrc_image, kwargs["OutMrc"]))
-    logger.info("Constructing aligned image record for %d." % imageid)
-    aligned_image_id = constructAlignedImage(imageid, aligned_preset_id, aligned_camera_id, aligned_image_mrc_image, aligned_image_filename)
-    aligned_preset_dw_id = constructAlignedPresets(imgmetadata['preset_id'], aligned_camera_id, alignlabel=args['alignlabel']+"-DW")
+    if os.path.exists(kwargs["OutMrc"]):
+        try:
+            os.link(kwargs["OutMrc"], abs_path_aligned_image_mrc_image)
+        except OSError:
+            os.symlink(kwargs["OutMrc"], abs_path_aligned_image_mrc_image)
+        logger.info("%s linked to %s." % (abs_path_aligned_image_mrc_image, kwargs["OutMrc"]))
+        logger.info("Constructing aligned image record for %d." % imageid)
+        aligned_preset_id = constructAlignedPresets(imgmetadata['preset_id'], aligned_camera_id, alignlabel=args['alignlabel'])
+        aligned_image_id = constructAlignedImage(imageid, aligned_preset_id, aligned_camera_id, aligned_image_mrc_image, aligned_image_filename)
+        
     aligned_image_dw_filename = imgmetadata['image_filename']+"-%s-DW" % args['alignlabel']
     aligned_image_dw_mrc_image = aligned_image_dw_filename + ".mrc"
     abs_path_aligned_image_dw_mrc_image = os.path.join(imgmetadata["session_image_path"],aligned_image_dw_mrc_image)
@@ -71,13 +72,15 @@ def postTask(imageid, kwargs, imgmetadata, jobmetadata, args, logData, logStdOut
     outmrc_dws=kwargs["OutMrc"].replace(".mrc","_DWS.mrc")
     if os.path.lexists(abs_path_aligned_image_dw_mrc_image):
         os.unlink(abs_path_aligned_image_dw_mrc_image)
-    try:
-        os.link(outmrc_dw, abs_path_aligned_image_dw_mrc_image)
-    except OSError:
-        os.symlink(outmrc_dw, abs_path_aligned_image_dw_mrc_image)
-    logger.info("%s linked to %s." % (abs_path_aligned_image_dw_mrc_image, kwargs["OutMrc"].replace(".mrc","_DW.mrc")))
-    logger.info("Constructing aligned, dose-weighted image record for %d." % imageid)
-    aligned_image_dw_id = constructAlignedImage(imageid, aligned_preset_dw_id, aligned_camera_id, aligned_image_dw_mrc_image, aligned_image_dw_filename)
+    if os.path.exists(outmrc_dw):
+        try:
+            os.link(outmrc_dw, abs_path_aligned_image_dw_mrc_image)
+        except OSError:
+            os.symlink(outmrc_dw, abs_path_aligned_image_dw_mrc_image)
+        logger.info("%s linked to %s." % (abs_path_aligned_image_dw_mrc_image, kwargs["OutMrc"].replace(".mrc","_DW.mrc")))
+        logger.info("Constructing aligned, dose-weighted image record for %d." % imageid)
+        aligned_preset_dw_id = constructAlignedPresets(imgmetadata['preset_id'], aligned_camera_id, alignlabel=args['alignlabel']+"-DW")
+        aligned_image_dw_id = constructAlignedImage(imageid, aligned_preset_dw_id, aligned_camera_id, aligned_image_dw_mrc_image, aligned_image_dw_filename)
     # Frame trajectory only saved for aligned_image_id: https://github.com/nysbc/appion-slurm/blob/814544a7fee69ba7121e7eb1dd3c8b63bc4bb75a/appion/appionlib/apDDLoop.py#L89-L107
     trajdata_id=saveFrameTrajectory(aligned_image_id, jobmetadata['ref_apddstackrundata_ddstackrun'], logData["shifts"])
     # This is only used by manualpicker.py so it can go away.  Just making a note of it in a commit for future me / someone.
