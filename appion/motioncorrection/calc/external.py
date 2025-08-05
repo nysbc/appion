@@ -4,6 +4,8 @@
 from shutil import which
 from ..retrieve.version import readMotionCorVersion
 from ..retrieve.logs import retrieveLogParser
+import sinedon.base as sb
+from ..retrieve.params import readInputPath
 import subprocess
 from subprocess import CalledProcessError
 
@@ -67,3 +69,9 @@ def motioncor(executable="motioncor2", **kwargs) -> tuple:
     output=rawoutput.split("\n")
     output=logparser(output)
     return output, rawoutput
+
+def checkImageExists(imageid: int):
+    imgdata=sb.get("AcquisitionImageData",{"def_id":imageid})
+    sessiondata=sb.get("SessionData",{"def_id":imgdata["ref_sessiondata_session"]})
+    path = readInputPath(sessiondata['frame_path'],imgdata['filename'])
+    return True if path else False

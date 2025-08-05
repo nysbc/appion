@@ -3,7 +3,7 @@ def preTask(imageid, args):
     # because the function runs as a Dask task, which means that it is run in a forked process
     # that doesn't have Django initialized.
     import sinedon.setup
-    sinedon.setup(args['projectid'])
+    sinedon.setup(args['projectid'], False)
     import logging, sys
     from .constructors import constructMotionCorKwargs
     from ..retrieve.params import readInputPath, readImageMetadata
