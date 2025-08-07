@@ -56,10 +56,8 @@ def postTask(imageid, kwargs, imgmetadata, jobmetadata, args, logData, logStdOut
     if os.path.lexists(abs_path_aligned_image_mrc_image):
         os.unlink(abs_path_aligned_image_mrc_image)
     if os.path.exists(kwargs["OutMrc"]):
-        try:
-            os.link(kwargs["OutMrc"], abs_path_aligned_image_mrc_image)
-        except OSError:
-            os.symlink(kwargs["OutMrc"], abs_path_aligned_image_mrc_image)
+        # In the future, we may want to catch any exceptions involving a cross-device link and run shutil.copy.
+        os.link(kwargs["OutMrc"], abs_path_aligned_image_mrc_image)
         logger.info("%s linked to %s." % (abs_path_aligned_image_mrc_image, kwargs["OutMrc"]))
         logger.info("Constructing aligned image record for %d." % imageid)
         aligned_preset_id = constructAlignedPresets(imgmetadata['preset_id'], aligned_camera_id, alignlabel=args['alignlabel'])
@@ -73,10 +71,8 @@ def postTask(imageid, kwargs, imgmetadata, jobmetadata, args, logData, logStdOut
     if os.path.lexists(abs_path_aligned_image_dw_mrc_image):
         os.unlink(abs_path_aligned_image_dw_mrc_image)
     if os.path.exists(outmrc_dw):
-        try:
-            os.link(outmrc_dw, abs_path_aligned_image_dw_mrc_image)
-        except OSError:
-            os.symlink(outmrc_dw, abs_path_aligned_image_dw_mrc_image)
+        # In the future, we may want to catch any exceptions involving a cross-device link and run shutil.copy.
+        os.link(outmrc_dw, abs_path_aligned_image_dw_mrc_image)
         logger.info("%s linked to %s." % (abs_path_aligned_image_dw_mrc_image, kwargs["OutMrc"].replace(".mrc","_DW.mrc")))
         logger.info("Constructing aligned, dose-weighted image record for %d." % imageid)
         aligned_preset_dw_id = constructAlignedPresets(imgmetadata['preset_id'], aligned_camera_id, alignlabel=args['alignlabel']+"-DW")
