@@ -47,7 +47,7 @@ def loop(pipeline, args: dict, cluster : Cluster, retrieveDoneImages : Callable 
     jobmetadata=preLoop()
     waitTime=30
     prev_tasklist=set()
-    failure_cooldown=10
+    failure_cooldown=1
     failure_waits=0
     while True:
         t0=time()
