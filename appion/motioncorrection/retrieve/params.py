@@ -142,15 +142,16 @@ def readImageMetadata(imageid: int, has_bad_pixels : bool = False, is_align : bo
                            imgmetadata['ccdcamera']))
     imgmetadata['pixelsizedata']=[{"timestamp": datetime.fromisoformat(p["def_timestamp"]), "pixelsize" : p["pixelsize"] } for p in pixelsizecalibrationdata]
     # Gain inputs
-    #if "ref_normimagedata_norm" in imgdata.keys():
-    #    gaindata=sb.get("AcquisitionImageData", {"def_id" : imgdata["ref_normimagedata_norm"]})
-    #    gainsessiondata=sb.get("SessionData", {"def_id" : gaindata["ref_sessiondata_session"]})
-    #    imgmetadata['gain_input']=os.path.join(gainsessiondata["frame_path"],gaindata["mrc_image"])
-    #else:
-    imgmetadata['gain_input']=None
+    if "ref_normimagedata_norm" in imgdata.keys():
+        gaindata=sb.get("NormImageData", {"def_id" : imgdata["ref_normimagedata_norm"]})
+        gainsessiondata=sb.get("SessionData", {"def_id" : gaindata["ref_sessiondata_session"]})
+        imgmetadata['gain_input']=os.path.join(gainsessiondata["frame_path"],gaindata["mrc_image"])
+    else:
+        imgmetadata['gain_input']=None
     if imgmetadata['dark_id']:
-        darkdata = sb.get("AcquisitionImageData", {"def_id" : imgmetadata['dark_id']})
-        imgmetadata['dark_input']=darkdata["mrc_image"]
+        darkdata = sb.get("DarkImageData", {"def_id" : imgmetadata['dark_id']})
+        darksessiondata=sb.get("SessionData", {"def_id" : darkdata["ref_sessiondata_session"]})
+        imgmetadata['dark_input']=os.path.join(darksessiondata["frame_path"],darkdata["mrc_image"])
         darkcamera=sb.get("CameraEMData", {"camera":darkdata["ref_cameraemdata_camera"]})
         imgmetadata['dark_nframes']=darkcamera["nframes"]
     else:
