@@ -47,7 +47,8 @@ def constructMotionCorKwargs(imgmetadata : dict, cli_args : dict, input_path : s
 
     # Gain
     # Get the reference image
-    kwargs["Gain"]=imgmetadata['gain_input']
+    if imgmetadata['gain_input']:
+        kwargs["Gain"]=imgmetadata['gain_input']
 
     # TODO - what exactly is the bright reference?  It isn't passed as a param into motioncor2, but
     # Appion still prints out its path.  To what end / why?
