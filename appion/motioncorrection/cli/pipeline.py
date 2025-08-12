@@ -17,9 +17,9 @@ def warmpagecache_motioncor(kwargs : dict):
 def sliced_motioncor(kwargs : dict):
     warmpagecache_motioncor(kwargs)
     jobid=os.environ.get("SLURM_JOB_ID",None)
-    lockfile_path=os.path.join("/tmp", "%s.lock" % jobid)
     if jobid:
-        with open(lockfile_path, "r") as f:
+        lockfile_path=os.path.join("/tmp", "%s.lock" % jobid)
+        with open(lockfile_path, "r+") as f:
             flock(f, LOCK_EX)
             motioncor(**kwargs)
             flock(f, LOCK_UN)
