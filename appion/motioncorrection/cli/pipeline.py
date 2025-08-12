@@ -19,10 +19,11 @@ def sliced_motioncor(kwargs : dict):
     jobid=os.environ.get("SLURM_JOB_ID",None)
     if jobid:
         lockfile_path=os.path.join("/tmp", "%s.lock" % jobid)
-        with open(lockfile_path, "r+") as f:
+        with open(lockfile_path, "w") as f:
             flock(f, LOCK_EX)
-            motioncor(**kwargs)
+            results=motioncor(**kwargs)
             flock(f, LOCK_UN)
+            return results
     else:
         raise RuntimeError("Could not determine Slurm job ID for motioncor time-slicing.")
 
