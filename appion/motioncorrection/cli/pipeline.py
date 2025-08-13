@@ -5,7 +5,6 @@ import dask
 from .pretask import preTask
 from ..calc.external import motioncor, checkImageExists
 from .posttask import postTask
-from multiprocessing import Pool
 
 def warmpagecache_motioncor(kwargs : dict):
     ondisk_keys=["Gain", "Dark", "DefectMap", "FmIntFile", "InMrc", "InTiff", "InEer"]
@@ -15,21 +14,22 @@ def warmpagecache_motioncor(kwargs : dict):
                 with open(kwargs[k], "rb") as f:
                     f.read()
 
-def fused_motioncor(kwargs1 : dict = None, kwargs2 : dict = None):
-    if not kwargs1 and not kwargs2:
-        return None, None
-    elif not kwargs1:
-        results2=motioncor(**kwargs2)
-        return None, results2
-    elif not kwargs2:
-        results1=motioncor(**kwargs1)
-        return results1, None
+def sliced_motioncor(kwargs : dict):
+    warmpagecache_motioncor(kwargs)
+    jobid=os.environ.get("SLURM_JOB_ID",None)
+    if jobid:
+        lockfile_path=os.path.join("/tmp", "%s.lock" % jobid)
+        try:
+            f=open(lockfile_path, "x")
+        except FileExistsError:
+            f=open(lockfile_path, "r")
+        flock(f, LOCK_EX)
+        results=motioncor(**kwargs)
+        flock(f, LOCK_UN)
+        f.close()
+        return results
     else:
-        with Pool(2) as p:
-            p.map(warmpagecache_motioncor, [kwargs1, kwargs2])
-        results1=motioncor(**kwargs1)
-        results2=motioncor(**kwargs2)
-        return results1, results2
+        raise RuntimeError("Could not determine Slurm job ID for motioncor time-slicing.")
 
 def pipeline(tasklist: list, args : dict, jobmetadata: dict, client : Client, retries : int = 0):
     # Sets the prior for tracking task duration to 30s so that adaptive scaling
@@ -52,28 +52,4 @@ def pipeline(tasklist: list, args : dict, jobmetadata: dict, client : Client, re
             postTask_lambda = lambda pretask_data, task_data : postTask(imageid, pretask_data[0], pretask_data[1], jobmetadata, args, task_data[0], task_data[1])
             posttask_f=client.submit(postTask_lambda, pretask_f, task_f, pure=True, retries=retries, resources={"MEMORY" : 16})
             futures.append(posttask_f)
-    return futures
-
-def fused_pipeline(tasklist: list, args : dict, jobmetadata: dict, client : Client, retries : int = 0):
-    pretask_futures=[]
-    futures=[]
-    for imageid in tasklist:
-        if checkImageExists(imageid):
-            pretask_f=client.submit(preTask, imageid, args, pure=True, retries=retries, resources={"MEMORY" : 16})
-            pretask_futures.append(pretask_f)
-    futures+=pretask_futures
-    if len(pretask_futures) % 2 != 0:
-        pretask_futures.append([None])
-    pretask_futures=iter(pretask_futures)
-    for f1, f2 in zip(pretask_futures, pretask_futures):    
-        # We give these lambdas names because Dask keeps track of function runtimes with a dict mapping
-        # task keys to average durations.  Task keys == function names by default.
-        # See (State --> task_duration): https://docs.dask.org/en/latest/deploying-python-advanced.html#id2
-        # and ('key' param) https://docs.dask.org/en/stable/futures.html#distributed.Client.submit
-        motioncor_lambda = lambda pretask_data1, pretask_data2 : fused_motioncor(pretask_data1[0], pretask_data2[0])
-        task_f=client.submit(motioncor_lambda, f1, f2, pure=True, retries=retries, resources={'GPU': 1, "MEMORY" : 64})
-        futures.append(task_f)
-        postTask_lambda = lambda pretask_data, task_data : postTask(imageid, pretask_data[0], pretask_data[1], jobmetadata, args, task_data[0], task_data[1])
-        posttask_f=client.submit(postTask_lambda, pretask_f, task_f, pure=True, retries=retries, resources={"MEMORY" : 16})
-        futures.append(posttask_f)
     return futures
