@@ -49,6 +49,7 @@ def loop(pipeline, args: dict, cluster : Cluster, retrieveDoneImages : Callable 
     prev_tasklist=set()
     failure_cooldown=1
     failure_waits=0
+    reduced_tasklist=[]
     while True:
         t0=time()
         all_images=readImageSet(args["sessionname"], args["preset"])
@@ -57,7 +58,7 @@ def loop(pipeline, args: dict, cluster : Cluster, retrieveDoneImages : Callable 
         # Not used by motioncor2; used by ctffind4
         reprocess_images=retrieveReprocessImages()
         tasklist=filterImages(all_images, done_images, reprocess_images, rejected_images)
-        if prev_tasklist:
+        if prev_tasklist and not reduced_tasklist:
             failureset=tasklist & prev_tasklist
             tasklist=tasklist-failureset
             logger.info("%d previously failed images will not be processed this iteration." % len(failureset))
@@ -66,11 +67,20 @@ def loop(pipeline, args: dict, cluster : Cluster, retrieveDoneImages : Callable 
         logger.info("Image counts: %d total images, %d done images, %d rejected images, and %d images marked for reprocessing." % (len(all_images), len(done_images), len(rejected_images), len(reprocess_images)))
         local_max_workers=min(max_workers,len(tasklist))
         if local_max_workers > 0:
-            logger.info("Scaling up to %d nodes." % local_max_workers)
+            logger.info("Scaling up to %d workers." % local_max_workers)
         cluster.adapt(minimum=min_workers, maximum=local_max_workers)
+        reduced_tasklist=[]
+        if len(tasklist) > 200:
+            reduced_tasklist=list(tasklist)
+            reduced_tasklist.sort()
+            reduced_tasklist.reverse()
+            reduced_tasklist=reduced_tasklist[0:200]
         if tasklist:
             pipeline_t0=time()
-            futures=pipeline(tasklist, args, jobmetadata, client)
+            if reduced_tasklist:
+                futures=pipeline(reduced_tasklist, args, jobmetadata, client)
+            else:
+                futures=pipeline(tasklist, args, jobmetadata, client)
             future_complete_counter=0
             throughput_t0=time()
             for _ in as_completed(futures):
@@ -88,7 +98,10 @@ def loop(pipeline, args: dict, cluster : Cluster, retrieveDoneImages : Callable 
                     else:
                         logger.info("Estimated remaining time: N/A min.")
             pipeline_t1=time()
-            logger.info("Finished processing %d images in %d seconds." % (len(tasklist), (pipeline_t1-pipeline_t0)))
+            if reduced_tasklist:
+                logger.info("Finished processing %d images in %d seconds." % (len(reduced_tasklist), (pipeline_t1-pipeline_t0)))
+            else:
+                logger.info("Finished processing %d images in %d seconds." % (len(tasklist), (pipeline_t1-pipeline_t0)))
             # Explicitly cancel all futures to prevent dask distributed from recalculating already calculated futures.
             # Possibly unnecessary.
             # See https://github.com/nysbc/appion/issues/17
