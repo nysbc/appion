@@ -65,97 +65,58 @@ def readShiftsBetweenFrames(logfile : str) -> list:
 # Retrieves metadata from the database that is used to calculate inputs to motioncor2/motioncor3
 def readImageMetadata(imageid: int, has_bad_pixels : bool = False, is_align : bool = False, has_non_zero_dark : bool = False):
     imgmetadata={}
-    imgmetadata['imageid']=imageid
-    imgdata=sb.get("AcquisitionImageData",{"def_id":imageid})
-    if "ref_correctorplandata_corrector_plan" in imgdata.keys():
-        correctorplandata=sb.get("CorrectorPlanData",{"def_id":imgdata["ref_correctorplandata_corrector_plan"]})
+    imgmetadata['imgdata']=sb.get("AcquisitionImageData",{"def_id":imageid})
+    if "ref_correctorplandata_corrector_plan" in imgmetadata['imgdata'].keys():
+        imgmetadata['correctorplandata']=sb.get("CorrectorPlanData",{"def_id":imgmetadata['imgdata']["ref_correctorplandata_corrector_plan"]})
     else:
-        correctorplandata=None
-    sessiondata=sb.get("SessionData",{"def_id":imgdata["ref_sessiondata_session"]})
-    cameradata=sb.get("CameraEMData",{"def_id":imgdata["ref_cameraemdata_camera"]})
-    imgmetadata['camera_id']=cameradata["def_id"]
-    # Additional parameters derived from the database
-    # Input image parameters
-    imgmetadata['session_id']=sessiondata["def_id"]
-    imgmetadata['session_image_path']=sessiondata["image_path"]
-    imgmetadata['session_frame_path']=sessiondata["frame_path"]
-    imgmetadata['image_filename']=imgdata["filename"]
-    # Dark inputs
-    if "ref_darkimagedata_dark" in imgmetadata.keys():
-        imgmetadata['dark_id']=imgdata["ref_darkimagedata_dark"]
-    else:
-        imgmetadata['dark_id']=None
-    ccdcamera=sb.get("InstrumentData",{"def_id" : cameradata["ref_instrumentdata_ccdcamera"]})
-    imgmetadata['camera_name']=ccdcamera["name"]
-    imgmetadata['eer_frames']=cameradata["eer_frames"]
-    # DefectMap inputs
-    imgmetadata['dx'] = cameradata["subd_dimension_x"]
-    imgmetadata['dy'] = cameradata["subd_dimension_y"]
-    if correctorplandata:
-        imgmetadata['bad_pixels'] = correctorplandata["bad_pixels"]
-        imgmetadata['bad_rows'] = correctorplandata["bad_rows"]
-        imgmetadata['bad_cols'] = correctorplandata["bad_cols"]
-    else:
-        imgmetadata['bad_pixels']=None
-        imgmetadata['bad_rows']=None
-        imgmetadata['bad_cols']=None
-    # FmDose, FmIntFile inputs
-    imgmetadata['total_raw_frames'] = cameradata["nframes"]
-    imgmetadata['exposure_time'] = cameradata["exposure_time"]
-    if "frame_time" in cameradata.keys():
-        imgmetadata['frame_time'] = cameradata["frame_time"]
-    else:
-        imgmetadata['frame_time'] = None
-    preset=sb.get("PresetData",{"def_id":imgdata["ref_presetdata_preset"]})
-    if "dose" in preset.keys():
-        imgmetadata['dose'] = preset["dose"]
-    else:
-        imgmetadata['dose'] = None
-    # PixSize inputs
-    scope=sb.get("ScopeEMData", {"def_id":imgdata["ref_scopeemdata_scope"]})
-    imgmetadata['magnification']=scope["magnification"]
-    imgmetadata['tem']=scope["ref_instrumentdata_tem"]
-    imgmetadata['ccdcamera']=ccdcamera["def_id"]
-    imgmetadata['binning']=cameradata["subd_binning_x"]
-    imgmetadata['imgdata_timestamp']=datetime.fromisoformat(imgdata["def_timestamp"])
-    # kV inputs
-    imgmetadata['high_tension']=scope["high_tension"]
-    # Trunc inputs
-    #camera_name is already defined for Dark
-    #exposure_time is already defined for FmDose/FmIntFile
-    #frame_time is already defined for FmDose/FmIntFile
-    imgmetadata['nframes']=cameradata["nframes"]
-    #eer_frames is already defined for Dark
-    # FlipGain/RotGain inputs
-    imgmetadata['frame_rotate']=cameradata["frame_rotate"]
-    imgmetadata['frame_flip']=cameradata["frame_flip"]
+        imgmetadata['correctorplandata']={}
+        imgmetadata['correctorplandata']["def_id"]=None
+        imgmetadata['correctorplandata']["bad_pixels"]=None
+        imgmetadata['correctorplandata']["bad_rows"]=None
+        imgmetadata['correctorplandata']["bad_cols"]
+
+    imgmetadata['sessiondata']=sb.get("SessionData",{"def_id":imgmetadata['imgdata']["ref_sessiondata_session"]})
+    imgmetadata['cameraemdata']=sb.get("CameraEMData",{"def_id":imgmetadata['imgdata']["ref_cameraemdata_camera"]})
+    imgmetadata['ccdcamera']=sb.get("InstrumentData",{"def_id" : imgmetadata['cameraemdata']["ref_instrumentdata_ccdcamera"]})
+    imgmetadata['preset']=sb.get("PresetData",{"def_id":imgmetadata['imgdata']["ref_presetdata_preset"]})
+    imgmetadata['scope']=sb.get("ScopeEMData", {"def_id":imgmetadata['imgdata']["ref_scopeemdata_scope"]})
+    if "frame_time" not in imgmetadata['cameraemdata'].keys():
+        imgmetadata['cameraemdata']["frame_time"]=None   
+    if "dose" not in imgmetadata['preset'].keys():
+        imgmetadata['preset']['dose'] = None
+    imgmetadata['imgdata']["def_timestamp"]=datetime.fromisoformat(imgmetadata['imgdata']["def_timestamp"])
     imgmetadata['frame_aligner_flat']=not (has_bad_pixels or not is_align or has_non_zero_dark)
-    # PixSize inputs
-    pixelsizecalibrationdata = sb.filter("PixelSizeCalibrationData", dict(magnification=imgmetadata['magnification'], 
-                                                             ref_instrumentdata_tem=imgmetadata['tem'], 
-                                                             ref_instrumentdata_ccdcamera=imgmetadata['ccdcamera']))
-    if not pixelsizecalibrationdata:
+    imgmetadata['pixelsizecalibrationdata'] = sb.filter("PixelSizeCalibrationData", dict(magnification=imgmetadata["scope"]['magnification'], 
+                                                             ref_instrumentdata_tem=imgmetadata["scope"]['tem'], 
+                                                             ref_instrumentdata_ccdcamera=imgmetadata["ccdcamera"]['def_id']))
+    if not imgmetadata['pixelsizecalibrationdata']:
         raise RuntimeError("No pixelsize information was found for image %s with mag %d, tem id %d, ccdcamera id %d."
-                        % (imgmetadata['image_filename'], 
-                           imgmetadata['magnification'], 
-                           imgmetadata['tem'], 
-                           imgmetadata['ccdcamera']))
-    imgmetadata['pixelsizedata']=[{"timestamp": datetime.fromisoformat(p["def_timestamp"]), "pixelsize" : p["pixelsize"] } for p in pixelsizecalibrationdata]
+                        % (imgmetadata['imgdata']["filename"], 
+                           imgmetadata["scope"]['magnification'], 
+                           imgmetadata["scope"]['tem'], 
+                           imgmetadata["ccdcamera"]['def_id']))
+    imgmetadata['pixelsizedata']=[{"timestamp": datetime.fromisoformat(p["def_timestamp"]), "pixelsize" : p["pixelsize"] } for p in imgmetadata['pixelsizecalibrationdata']]
     # Gain inputs
-    if "ref_normimagedata_norm" in imgdata.keys():
-        gaindata=sb.get("NormImageData", {"def_id" : imgdata["ref_normimagedata_norm"]})
-        gainsessiondata=sb.get("SessionData", {"def_id" : gaindata["ref_sessiondata_session"]})
-        imgmetadata['gain_input']=os.path.join(gainsessiondata["image_path"],gaindata["mrc_image"])
+    if "ref_normimagedata_norm" in imgmetadata['imgdata'].keys():
+        imgmetadata['gainmetadata']={}
+        imgmetadata['gainmetadata']['normimagedata']=sb.get("NormImageData", {"def_id" : imgmetadata['imgdata']["ref_normimagedata_norm"]})
+        imgmetadata['gainmetadata']['sessiondata']=sb.get("SessionData", {"def_id" : imgmetadata['gainmetadata']['normimagedata']["ref_sessiondata_session"]})
+        imgmetadata['gain_input']=os.path.join(imgmetadata['gainmetadata']['sessiondata']["image_path"],imgmetadata['gainmetadata']['normimagedata']["mrc_image"])
     else:
+        imgmetadata['gainmetadata']={}
+        imgmetadata['gainmetadata']['normimagedata']=None
+        imgmetadata['gainmetadata']['sessiondata']=None
         imgmetadata['gain_input']=None
-    if imgmetadata['dark_id']:
-        darkdata = sb.get("DarkImageData", {"def_id" : imgmetadata['dark_id']})
-        darksessiondata=sb.get("SessionData", {"def_id" : darkdata["ref_sessiondata_session"]})
-        imgmetadata['dark_input']=os.path.join(darksessiondata["image_path"],darkdata["mrc_image"])
-        darkcamera=sb.get("CameraEMData", {"camera":darkdata["ref_cameraemdata_camera"]})
-        imgmetadata['dark_nframes']=darkcamera["nframes"]
+    if "ref_darkimagedata_dark" in imgmetadata['imgdata'].keys():
+        imgmetadata['darkmetadata']={}
+        imgmetadata['darkmetadata']['darkimagedata'] = sb.get("DarkImageData", {"def_id" : imgmetadata['imgdata']['ref_darkimagedata_dark']})
+        imgmetadata['darkmetadata']['sessiondata']=sb.get("SessionData", {"def_id" : imgmetadata['darkmetadata']['darkimagedata']["ref_sessiondata_session"]})
+        imgmetadata['dark_input']=os.path.join(imgmetadata['darkmetadata']["image_path"],imgmetadata['darkmetadata']['darkimagedata']["mrc_image"])
+        imgmetadata['darkmetadata']['cameraemdata']=sb.get("CameraEMData", {"camera":imgmetadata['darkmetadata']['darkimagedata']["ref_cameraemdata_camera"]})
     else:
+        imgmetadata['darkmetadata']={}
+        imgmetadata['darkmetadata']['darkimagedata']=None
+        imgmetadata['darkmetadata']['sessiondata']=None
         imgmetadata['dark_input']=None
-        imgmetadata['dark_nframes']=None
-    imgmetadata['preset_id']=imgdata["ref_presetdata_preset"]
+        imgmetadata['darkmetadata']['cameraemdata']=None
     return imgmetadata

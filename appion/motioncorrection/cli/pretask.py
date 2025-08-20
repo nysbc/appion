@@ -22,16 +22,22 @@ def preTask(imageid, args):
         if args['refimgid']:
             logger.info("Updating gain metadata for %d." % imageid)
             gainmetadata=readImageMetadata(args['refimgid'], False, args["align"], False)
-            imgmetadata['gain_input']=readInputPath(gainmetadata['session_frame_path'],gainmetadata['image_filename'])
+            imgmetadata['gain_input']=readInputPath(gainmetadata['sessiondata']["frame_path"],gainmetadata['imgdata']['filename'])
     logger.info("Constructing motion correction command arguments for %d." % imageid)
-    input_path = readInputPath(imgmetadata['session_frame_path'],imgmetadata['image_filename'])
+    input_path = readInputPath(imgmetadata['imgdata']['frame_path'],imgmetadata['imgdata']['filename'])
     if input_path is None:
-        raise RuntimeError("Input file for %d does not exist." % imgmetadata["imageid"])
+        raise RuntimeError("Input file for %d does not exist." % imgmetadata["imgdata"]["def_id"])
     kwargs=constructMotionCorKwargs(imgmetadata, args, input_path)
-    saveDark(kwargs["Dark"], imgmetadata['camera_name'], imgmetadata['eer_frames'], imgmetadata["dark_input"], imgmetadata["dark_nframes"])
+    saveDark(kwargs["Dark"], imgmetadata["ccdcamera"]['name'], imgmetadata['cameraemdata']['eer_frames'], imgmetadata["dark_input"], imgmetadata['darkmetadata']['cameraemdata']["nframes"])
     if "FmIntFile" in kwargs.keys():
-        saveFmIntFile(kwargs["FmIntFile"], imgmetadata['total_raw_frames'], args['rendered_frame_size'], kwargs["FmDose"] / args['rendered_frame_size'])
+        saveFmIntFile(kwargs["FmIntFile"], imgmetadata['cameraemdata']['nframes'], args['rendered_frame_size'], kwargs["FmDose"] / args['rendered_frame_size'])
     if 'DefectMap' in kwargs.keys():
-        defect_map=calcImageDefectMap(imgmetadata['bad_rows'], imgmetadata['bad_cols'], imgmetadata['bad_pixels'], imgmetadata['dx'], imgmetadata['dy'], imgmetadata['frame_flip'], imgmetadata['frame_rotate'])
+        defect_map=calcImageDefectMap(imgmetadata["correctorplandata"]['bad_rows'], 
+                                      imgmetadata["correctorplandata"]['bad_cols'], 
+                                      imgmetadata["correctorplandata"]['bad_pixels'], 
+                                      imgmetadata['cameraemdata']["subd_dimension_x"], 
+                                      imgmetadata['cameraemdata']["subd_dimension_y"], 
+                                      imgmetadata['cameraemdata']['frame_flip'], 
+                                      imgmetadata['cameraemdata']['frame_rotate'])
         saveDefectMrc(kwargs['DefectMap'], defect_map)
     return kwargs, imgmetadata

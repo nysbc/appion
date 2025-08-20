@@ -43,7 +43,7 @@ def constructMotionCorKwargs(imgmetadata : dict, cli_args : dict, input_path : s
 
     #OutMrc
     #Path to the aligned aligned/summed micrograph.
-    kwargs['OutMrc'] = os.path.join(cli_args['rundir'],imgmetadata['image_filename']+'_c.mrc')
+    kwargs['OutMrc'] = os.path.join(cli_args['rundir'],imgmetadata['imgdata']['filename']+'_c.mrc')
 
     # Gain
     # Get the reference image
@@ -62,43 +62,43 @@ def constructMotionCorKwargs(imgmetadata : dict, cli_args : dict, input_path : s
     # self.setCameraInfo(1,use_full_raw_area)
         
     # Get the dark image.  Create it if it does not exist.
-    dark_path=os.path.join(cli_args["rundir"], imgmetadata['image_filename']+"_dark.mrc")
+    dark_path=os.path.join(cli_args["rundir"], imgmetadata['imgdata']['filename']+"_dark.mrc")
     kwargs["Dark"]=dark_path
 
     # DefectMap
-    if imgmetadata['bad_pixels'] or imgmetadata['bad_cols'] or imgmetadata['bad_rows']:
-        defect_map_path=os.path.join(cli_args["rundir"], imgmetadata['image_filename']+"_defect.mrc")
+    if imgmetadata['correctorplandata']['bad_pixels'] or imgmetadata['correctorplandata']['bad_cols'] or imgmetadata['correctorplandata']['bad_rows']:
+        defect_map_path=os.path.join(cli_args["rundir"], "defectmap-correctorplan-%d_camera-%d.mrc" % (imgmetadata['correctorplandata']["def_id"], imgmetadata['cameraemdata']["def_id"]))
         kwargs["DefectMap"]=defect_map_path
 
     # FmIntFile
     # FmDose
     if "InEer" in kwargs.keys():
-        kwargs["FmDose"] = calcFmDose(imgmetadata['total_raw_frames'], imgmetadata['exposure_time'], imgmetadata['frame_time'], imgmetadata['dose'], cli_args['rendered_frame_size'], totaldose, True)
-        fmintfile_path=os.path.join(cli_args["rundir"], imgmetadata['image_filename']+"_fmintfile.txt")
+        kwargs["FmDose"] = calcFmDose(imgmetadata['cameraemdata']['nframes'], imgmetadata['cameraemdata']['exposure_time'], imgmetadata['cameraemdata']['frame_time'], imgmetadata['presetdata']['dose'], cli_args['rendered_frame_size'], totaldose, True)
+        fmintfile_path=os.path.join(cli_args["rundir"], "fmintfile_camera-%d_rfs-%d_dose-%d.txt" % imgmetadata['cameraemdata']["def_id"], cli_args['rendered_frame_size'], kwargs["FmDose"])
         kwargs["FmIntFile"] = fmintfile_path
     else:
-        kwargs["FmDose"] = calcFmDose(imgmetadata['total_raw_frames'], imgmetadata['exposure_time'], imgmetadata['frame_time'], imgmetadata['dose'], cli_args['rendered_frame_size'], totaldose, False)
+        kwargs["FmDose"] = calcFmDose(imgmetadata['cameraemdata']['nframes'], imgmetadata['cameraemdata']['exposure_time'], imgmetadata['cameraemdata']['frame_time'], imgmetadata['presetdata']['dose'], cli_args['rendered_frame_size'], totaldose, False)
 
     # PixSize
 
-    kwargs['PixSize'] = calcPixelSize(imgmetadata['pixelsizedata'], imgmetadata['binning'], imgmetadata['imgdata_timestamp'])
+    kwargs['PixSize'] = calcPixelSize(imgmetadata['pixelsizedata'], imgmetadata['cameraemdata']['subd_binning_x'], imgmetadata['imgdata']['timestamp'])
 
     # kV
-    kwargs["kV"] = calcKV(imgmetadata['high_tension'])
+    kwargs["kV"] = calcKV(imgmetadata['scope']['high_tension'])
 
     # Trunc
     # shifts = readShiftsBetweenFrames()
     shifts=[]
-    sumframelist = filterFrameList(kwargs["PixSize"], imgmetadata['nframes'], shifts)
-    total_frames = calcTotalFrames(imgmetadata['camera_name'], imgmetadata['exposure_time'], imgmetadata['frame_time'], imgmetadata['nframes'], imgmetadata['eer_frames'])
+    sumframelist = filterFrameList(kwargs["PixSize"], imgmetadata['cameraemdata']['nframes'], shifts)
+    total_frames = calcTotalFrames(imgmetadata['cameraemdata']['name'], imgmetadata['cameraemdata']['exposure_time'], imgmetadata['cameraemdata']['frame_time'], imgmetadata['cameraemdata']['nframes'], imgmetadata['cameraemdata']['eer_frames'])
     kwargs['Trunc'] = calcTrunc(total_frames, sumframelist)
     if not kwargs['Trunc']:
         del kwargs['Trunc']
 
     # RotGain
     # FlipGain
-    kwargs['RotGain'], kwargs['FlipGain'] = calcRotFlipGain(imgmetadata['frame_rotate'], 
-                                                           imgmetadata['frame_flip'], 
+    kwargs['RotGain'], kwargs['FlipGain'] = calcRotFlipGain(imgmetadata["cameraemdata"]['frame_rotate'], 
+                                                           imgmetadata["cameraemdata"]['frame_flip'], 
                                                            cli_args['force_cpu_flat'], 
                                                            imgmetadata['frame_aligner_flat'])
 
