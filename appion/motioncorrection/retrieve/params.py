@@ -73,21 +73,21 @@ def readImageMetadata(imageid: int, has_bad_pixels : bool = False, is_align : bo
         imgmetadata['correctorplandata']["def_id"]=None
         imgmetadata['correctorplandata']["bad_pixels"]=None
         imgmetadata['correctorplandata']["bad_rows"]=None
-        imgmetadata['correctorplandata']["bad_cols"]
+        imgmetadata['correctorplandata']["bad_cols"]=None
 
     imgmetadata['sessiondata']=sb.get("SessionData",{"def_id":imgmetadata['imgdata']["ref_sessiondata_session"]})
     imgmetadata['cameraemdata']=sb.get("CameraEMData",{"def_id":imgmetadata['imgdata']["ref_cameraemdata_camera"]})
     imgmetadata['ccdcamera']=sb.get("InstrumentData",{"def_id" : imgmetadata['cameraemdata']["ref_instrumentdata_ccdcamera"]})
-    imgmetadata['preset']=sb.get("PresetData",{"def_id":imgmetadata['imgdata']["ref_presetdata_preset"]})
+    imgmetadata['presetdata']=sb.get("PresetData",{"def_id":imgmetadata['imgdata']["ref_presetdata_preset"]})
     imgmetadata['scope']=sb.get("ScopeEMData", {"def_id":imgmetadata['imgdata']["ref_scopeemdata_scope"]})
     if "frame_time" not in imgmetadata['cameraemdata'].keys():
         imgmetadata['cameraemdata']["frame_time"]=None   
-    if "dose" not in imgmetadata['preset'].keys():
-        imgmetadata['preset']['dose'] = None
+    if "dose" not in imgmetadata['presetdata'].keys():
+        imgmetadata['presetdata']['dose'] = None
     imgmetadata['imgdata']["def_timestamp"]=datetime.fromisoformat(imgmetadata['imgdata']["def_timestamp"])
     imgmetadata['frame_aligner_flat']=not (has_bad_pixels or not is_align or has_non_zero_dark)
     imgmetadata['pixelsizecalibrationdata'] = sb.filter("PixelSizeCalibrationData", dict(magnification=imgmetadata["scope"]['magnification'], 
-                                                             ref_instrumentdata_tem=imgmetadata["scope"]['tem'], 
+                                                             ref_instrumentdata_tem=imgmetadata["scope"]['ref_instrumentdata_tem'], 
                                                              ref_instrumentdata_ccdcamera=imgmetadata["ccdcamera"]['def_id']))
     if not imgmetadata['pixelsizecalibrationdata']:
         raise RuntimeError("No pixelsize information was found for image %s with mag %d, tem id %d, ccdcamera id %d."

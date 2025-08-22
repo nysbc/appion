@@ -52,54 +52,54 @@ for imageid in validationData.keys():
     else:
         totaldose = None
     if "InEer" in validationData[imageid]["motioncorflags"].keys():
-        params['test_calcFmDose'].append({"total_raw_frames" : imgmetadata['total_raw_frames'], 
-                                          "exposure_time" : imgmetadata['exposure_time'], 
-                                          "frame_time" : imgmetadata['frame_time'], 
-                                          "dose" : imgmetadata['dose'], 
+        params['test_calcFmDose'].append({"total_raw_frames" : imgmetadata['cameraemdata']['nframes'], 
+                                          "exposure_time" : imgmetadata['cameraemdata']['exposure_time'], 
+                                          "frame_time" : imgmetadata['cameraemdata']['frame_time'], 
+                                          "dose" : imgmetadata['presetdata']['dose'], 
                                           "rendered_frame_size" : validationData[imageid]["appionflags"]['rendered_frame_size'], 
                                           "totaldose" : totaldose, 
                                           "is_eer" : True,
                                           "expected": validationData[imageid]["motioncorflags"]["FmDose"] })
     else:
-        params['test_calcFmDose'].append({"total_raw_frames" : imgmetadata['total_raw_frames'], 
-                                          "exposure_time" : imgmetadata['exposure_time'], 
-                                          "frame_time" : imgmetadata['frame_time'], 
-                                          "dose" : imgmetadata['dose'], 
+        params['test_calcFmDose'].append({"total_raw_frames" : imgmetadata['cameraemdata']['nframes'], 
+                                          "exposure_time" : imgmetadata['cameraemdata']['exposure_time'], 
+                                          "frame_time" : imgmetadata['cameraemdata']['frame_time'], 
+                                          "dose" : imgmetadata['presetdata']['dose'], 
                                           "rendered_frame_size" : validationData[imageid]["appionflags"]['rendered_frame_size'], 
                                           "totaldose" : totaldose, 
                                           "is_eer" : False,
-                                          "expected": validationData[imageid]["motioncorflags"]["FmDose"]})
+                                          "expected": validationData[imageid]["motioncorflags"]["FmDose"] })
         
-    params['test_calcTotalRenderedFrames'].append({"total_raw_frames" : imgmetadata['total_raw_frames'], 
+    params['test_calcTotalRenderedFrames'].append({"total_raw_frames" : imgmetadata['cameraemdata']['nframes'], 
                                                    "rendered_frame_size" : int(validationData[imageid]["appionflags"]['rendered_frame_size']),
-                                                   "expected" : calcTotalRenderedFrames(imgmetadata['total_raw_frames'], int(validationData[imageid]["appionflags"]['rendered_frame_size']))})
-    params['test_calcPixelSize'].append({"pixelsizedatas" : imgmetadata['pixelsizedata'], 
-                                          "binning" : imgmetadata['binning'], 
-                                          "imgdata_timestamp" : imgmetadata['imgdata_timestamp'], 
+                                                   "expected" : calcTotalRenderedFrames(imgmetadata["cameraemdata"]['nframes'], int(validationData[imageid]["appionflags"]['rendered_frame_size']))})
+    params['test_calcPixelSize'].append({"pixelsizedatas" : [dict(x) for x in imgmetadata['pixelsizedata']], 
+                                          "binning" : imgmetadata['cameraemdata']['subd_binning_x'], 
+                                          "imgdata_timestamp" : imgmetadata['imgdata']['def_timestamp'], 
                                           "expected": float(validationData[imageid]["motioncorflags"]["PixSize"])})
-    framelist=list(filterFrameList(float(validationData[imageid]["motioncorflags"]["PixSize"]), imgmetadata['nframes'], []))
+    framelist=list(filterFrameList(float(validationData[imageid]["motioncorflags"]["PixSize"]), imgmetadata['cameraemdata']['nframes'], []))
     params['test_filterFrameList'].append({"pixsize" : float(validationData[imageid]["motioncorflags"]["PixSize"]),
-                                            "nframes" : imgmetadata['nframes'], 
+                                            "nframes" : imgmetadata['cameraemdata']['nframes'], 
                                             "shifts" : [], 
                                             "expected" : framelist})
-    nframes=calcTotalFrames(imgmetadata['camera_name'], imgmetadata['exposure_time'], imgmetadata['frame_time'], imgmetadata['nframes'], imgmetadata['eer_frames'])
-    params['test_calcTotalFrames'].append({"camera_name" : imgmetadata['camera_name'], 
-                                           "exposure_time" : imgmetadata['exposure_time'], 
-                                           "frame_time" : imgmetadata['frame_time'], 
-                                           "nframes" : imgmetadata['nframes'], 
-                                           "eer_frames" : imgmetadata['eer_frames'],
+    nframes=calcTotalFrames(imgmetadata['ccdcamera']['name'], imgmetadata['cameraemdata']['exposure_time'], imgmetadata['cameraemdata']['frame_time'], imgmetadata['cameraemdata']['nframes'], imgmetadata['cameraemdata']['eer_frames'])
+    params['test_calcTotalFrames'].append({"camera_name" : imgmetadata['ccdcamera']['name'], 
+                                           "exposure_time" : imgmetadata['cameraemdata']['exposure_time'], 
+                                           "frame_time" : imgmetadata['cameraemdata']['frame_time'], 
+                                           "nframes" : imgmetadata['cameraemdata']['nframes'], 
+                                           "eer_frames" : imgmetadata['cameraemdata']['eer_frames'],
                                            "expected" : nframes})
     if "Trunc" in validationData[imageid]["motioncorflags"].keys():
         trunc=validationData[imageid]["motioncorflags"]["Trunc"]
     else:
         trunc="%.2f" % 0
-    params['test_calcTrunc'].append({"total_frames" : calcTotalFrames(imgmetadata['camera_name'], imgmetadata['exposure_time'], imgmetadata['frame_time'], imgmetadata['nframes'], imgmetadata['eer_frames']),
-                                     "sumframelist" : list(filterFrameList(float(validationData[imageid]["motioncorflags"]["PixSize"]), imgmetadata['nframes'], [])),
+    params['test_calcTrunc'].append({"total_frames" : calcTotalFrames(imgmetadata['ccdcamera']['name'], imgmetadata['cameraemdata']['exposure_time'], imgmetadata['cameraemdata']['frame_time'], imgmetadata['cameraemdata']['nframes'], imgmetadata['cameraemdata']['eer_frames']),
+                                     "sumframelist" : list(filterFrameList(float(validationData[imageid]["motioncorflags"]["PixSize"]), imgmetadata['cameraemdata']['nframes'], [])),
                                      "expected" : trunc})                
-    params['test_calcKV'].append({"high_tension": imgmetadata['high_tension'],"expected": float(validationData[imageid]["motioncorflags"]["kV"])})
+    params['test_calcKV'].append({"high_tension": imgmetadata['scope']['high_tension'],"expected": float(validationData[imageid]["motioncorflags"]["kV"])})
     force_cpu_flat= 'force_cpu_flat' in validationData[imageid]["appionflags"].keys()
-    params["test_calcRotFlipGain"].append({"frame_rotate":imgmetadata["frame_rotate"], 
-                                           "frame_flip" : imgmetadata["frame_flip"], 
+    params["test_calcRotFlipGain"].append({"frame_rotate":imgmetadata['cameraemdata']["frame_rotate"], 
+                                           "frame_flip" : imgmetadata['cameraemdata']["frame_flip"], 
                                            "force_cpu_flat" : force_cpu_flat, 
                                            "frame_aligner_flat" : imgmetadata["frame_aligner_flat"], 
                                            "expected_RotGain" : int(validationData[imageid]["motioncorflags"]["RotGain"]), 
@@ -109,7 +109,7 @@ for imageid in validationData.keys():
         trim=validationData[imageid]["motioncorflags"]["Trim"]
     else:
         trim=0
-    camdata = CameraEMData.objects.get(def_id=imgmetadata['camera_id'])
+    camdata = CameraEMData.objects.get(def_id=imgmetadata['cameraemdata']['def_id'])
     if "square" in validationData[imageid]["appionflags"].keys():
         square=True
     else:
@@ -149,6 +149,8 @@ for imageid in validationData.keys():
     motioncorr_log_path=calcMotionCorrLogPath(framestackpath)
     params['test_calcMotionCorrLogPath'].append({"framestackpath":framestackpath, "expected": motioncorr_log_path})
     test_constructMotionCorKwargs={}
+    if "pixelsizecalibrationdata" in imgmetadata.keys():
+        del imgmetadata["pixelsizecalibrationdata"]
     test_constructMotionCorKwargs['imgmetadata']=imgmetadata
     test_constructMotionCorKwargs['args']=validationData[imageid]["appionflags"]
     test_constructMotionCorKwargs['args']['Bft_global'] = int(test_constructMotionCorKwargs['args']['Bft_global'])
@@ -203,7 +205,7 @@ for imageid in uploadAlignStatsTest:
         outbuffer=[s for s in outbuffer if s]
         logdata=logparser(outbuffer)
     shifts=logdata["shifts"]
-    nframes=imgmetadata["nframes"]
+    nframes=imgmetadata['cameraemdata']["nframes"]
     pixel_shifts = calcFrameShiftFromPositions(shifts, nframes - len(shifts)+1)
     max_drifts, median = calcFrameStats(pixel_shifts)
     shifts=[list(i) for i in shifts]

@@ -81,7 +81,7 @@ def constructMotionCorKwargs(imgmetadata : dict, cli_args : dict, input_path : s
 
     # PixSize
 
-    kwargs['PixSize'] = calcPixelSize(imgmetadata['pixelsizedata'], imgmetadata['cameraemdata']['subd_binning_x'], imgmetadata['imgdata']['timestamp'])
+    kwargs['PixSize'] = calcPixelSize(imgmetadata['pixelsizedata'], imgmetadata['cameraemdata']['subd_binning_x'], imgmetadata['imgdata']['def_timestamp'])
 
     # kV
     kwargs["kV"] = calcKV(imgmetadata['scope']['high_tension'])
@@ -90,7 +90,7 @@ def constructMotionCorKwargs(imgmetadata : dict, cli_args : dict, input_path : s
     # shifts = readShiftsBetweenFrames()
     shifts=[]
     sumframelist = filterFrameList(kwargs["PixSize"], imgmetadata['cameraemdata']['nframes'], shifts)
-    total_frames = calcTotalFrames(imgmetadata['cameraemdata']['name'], imgmetadata['cameraemdata']['exposure_time'], imgmetadata['cameraemdata']['frame_time'], imgmetadata['cameraemdata']['nframes'], imgmetadata['cameraemdata']['eer_frames'])
+    total_frames = calcTotalFrames(imgmetadata['ccdcamera']['name'], imgmetadata['cameraemdata']['exposure_time'], imgmetadata['cameraemdata']['frame_time'], imgmetadata['cameraemdata']['nframes'], imgmetadata['cameraemdata']['eer_frames'])
     kwargs['Trunc'] = calcTrunc(total_frames, sumframelist)
     if not kwargs['Trunc']:
         del kwargs['Trunc']
