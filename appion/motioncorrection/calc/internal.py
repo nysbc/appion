@@ -1,6 +1,8 @@
 import numpy
 import math
 import os
+import hashlib
+from copy import deepcopy
 
 ## Calculations for parameters used in motioncor2 command
 # InMrc, InTiff, InEer functions
@@ -219,3 +221,67 @@ def calcMotionCorrLogPath(framestackpath):
 
 def calcMotionCor2LogPath(framestackpath):
     return os.path.splitext(framestackpath)[0]+"_Log.motioncor2.txt"
+
+def motioncor_merge(kwarg_list, rundir, max_batch_size=10):
+    merged_tasks=[]
+    serial_inputs={}
+    merged_kwargs={}
+    flags=['EerSampling', 'Patch', 'Iter', 'Tol','Bft','FtBin','Throw','Group',
+            'FmRef', 'Gpu', 'Gain', 'Dark', 'DefectMap', 'FmDose', 'FmIntFile', 'PixSize',
+            'kV', 'Trunc', 'RotGain', 'FlipGain','InMrc', 'InTiff', 'InEer']
+    for kwargs in kwarg_list:
+        flags_cat=""
+        for flag in flags:
+            if flag in kwargs.keys():
+                flags_cat+=str(kwargs[flag])
+        flag_hash = hashlib.md5(flags_cat)
+        if flag_hash not in serial_inputs.keys():
+            serial_inputs[flag_hash]=[]
+        for input_flag in ['InMrc', 'InTiff', 'InEer']:
+            if input_flag in kwargs.keys():
+                serial_inputs[flag_hash].append(kwargs[input_flag])
+        if flag_hash not in merged_kwargs.keys():
+            tmp_kwargs={}
+            for flag in flags:
+                if flag in kwargs.keys():
+                    tmp_kwargs[flag]=kwargs[flag]
+            merged_kwargs[flag_hash]=tmp_kwargs
+    for s_input_k in serial_inputs.keys():
+        if s_input_k not in merged_kwargs.keys():
+            raise RuntimeError("Merging error: serial_inputs and merged_kwargs don't have matching keys.")
+        if len(serial_inputs[s_input_k]) > max_batch_size:
+            partitions=round(len(serial_inputs[s_input_k])/max_batch_size)
+            for p in range(partitions):
+                part_name="%s-%d" % (s_input_k, p)
+                part_dir=os.path.join(rundir,"merged_inputs", part_name)
+                if not os.path.exists(part_dir):
+                    os.makedirs(part_dir)
+                for _ in range(max_batch_size):
+                    if serial_inputs[s_input_k]:
+                        s_input=serial_inputs[s_input_k].pop()
+                    else:
+                        break
+                    os.symlink(s_input, os.path.join(part_dir, os.path.basename(s_input)))
+                tmp_kwargs=deepcopy(merged_kwargs[s_input_k])
+                tmp_kwargs['Serial']=1
+                for input_flag in ['InMrc', 'InTiff', 'InEer']:
+                    if input_flag in tmp_kwargs:
+                        tmp_kwargs[input_flag]=part_dir
+                merged_tasks.append(tmp_kwargs)
+        else:      
+            s_input_dir=os.path.join(rundir,"merged_inputs", s_input_k)
+            if not os.path.exists(s_input_dir):
+                os.makedirs(s_input_dir)
+            for _ in range(max_batch_size):
+                if serial_inputs[s_input_k]:
+                    s_input=serial_inputs[s_input_k].pop()
+                else:
+                    break
+                os.symlink(s_input, os.path.join(s_input_dir, os.path.basename(s_input)))
+            tmp_kwargs=deepcopy(merged_kwargs[s_input_k])
+            tmp_kwargs['Serial']=1
+            for input_flag in ['InMrc', 'InTiff', 'InEer']:
+                if input_flag in tmp_kwargs:
+                    tmp_kwargs[input_flag]=s_input_dir
+            merged_tasks.append(tmp_kwargs)
+    return merged_tasks

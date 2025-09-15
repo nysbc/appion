@@ -1,0 +1,2671 @@
+
+==========
+== CUDA ==
+==========
+
+CUDA Version 12.1.0
+
+Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+
+*************************
+** DEPRECATION NOTICE! **
+*************************
+THIS IMAGE IS DEPRECATED and is scheduled for DELETION.
+    https://gitlab.com/nvidia/container-images/cuda/blob/master/doc/support-policy.md
+
+
+-InMrc           
+-InTiff          /h2/jpellman/motioncor2-serial-vs-noserial/input/
+-InEer           
+-InSuffix        
+-OutMrc          /h2/jpellman/motioncor2-serial-vs-noserial/output/
+-FmIntFile       
+-ArcDir          
+-FullSum         
+-Gain            /beegfs/leginon.ref/n25jul14_ref_a/rawdata/n25aug18c_18104624_05_4092x5760_norm_0.mrc
+-Dark            /h2/jpellman/motioncor2-serial-vs-noserial/dark.mrc
+-DefectFile      
+-DefectMap       
+-InAln           
+-OutAln          
+-TmpFile         
+-LogDir          /h2/jpellman/motioncor2-serial-vs-noserial/logs/
+-FmIntFile       
+-Serial          1
+-EerSampling     1
+-Patch           5  7  0
+-Iter            7
+-Tol             0.50
+-Bft             500.00 100.00
+-PhaseOnly       0
+-FtBin           1.00
+-InitDose        0.00
+-FmDose          1.39
+-PixSize         0.83
+-kV              300
+-Throw           0
+-Trunc           0
+-SumRange        3.00  25.00
+-SplitSum        0
+-Group           1  4
+-FmRef           -1
+-OutStack        0  1
+-RotGain         0
+-FlipGain        0
+-InvGain         0
+-Align           1
+-Tilt            0.00  0.00
+-Mag             1.00  1.00  0.00
+-InFmMotion      0
+-Crop            0  0
+-Gpu             0
+-UseGpus         1
+-GpuMemUsage     0.75
+-OutStar         0
+-TiffOrder       1
+-CorrInterp      0
+
+
+GPU 0 memory: 45487 MB
+
+Directory: /h2/jpellman/motioncor2-serial-vs-noserial/input/
+Prefix:    
+Suffix:    
+added: /h2/jpellman/motioncor2-serial-vs-noserial/input/n25aug18c_NY1814_g3_00021gr_00089sq_v02_00003hl_00002enn.frames.tif
+added: /h2/jpellman/motioncor2-serial-vs-noserial/input/n25aug18c_NY1814_g3_00021gr_00089sq_v02_00003hl_00003enn.frames.tif
+added: /h2/jpellman/motioncor2-serial-vs-noserial/input/n25aug18c_NY1814_g3_00021gr_00089sq_v02_00003hl_00004enn.frames.tif
+added: /h2/jpellman/motioncor2-serial-vs-noserial/input/n25aug18c_NY1814_g3_00021gr_00089sq_v02_00003hl_00005enn.frames.tif
+added: /h2/jpellman/motioncor2-serial-vs-noserial/input/n25aug18c_NY1814_g3_00021gr_00089sq_v02_00003hl_00006enn.frames.tif
+added: /h2/jpellman/motioncor2-serial-vs-noserial/input/n25aug18c_NY1814_g3_00021gr_00089sq_v02_00003hl_00007enn.frames.tif
+added: /h2/jpellman/motioncor2-serial-vs-noserial/input/n25aug18c_NY1814_g3_00021gr_00089sq_v02_00003hl_00008enn.frames.tif
+added: /h2/jpellman/motioncor2-serial-vs-noserial/input/n25aug18c_NY1814_g3_00021gr_00089sq_v02_00003hl_00009enn.frames.tif
+Load gain refereince from
+   /beegfs/leginon.ref/n25jul14_ref_a/rawdata/n25aug18c_18104624_05_4092x5760_norm_0.mrc
+Gain reference has been loaded.
+
+Load dark reference from
+   /h2/jpellman/motioncor2-serial-vs-noserial/dark.mrc
+Dark reference has been loaded.
+
+Warning: The sizes of Dark and gain references do not match.
+   Dark reference has been removed.
+
+Gain reference has been loaded.
+Dark reference has been loaded.
+
+TIFF file size mode: 5760  4092  50  0
+Rendered size mode: 5760  4092  50  0
+GPU 0 Allocation time: GPU (  0.26 GB)   0.00 s, CPU (  0.00 GB)   0.00 s
+GPU 0 Allocation time: GPU (  0.35 GB)   0.00 s, CPU (  0.00 GB)   0.00 s
+GPU 0 Allocation time: GPU (  1.10 GB)   0.00 s, CPU (  0.00 GB)   0.00 s
+GPU 0 Allocation time: GPU (  0.03 GB)   0.00 s, CPU (  0.00 GB)   0.00 s
+GPU 0 Allocation time: GPU (  4.39 GB)   0.00 s, CPU (  0.00 GB)   0.00 s
+Create buffers: total memory allocation 0.53 GB
+Create buffers: 0.06 seconds
+
+Load Tiff movie: 5.29 seconds
+
+Apply gain: 0.30 s
+
+Detect bad and hot pixels.
+Mean & Std:    24.85     5.40
+Hot pixel threshold:    57.26
+
+CC Mean Std: 1.381e-01  1.024e-01
+CC threshold: 0.752
+Patch based alignment
+Forward FFT of stack, please wait...
+Fourier transform done.
+Full-frame alignment has been started.
+Iteration  1  Error:     4.502
+Iteration  2  Error:     0.418
+
+# xcf img size: 2882  2048
+# CPatchCenters::Calculate()
+  0    288.00     146.00     371.51     152.00
+  1    864.00     146.00     864.60     146.29
+  2   1440.00     146.00    1441.00     146.29
+  3   2016.00     146.00    2017.40     146.29
+  4   2592.00     146.00    2600.55     136.00
+  5    288.00     438.00     288.20     438.86
+  6    864.00     438.00     864.60     438.86
+  7   1440.00     438.00    1441.00     438.86
+  8   2016.00     438.00    2017.40     438.86
+  9   2592.00     438.00    2593.80     438.86
+ 10    288.00     730.00     371.51     744.00
+ 11    864.00     730.00     864.60     731.43
+ 12   1440.00     730.00    1441.00     731.43
+ 13   2016.00     730.00    2017.40     731.43
+ 14   2592.00     730.00    2593.80     731.43
+ 15    288.00    1022.00     288.20    1024.00
+ 16    864.00    1022.00     911.88    1016.00
+ 17   1440.00    1022.00    1429.74    1016.00
+ 18   2016.00    1022.00    2017.40    1024.00
+ 19   2592.00    1022.00    2593.80    1024.00
+ 20    288.00    1314.00     288.20    1316.57
+ 21    864.00    1314.00     866.85    1400.00
+ 22   1440.00    1314.00    1441.00    1316.57
+ 23   2016.00    1314.00    2017.40    1316.57
+ 24   2592.00    1314.00    2600.55    1336.00
+ 25    288.00    1606.00     394.02    1592.00
+ 26    864.00    1606.00     864.60    1609.14
+ 27   1440.00    1606.00    1441.00    1609.14
+ 28   2016.00    1606.00    2017.40    1609.14
+ 29   2592.00    1606.00    2578.04    1608.00
+ 30    288.00    1898.00     303.96    1848.00
+ 31    864.00    1898.00     864.60    1901.71
+ 32   1440.00    1898.00    1441.00    1901.71
+ 33   2016.00    1898.00    2017.40    1901.71
+ 34   2592.00    1898.00    2600.55    1816.00
+Full-frame alignment
+  Frame   x Shift   y Shift
+    1      0.000      0.000
+    2      0.600     -0.100
+    3      1.120     -0.220
+    4      1.520     -0.430
+    5      1.810     -0.770
+    6      2.030     -1.170
+    7      2.200     -1.540
+    8      2.350     -1.820
+    9      2.440     -2.020
+   10      2.510     -2.200
+   11      2.630     -2.420
+   12      2.790     -2.630
+   13      2.930     -2.790
+   14      3.040     -2.940
+   15      3.110     -3.160
+   16      3.130     -3.370
+   17      3.100     -3.460
+   18      3.060     -3.490
+   19      3.060     -3.570
+   20      3.160     -3.700
+   21      3.330     -3.820
+   22      3.490     -3.930
+   23      3.610     -4.040
+   24      3.630     -4.110
+   25      3.550     -4.160
+   26      3.480     -4.230
+   27      3.500     -4.310
+   28      3.570     -4.360
+   29      3.610     -4.400
+   30      3.610     -4.490
+   31      3.580     -4.620
+   32      3.520     -4.690
+   33      3.470     -4.660
+   34      3.490     -4.620
+   35      3.580     -4.670
+   36      3.710     -4.800
+   37      3.830     -4.930
+   38      3.840     -4.990
+   39      3.710     -5.000
+   40      3.600     -5.050
+   41      3.620     -5.160
+   42      3.680     -5.310
+   43      3.670     -5.430
+   44      3.660     -5.530
+   45      3.710     -5.620
+   46      3.730     -5.680
+   47      3.660     -5.700
+   48      3.610     -5.710
+   49      3.730     -5.640
+   50      4.010     -5.460
+
+Global shifts are corrected: 0.080255 sec
+Start to align patches.
+TIFF file size mode: 5760  4092  50  0
+Rendered size mode: 5760  4092  50  0
+Align patch 1  34 left
+Iteration  1  Error:     1.012
+Iteration  2  Error:     0.268
+
+Align patch 2  33 left
+Iteration  1  Error:     0.934
+Iteration  2  Error:     0.211
+
+Align patch 3  32 left
+Iteration  1  Error:     0.974
+Iteration  2  Error:     0.274
+
+Align patch 4  31 left
+Iteration  1  Error:     0.964
+Iteration  2  Error:     0.253
+
+Align patch 5  30 left
+Iteration  1  Error:     1.269
+Iteration  2  Error:     0.421
+
+Align patch 6  29 left
+Iteration  1  Error:     0.846
+Iteration  2  Error:     0.288
+
+Align patch 7  28 left
+Iteration  1  Error:     0.872
+Iteration  2  Error:     0.283
+
+Align patch 8  27 left
+Iteration  1  Error:     1.009
+Iteration  2  Error:     0.152
+
+Align patch 9  26 left
+Iteration  1  Error:     0.978
+Iteration  2  Error:     0.319
+
+Align patch 10  25 left
+Iteration  1  Error:     0.841
+Iteration  2  Error:     0.248
+
+Align patch 11  24 left
+Iteration  1  Error:     1.007
+Iteration  2  Error:     0.325
+
+Align patch 12  23 left
+Iteration  1  Error:     0.916
+Iteration  2  Error:     0.269
+
+Align patch 13  22 left
+Iteration  1  Error:     0.694
+Iteration  2  Error:     0.222
+
+Align patch 14  21 left
+Iteration  1  Error:     0.945
+Iteration  2  Error:     0.208
+
+Align patch 15  20 left
+Iteration  1  Error:     1.223
+Iteration  2  Error:     0.214
+
+Align patch 16  19 left
+Iteration  1  Error:     1.094
+Iteration  2  Error:     0.142
+
+Align patch 17  18 left
+Iteration  1  Error:     1.226
+Iteration  2  Error:     0.194
+
+Align patch 18  17 left
+Iteration  1  Error:     0.760
+Iteration  2  Error:     0.101
+
+Align patch 19  16 left
+Iteration  1  Error:     0.586
+Iteration  2  Error:     0.222
+
+Align patch 20  15 left
+Iteration  1  Error:     1.001
+Iteration  2  Error:     0.228
+
+Align patch 21  14 left
+Iteration  1  Error:     1.368
+Iteration  2  Error:     0.206
+
+Align patch 22  13 left
+Iteration  1  Error:     1.157
+Iteration  2  Error:     0.447
+
+Align patch 23  12 left
+Iteration  1  Error:     0.594
+Iteration  2  Error:     0.184
+
+Align patch 24  11 left
+Iteration  1  Error:     0.950
+Iteration  2  Error:     0.082
+
+Align patch 25  10 left
+Iteration  1  Error:     0.990
+Iteration  2  Error:     0.176
+
+Align patch 26  9 left
+Iteration  1  Error:     0.530
+Iteration  2  Error:     0.208
+
+Align patch 27  8 left
+Iteration  1  Error:     1.138
+Iteration  2  Error:     0.280
+
+Align patch 28  7 left
+Iteration  1  Error:     1.415
+Iteration  2  Error:     0.195
+
+Align patch 29  6 left
+Iteration  1  Error:     1.061
+Iteration  2  Error:     0.275
+
+Align patch 30  5 left
+Iteration  1  Error:     0.811
+Iteration  2  Error:     0.191
+
+Align patch 31  4 left
+Iteration  1  Error:     1.158
+Iteration  2  Error:     0.260
+
+Align patch 32  3 left
+Iteration  1  Error:     0.620
+Iteration  2  Error:     0.089
+
+Align patch 33  2 left
+Iteration  1  Error:     0.751
+Iteration  2  Error:     0.155
+
+Align patch 34  1 left
+Iteration  1  Error:     0.786
+Iteration  2  Error:     0.256
+
+Align patch 35  0 left
+Iteration  1  Error:     0.675
+Iteration  2  Error:     0.302
+
+  1    0     0.41      0.77
+  2    1     0.40      0.68
+  3    2     0.39      0.63
+  4    3     0.31      0.43
+  5    4     0.32      0.38
+  6    5     0.33      0.34
+  7    6     0.32      0.30
+  8    7     0.31      0.27
+  9    8     0.30      0.26
+ 10    9     0.29      0.25
+ 11   10     0.28      0.23
+ 12   11     0.26      0.24
+ 13   12     0.24      0.26
+ 14   12     0.21      0.26
+ 15   14     0.17      0.25
+ 16   15     0.13      0.25
+ 17   16     0.09      0.26
+ 18   17     0.06      0.25
+ 19   18     0.05      0.22
+ 20   19     0.03      0.22
+ 21   20     0.02      0.25
+ 22   20     0.01      0.25
+ 23   20     0.00      0.23
+ 24   23     0.02      0.23
+ 25   23     0.03      0.24
+ 26   23     0.05      0.25
+ 27   23     0.06      0.25
+ 28   23     0.08      0.28
+ 29   23     0.09      0.32
+ 30   23     0.10      0.32
+ 31   23     0.09      0.29
+ 32   23     0.09      0.29
+ 33   23     0.09      0.31
+ 34   23     0.10      0.31
+ 35   23     0.14      0.28
+ 36   23     0.18      0.28
+ 37   23     0.22      0.30
+ 38   23     0.25      0.30
+ 39   23     0.27      0.30
+ 40   23     0.28      0.34
+ 41   23     0.30      0.41
+ 42   23     0.33      0.43
+ 43   23     0.36      0.41
+ 44   23     0.40      0.40
+ 45   23     0.43      0.41
+ 46   23     0.42      0.42
+ 47   23     0.39      0.45
+ 48   23     0.35      0.58
+ 49   23     0.31      0.76
+Patch alignment time: 0.74(sec)
+
+Mag stretch: 1.000  -0.000
+
+Correction of local motion: 0.595303 sec
+
+Computation time: 2.469081 sec
+
+Saving motion corrected images ......
+Corrected sum has been saved in:
+   /h2/jpellman/motioncor2-serial-vs-noserial/output/n25aug18c_NY1814_g3_00021gr_00089sq_v02_00003hl_00002enn.frames.mrc
+
+Corrected sum has been saved in:
+   /h2/jpellman/motioncor2-serial-vs-noserial/output/n25aug18c_NY1814_g3_00021gr_00089sq_v02_00003hl_00002enn.frames_DW.mrc
+
+Corrected sum has been saved in:
+   /h2/jpellman/motioncor2-serial-vs-noserial/output/n25aug18c_NY1814_g3_00021gr_00089sq_v02_00003hl_00002enn.frames_DWS.mrc
+
+Motion corrected images saved.
+
+Load Tiff movie: 5.18 seconds
+
+Apply gain: 0.21 s
+
+Detect bad and hot pixels.
+Mean & Std:    22.44     5.16
+Hot pixel threshold:    53.37
+
+CC Mean Std: 1.383e-01  1.025e-01
+CC threshold: 0.753
+Patch based alignment
+Forward FFT of stack, please wait...
+Fourier transform done.
+Full-frame alignment has been started.
+Iteration  1  Error:     3.177
+Iteration  2  Error:     0.276
+
+# xcf img size: 2882  2048
+# CPatchCenters::Calculate()
+  0    288.00     146.00     288.20     146.29
+  1    864.00     146.00     844.34     152.00
+  2   1440.00     146.00    1441.00     146.29
+  3   2016.00     146.00    2017.40     146.29
+  4   2592.00     146.00    2578.04     152.00
+  5    288.00     438.00     326.48     456.00
+  6    864.00     438.00     864.60     438.86
+  7   1440.00     438.00    1441.00     438.86
+  8   2016.00     438.00    2017.40     438.86
+  9   2592.00     438.00    2593.80     438.86
+ 10    288.00     730.00     288.20     731.43
+ 11    864.00     730.00     864.60     731.43
+ 12   1440.00     730.00    1429.74     760.00
+ 13   2016.00     730.00    2017.40     731.43
+ 14   2592.00     730.00    2593.80     731.43
+ 15    288.00    1022.00     281.45    1064.00
+ 16    864.00    1022.00     864.60    1024.00
+ 17   1440.00    1022.00    1384.71    1000.00
+ 18   2016.00    1022.00    1992.63    1032.00
+ 19   2592.00    1022.00    2593.80    1024.00
+ 20    288.00    1314.00     281.45    1304.00
+ 21    864.00    1314.00     889.37    1336.00
+ 22   1440.00    1314.00    1441.00    1316.57
+ 23   2016.00    1314.00    2017.40    1316.57
+ 24   2592.00    1314.00    2600.55    1272.00
+ 25    288.00    1606.00     288.20    1609.14
+ 26    864.00    1606.00     864.60    1609.14
+ 27   1440.00    1606.00    1429.74    1592.00
+ 28   2016.00    1606.00    2015.15    1624.00
+ 29   2592.00    1606.00    2593.80    1609.14
+ 30    288.00    1898.00     281.45    1848.00
+ 31    864.00    1898.00     864.60    1901.71
+ 32   1440.00    1898.00    1497.29    1864.00
+ 33   2016.00    1898.00    2037.66    1912.00
+ 34   2592.00    1898.00    2600.55    1848.00
+Full-frame alignment
+  Frame   x Shift   y Shift
+    1      0.000      0.000
+    2      0.500      0.380
+    3      1.060      0.590
+    4      1.570      0.600
+    5      1.920      0.510
+    6      2.110      0.390
+    7      2.260      0.250
+    8      2.420      0.090
+    9      2.600     -0.060
+   10      2.760     -0.230
+   11      2.870     -0.420
+   12      2.950     -0.550
+   13      2.970     -0.650
+   14      2.960     -0.750
+   15      3.020     -0.830
+   16      3.140     -0.900
+   17      3.240     -0.990
+   18      3.250     -1.070
+   19      3.210     -1.120
+   20      3.220     -1.180
+   21      3.300     -1.260
+   22      3.430     -1.320
+   23      3.560     -1.350
+   24      3.680     -1.380
+   25      3.780     -1.430
+   26      3.830     -1.480
+   27      3.800     -1.510
+   28      3.710     -1.540
+   29      3.680     -1.580
+   30      3.670     -1.650
+   31      3.620     -1.700
+   32      3.580     -1.760
+   33      3.630     -1.860
+   34      3.750     -1.960
+   35      3.850     -2.030
+   36      3.840     -2.110
+   37      3.790     -2.180
+   38      3.770     -2.200
+   39      3.770     -2.150
+   40      3.720     -2.140
+   41      3.660     -2.180
+   42      3.640     -2.230
+   43      3.680     -2.280
+   44      3.770     -2.330
+   45      3.880     -2.430
+   46      3.970     -2.530
+   47      4.030     -2.600
+   48      4.070     -2.630
+   49      4.090     -2.600
+   50      4.140     -2.520
+
+Global shifts are corrected: 0.088665 sec
+Start to align patches.
+Align patch 1  34 left
+Iteration  1  Error:     1.018
+Iteration  2  Error:     0.201
+
+Align patch 2  33 left
+Iteration  1  Error:     1.019
+Iteration  2  Error:     0.315
+
+Align patch 3  32 left
+Iteration  1  Error:     1.396
+Iteration  2  Error:     0.436
+
+Align patch 4  31 left
+Iteration  1  Error:     1.401
+Iteration  2  Error:     0.283
+
+Align patch 5  30 left
+Iteration  1  Error:     1.338
+Iteration  2  Error:     0.209
+
+Align patch 6  29 left
+Iteration  1  Error:     0.959
+Iteration  2  Error:     0.235
+
+Align patch 7  28 left
+Iteration  1  Error:     0.957
+Iteration  2  Error:     0.297
+
+Align patch 8  27 left
+Iteration  1  Error:     0.984
+Iteration  2  Error:     0.185
+
+Align patch 9  26 left
+Iteration  1  Error:     1.602
+Iteration  2  Error:     0.315
+
+Align patch 10  25 left
+Iteration  1  Error:     1.915
+Iteration  2  Error:     0.561
+Iteration  3  Error:     0.148
+
+Align patch 11  24 left
+Iteration  1  Error:     1.285
+Iteration  2  Error:     0.191
+
+Align patch 12  23 left
+Iteration  1  Error:     1.108
+Iteration  2  Error:     0.165
+
+Align patch 13  22 left
+Iteration  1  Error:     0.610
+Iteration  2  Error:     0.257
+
+Align patch 14  21 left
+Iteration  1  Error:     1.410
+Iteration  2  Error:     0.392
+
+Align patch 15  20 left
+Iteration  1  Error:     1.313
+Iteration  2  Error:     0.232
+
+Align patch 16  19 left
+Iteration  1  Error:     1.045
+Iteration  2  Error:     0.244
+
+Align patch 17  18 left
+Iteration  1  Error:     0.652
+Iteration  2  Error:     0.128
+
+Align patch 18  17 left
+Iteration  1  Error:     1.083
+Iteration  2  Error:     0.140
+
+Align patch 19  16 left
+Iteration  1  Error:     1.330
+Iteration  2  Error:     0.205
+
+Align patch 20  15 left
+Iteration  1  Error:     1.209
+Iteration  2  Error:     0.138
+
+Align patch 21  14 left
+Iteration  1  Error:     0.970
+Iteration  2  Error:     0.194
+
+Align patch 22  13 left
+Iteration  1  Error:     0.575
+Iteration  2  Error:     0.101
+
+Align patch 23  12 left
+Iteration  1  Error:     1.165
+Iteration  2  Error:     0.266
+
+Align patch 24  11 left
+Iteration  1  Error:     0.536
+Iteration  2  Error:     0.124
+
+Align patch 25  10 left
+Iteration  1  Error:     0.968
+Iteration  2  Error:     0.204
+
+Align patch 26  9 left
+Iteration  1  Error:     0.623
+Iteration  2  Error:     0.193
+
+Align patch 27  8 left
+Iteration  1  Error:     1.023
+Iteration  2  Error:     0.214
+
+Align patch 28  7 left
+Iteration  1  Error:     0.703
+Iteration  2  Error:     0.139
+
+Align patch 29  6 left
+Iteration  1  Error:     1.093
+Iteration  2  Error:     0.277
+
+Align patch 30  5 left
+Iteration  1  Error:     0.698
+Iteration  2  Error:     0.140
+
+Align patch 31  4 left
+Iteration  1  Error:     1.694
+Iteration  2  Error:     0.148
+
+Align patch 32  3 left
+Iteration  1  Error:     0.744
+Iteration  2  Error:     0.167
+
+Align patch 33  2 left
+Iteration  1  Error:     1.075
+Iteration  2  Error:     0.170
+
+Align patch 34  1 left
+Iteration  1  Error:     0.856
+Iteration  2  Error:     0.240
+
+Align patch 35  0 left
+Iteration  1  Error:     1.142
+Iteration  2  Error:     0.258
+
+  1    0     0.44      0.89
+  2    1     0.42      0.83
+  3    2     0.40      0.77
+  4    3     0.38      0.53
+  5    4     0.37      0.45
+  6    5     0.36      0.38
+  7    6     0.33      0.31
+  8    7     0.30      0.27
+  9    8     0.27      0.26
+ 10    9     0.24      0.26
+ 11   10     0.21      0.25
+ 12   11     0.18      0.27
+ 13   12     0.16      0.29
+ 14   12     0.14      0.29
+ 15   14     0.13      0.26
+ 16   15     0.12      0.25
+ 17   16     0.12      0.26
+ 18   16     0.11      0.25
+ 19   18     0.10      0.24
+ 20   19     0.08      0.25
+ 21   20     0.07      0.28
+ 22   20     0.05      0.27
+ 23   22     0.04      0.25
+ 24   23     0.05      0.25
+ 25   23     0.06      0.28
+ 26   23     0.08      0.30
+ 27   23     0.09      0.31
+ 28   23     0.10      0.32
+ 29   23     0.10      0.34
+ 30   23     0.11      0.33
+ 31   23     0.12      0.30
+ 32   23     0.15      0.28
+ 33   23     0.19      0.29
+ 34   23     0.23      0.28
+ 35   23     0.26      0.27
+ 36   23     0.30      0.29
+ 37   23     0.32      0.34
+ 38   23     0.33      0.37
+ 39   23     0.31      0.39
+ 40   23     0.28      0.42
+ 41   23     0.27      0.45
+ 42   23     0.27      0.45
+ 43   23     0.30      0.43
+ 44   23     0.34      0.45
+ 45   23     0.37      0.48
+ 46   23     0.39      0.50
+ 47   23     0.40      0.54
+ 48   23     0.41      0.66
+ 49   23     0.42      0.84
+Patch alignment time: 0.34(sec)
+
+TIFF file size mode: 5760  4092  50  0
+Rendered size mode: 5760  4092  50  0
+Mag stretch: 1.000  -0.000
+
+Correction of local motion: 0.803323 sec
+
+Computation time: 1.762210 sec
+
+Saving motion corrected images ......
+Corrected sum has been saved in:
+   /h2/jpellman/motioncor2-serial-vs-noserial/output/n25aug18c_NY1814_g3_00021gr_00089sq_v02_00003hl_00003enn.frames.mrc
+
+Corrected sum has been saved in:
+   /h2/jpellman/motioncor2-serial-vs-noserial/output/n25aug18c_NY1814_g3_00021gr_00089sq_v02_00003hl_00003enn.frames_DW.mrc
+
+Corrected sum has been saved in:
+   /h2/jpellman/motioncor2-serial-vs-noserial/output/n25aug18c_NY1814_g3_00021gr_00089sq_v02_00003hl_00003enn.frames_DWS.mrc
+
+Motion corrected images saved.
+
+Load Tiff movie: 5.94 seconds
+
+Apply gain: 0.20 s
+
+Detect bad and hot pixels.
+Mean & Std:    24.72     5.40
+Hot pixel threshold:    57.15
+
+CC Mean Std: 1.383e-01  1.025e-01
+CC threshold: 0.753
+Patch based alignment
+Forward FFT of stack, please wait...
+Fourier transform done.
+Full-frame alignment has been started.
+Iteration  1  Error:     3.896
+Iteration  2  Error:     0.243
+
+# xcf img size: 2882  2048
+# CPatchCenters::Calculate()
+  0    288.00     146.00     288.20     146.29
+  1    864.00     146.00     864.60     146.29
+  2   1440.00     146.00    1384.71     136.00
+  3   2016.00     146.00    2060.18     136.00
+  4   2592.00     146.00    2600.55     136.00
+  5    288.00     438.00     348.99     392.00
+  6    864.00     438.00     864.60     438.86
+  7   1440.00     438.00    1441.00     438.86
+  8   2016.00     438.00    2017.40     438.86
+  9   2592.00     438.00    2593.80     438.86
+ 10    288.00     730.00     326.48     728.00
+ 11    864.00     730.00     864.60     731.43
+ 12   1440.00     730.00    1407.23     728.00
+ 13   2016.00     730.00    2017.40     731.43
+ 14   2592.00     730.00    2593.80     731.43
+ 15    288.00    1022.00     439.05     920.00
+ 16    864.00    1022.00     864.60    1024.00
+ 17   1440.00    1022.00    1452.26     984.00
+ 18   2016.00    1022.00    2017.40    1024.00
+ 19   2592.00    1022.00    2593.80    1024.00
+ 20    288.00    1314.00     281.45    1352.00
+ 21    864.00    1314.00     866.85    1336.00
+ 22   1440.00    1314.00    1441.00    1316.57
+ 23   2016.00    1314.00    2017.40    1316.57
+ 24   2592.00    1314.00    2593.80    1316.57
+ 25    288.00    1606.00     288.20    1609.14
+ 26    864.00    1606.00     889.37    1608.00
+ 27   1440.00    1606.00    1407.23    1576.00
+ 28   2016.00    1606.00    2015.15    1624.00
+ 29   2592.00    1606.00    2555.52    1592.00
+ 30    288.00    1898.00     281.45    1880.00
+ 31    864.00    1898.00     844.34    1864.00
+ 32   1440.00    1898.00    1497.29    1896.00
+ 33   2016.00    1898.00    1992.63    1896.00
+ 34   2592.00    1898.00    2593.80    1901.71
+Full-frame alignment
+  Frame   x Shift   y Shift
+    1      0.000      0.000
+    2      0.520     -0.260
+    3      1.000     -0.450
+    4      1.400     -0.610
+    5      1.700     -0.810
+    6      1.910     -1.030
+    7      2.080     -1.230
+    8      2.240     -1.400
+    9      2.340     -1.570
+   10      2.410     -1.750
+   11      2.490     -1.930
+   12      2.620     -2.060
+   13      2.800     -2.140
+   14      2.980     -2.200
+   15      3.100     -2.270
+   16      3.200     -2.330
+   17      3.340     -2.370
+   18      3.510     -2.430
+   19      3.600     -2.500
+   20      3.610     -2.550
+   21      3.600     -2.560
+   22      3.600     -2.570
+   23      3.560     -2.620
+   24      3.540     -2.720
+   25      3.610     -2.800
+   26      3.740     -2.800
+   27      3.810     -2.770
+   28      3.820     -2.790
+   29      3.830     -2.880
+   30      3.830     -2.930
+   31      3.850     -2.920
+   32      3.910     -2.930
+   33      3.960     -3.000
+   34      3.940     -3.060
+   35      3.850     -3.030
+   36      3.830     -2.970
+   37      3.910     -2.970
+   38      4.010     -3.050
+   39      4.030     -3.170
+   40      3.970     -3.300
+   41      3.930     -3.390
+   42      3.930     -3.420
+   43      3.960     -3.450
+   44      4.000     -3.510
+   45      4.030     -3.540
+   46      4.070     -3.510
+   47      4.150     -3.470
+   48      4.280     -3.520
+   49      4.390     -3.630
+   50      4.420     -3.770
+
+Global shifts are corrected: 0.089413 sec
+Start to align patches.
+TIFF file size mode: 5760  4092  50  0
+Rendered size mode: 5760  4092  50  0
+Align patch 1  34 left
+Iteration  1  Error:     0.999
+Iteration  2  Error:     0.270
+
+Align patch 2  33 left
+Iteration  1  Error:     0.507
+Iteration  2  Error:     0.172
+
+Align patch 3  32 left
+Iteration  1  Error:     1.086
+Iteration  2  Error:     0.172
+
+Align patch 4  31 left
+Iteration  1  Error:     0.696
+Iteration  2  Error:     0.161
+
+Align patch 5  30 left
+Iteration  1  Error:     0.942
+Iteration  2  Error:     0.139
+
+Align patch 6  29 left
+Iteration  1  Error:     0.730
+Iteration  2  Error:     0.159
+
+Align patch 7  28 left
+Iteration  1  Error:     0.846
+Iteration  2  Error:     0.186
+
+Align patch 8  27 left
+Iteration  1  Error:     1.414
+Iteration  2  Error:     0.228
+
+Align patch 9  26 left
+Iteration  1  Error:     0.767
+Iteration  2  Error:     0.176
+
+Align patch 10  25 left
+Iteration  1  Error:     0.709
+Iteration  2  Error:     0.114
+
+Align patch 11  24 left
+Iteration  1  Error:     1.074
+Iteration  2  Error:     0.104
+
+Align patch 12  23 left
+Iteration  1  Error:     0.995
+Iteration  2  Error:     0.140
+
+Align patch 13  22 left
+Iteration  1  Error:     1.055
+Iteration  2  Error:     0.296
+
+Align patch 14  21 left
+Iteration  1  Error:     1.270
+Iteration  2  Error:     0.192
+
+Align patch 15  20 left
+Iteration  1  Error:     1.270
+Iteration  2  Error:     0.204
+
+Align patch 16  19 left
+Iteration  1  Error:     0.851
+Iteration  2  Error:     0.159
+
+Align patch 17  18 left
+Iteration  1  Error:     0.341
+Iteration  2  Error:     0.043
+
+Align patch 18  17 left
+Iteration  1  Error:     0.879
+Iteration  2  Error:     0.200
+
+Align patch 19  16 left
+Iteration  1  Error:     1.054
+Iteration  2  Error:     0.165
+
+Align patch 20  15 left
+Iteration  1  Error:     0.764
+Iteration  2  Error:     0.207
+
+Align patch 21  14 left
+Iteration  1  Error:     0.682
+Iteration  2  Error:     0.160
+
+Align patch 22  13 left
+Iteration  1  Error:     1.095
+Iteration  2  Error:     0.199
+
+Align patch 23  12 left
+Iteration  1  Error:     1.072
+Iteration  2  Error:     0.376
+
+Align patch 24  11 left
+Iteration  1  Error:     0.978
+Iteration  2  Error:     0.145
+
+Align patch 25  10 left
+Iteration  1  Error:     0.697
+Iteration  2  Error:     0.194
+
+Align patch 26  9 left
+Iteration  1  Error:     0.825
+Iteration  2  Error:     0.111
+
+Align patch 27  8 left
+Iteration  1  Error:     0.674
+Iteration  2  Error:     0.075
+
+Align patch 28  7 left
+Iteration  1  Error:     2.133
+Iteration  2  Error:     0.439
+
+Align patch 29  6 left
+Iteration  1  Error:     0.859
+Iteration  2  Error:     0.242
+
+Align patch 30  5 left
+Iteration  1  Error:     1.300
+Iteration  2  Error:     0.139
+
+Align patch 31  4 left
+Iteration  1  Error:     0.496
+Iteration  2  Error:     0.145
+
+Align patch 32  3 left
+Iteration  1  Error:     0.638
+Iteration  2  Error:     0.098
+
+Align patch 33  2 left
+Iteration  1  Error:     0.642
+Iteration  2  Error:     0.170
+
+Align patch 34  1 left
+Iteration  1  Error:     0.735
+Iteration  2  Error:     0.324
+
+Align patch 35  0 left
+Iteration  1  Error:     0.949
+Iteration  2  Error:     0.106
+
+  1    0     0.56      0.66
+  2    1     0.50      0.58
+  3    2     0.46      0.55
+  4    3     0.45      0.42
+  5    4     0.43      0.39
+  6    5     0.40      0.35
+  7    6     0.36      0.30
+  8    7     0.31      0.27
+  9    8     0.27      0.27
+ 10    9     0.23      0.27
+ 11   10     0.19      0.25
+ 12   11     0.16      0.25
+ 13   12     0.12      0.25
+ 14   13     0.10      0.24
+ 15   14     0.08      0.21
+ 16   15     0.07      0.20
+ 17   16     0.05      0.21
+ 18   17     0.04      0.21
+ 19   18     0.02      0.19
+ 20   19     0.02      0.20
+ 21   19     0.03      0.23
+ 22   19     0.04      0.24
+ 23   19     0.05      0.21
+ 24   19     0.05      0.20
+ 25   19     0.06      0.21
+ 26   19     0.08      0.22
+ 27   19     0.09      0.22
+ 28   19     0.10      0.24
+ 29   19     0.12      0.28
+ 30   19     0.13      0.28
+ 31   19     0.14      0.25
+ 32   19     0.16      0.24
+ 33   19     0.17      0.26
+ 34   19     0.17      0.26
+ 35   19     0.16      0.26
+ 36   19     0.16      0.29
+ 37   19     0.16      0.32
+ 38   19     0.18      0.33
+ 39   19     0.21      0.33
+ 40   19     0.25      0.36
+ 41   19     0.29      0.39
+ 42   19     0.32      0.39
+ 43   19     0.35      0.36
+ 44   19     0.37      0.33
+ 45   19     0.39      0.34
+ 46   19     0.41      0.36
+ 47   19     0.43      0.45
+ 48   19     0.44      0.62
+ 49   19     0.46      0.83
+Patch alignment time: 0.45(sec)
+
+Mag stretch: 1.000  -0.000
+
+Correction of local motion: 0.796199 sec
+
+Computation time: 1.848317 sec
+
+Saving motion corrected images ......
+Corrected sum has been saved in:
+   /h2/jpellman/motioncor2-serial-vs-noserial/output/n25aug18c_NY1814_g3_00021gr_00089sq_v02_00003hl_00004enn.frames.mrc
+
+Corrected sum has been saved in:
+   /h2/jpellman/motioncor2-serial-vs-noserial/output/n25aug18c_NY1814_g3_00021gr_00089sq_v02_00003hl_00004enn.frames_DW.mrc
+
+Corrected sum has been saved in:
+   /h2/jpellman/motioncor2-serial-vs-noserial/output/n25aug18c_NY1814_g3_00021gr_00089sq_v02_00003hl_00004enn.frames_DWS.mrc
+
+Motion corrected images saved.
+
+Load Tiff movie: 4.97 seconds
+
+Apply gain: 0.31 s
+
+Detect bad and hot pixels.
+Mean & Std:    21.28     5.02
+Hot pixel threshold:    51.43
+
+CC Mean Std: 1.383e-01  1.025e-01
+CC threshold: 0.754
+Patch based alignment
+Forward FFT of stack, please wait...
+Fourier transform done.
+Full-frame alignment has been started.
+Iteration  1  Error:     3.940
+Iteration  2  Error:     0.241
+
+# xcf img size: 2882  2048
+# CPatchCenters::Calculate()
+  0    288.00     146.00     288.20     146.29
+  1    864.00     146.00     864.60     146.29
+  2   1440.00     146.00    1441.00     146.29
+  3   2016.00     146.00    2017.40     146.29
+  4   2592.00     146.00    2593.80     146.29
+  5    288.00     438.00     303.96     440.00
+  6    864.00     438.00     844.34     440.00
+  7   1440.00     438.00    1441.00     438.86
+  8   2016.00     438.00    2017.40     438.86
+  9   2592.00     438.00    2600.55     456.00
+ 10    288.00     730.00     288.20     731.43
+ 11    864.00     730.00     864.60     731.43
+ 12   1440.00     730.00    1429.74     728.00
+ 13   2016.00     730.00    2017.40     731.43
+ 14   2592.00     730.00    2593.80     731.43
+ 15    288.00    1022.00     288.20    1024.00
+ 16    864.00    1022.00     754.27    1016.00
+ 17   1440.00    1022.00    1429.74    1000.00
+ 18   2016.00    1022.00    2017.40    1024.00
+ 19   2592.00    1022.00    2555.52    1016.00
+ 20    288.00    1314.00     281.45    1368.00
+ 21    864.00    1314.00     866.85    1288.00
+ 22   1440.00    1314.00    1474.77    1320.00
+ 23   2016.00    1314.00    2017.40    1316.57
+ 24   2592.00    1314.00    2533.01    1400.00
+ 25    288.00    1606.00     288.20    1609.14
+ 26    864.00    1606.00     864.60    1609.14
+ 27   1440.00    1606.00    1441.00    1609.14
+ 28   2016.00    1606.00    2017.40    1609.14
+ 29   2592.00    1606.00    2593.80    1609.14
+ 30    288.00    1898.00     288.20    1901.71
+ 31    864.00    1898.00     821.82    1896.00
+ 32   1440.00    1898.00    1441.00    1901.71
+ 33   2016.00    1898.00    2015.15    1912.00
+ 34   2592.00    1898.00    2593.80    1901.71
+Full-frame alignment
+  Frame   x Shift   y Shift
+    1      0.000      0.000
+    2      0.790      0.130
+    3      1.500      0.240
+    4      2.080      0.340
+    5      2.530      0.390
+    6      2.820      0.300
+    7      3.060      0.100
+    8      3.320     -0.110
+    9      3.620     -0.250
+   10      3.880     -0.340
+   11      4.060     -0.410
+   12      4.130     -0.520
+   13      4.090     -0.650
+   14      4.010     -0.790
+   15      3.970     -0.920
+   16      3.970     -1.000
+   17      4.010     -1.040
+   18      4.110     -1.080
+   19      4.210     -1.110
+   20      4.270     -1.120
+   21      4.370     -1.130
+   22      4.480     -1.160
+   23      4.520     -1.200
+   24      4.510     -1.260
+   25      4.520     -1.290
+   26      4.540     -1.300
+   27      4.520     -1.330
+   28      4.470     -1.380
+   29      4.400     -1.430
+   30      4.330     -1.450
+   31      4.290     -1.460
+   32      4.300     -1.510
+   33      4.290     -1.550
+   34      4.260     -1.570
+   35      4.300     -1.600
+   36      4.440     -1.670
+   37      4.580     -1.730
+   38      4.700     -1.750
+   39      4.780     -1.780
+   40      4.840     -1.820
+   41      4.880     -1.840
+   42      4.850     -1.880
+   43      4.730     -1.990
+   44      4.630     -2.140
+   45      4.620     -2.240
+   46      4.630     -2.280
+   47      4.610     -2.280
+   48      4.580     -2.260
+   49      4.630     -2.220
+   50      4.770     -2.160
+
+TIFF file size mode: 5760  4092  50  0
+Rendered size mode: 5760  4092  50  0
+Global shifts are corrected: 0.117999 sec
+Start to align patches.
+Align patch 1  34 left
+Iteration  1  Error:     0.740
+Iteration  2  Error:     0.165
+
+Align patch 2  33 left
+Iteration  1  Error:     1.827
+Iteration  2  Error:     0.332
+
+Align patch 3  32 left
+Iteration  1  Error:     1.291
+Iteration  2  Error:     0.249
+
+Align patch 4  31 left
+Iteration  1  Error:     1.204
+Iteration  2  Error:     0.250
+
+Align patch 5  30 left
+Iteration  1  Error:     1.005
+Iteration  2  Error:     0.254
+
+Align patch 6  29 left
+Iteration  1  Error:     0.997
+Iteration  2  Error:     0.320
+
+Align patch 7  28 left
+Iteration  1  Error:     1.476
+Iteration  2  Error:     0.229
+
+Align patch 8  27 left
+Iteration  1  Error:     0.843
+Iteration  2  Error:     0.215
+
+Align patch 9  26 left
+Iteration  1  Error:     0.810
+Iteration  2  Error:     0.155
+
+Align patch 10  25 left
+Iteration  1  Error:     1.963
+Iteration  2  Error:     0.354
+
+Align patch 11  24 left
+Iteration  1  Error:     1.081
+Iteration  2  Error:     0.121
+
+Align patch 12  23 left
+Iteration  1  Error:     1.033
+Iteration  2  Error:     0.181
+
+Align patch 13  22 left
+Iteration  1  Error:     0.863
+Iteration  2  Error:     0.154
+
+Align patch 14  21 left
+Iteration  1  Error:     0.763
+Iteration  2  Error:     0.119
+
+Align patch 15  20 left
+Iteration  1  Error:     1.171
+Iteration  2  Error:     0.274
+
+Align patch 16  19 left
+Iteration  1  Error:     1.037
+Iteration  2  Error:     0.171
+
+Align patch 17  18 left
+Iteration  1  Error:     1.077
+Iteration  2  Error:     0.204
+
+Align patch 18  17 left
+Iteration  1  Error:     0.678
+Iteration  2  Error:     0.157
+
+Align patch 19  16 left
+Iteration  1  Error:     0.856
+Iteration  2  Error:     0.129
+
+Align patch 20  15 left
+Iteration  1  Error:     1.854
+Iteration  2  Error:     0.304
+
+Align patch 21  14 left
+Iteration  1  Error:     0.901
+Iteration  2  Error:     0.177
+
+Align patch 22  13 left
+Iteration  1  Error:     0.799
+Iteration  2  Error:     0.178
+
+Align patch 23  12 left
+Iteration  1  Error:     0.799
+Iteration  2  Error:     0.226
+
+Align patch 24  11 left
+Iteration  1  Error:     0.870
+Iteration  2  Error:     0.202
+
+Align patch 25  10 left
+Iteration  1  Error:     1.287
+Iteration  2  Error:     0.213
+
+Align patch 26  9 left
+Iteration  1  Error:     0.716
+Iteration  2  Error:     0.167
+
+Align patch 27  8 left
+Iteration  1  Error:     0.800
+Iteration  2  Error:     0.210
+
+Align patch 28  7 left
+Iteration  1  Error:     0.842
+Iteration  2  Error:     0.099
+
+Align patch 29  6 left
+Iteration  1  Error:     1.200
+Iteration  2  Error:     0.208
+
+Align patch 30  5 left
+Iteration  1  Error:     0.798
+Iteration  2  Error:     0.152
+
+Align patch 31  4 left
+Iteration  1  Error:     1.512
+Iteration  2  Error:     0.205
+
+Align patch 32  3 left
+Iteration  1  Error:     0.734
+Iteration  2  Error:     0.200
+
+Align patch 33  2 left
+Iteration  1  Error:     0.850
+Iteration  2  Error:     0.110
+
+Align patch 34  1 left
+Iteration  1  Error:     1.545
+Iteration  2  Error:     0.151
+
+Align patch 35  0 left
+Iteration  1  Error:     1.393
+Iteration  2  Error:     0.210
+
+  1    0     0.55      1.01
+  2    1     0.47      0.89
+  3    2     0.40      0.81
+  4    3     0.39      0.53
+  5    4     0.34      0.45
+  6    5     0.30      0.39
+  7    6     0.27      0.33
+  8    7     0.24      0.29
+  9    8     0.22      0.28
+ 10    9     0.18      0.27
+ 11   10     0.13      0.25
+ 12   11     0.07      0.24
+ 13   12     0.03      0.25
+ 14   13     0.02      0.25
+ 15   14     0.03      0.25
+ 16   14     0.05      0.26
+ 17   14     0.07      0.30
+ 18   14     0.07      0.29
+ 19   14     0.08      0.26
+ 20   14     0.09      0.25
+ 21   14     0.11      0.27
+ 22   14     0.11      0.27
+ 23   14     0.11      0.25
+ 24   14     0.09      0.26
+ 25   14     0.08      0.29
+ 26   14     0.08      0.29
+ 27   14     0.08      0.28
+ 28   14     0.08      0.27
+ 29   14     0.09      0.29
+ 30   14     0.09      0.29
+ 31   14     0.09      0.28
+ 32   14     0.10      0.30
+ 33   14     0.11      0.34
+ 34   14     0.12      0.34
+ 35   14     0.15      0.33
+ 36   14     0.18      0.35
+ 37   14     0.21      0.39
+ 38   14     0.22      0.39
+ 39   14     0.22      0.36
+ 40   14     0.22      0.35
+ 41   14     0.23      0.36
+ 42   14     0.24      0.37
+ 43   14     0.25      0.36
+ 44   14     0.27      0.39
+ 45   14     0.29      0.42
+ 46   14     0.30      0.44
+ 47   14     0.31      0.50
+ 48   14     0.32      0.64
+ 49   14     0.34      0.83
+Patch alignment time: 0.62(sec)
+
+Mag stretch: 1.000  -0.000
+
+Correction of local motion: 0.971426 sec
+
+Computation time: 2.388835 sec
+
+Saving motion corrected images ......
+Corrected sum has been saved in:
+   /h2/jpellman/motioncor2-serial-vs-noserial/output/n25aug18c_NY1814_g3_00021gr_00089sq_v02_00003hl_00005enn.frames.mrc
+
+Corrected sum has been saved in:
+   /h2/jpellman/motioncor2-serial-vs-noserial/output/n25aug18c_NY1814_g3_00021gr_00089sq_v02_00003hl_00005enn.frames_DW.mrc
+
+Corrected sum has been saved in:
+   /h2/jpellman/motioncor2-serial-vs-noserial/output/n25aug18c_NY1814_g3_00021gr_00089sq_v02_00003hl_00005enn.frames_DWS.mrc
+
+Motion corrected images saved.
+
+Load Tiff movie: 7.13 seconds
+
+Apply gain: 0.24 s
+
+Detect bad and hot pixels.
+Mean & Std:    21.18     5.06
+Hot pixel threshold:    51.56
+
+CC Mean Std: 1.385e-01  1.026e-01
+CC threshold: 0.754
+Patch based alignment
+Forward FFT of stack, please wait...
+Fourier transform done.
+Full-frame alignment has been started.
+Iteration  1  Error:     2.001
+Iteration  2  Error:     0.166
+
+# xcf img size: 2882  2048
+# CPatchCenters::Calculate()
+  0    288.00     146.00     288.20     146.29
+  1    864.00     146.00     864.60     146.29
+  2   1440.00     146.00    1441.00     146.29
+  3   2016.00     146.00    2017.40     146.29
+  4   2592.00     146.00    2593.80     146.29
+  5    288.00     438.00     281.45     424.00
+  6    864.00     438.00     866.85     456.00
+  7   1440.00     438.00    1452.26     424.00
+  8   2016.00     438.00    2017.40     438.86
+  9   2592.00     438.00    2593.80     438.86
+ 10    288.00     730.00     288.20     731.43
+ 11    864.00     730.00     864.60     731.43
+ 12   1440.00     730.00    1407.23     728.00
+ 13   2016.00     730.00    2037.66     728.00
+ 14   2592.00     730.00    2510.49     728.00
+ 15    288.00    1022.00     326.48    1016.00
+ 16    864.00    1022.00     864.60    1024.00
+ 17   1440.00    1022.00    1441.00    1024.00
+ 18   2016.00    1022.00    2015.15    1048.00
+ 19   2592.00    1022.00    2593.80    1024.00
+ 20    288.00    1314.00     288.20    1316.57
+ 21    864.00    1314.00     864.60    1316.57
+ 22   1440.00    1314.00    1429.74    1320.00
+ 23   2016.00    1314.00    2015.15    1304.00
+ 24   2592.00    1314.00    2600.55    1304.00
+ 25    288.00    1606.00     288.20    1609.14
+ 26    864.00    1606.00     864.60    1609.14
+ 27   1440.00    1606.00    1407.23    1608.00
+ 28   2016.00    1606.00    2060.18    1592.00
+ 29   2592.00    1606.00    2600.55    1624.00
+ 30    288.00    1898.00     288.20    1901.71
+ 31    864.00    1898.00     864.60    1901.71
+ 32   1440.00    1898.00    1429.74    1896.00
+ 33   2016.00    1898.00    1970.12    1848.00
+ 34   2592.00    1898.00    2578.04    1848.00
+Full-frame alignment
+  Frame   x Shift   y Shift
+    1      0.000      0.000
+    2     -0.360      0.490
+    3     -0.470      0.830
+    4     -0.300      0.990
+    5      0.050      0.970
+    6      0.380      0.860
+    7      0.550      0.730
+    8      0.580      0.570
+    9      0.580      0.360
+   10      0.620      0.180
+   11      0.640      0.050
+   12      0.610     -0.050
+   13      0.580     -0.180
+   14      0.600     -0.260
+   15      0.650     -0.300
+   16      0.690     -0.360
+   17      0.730     -0.440
+   18      0.800     -0.500
+   19      0.880     -0.560
+   20      0.970     -0.620
+   21      1.040     -0.620
+   22      1.100     -0.570
+   23      1.140     -0.530
+   24      1.130     -0.500
+   25      1.040     -0.550
+   26      0.940     -0.660
+   27      0.860     -0.790
+   28      0.790     -0.900
+   29      0.750     -0.970
+   30      0.760     -1.000
+   31      0.790     -1.000
+   32      0.820     -0.970
+   33      0.870     -0.940
+   34      0.930     -0.950
+   35      0.960     -0.990
+   36      0.960     -1.030
+   37      0.980     -1.060
+   38      1.020     -1.070
+   39      1.020     -1.070
+   40      0.930     -1.080
+   41      0.790     -1.120
+   42      0.750     -1.140
+   43      0.870     -1.140
+   44      1.050     -1.170
+   45      1.090     -1.200
+   46      0.980     -1.200
+   47      0.890     -1.220
+   48      0.950     -1.260
+   49      1.150     -1.250
+   50      1.400     -1.190
+
+Global shifts are corrected: 0.077613 sec
+Start to align patches.
+Align patch 1  34 left
+Iteration  1  Error:     1.635
+Iteration  2  Error:     0.177
+
+Align patch 2  33 left
+Iteration  1  Error:     0.911
+Iteration  2  Error:     0.179
+
+Align patch 3  32 left
+Iteration  1  Error:     1.134
+Iteration  2  Error:     0.228
+
+Align patch 4  31 left
+Iteration  1  Error:     1.075
+Iteration  2  Error:     0.186
+
+Align patch 5  30 left
+Iteration  1  Error:     1.125
+Iteration  2  Error:     0.182
+
+Align patch 6  29 left
+Iteration  1  Error:     1.001
+Iteration  2  Error:     0.149
+
+Align patch 7  28 left
+Iteration  1  Error:     0.743
+Iteration  2  Error:     0.086
+
+Align patch 8  27 left
+Iteration  1  Error:     2.114
+Iteration  2  Error:     0.185
+
+Align patch 9  26 left
+Iteration  1  Error:     0.709
+Iteration  2  Error:     0.162
+
+Align patch 10  25 left
+Iteration  1  Error:     1.705
+Iteration  2  Error:     0.311
+
+Align patch 11  24 left
+Iteration  1  Error:     0.759
+Iteration  2  Error:     0.219
+
+Align patch 12  23 left
+Iteration  1  Error:     0.760
+Iteration  2  Error:     0.154
+
+Align patch 13  22 left
+Iteration  1  Error:     0.706
+Iteration  2  Error:     0.159
+
+Align patch 14  21 left
+Iteration  1  Error:     0.874
+Iteration  2  Error:     0.186
+
+Align patch 15  20 left
+Iteration  1  Error:     1.021
+Iteration  2  Error:     0.195
+
+Align patch 16  19 left
+Iteration  1  Error:     1.333
+Iteration  2  Error:     0.185
+
+Align patch 17  18 left
+Iteration  1  Error:     0.936
+Iteration  2  Error:     0.073
+
+Align patch 18  17 left
+Iteration  1  Error:     0.863
+Iteration  2  Error:     0.149
+
+Align patch 19  16 left
+Iteration  1  Error:     1.105
+Iteration  2  Error:     0.166
+
+Align patch 20  15 left
+Iteration  1  Error:     1.086
+Iteration  2  Error:     0.157
+
+Align patch 21  14 left
+Iteration  1  Error:     1.238
+Iteration  2  Error:     0.204
+
+Align patch 22  13 left
+Iteration  1  Error:     0.738
+Iteration  2  Error:     0.156
+
+Align patch 23  12 left
+Iteration  1  Error:     0.690
+Iteration  2  Error:     0.094
+
+Align patch 24  11 left
+Iteration  1  Error:     0.796
+Iteration  2  Error:     0.127
+
+Align patch 25  10 left
+Iteration  1  Error:     1.008
+Iteration  2  Error:     0.125
+
+Align patch 26  9 left
+Iteration  1  Error:     0.764
+Iteration  2  Error:     0.118
+
+Align patch 27  8 left
+Iteration  1  Error:     0.686
+Iteration  2  Error:     0.096
+
+Align patch 28  7 left
+Iteration  1  Error:     0.838
+Iteration  2  Error:     0.088
+
+Align patch 29  6 left
+Iteration  1  Error:     0.681
+Iteration  2  Error:     0.154
+
+Align patch 30  5 left
+Iteration  1  Error:     0.812
+Iteration  2  Error:     0.149
+
+Align patch 31  4 left
+Iteration  1  Error:     2.309
+Iteration  2  Error:     0.275
+
+Align patch 32  3 left
+Iteration  1  Error:     0.844
+Iteration  2  Error:     0.240
+
+Align patch 33  2 left
+Iteration  1  Error:     0.595
+Iteration  2  Error:     0.099
+
+Align patch 34  1 left
+Iteration  1  Error:     0.856
+Iteration  2  Error:     0.133
+
+Align patch 35  0 left
+Iteration  1  Error:     0.766
+Iteration  2  Error:     0.122
+
+  1    0     0.13      1.01
+  2    1     0.18      0.91
+  3    2     0.21      0.85
+  4    3     0.26      0.55
+  5    4     0.28      0.46
+  6    5     0.29      0.39
+  7    6     0.28      0.33
+  8    7     0.26      0.29
+  9    8     0.24      0.27
+ 10    9     0.20      0.25
+ 11   10     0.16      0.23
+ 12   11     0.11      0.24
+ 13   12     0.07      0.26
+ 14   13     0.05      0.26
+ 15   14     0.07      0.24
+ 16   15     0.09      0.23
+ 17   15     0.11      0.23
+ 18   15     0.10      0.22
+ 19   15     0.08      0.19
+ 20   19     0.07      0.21
+ 21   20     0.08      0.25
+ 22   20     0.09      0.26
+ 23   20     0.08      0.24
+ 24   20     0.06      0.24
+ 25   20     0.05      0.26
+ 26   20     0.05      0.26
+ 27   20     0.08      0.24
+ 28   20     0.12      0.24
+ 29   20     0.16      0.26
+ 30   20     0.17      0.26
+ 31   20     0.15      0.26
+ 32   20     0.13      0.27
+ 33   20     0.12      0.31
+ 34   20     0.12      0.33
+ 35   20     0.13      0.33
+ 36   20     0.13      0.36
+ 37   20     0.14      0.40
+ 38   20     0.15      0.40
+ 39   20     0.17      0.38
+ 40   20     0.18      0.37
+ 41   20     0.20      0.38
+ 42   20     0.21      0.38
+ 43   20     0.22      0.37
+ 44   20     0.22      0.38
+ 45   20     0.22      0.41
+ 46   20     0.22      0.46
+ 47   20     0.21      0.55
+ 48   20     0.21      0.70
+ 49   20     0.23      0.89
+Patch alignment time: 0.27(sec)
+
+Mag stretch: 1.000  -0.000
+
+TIFF file size mode: 5760  4092  50  0
+Rendered size mode: 5760  4092  50  0
+Correction of local motion: 0.478344 sec
+
+Computation time: 1.342443 sec
+
+Saving motion corrected images ......
+Corrected sum has been saved in:
+   /h2/jpellman/motioncor2-serial-vs-noserial/output/n25aug18c_NY1814_g3_00021gr_00089sq_v02_00003hl_00006enn.frames.mrc
+
+Corrected sum has been saved in:
+   /h2/jpellman/motioncor2-serial-vs-noserial/output/n25aug18c_NY1814_g3_00021gr_00089sq_v02_00003hl_00006enn.frames_DW.mrc
+
+Corrected sum has been saved in:
+   /h2/jpellman/motioncor2-serial-vs-noserial/output/n25aug18c_NY1814_g3_00021gr_00089sq_v02_00003hl_00006enn.frames_DWS.mrc
+
+Motion corrected images saved.
+
+Load Tiff movie: 6.43 seconds
+
+Apply gain: 0.17 s
+
+Detect bad and hot pixels.
+Mean & Std:    26.19     5.54
+Hot pixel threshold:    59.42
+
+CC Mean Std: 1.381e-01  1.023e-01
+CC threshold: 0.752
+Patch based alignment
+Forward FFT of stack, please wait...
+Fourier transform done.
+Full-frame alignment has been started.
+Iteration  1  Error:     3.346
+Iteration  2  Error:     0.310
+
+# xcf img size: 2882  2048
+# CPatchCenters::Calculate()
+  0    288.00     146.00     288.20     146.29
+  1    864.00     146.00     866.85     136.00
+  2   1440.00     146.00    1429.74     136.00
+  3   2016.00     146.00    2082.70     168.00
+  4   2592.00     146.00    2593.80     146.29
+  5    288.00     438.00     288.20     438.86
+  6    864.00     438.00     864.60     438.86
+  7   1440.00     438.00    1441.00     438.86
+  8   2016.00     438.00    1992.63     456.00
+  9   2592.00     438.00    2578.04     440.00
+ 10    288.00     730.00     288.20     731.43
+ 11    864.00     730.00     864.60     731.43
+ 12   1440.00     730.00    1441.00     731.43
+ 13   2016.00     730.00    2015.15     744.00
+ 14   2592.00     730.00    2593.80     731.43
+ 15    288.00    1022.00     326.48    1032.00
+ 16    864.00    1022.00     866.85    1016.00
+ 17   1440.00    1022.00    1441.00    1024.00
+ 18   2016.00    1022.00    2017.40    1024.00
+ 19   2592.00    1022.00    2593.80    1024.00
+ 20    288.00    1314.00     288.20    1316.57
+ 21    864.00    1314.00     956.91    1272.00
+ 22   1440.00    1314.00    1441.00    1316.57
+ 23   2016.00    1314.00    2015.15    1304.00
+ 24   2592.00    1314.00    2578.04    1320.00
+ 25    288.00    1606.00     281.45    1656.00
+ 26    864.00    1606.00     866.85    1624.00
+ 27   1440.00    1606.00    1407.23    1592.00
+ 28   2016.00    1606.00    2037.66    1656.00
+ 29   2592.00    1606.00    2593.80    1609.14
+ 30    288.00    1898.00     326.48    1912.00
+ 31    864.00    1898.00     866.85    1912.00
+ 32   1440.00    1898.00    1441.00    1901.71
+ 33   2016.00    1898.00    2017.40    1901.71
+ 34   2592.00    1898.00    2593.80    1901.71
+Full-frame alignment
+  Frame   x Shift   y Shift
+    1      0.000      0.000
+    2      0.400     -0.270
+    3      0.800     -0.540
+    4      1.140     -0.840
+    5      1.370     -1.170
+    6      1.540     -1.460
+    7      1.720     -1.660
+    8      1.900     -1.780
+    9      2.010     -1.890
+   10      2.050     -2.020
+   11      2.060     -2.190
+   12      2.040     -2.390
+   13      2.000     -2.560
+   14      1.970     -2.700
+   15      1.920     -2.780
+   16      1.880     -2.800
+   17      1.910     -2.810
+   18      1.940     -2.850
+   19      1.950     -2.930
+   20      2.000     -3.020
+   21      2.100     -3.100
+   22      2.170     -3.190
+   23      2.200     -3.240
+   24      2.240     -3.250
+   25      2.290     -3.280
+   26      2.360     -3.360
+   27      2.440     -3.450
+   28      2.500     -3.500
+   29      2.520     -3.470
+   30      2.510     -3.450
+   31      2.540     -3.480
+   32      2.550     -3.540
+   33      2.490     -3.610
+   34      2.380     -3.710
+   35      2.320     -3.810
+   36      2.360     -3.850
+   37      2.420     -3.830
+   38      2.450     -3.820
+   39      2.480     -3.870
+   40      2.510     -3.930
+   41      2.500     -3.940
+   42      2.480     -3.910
+   43      2.520     -3.920
+   44      2.570     -3.980
+   45      2.580     -4.050
+   46      2.590     -4.110
+   47      2.610     -4.120
+   48      2.600     -4.100
+   49      2.540     -4.130
+   50      2.490     -4.240
+
+Global shifts are corrected: 0.199376 sec
+Start to align patches.
+Align patch 1  34 left
+Iteration  1  Error:     0.792
+Iteration  2  Error:     0.172
+
+Align patch 2  33 left
+Iteration  1  Error:     0.853
+Iteration  2  Error:     0.086
+
+Align patch 3  32 left
+Iteration  1  Error:     0.962
+Iteration  2  Error:     0.320
+
+Align patch 4  31 left
+Iteration  1  Error:     0.957
+Iteration  2  Error:     0.198
+
+Align patch 5  30 left
+Iteration  1  Error:     1.106
+Iteration  2  Error:     0.216
+
+Align patch 6  29 left
+Iteration  1  Error:     1.211
+Iteration  2  Error:     0.345
+
+Align patch 7  28 left
+Iteration  1  Error:     0.714
+Iteration  2  Error:     0.212
+
+Align patch 8  27 left
+Iteration  1  Error:     1.091
+Iteration  2  Error:     0.247
+
+Align patch 9  26 left
+Iteration  1  Error:     1.093
+Iteration  2  Error:     0.179
+
+Align patch 10  25 left
+Iteration  1  Error:     1.440
+Iteration  2  Error:     0.234
+
+Align patch 11  24 left
+Iteration  1  Error:     0.509
+Iteration  2  Error:     0.131
+
+Align patch 12  23 left
+Iteration  1  Error:     0.619
+Iteration  2  Error:     0.186
+
+Align patch 13  22 left
+Iteration  1  Error:     0.510
+Iteration  2  Error:     0.132
+
+Align patch 14  21 left
+Iteration  1  Error:     1.475
+Iteration  2  Error:     0.290
+
+Align patch 15  20 left
+Iteration  1  Error:     1.003
+Iteration  2  Error:     0.284
+
+Align patch 16  19 left
+Iteration  1  Error:     1.927
+Iteration  2  Error:     0.218
+
+Align patch 17  18 left
+Iteration  1  Error:     1.487
+Iteration  2  Error:     0.311
+
+Align patch 18  17 left
+Iteration  1  Error:     0.574
+Iteration  2  Error:     0.152
+
+Align patch 19  16 left
+Iteration  1  Error:     0.988
+Iteration  2  Error:     0.246
+
+Align patch 20  15 left
+Iteration  1  Error:     0.866
+Iteration  2  Error:     0.236
+
+Align patch 21  14 left
+Iteration  1  Error:     0.928
+Iteration  2  Error:     0.122
+
+Align patch 22  13 left
+Iteration  1  Error:     1.382
+Iteration  2  Error:     0.352
+
+Align patch 23  12 left
+Iteration  1  Error:     1.316
+Iteration  2  Error:     0.090
+
+Align patch 24  11 left
+Iteration  1  Error:     0.945
+Iteration  2  Error:     0.195
+
+Align patch 25  10 left
+Iteration  1  Error:     0.976
+Iteration  2  Error:     0.226
+
+Align patch 26  9 left
+Iteration  1  Error:     0.716
+Iteration  2  Error:     0.185
+
+Align patch 27  8 left
+Iteration  1  Error:     0.651
+Iteration  2  Error:     0.142
+
+Align patch 28  7 left
+Iteration  1  Error:     0.435
+Iteration  2  Error:     0.074
+
+Align patch 29  6 left
+Iteration  1  Error:     0.809
+Iteration  2  Error:     0.147
+
+Align patch 30  5 left
+Iteration  1  Error:     0.545
+Iteration  2  Error:     0.244
+
+Align patch 31  4 left
+Iteration  1  Error:     0.427
+Iteration  2  Error:     0.121
+
+Align patch 32  3 left
+Iteration  1  Error:     0.607
+Iteration  2  Error:     0.088
+
+Align patch 33  2 left
+Iteration  1  Error:     0.701
+Iteration  2  Error:     0.242
+
+Align patch 34  1 left
+Iteration  1  Error:     0.485
+Iteration  2  Error:     0.105
+
+Align patch 35  0 left
+Iteration  1  Error:     0.909
+Iteration  2  Error:     0.256
+
+  1    0     0.57      0.73
+  2    1     0.47      0.65
+  3    2     0.40      0.63
+  4    3     0.43      0.40
+  5    4     0.40      0.37
+  6    5     0.37      0.35
+  7    6     0.35      0.32
+  8    7     0.32      0.31
+  9    8     0.29      0.31
+ 10    9     0.26      0.30
+ 11   10     0.23      0.28
+ 12   11     0.20      0.27
+ 13   12     0.17      0.29
+ 14   13     0.15      0.28
+ 15   14     0.13      0.25
+ 16   15     0.11      0.22
+ 17   16     0.09      0.22
+ 18   17     0.07      0.22
+ 19   18     0.06      0.23
+ 20   19     0.06      0.25
+ 21   19     0.06      0.28
+ 22   19     0.05      0.27
+ 23   19     0.05      0.24
+ 24   23     0.07      0.23
+ 25   23     0.10      0.25
+ 26   23     0.12      0.25
+ 27   23     0.11      0.23
+ 28   23     0.09      0.23
+ 29   23     0.08      0.25
+ 30   23     0.08      0.24
+ 31   23     0.10      0.21
+ 32   23     0.13      0.22
+ 33   23     0.16      0.25
+ 34   23     0.19      0.26
+ 35   23     0.21      0.25
+ 36   23     0.23      0.26
+ 37   23     0.24      0.29
+ 38   23     0.25      0.28
+ 39   23     0.26      0.25
+ 40   23     0.27      0.25
+ 41   23     0.28      0.29
+ 42   23     0.30      0.32
+ 43   23     0.31      0.34
+ 44   23     0.33      0.39
+ 45   23     0.35      0.44
+ 46   23     0.37      0.45
+ 47   23     0.40      0.46
+ 48   23     0.43      0.57
+ 49   23     0.47      0.75
+Patch alignment time: 0.27(sec)
+
+TIFF file size mode: 5760  4092  50  0
+Rendered size mode: 5760  4092  50  0
+Mag stretch: 1.000  -0.000
+
+Correction of local motion: 0.625245 sec
+
+Computation time: 1.594971 sec
+
+Saving motion corrected images ......
+Corrected sum has been saved in:
+   /h2/jpellman/motioncor2-serial-vs-noserial/output/n25aug18c_NY1814_g3_00021gr_00089sq_v02_00003hl_00007enn.frames.mrc
+
+Corrected sum has been saved in:
+   /h2/jpellman/motioncor2-serial-vs-noserial/output/n25aug18c_NY1814_g3_00021gr_00089sq_v02_00003hl_00007enn.frames_DW.mrc
+
+Corrected sum has been saved in:
+   /h2/jpellman/motioncor2-serial-vs-noserial/output/n25aug18c_NY1814_g3_00021gr_00089sq_v02_00003hl_00007enn.frames_DWS.mrc
+
+Motion corrected images saved.
+
+Load Tiff movie: 6.54 seconds
+
+Apply gain: 0.17 s
+
+Detect bad and hot pixels.
+Mean & Std:    26.91     5.63
+Hot pixel threshold:    60.69
+
+CC Mean Std: 1.380e-01  1.023e-01
+CC threshold: 0.752
+Patch based alignment
+Forward FFT of stack, please wait...
+Fourier transform done.
+Full-frame alignment has been started.
+Iteration  1  Error:     4.000
+Iteration  2  Error:     0.133
+
+# xcf img size: 2882  2048
+# CPatchCenters::Calculate()
+  0    288.00     146.00     288.20     146.29
+  1    864.00     146.00     864.60     146.29
+  2   1440.00     146.00    1441.00     146.29
+  3   2016.00     146.00    2017.40     146.29
+  4   2592.00     146.00    2600.55     136.00
+  5    288.00     438.00     288.20     438.86
+  6    864.00     438.00     864.60     438.86
+  7   1440.00     438.00    1429.74     424.00
+  8   2016.00     438.00    2015.15     424.00
+  9   2592.00     438.00    2593.80     438.86
+ 10    288.00     730.00     288.20     731.43
+ 11    864.00     730.00     864.60     731.43
+ 12   1440.00     730.00    1441.00     731.43
+ 13   2016.00     730.00    2017.40     731.43
+ 14   2592.00     730.00    2578.04     712.00
+ 15    288.00    1022.00     288.20    1024.00
+ 16    864.00    1022.00     844.34    1016.00
+ 17   1440.00    1022.00    1441.00    1024.00
+ 18   2016.00    1022.00    2060.18    1016.00
+ 19   2592.00    1022.00    2593.80    1024.00
+ 20    288.00    1314.00     288.20    1316.57
+ 21    864.00    1314.00     864.60    1316.57
+ 22   1440.00    1314.00    1441.00    1316.57
+ 23   2016.00    1314.00    2060.18    1272.00
+ 24   2592.00    1314.00    2593.80    1316.57
+ 25    288.00    1606.00     281.45    1640.00
+ 26    864.00    1606.00     866.85    1576.00
+ 27   1440.00    1606.00    1429.74    1656.00
+ 28   2016.00    1606.00    2017.40    1609.14
+ 29   2592.00    1606.00    2578.04    1544.00
+ 30    288.00    1898.00     281.45    1848.00
+ 31    864.00    1898.00     821.82    1896.00
+ 32   1440.00    1898.00    1429.74    1848.00
+ 33   2016.00    1898.00    1992.63    1912.00
+ 34   2592.00    1898.00    2593.80    1901.71
+Full-frame alignment
+  Frame   x Shift   y Shift
+    1      0.000      0.000
+    2      0.640     -0.280
+    3      1.300     -0.610
+    4      1.850     -0.960
+    5      2.250     -1.270
+    6      2.640     -1.520
+    7      2.990     -1.790
+    8      3.180     -2.060
+    9      3.220     -2.290
+   10      3.240     -2.460
+   11      3.320     -2.560
+   12      3.450     -2.630
+   13      3.630     -2.690
+   14      3.770     -2.730
+   15      3.790     -2.730
+   16      3.690     -2.740
+   17      3.570     -2.820
+   18      3.510     -2.950
+   19      3.480     -3.070
+   20      3.460     -3.200
+   21      3.400     -3.310
+   22      3.310     -3.340
+   23      3.250     -3.230
+   24      3.300     -3.090
+   25      3.410     -3.030
+   26      3.450     -3.030
+   27      3.360     -3.000
+   28      3.170     -2.950
+   29      3.030     -2.950
+   30      3.000     -3.000
+   31      3.040     -3.060
+   32      3.040     -3.110
+   33      3.010     -3.150
+   34      2.990     -3.160
+   35      3.030     -3.170
+   36      3.100     -3.160
+   37      3.150     -3.170
+   38      3.120     -3.190
+   39      3.040     -3.230
+   40      3.030     -3.240
+   41      3.110     -3.210
+   42      3.240     -3.180
+   43      3.310     -3.160
+   44      3.310     -3.150
+   45      3.350     -3.090
+   46      3.400     -2.920
+   47      3.400     -2.750
+   48      3.380     -2.700
+   49      3.420     -2.840
+   50      3.510     -3.100
+
+Global shifts are corrected: 0.087181 sec
+Start to align patches.
+Align patch 1  34 left
+Iteration  1  Error:     0.642
+Iteration  2  Error:     0.086
+
+Align patch 2  33 left
+Iteration  1  Error:     1.049
+Iteration  2  Error:     0.179
+
+Align patch 3  32 left
+Iteration  1  Error:     1.011
+Iteration  2  Error:     0.103
+
+Align patch 4  31 left
+Iteration  1  Error:     0.657
+Iteration  2  Error:     0.132
+
+Align patch 5  30 left
+Iteration  1  Error:     0.691
+Iteration  2  Error:     0.252
+
+Align patch 6  29 left
+Iteration  1  Error:     0.672
+Iteration  2  Error:     0.139
+
+Align patch 7  28 left
+Iteration  1  Error:     0.655
+Iteration  2  Error:     0.078
+
+Align patch 8  27 left
+Iteration  1  Error:     0.736
+Iteration  2  Error:     0.121
+
+Align patch 9  26 left
+Iteration  1  Error:     0.820
+Iteration  2  Error:     0.073
+
+Align patch 10  25 left
+Iteration  1  Error:     0.942
+Iteration  2  Error:     0.121
+
+Align patch 11  24 left
+Iteration  1  Error:     0.488
+Iteration  2  Error:     0.091
+
+Align patch 12  23 left
+Iteration  1  Error:     0.806
+Iteration  2  Error:     0.169
+
+Align patch 13  22 left
+Iteration  1  Error:     0.698
+Iteration  2  Error:     0.067
+
+Align patch 14  21 left
+Iteration  1  Error:     1.089
+Iteration  2  Error:     0.164
+
+Align patch 15  20 left
+Iteration  1  Error:     1.043
+Iteration  2  Error:     0.115
+
+Align patch 16  19 left
+Iteration  1  Error:     0.556
+Iteration  2  Error:     0.062
+
+Align patch 17  18 left
+Iteration  1  Error:     0.579
+Iteration  2  Error:     0.067
+
+Align patch 18  17 left
+Iteration  1  Error:     0.790
+Iteration  2  Error:     0.102
+
+Align patch 19  16 left
+Iteration  1  Error:     0.771
+Iteration  2  Error:     0.210
+
+Align patch 20  15 left
+Iteration  1  Error:     0.934
+Iteration  2  Error:     0.150
+
+Align patch 21  14 left
+Iteration  1  Error:     1.215
+Iteration  2  Error:     0.191
+
+Align patch 22  13 left
+Iteration  1  Error:     1.078
+Iteration  2  Error:     0.148
+
+Align patch 23  12 left
+Iteration  1  Error:     0.844
+Iteration  2  Error:     0.148
+
+Align patch 24  11 left
+Iteration  1  Error:     1.635
+Iteration  2  Error:     0.269
+
+Align patch 25  10 left
+Iteration  1  Error:     0.773
+Iteration  2  Error:     0.186
+
+Align patch 26  9 left
+Iteration  1  Error:     0.817
+Iteration  2  Error:     0.105
+
+Align patch 27  8 left
+Iteration  1  Error:     0.701
+Iteration  2  Error:     0.137
+
+Align patch 28  7 left
+Iteration  1  Error:     0.949
+Iteration  2  Error:     0.191
+
+Align patch 29  6 left
+Iteration  1  Error:     1.009
+Iteration  2  Error:     0.143
+
+Align patch 30  5 left
+Iteration  1  Error:     1.819
+Iteration  2  Error:     0.182
+
+Align patch 31  4 left
+Iteration  1  Error:     1.079
+Iteration  2  Error:     0.198
+
+Align patch 32  3 left
+Iteration  1  Error:     0.745
+Iteration  2  Error:     0.174
+
+Align patch 33  2 left
+Iteration  1  Error:     0.997
+Iteration  2  Error:     0.126
+
+Align patch 34  1 left
+Iteration  1  Error:     0.653
+Iteration  2  Error:     0.128
+
+Align patch 35  0 left
+Iteration  1  Error:     0.765
+Iteration  2  Error:     0.079
+
+  1    0     0.49      0.67
+  2    1     0.57      0.54
+  3    2     0.60      0.51
+  4    3     0.43      0.37
+  5    4     0.38      0.34
+  6    5     0.32      0.32
+  7    6     0.26      0.30
+  8    7     0.20      0.29
+  9    8     0.16      0.30
+ 10    9     0.13      0.30
+ 11   10     0.13      0.28
+ 12   11     0.12      0.27
+ 13   12     0.11      0.27
+ 14   13     0.09      0.26
+ 15   14     0.07      0.23
+ 16   15     0.07      0.22
+ 17   16     0.09      0.24
+ 18   16     0.10      0.24
+ 19   16     0.10      0.21
+ 20   16     0.09      0.22
+ 21   16     0.08      0.24
+ 22   16     0.07      0.25
+ 23   16     0.06      0.23
+ 24   16     0.06      0.24
+ 25   16     0.07      0.26
+ 26   16     0.08      0.26
+ 27   16     0.09      0.23
+ 28   16     0.10      0.23
+ 29   16     0.11      0.24
+ 30   16     0.12      0.25
+ 31   16     0.12      0.25
+ 32   16     0.13      0.28
+ 33   16     0.13      0.32
+ 34   16     0.14      0.34
+ 35   16     0.15      0.33
+ 36   16     0.16      0.33
+ 37   16     0.17      0.35
+ 38   16     0.18      0.33
+ 39   16     0.20      0.29
+ 40   16     0.21      0.27
+ 41   16     0.22      0.29
+ 42   16     0.21      0.31
+ 43   16     0.19      0.31
+ 44   16     0.16      0.32
+ 45   16     0.13      0.35
+ 46   16     0.11      0.38
+ 47   16     0.09      0.43
+ 48   16     0.08      0.54
+ 49   16     0.09      0.69
+Patch alignment time: 0.28(sec)
+
+TIFF file size mode: 5760  4092  50  0
+Rendered size mode: 5760  4092  50  0
+Mag stretch: 1.000  -0.000
+
+Correction of local motion: 0.464923 sec
+
+Computation time: 1.306956 sec
+
+Saving motion corrected images ......
+Corrected sum has been saved in:
+   /h2/jpellman/motioncor2-serial-vs-noserial/output/n25aug18c_NY1814_g3_00021gr_00089sq_v02_00003hl_00008enn.frames.mrc
+
+Corrected sum has been saved in:
+   /h2/jpellman/motioncor2-serial-vs-noserial/output/n25aug18c_NY1814_g3_00021gr_00089sq_v02_00003hl_00008enn.frames_DW.mrc
+
+Corrected sum has been saved in:
+   /h2/jpellman/motioncor2-serial-vs-noserial/output/n25aug18c_NY1814_g3_00021gr_00089sq_v02_00003hl_00008enn.frames_DWS.mrc
+
+Motion corrected images saved.
+
+Load Tiff movie: 7.30 seconds
+
+Apply gain: 0.27 s
+
+Detect bad and hot pixels.
+Mean & Std:    27.02     5.63
+Hot pixel threshold:    60.83
+
+CC Mean Std: 1.379e-01  1.023e-01
+CC threshold: 0.751
+Patch based alignment
+Forward FFT of stack, please wait...
+Fourier transform done.
+Full-frame alignment has been started.
+Iteration  1  Error:     3.449
+Iteration  2  Error:     0.211
+
+# xcf img size: 2882  2048
+# CPatchCenters::Calculate()
+  0    288.00     146.00     326.48     152.00
+  1    864.00     146.00     864.60     146.29
+  2   1440.00     146.00    1429.74     136.00
+  3   2016.00     146.00    2017.40     146.29
+  4   2592.00     146.00    2593.80     146.29
+  5    288.00     438.00     288.20     438.86
+  6    864.00     438.00     889.37     440.00
+  7   1440.00     438.00    1474.77     424.00
+  8   2016.00     438.00    2017.40     438.86
+  9   2592.00     438.00    2593.80     438.86
+ 10    288.00     730.00     288.20     731.43
+ 11    864.00     730.00     799.30     696.00
+ 12   1440.00     730.00    1441.00     731.43
+ 13   2016.00     730.00    2037.66     728.00
+ 14   2592.00     730.00    2555.52     776.00
+ 15    288.00    1022.00     288.20    1024.00
+ 16    864.00    1022.00     864.60    1024.00
+ 17   1440.00    1022.00    1441.00    1024.00
+ 18   2016.00    1022.00    2015.15    1048.00
+ 19   2592.00    1022.00    2593.80    1024.00
+ 20    288.00    1314.00     288.20    1316.57
+ 21    864.00    1314.00     864.60    1316.57
+ 22   1440.00    1314.00    1441.00    1316.57
+ 23   2016.00    1314.00    2060.18    1304.00
+ 24   2592.00    1314.00    2578.04    1320.00
+ 25    288.00    1606.00     288.20    1609.14
+ 26    864.00    1606.00     864.60    1609.14
+ 27   1440.00    1606.00    1429.74    1608.00
+ 28   2016.00    1606.00    2017.40    1609.14
+ 29   2592.00    1606.00    2593.80    1609.14
+ 30    288.00    1898.00     288.20    1901.71
+ 31    864.00    1898.00     864.60    1901.71
+ 32   1440.00    1898.00    1407.23    1896.00
+ 33   2016.00    1898.00    2015.15    1832.00
+ 34   2592.00    1898.00    2593.80    1901.71
+Full-frame alignment
+  Frame   x Shift   y Shift
+    1      0.000      0.000
+    2      0.290     -0.320
+    3      0.650     -0.590
+    4      1.070     -0.790
+    5      1.500     -0.960
+    6      1.840     -1.130
+    7      2.070     -1.330
+    8      2.210     -1.590
+    9      2.300     -1.840
+   10      2.380     -2.050
+   11      2.440     -2.220
+   12      2.480     -2.360
+   13      2.480     -2.460
+   14      2.490     -2.550
+   15      2.540     -2.670
+   16      2.610     -2.810
+   17      2.690     -2.890
+   18      2.800     -2.910
+   19      2.920     -2.910
+   20      2.980     -2.940
+   21      2.980     -2.970
+   22      2.960     -2.980
+   23      2.920     -3.010
+   24      2.850     -3.090
+   25      2.790     -3.220
+   26      2.780     -3.290
+   27      2.800     -3.280
+   28      2.860     -3.240
+   29      2.930     -3.250
+   30      2.960     -3.300
+   31      2.930     -3.310
+   32      2.900     -3.290
+   33      2.890     -3.260
+   34      2.840     -3.240
+   35      2.750     -3.230
+   36      2.650     -3.260
+   37      2.620     -3.300
+   38      2.660     -3.310
+   39      2.730     -3.320
+   40      2.740     -3.360
+   41      2.690     -3.390
+   42      2.630     -3.360
+   43      2.560     -3.310
+   44      2.500     -3.350
+   45      2.450     -3.450
+   46      2.400     -3.500
+   47      2.300     -3.520
+   48      2.230     -3.570
+   49      2.240     -3.690
+   50      2.300     -3.840
+
+Global shifts are corrected: 0.085692 sec
+Start to align patches.
+Align patch 1  34 left
+Iteration  1  Error:     0.949
+Iteration  2  Error:     0.117
+
+Align patch 2  33 left
+Iteration  1  Error:     1.198
+Iteration  2  Error:     0.144
+
+Align patch 3  32 left
+Iteration  1  Error:     0.874
+Iteration  2  Error:     0.106
+
+Align patch 4  31 left
+Iteration  1  Error:     0.810
+Iteration  2  Error:     0.126
+
+Align patch 5  30 left
+Iteration  1  Error:     1.214
+Iteration  2  Error:     0.277
+
+Align patch 6  29 left
+Iteration  1  Error:     1.364
+Iteration  2  Error:     0.211
+
+Align patch 7  28 left
+Iteration  1  Error:     0.642
+Iteration  2  Error:     0.164
+
+Align patch 8  27 left
+Iteration  1  Error:     0.748
+Iteration  2  Error:     0.138
+
+Align patch 9  26 left
+Iteration  1  Error:     0.820
+Iteration  2  Error:     0.357
+
+Align patch 10  25 left
+Iteration  1  Error:     0.677
+Iteration  2  Error:     0.107
+
+Align patch 11  24 left
+Iteration  1  Error:     1.141
+Iteration  2  Error:     0.251
+
+Align patch 12  23 left
+Iteration  1  Error:     1.187
+Iteration  2  Error:     0.279
+
+Align patch 13  22 left
+Iteration  1  Error:     0.768
+Iteration  2  Error:     0.174
+
+Align patch 14  21 left
+Iteration  1  Error:     0.689
+Iteration  2  Error:     0.155
+
+Align patch 15  20 left
+Iteration  1  Error:     0.693
+Iteration  2  Error:     0.388
+
+Align patch 16  19 left
+Iteration  1  Error:     0.781
+Iteration  2  Error:     0.218
+
+Align patch 17  18 left
+Iteration  1  Error:     0.764
+Iteration  2  Error:     0.154
+
+Align patch 18  17 left
+Iteration  1  Error:     0.828
+Iteration  2  Error:     0.168
+
+Align patch 19  16 left
+Iteration  1  Error:     0.869
+Iteration  2  Error:     0.263
+
+Align patch 20  15 left
+Iteration  1  Error:     0.700
+Iteration  2  Error:     0.178
+
+Align patch 21  14 left
+Iteration  1  Error:     0.855
+Iteration  2  Error:     0.138
+
+Align patch 22  13 left
+Iteration  1  Error:     0.514
+Iteration  2  Error:     0.096
+
+Align patch 23  12 left
+Iteration  1  Error:     1.211
+Iteration  2  Error:     0.312
+
+Align patch 24  11 left
+Iteration  1  Error:     0.786
+Iteration  2  Error:     0.230
+
+Align patch 25  10 left
+Iteration  1  Error:     0.932
+Iteration  2  Error:     0.304
+
+Align patch 26  9 left
+Iteration  1  Error:     0.508
+Iteration  2  Error:     0.119
+
+Align patch 27  8 left
+Iteration  1  Error:     0.682
+Iteration  2  Error:     0.130
+
+Align patch 28  7 left
+Iteration  1  Error:     1.193
+Iteration  2  Error:     0.151
+
+Align patch 29  6 left
+Iteration  1  Error:     0.913
+Iteration  2  Error:     0.146
+
+Align patch 30  5 left
+Iteration  1  Error:     0.899
+Iteration  2  Error:     0.189
+
+Align patch 31  4 left
+Iteration  1  Error:     0.773
+Iteration  2  Error:     0.154
+
+Align patch 32  3 left
+Iteration  1  Error:     0.804
+Iteration  2  Error:     0.156
+
+Align patch 33  2 left
+Iteration  1  Error:     0.566
+Iteration  2  Error:     0.139
+
+Align patch 34  1 left
+Iteration  1  Error:     0.828
+Iteration  2  Error:     0.247
+
+Align patch 35  0 left
+Iteration  1  Error:     1.037
+Iteration  2  Error:     0.345
+
+  1    0     0.43      0.66
+  2    1     0.41      0.52
+  3    2     0.39      0.49
+  4    3     0.44      0.37
+  5    4     0.42      0.35
+  6    5     0.39      0.34
+  7    6     0.35      0.32
+  8    7     0.31      0.30
+  9    8     0.28      0.29
+ 10    9     0.24      0.27
+ 11   10     0.20      0.24
+ 12   11     0.16      0.24
+ 13   12     0.13      0.26
+ 14   13     0.09      0.26
+ 15   14     0.06      0.24
+ 16   15     0.05      0.24
+ 17   16     0.06      0.26
+ 18   16     0.08      0.26
+ 19   16     0.09      0.26
+ 20   16     0.11      0.26
+ 21   16     0.11      0.28
+ 22   16     0.11      0.27
+ 23   16     0.10      0.23
+ 24   16     0.09      0.21
+ 25   16     0.10      0.24
+ 26   16     0.11      0.25
+ 27   16     0.13      0.25
+ 28   16     0.15      0.27
+ 29   16     0.16      0.31
+ 30   16     0.16      0.31
+ 31   16     0.14      0.28
+ 32   16     0.12      0.28
+ 33   16     0.10      0.31
+ 34   16     0.11      0.31
+ 35   16     0.14      0.29
+ 36   16     0.18      0.29
+ 37   16     0.22      0.31
+ 38   16     0.23      0.30
+ 39   16     0.22      0.27
+ 40   16     0.20      0.30
+ 41   16     0.19      0.35
+ 42   16     0.19      0.39
+ 43   16     0.21      0.39
+ 44   16     0.23      0.42
+ 45   16     0.25      0.46
+ 46   16     0.26      0.47
+ 47   16     0.25      0.47
+ 48   16     0.24      0.54
+ 49   16     0.23      0.67
+Patch alignment time: 0.32(sec)
+
+Mag stretch: 1.000  -0.000
+
+Correction of local motion: 0.456810 sec
+
+Computation time: 1.514724 sec
+
+Saving motion corrected images ......
+Corrected sum has been saved in:
+   /h2/jpellman/motioncor2-serial-vs-noserial/output/n25aug18c_NY1814_g3_00021gr_00089sq_v02_00003hl_00009enn.frames.mrc
+
+Corrected sum has been saved in:
+   /h2/jpellman/motioncor2-serial-vs-noserial/output/n25aug18c_NY1814_g3_00021gr_00089sq_v02_00003hl_00009enn.frames_DW.mrc
+
+Corrected sum has been saved in:
+   /h2/jpellman/motioncor2-serial-vs-noserial/output/n25aug18c_NY1814_g3_00021gr_00089sq_v02_00003hl_00009enn.frames_DWS.mrc
+
+Motion corrected images saved.
+
+Total time: 60.712482 sec

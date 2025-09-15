@@ -3,7 +3,6 @@
 
 from shutil import which
 from ..retrieve.version import readMotionCorVersion
-from ..retrieve.logs import retrieveLogParser
 import subprocess
 from subprocess import CalledProcessError
 
@@ -55,9 +54,6 @@ def motioncor(executable="motioncor2", **kwargs) -> tuple:
             validParamsStr=", ".join(list(validParams))
             validParamsStr=validParamsStr.rstrip(", ")
             raise RuntimeError("Invalid argument(s) passed in: %s.\nValid parameters are as follows: %s" % (invalidArgs, validParamsStr))
-        logparser=retrieveLogParser(version)
-        if not logparser:
-            raise RuntimeError("No supported log parser for motioncor version %s." % version)
     cmd=constructMotionCorCmd(cmd, kwargs)
     try:
         proc=subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=True, text=True, encoding="utf-8")
@@ -65,8 +61,7 @@ def motioncor(executable="motioncor2", **kwargs) -> tuple:
         raise RuntimeError("motioncor2 failed to run.  \n\nStdOut: %s\n\nStdErr: %s" % (e.stdout, e.stderr)) from e
     rawoutput=proc.stdout
     output=rawoutput.split("\n")
-    output=logparser(output)
-    return output, rawoutput
+    return output
 
 def checkImageExists(imageid: int):
     import sinedon.base as sb
