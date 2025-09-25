@@ -1,5 +1,3 @@
-from dask.distributed import Client, as_completed
-from distributed.deploy import Cluster
 from time import sleep, time
 import logging
 import sys
@@ -9,14 +7,13 @@ from .calc import filterImages
 from typing import Callable
 
 # Parameters passed in using lambdas.
-def loop(pipeline, args: dict, cluster : Cluster, retrieveDoneImages : Callable = lambda : set(), preLoop : Callable = lambda args : {}, postLoop : Callable = lambda jobmetadata : None, retrieveReprocessImages : Callable = lambda : set(), min_workers : int = 0, max_workers : int = 32) -> None:
+def loop(process_task: Callable, args: dict, retrieveDoneImages : Callable = lambda : set(), preLoop : Callable = lambda args : {}, postLoop : Callable = lambda jobmetadata : None, retrieveReprocessImages : Callable = lambda : set()) -> None:
     jobmetadata={}
     # Signal handler used to ensure that cleanup happens if SIGINT, SIGCONT or SIGTERM is received.
     def handler(signum, frame):
         signame = Signals(signum).name
         logger.info(f"Received {signame} signal.  Cleaning up and exiting now.")
         try:
-            cluster.close()
             postLoop(jobmetadata)
             logger.info("Server has exited cleanly.  Bye!")
         except SystemExit:
@@ -29,27 +26,20 @@ def loop(pipeline, args: dict, cluster : Cluster, retrieveDoneImages : Callable 
 
     # Set up logging
     logger=logging.getLogger(__name__)
-    distributed_scheduler_logger=logging.getLogger("distributed.scheduler")
     logHandler=logging.StreamHandler(sys.stdout)
     logFormatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(funcName)s - %(process)d - %(message)s")
     logHandler.setFormatter(logFormatter)
     logger.setLevel("INFO")
     logHandler.setLevel("INFO")
     logger.addHandler(logHandler)
-    distributed_scheduler_logger.addHandler(logHandler)
 
     # Set up the control loop and signal handlers.
     signal(SIGTERM, handler)
     signal(SIGINT, handler)
     signal(SIGCONT, handler)
-    client = Client(cluster)
 
     jobmetadata=preLoop()
     waitTime=30
-    prev_tasklist=set()
-    failure_cooldown=1
-    failure_waits=0
-    reduced_tasklist=[]
     while True:
         t0=time()
         all_images=readImageSet(args["sessionname"], args["preset"])
@@ -58,67 +48,15 @@ def loop(pipeline, args: dict, cluster : Cluster, retrieveDoneImages : Callable 
         # Not used by motioncor2; used by ctffind4
         reprocess_images=retrieveReprocessImages()
         tasklist=filterImages(all_images, done_images, reprocess_images, rejected_images)
-        if prev_tasklist and not reduced_tasklist:
-            failureset=tasklist & prev_tasklist
-            tasklist=tasklist-failureset
-            logger.info("%d previously failed images will not be processed this iteration." % len(failureset))
         t1=time()
         logger.info("Constructed task list in %d seconds." % (t1-t0))
         logger.info("Image counts: %d total images, %d done images, %d rejected images, and %d images marked for reprocessing." % (len(all_images), len(done_images), len(rejected_images), len(reprocess_images)))
-        local_max_workers=min(max_workers,len(tasklist))
-        if local_max_workers > 0:
-            logger.info("Scaling up to %d workers." % local_max_workers)
-        cluster.adapt(minimum=min_workers, maximum=local_max_workers)
-        reduced_tasklist=[]
-        if len(tasklist) > 200:
-            reduced_tasklist=list(tasklist)
-            reduced_tasklist.sort()
-            reduced_tasklist.reverse()
-            reduced_tasklist=reduced_tasklist[0:200]
         if tasklist:
             pipeline_t0=time()
-            if reduced_tasklist:
-                futures=pipeline(reduced_tasklist, args, jobmetadata, client)
-            else:
-                futures=pipeline(tasklist, args, jobmetadata, client)
-            future_complete_counter=0
-            throughput_t0=time()
-            for _ in as_completed(futures):
-                future_complete_counter+=1
-                if future_complete_counter % 100 == 0:
-                    throughput_t1=time()
-                    done_images=retrieveDoneImages()
-                    images_processed_total=len(done_images) - (len(all_images) - len(tasklist))
-                    throughput=(images_processed_total)/(((throughput_t1-throughput_t0))/60.)
-                    remaining_image_count=len(tasklist)-images_processed_total
-                    logger.info("Progress: %d / %d images processed." % (images_processed_total, len(tasklist)))
-                    logger.info("Throughput: %.2f images/min." % throughput)
-                    if throughput > 0.0:
-                        logger.info("Estimated remaining time: %.2f min." % (remaining_image_count/throughput))
-                    else:
-                        logger.info("Estimated remaining time: N/A min.")
+            for task in tasklist:
+                process_task(task)
             pipeline_t1=time()
-            if reduced_tasklist:
-                logger.info("Finished processing %d images in %d seconds." % (len(reduced_tasklist), (pipeline_t1-pipeline_t0)))
-            else:
-                logger.info("Finished processing %d images in %d seconds." % (len(tasklist), (pipeline_t1-pipeline_t0)))
-            # Explicitly cancel all futures to prevent dask distributed from recalculating already calculated futures.
-            # Possibly unnecessary.
-            # See https://github.com/nysbc/appion/issues/17
-            logger.debug("Cancelling all futures.")
-            for f in futures:
-                f.cancel()
-            logger.debug("Futures cancelled.")
-            # This is here to accommodate an edge case where a scale down event isn't triggered when processing a very
-            # small number of images.
-            logger.info("Removing all nodes.")
-            cluster.adapt(minimum=min_workers,maximum=min_workers)
-            prev_tasklist=tasklist
+            logger.info("Finished processing %d images in %d seconds." % (len(tasklist), (pipeline_t1-pipeline_t0)))
         else:
             logger.info(f"No new images.  Waiting {waitTime} seconds.")
             sleep(waitTime)
-            if prev_tasklist:
-                failure_waits+=1
-                if failure_waits >= failure_cooldown:
-                    prev_tasklist=set()
-                    failure_waits=0

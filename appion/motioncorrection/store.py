@@ -229,7 +229,7 @@ def saveDDStackRunData(preset, align, binning, runname, rundir, ref_sessiondata_
     return ddstackrundata["def_id"]
 
 
-def saveMotionCorrLog(logData: dict, outputLogPath: str, throw: int, totalRenderedFrames: int, binning: float = 1.0) -> None:
+def saveMotionCorrLog(shifts: float, outputLogPath: str, throw: int, totalRenderedFrames: int, binning: float = 1.0) -> None:
     ''' 
     Takes the output log from motioncor2/motioncor3 and converts it to a motioncorr-formatted log.
     This is necessary because the myamiweb web UI reads motioncorr logs directly / doesn't query the database for information about shifts.
@@ -238,10 +238,10 @@ def saveMotionCorrLog(logData: dict, outputLogPath: str, throw: int, totalRender
     # Convert to the convention used in motioncorr
     # so that shift is in pixels of the aligned image.
     adjusted_shifts = []
-    midval = int(len(logData["shifts"])/2)
-    midshx = logData["shifts"][midval][0]
-    midshy = logData["shifts"][midval][1]
-    for shift in logData["shifts"]:
+    midval = int(len(shifts)/2)
+    midshx = shifts[midval][0]
+    midshy = shifts[midval][1]
+    for shift in shifts:
         shxa = -(shift[0] - midshx) / binning
         shya = -(shift[1] - midshy) / binning
         adjusted_shifts.append((shxa, shya))
