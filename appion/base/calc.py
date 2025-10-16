@@ -6,7 +6,7 @@ from math import degrees
 def filterImages(all_images, done_images, reprocess_images : set = set(), rejected_images: set = set()):
     return ((all_images - done_images) | reprocess_images) - rejected_images
 
-# 2026/09/10: Honestly not entirely sure how'd I'd go about testing this with real world data;
+# 2025/09/10: Honestly not entirely sure how'd I'd go about testing this with real world data;
 # no one has used the --tiltangle flag for any of the Appion sessions since 12/2024.  --jsp
 # Maybe just chuck it?
 def calcSkipTiltAngle(tilt_angle, tilt_angle_type, unit : str = "radians") -> bool:

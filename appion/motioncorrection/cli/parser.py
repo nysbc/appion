@@ -2,6 +2,12 @@ import argparse
 
 def constructMotionCorParser():
     parser = argparse.ArgumentParser(add_help=False)
+
+    # Inputs
+    parser.add_argument("-i", "--cs_import_dir", dest="cryosparc_import_dir",
+        help="Path to CryoSPARC imports directory.", required=True)
+    parser.add_argument("-m", "--cs_motioncorrection_dir", dest="cryosparc_motioncorrection_dir",
+        help="Path to CryoSPARC motion correction outputs directory.", required=True)
     # Integer
     parser.add_argument("--ddstartframe", dest="startframe", type=int, default=0,
         help="starting frame for summing the frames. The first frame is 0")

@@ -34,14 +34,9 @@ def process_task(imageid, args, cryosparc_import_dir, cryosparc_motioncorrection
         logger.info("Saving out motioncorr-formatted log for %d to %s." % (imageid, motioncorr_log_path))
         saveMotionCorrLog(shifts, motioncorr_log_path, args['startframe'], calcTotalRenderedFrames(imgmetadata['cameraemdata']['nframes'], args['rendered_frame_size']), args['bin'])
 
-
         framelist=[]
         nframes=0
-
-        if "Trim" in kwargs.keys():
-            trim=kwargs["Trim"]
-        else:
-            trim=0
+        trim=0
         aligned_camera_id = constructAlignedCamera(imgmetadata['cameraemdata']['def_id'], args['square'], args['bin'], trim, framelist, nframes)
 
         aligned_image_filename = imgmetadata['imgdata']['filename']+"-%s" % args['alignlabel']

@@ -2,8 +2,6 @@
 # Copyright 2002-2015 Scripps Research Institute, 2015-2025 New York Structural Biology Center
 
 import os
-import numpy
-import mrcfile
 import sinedon.base as sb
 from .calc.internal import calcAlignedCamera, calcFrameShiftFromPositions, calcFrameStats, calcTotalRenderedFrames
 
@@ -253,43 +251,3 @@ def saveMotionCorrLog(shifts: float, outputLogPath: str, throw: int, totalRender
         for idx, adjusted_shift in enumerate(adjusted_shifts):
             f.write("......Add Frame #%.3d with xy shift: %.5f %.5f\n" % (idx+throw, adjusted_shift[0], adjusted_shift[1]))
 
-# Dark functions
-
-def saveDark(dark_output_path : str, camera_name : str, eer_frames : bool, dark_input_path : str = "", nframes : int = 1):
-    if not dark_input_path:
-        # Why is this switch statement necessary?  Why not save default dimensions into the database instead of
-        # hardcoding them in here?  (Original Appion has these hardcoded as part of object initialization.)
-        if camera_name == "GatanK2":
-            dimensions = (3710,3838)
-        elif camera_name == 'GatanK3':
-            dimensions = (8184,11520)
-        elif camera_name == 'DE':
-            dimensions = (4096,3072)
-        elif camera_name in ['TIA','Falcon','Falcon3','Falcon4'] or (camera_name == 'Falcon4EC' and eer_frames):
-            dimensions = (4096,4096)
-        else:
-            dimensions = (0,0)
-        unscaled_darkarray =  numpy.zeros((dimensions[1],dimensions[0]), dtype=numpy.float32)
-    else:
-        unscaled_darkarray = mrcfile.read(dark_input_path) / nframes
-    mrcfile.write(dark_output_path, unscaled_darkarray, overwrite=True)
-
-# DefectMap functions
-def saveDefectMrc(defect_map_path : str, defect_map : numpy.ndarray) -> None:
-    mrcfile.write(defect_map_path, defect_map, overwrite=True)
-
-# FmIntFile/FmDose functions
-def saveFmIntFile(fmintpath, nraw, size, raw_dose):
-    '''
-    calculate and set frame dose and create FmIntFile
-    '''
-    modulo = nraw % size
-    int_div = nraw // size
-    lines = []
-    total_rendered_frames = calcTotalRenderedFrames(nraw, size)
-    if modulo != 0:
-        total_rendered_frames += 1
-        lines.append('%d\t%d\t%.3f\n' % (modulo, modulo, raw_dose))
-    lines.append('%d\t%d\t%.3f\n' % (int_div*size+modulo, size, raw_dose))
-    with open(fmintpath,'w') as f:
-        f.write(''.join(lines))
