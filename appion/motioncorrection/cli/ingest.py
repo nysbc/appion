@@ -1,7 +1,7 @@
 
 import os
 import logging
-from ..calc.internal import calcTotalRenderedFrames
+from ..calc.internal import calcTotalRenderedFrames, calcPixelSize
 from .constructors import constructMotionCor2JobMetadata
 from ..store import saveFrameTrajectory, constructAlignedCamera, constructAlignedPresets, constructAlignedImage, uploadAlignedImage, saveDDStackParamsData, saveMotionCorrLog
 from ..retrieve.params import readImageMetadata, readInputPath
@@ -79,10 +79,11 @@ def process_task(imageid, args, cryosparc_import_dir, cryosparc_motioncorrection
         # These need to happen last because they create records that are used to determine if an image is done or not in retrieveDoneImages.
         # Every other step in this function should be idempotent/capable of being run multiple times, but these two function invocations
         # finalize the image for the specified preset/settings/alignment label.
+        pixsize = calcPixelSize(imgmetadata['pixelsizedata'], imgmetadata['cameraemdata']['subd_binning_x'], imgmetadata['imgdata']['def_timestamp'])
         logger.info("Uploading aligned image record for %d." % imageid)
-        uploadAlignedImage(imageid, aligned_image_id, jobmetadata['ref_apddstackrundata_ddstackrun'], shifts, kwargs["PixSize"], False)
+        uploadAlignedImage(imageid, aligned_image_id, jobmetadata['ref_apddstackrundata_ddstackrun'], shifts, pixsize, False)
         logger.info("Uploading aligned, dose-weighted image record for %d." % imageid)
-        uploadAlignedImage(imageid, aligned_image_dw_id, jobmetadata['ref_apddstackrundata_ddstackrun'], shifts, kwargs["PixSize"], True, trajdata_id)
+        uploadAlignedImage(imageid, aligned_image_dw_id, jobmetadata['ref_apddstackrundata_ddstackrun'], shifts, pixsize, True, trajdata_id)
 
 def readShifts(cs_traj_file):
     traj=np.load(cs_traj_file)
