@@ -13,7 +13,7 @@ def process_task(imageid, args, cryosparc_import_dir, cryosparc_motioncorrection
     jobmetadata=constructMotionCor2JobMetadata(args)
 
     imgmetadata=readImageMetadata(imageid)
-    input_path = readInputPath(imgmetadata['imgdata']['frame_path'],imgmetadata['imgdata']['filename'])
+    input_path = readInputPath(imgmetadata['sessiondata']['frame_path'],imgmetadata['imgdata']['filename'])
     import_paths = matchInputImport(input_path, cryosparc_import_dir)
     for import_path in import_paths:
         output_prefix = calcOutputPrefix(import_path)
@@ -51,7 +51,7 @@ def process_task(imageid, args, cryosparc_import_dir, cryosparc_motioncorrection
             os.link(aligned_output_file, abs_path_aligned_image_mrc_image)
             logger.info("%s linked to %s." % (abs_path_aligned_image_mrc_image, aligned_output_file))
             logger.info("Constructing aligned image record for %d." % imageid)
-            aligned_preset_id = constructAlignedPresets(imgmetadata['preset_id'], aligned_camera_id, alignlabel=args['alignlabel'])
+            aligned_preset_id = constructAlignedPresets(imgmetadata['presetdata']['def_id'], aligned_camera_id, alignlabel=args['alignlabel'])
             aligned_image_id = constructAlignedImage(imageid, aligned_preset_id, aligned_camera_id, aligned_image_mrc_image, aligned_image_filename)
             
         aligned_image_dw_filename = imgmetadata['imgdata']['filename']+"-%s-DW" % args['alignlabel']

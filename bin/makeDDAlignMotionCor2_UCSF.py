@@ -8,7 +8,6 @@ from fcntl import flock, LOCK_EX, LOCK_UN
 from appion.base.cli import constructGlobalParser
 from appion.motioncorrection.cli.parser import constructMotionCorParser
 from appion.motioncorrection.retrieve.images import retrieveDoneImages
-from appion.motioncorrection.cli.ingest import process_task
 import sinedon.setup
 
 def main():
@@ -19,6 +18,7 @@ def main():
     from appion.base.retrieve import readSessionData
     from appion.base.store import updateApAppionJobData
     from appion.base.loop import loop
+    from appion.motioncorrection.cli.ingest import process_task
     if not os.path.exists(args.rundir):
         os.makedirs(args.rundir)
     # Create a lock in the run directory so that only one loop can run at a time.
