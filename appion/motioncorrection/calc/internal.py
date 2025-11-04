@@ -219,9 +219,6 @@ def calcAlignedCamera(dimensions : tuple, square_output : bool, binning : tuple,
 def calcMotionCorrLogPath(framestackpath):
     return os.path.splitext(framestackpath)[0]+"_Log.txt"
 
-def calcMotionCor2LogPath(framestackpath):
-    return os.path.splitext(framestackpath)[0]+"_Log.motioncor2.txt"
-
 def motioncor_merge(kwarg_list, rundir, max_batch_size=10):
     merged_tasks=[]
     serial_inputs={}

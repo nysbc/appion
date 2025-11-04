@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright 2025 New York Structural Biology Center
+import sinedon.base as sb
 
 # preset is implicitly encoded in the path; each run should only be for one (and only one) preset.
 def retrieveDoneImages(rundir, session_id):
-    import sinedon.base as sb
     appathdata=sb.filter("ApPathData",{"path" : rundir})
     runs=[]
     for path in appathdata:
