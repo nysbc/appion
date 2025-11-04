@@ -68,16 +68,6 @@ def retrieveSkippedTiltAngleImages(session, tilt_angle_type):
     images = set(images)
     return images
 
-# This isn't necessary for ctffind or motioncor2, since images that have been processed are 
-# recorded in the Appion database, but it might be useful in the future for applications that don't
-# have this info stored in the database.
-def readCheckpoint(checkpoint_path):
-    with open(checkpoint_path, "r") as f:
-        flock(f, LOCK_EX)
-        images=set(json.load(f))
-        flock(f, LOCK_UN)
-    return images
-
 def readSessionData(sessionname : str):
     sessiondata=sb.get("SessionData", {"name" : sessionname})
     sessionmetadata={}

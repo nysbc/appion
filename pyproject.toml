@@ -29,7 +29,8 @@ dependencies = [
   "argunparse",
   "pyyaml",
   "pytest",
-  "parametrize_from_file"
+  "parametrize_from_file",
+  "pymongo"
 ]
 # Need a newer version of Python or we wind up with partial initialization 
 # issue when using LocalCluster

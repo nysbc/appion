@@ -27,7 +27,7 @@ def constructCTFFindParser():
         help="phase shift search step, in degrees")
     parser.add_argument("--ddstackid", dest="ddstackid",type=int, help="DD stack ID")
     parser.add_argument("--num_frame_avg", dest="num_frame_avg", type=int, default=7,
-        help="Average number of moive frames for movie stack CTF refinement")
+        help="Average number of movie frames for movie stack CTF refinement")
 
 
     ## true/false
