@@ -1,4 +1,8 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2025 New York Structural Biology Center
+
 from math import degrees
+import os
 
 # Currently ctffind4 is the only tool that has an obvious criteria for images that should be reprocessed.
 # See: https://github.com/nysbc/appion-slurm/blob/f376758762771073c0450d2bc3badc0fed6f8e66/appion/bin/ctffind4.py#L130
@@ -29,3 +33,11 @@ def calcSkipTiltAngle(tilt_angle, tilt_angle_type, unit : str = "radians") -> bo
 
 def calcSlicedImageSet(images, startimgid, endimgid):
     return set([image for image in images if image > startimgid or image < endimgid])
+
+def calcCryoSPARCDirectoryType(cs_path):
+    if os.path.exists(os.path.join(cs_path,"exposures.bson")):
+        return "session"
+    elif os.path.exists(os.path.join(cs_path),"job.json"):
+        return "job"
+    else:
+        return None
