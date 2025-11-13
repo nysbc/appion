@@ -4,7 +4,8 @@ import logging
 from ..calc.internal import calcTotalRenderedFrames, calcPixelSize
 from .constructors import constructMotionCor2JobMetadata
 from ..store import saveFrameTrajectory, constructAlignedCamera, constructAlignedPresets, constructAlignedImage, uploadAlignedImage, saveDDStackParamsData, saveMotionCorrLog
-from ..retrieve.params import readImageMetadata, readInputPath
+from ...base.retrieve import readImageMetadata
+from ..retrieve.params import readInputPath
 import numpy as np
 
 def process_task(imageid, args, cryosparc_import_dir, cryosparc_motioncorrection_dir):

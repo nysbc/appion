@@ -4,7 +4,7 @@
 import os
 import logging
 import numpy as np
-from ...motioncorrection.retrieve.params import readImageMetadata
+from ...base.retrieve import readImageMetadata
 from ..retrieve.params import readCryoSPARCMetadata
 from ..store import saveApCtfFind4ParamsData, saveApAceRunData, saveApCtfData, savePowAvRot
 
@@ -13,6 +13,8 @@ def process_task(imageid, args, cryosparc_dir):
 
     imgmetadata=readImageMetadata(imageid)
     csmetadata=readCryoSPARCMetadata(cryosparc_dir, imgmetadata)
+    if not csmetadata:
+        raise RuntimeError(f"Could not determine if {cryosparc_dir} was a job or a live session.")
 
     logger.info("Saving metadata to ApCtfFind4ParamsData.")
     ref_apctffind4paramsdata_ctffind4_params = saveApCtfFind4ParamsData(csmetadata["bestdb"], csmetadata["ampcontrast"], csmetadata["fieldsize"], csmetadata["cs"], csmetadata["resmin"],
