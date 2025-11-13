@@ -20,8 +20,6 @@ dependencies = [
   "django >= 4.2.22",
   "numpy",
   "mrcfile",
-  "dask",
-  "dask-jobqueue",
   "pexpect",
   "py-cpuinfo",
   "distro",
@@ -29,7 +27,8 @@ dependencies = [
   "argunparse",
   "pyyaml",
   "pytest",
-  "parametrize_from_file"
+  "parametrize_from_file",
+  "submitit"
 ]
 # Need a newer version of Python or we wind up with partial initialization 
 # issue when using LocalCluster

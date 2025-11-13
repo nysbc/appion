@@ -20,7 +20,7 @@ def main():
     from appion.base.retrieve import readSessionData
     from appion.base.store import updateApAppionJobData
     from appion.base.loop import loop
-    from appion.base.cluster import constructCluster
+
     if not os.path.exists(args.rundir):
         os.makedirs(args.rundir)
     # Create a lock in the run directory so that only one loop can run at a time.
@@ -33,25 +33,7 @@ def main():
         f.seek(0)
         f.truncate()
         f.write(str(os.getpid()))
-        # The cluster config can be set via environment variable instead of the CLI flag.
-        # This is necessary for backwards compatibility since the myamiweb web UI will not add the clusterconfig flag at present.
-        clusterconfig={}
-        if "DASK_CLUSTER_CONFIG" in os.environ.keys():
-            clusterconfig_path=os.environ["DASK_CLUSTER_CONFIG"]
-            if os.path.exists(clusterconfig_path):
-                with open(clusterconfig_path,"r") as f:
-                    clusterconfig=yaml.load(f, Loader=yaml.Loader)
-            else:
-                raise RuntimeError("Dask cluster configuration at %s does not exist." % clusterconfig_path)
-        else:
-            clusterconfig_path=args.clusterconfig
-            if os.path.exists(clusterconfig_path):
-                with open(clusterconfig_path,"r") as f:
-                    clusterconfig=yaml.load(f, Loader=yaml.Loader)
-            else:
-                raise RuntimeError("Dask cluster configuration at %s does not exist." % clusterconfig_path)
         session_metadata=readSessionData(args.sessionname)
-        cluster=constructCluster(clusterconfig, args.rundir)
         arg_dict=vars(args)
         if 'gpuids' in arg_dict.keys():
             arg_dict['gpuids']="0"
