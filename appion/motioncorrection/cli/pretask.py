@@ -1,9 +1,4 @@
 def preTask(imageid, args):
-    # Sinedon needs to be reimported and setup within the local scope of this function
-    # because the function runs as a Dask task, which means that it is run in a forked process
-    # that doesn't have Django initialized.
-    import sinedon.setup
-    sinedon.setup(args['projectid'], False)
     import logging, sys
     from .constructors import constructMotionCorKwargs
     from ..retrieve.params import readInputPath, readImageMetadata
@@ -24,11 +19,16 @@ def preTask(imageid, args):
             gainmetadata=readImageMetadata(args['refimgid'], False, args["align"], False)
             imgmetadata['gain_input']=readInputPath(gainmetadata['sessiondata']["frame_path"],gainmetadata['imgdata']['filename'])
     logger.info("Constructing motion correction command arguments for %d." % imageid)
-    input_path = readInputPath(imgmetadata['imgdata']['frame_path'],imgmetadata['imgdata']['filename'])
+    input_path = readInputPath(imgmetadata['sessiondata']['frame_path'],imgmetadata['imgdata']['filename'])
     if input_path is None:
         raise RuntimeError("Input file for %d does not exist." % imgmetadata["imgdata"]["def_id"])
     kwargs=constructMotionCorKwargs(imgmetadata, args, input_path)
-    saveDark(kwargs["Dark"], imgmetadata["ccdcamera"]['name'], imgmetadata['cameraemdata']['eer_frames'], imgmetadata["dark_input"], imgmetadata['darkmetadata']['cameraemdata']["nframes"])
+    try:
+        saveDark(kwargs["Dark"], imgmetadata["ccdcamera"]['name'], imgmetadata['cameraemdata']['eer_frames'], imgmetadata["dark_input"], imgmetadata['darkmetadata']['cameraemdata']["nframes"])
+    except:
+        logger.error("Unable to save dark image for %d." % imageid)
+        if "Dark" in kwargs.keys():
+            del kwargs["Dark"]
     if "FmIntFile" in kwargs.keys():
         saveFmIntFile(kwargs["FmIntFile"], imgmetadata['cameraemdata']['nframes'], args['rendered_frame_size'], kwargs["FmDose"] / args['rendered_frame_size'])
     if 'DefectMap' in kwargs.keys():

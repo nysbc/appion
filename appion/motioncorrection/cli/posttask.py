@@ -1,10 +1,5 @@
 
 def postTask(imageid, kwargs, imgmetadata, jobmetadata, args, logData, logStdOut):
-    # Sinedon needs to be reimported and setup within the local scope of this function
-    # because the function runs as a Dask task, which means that it is run in a forked process
-    # that doesn't have Django initialized.
-    import sinedon.setup
-    sinedon.setup(args['projectid'], False)
     import os, sys
     import logging
     from ..calc.internal import calcTotalFrames, filterFrameList, calcMotionCorrLogPath, calcMotionCor2LogPath, calcTotalRenderedFrames
@@ -42,7 +37,7 @@ def postTask(imageid, kwargs, imgmetadata, jobmetadata, args, logData, logStdOut
     shifts=[]
     # Find way to not calculate these twice?
     framelist=filterFrameList(kwargs["PixSize"], imgmetadata['cameraemdata']['nframes'], shifts)
-    nframes=calcTotalFrames(imgmetadata['cameraemdata']['name'], imgmetadata['cameraemdata']['exposure_time'], imgmetadata['cameraemdata']['frame_time'], imgmetadata['cameraemdata']['nframes'], imgmetadata['cameraemdata']['eer_frames'])
+    nframes=calcTotalFrames(imgmetadata['ccdcamera']['name'], imgmetadata['cameraemdata']['exposure_time'], imgmetadata['cameraemdata']['frame_time'], imgmetadata['cameraemdata']['nframes'], imgmetadata['cameraemdata']['eer_frames'])
     if "Trim" in kwargs.keys():
         trim=kwargs["Trim"]
     else:
@@ -60,8 +55,10 @@ def postTask(imageid, kwargs, imgmetadata, jobmetadata, args, logData, logStdOut
         os.link(kwargs["OutMrc"], abs_path_aligned_image_mrc_image)
         logger.info("%s linked to %s." % (abs_path_aligned_image_mrc_image, kwargs["OutMrc"]))
         logger.info("Constructing aligned image record for %d." % imageid)
-        aligned_preset_id = constructAlignedPresets(imgmetadata['preset_id'], aligned_camera_id, alignlabel=args['alignlabel'])
+        aligned_preset_id = constructAlignedPresets(imgmetadata['presetdata']['def_id'], aligned_camera_id, alignlabel=args['alignlabel'])
         aligned_image_id = constructAlignedImage(imageid, aligned_preset_id, aligned_camera_id, aligned_image_mrc_image, aligned_image_filename)
+    else:
+        return
         
     aligned_image_dw_filename = imgmetadata['imgdata']['filename']+"-%s-DW" % args['alignlabel']
     aligned_image_dw_mrc_image = aligned_image_dw_filename + ".mrc"
@@ -88,8 +85,9 @@ def postTask(imageid, kwargs, imgmetadata, jobmetadata, args, logData, logStdOut
     #saveDDStackParamsData(args['preset'], args['align'], args['bin'], ref_apddstackrundata_unaligned_ddstackrun, method, ref_apstackdata_stack, ref_apdealignerparamsdata_de_aligner)
 
     if args["clean"]:
-        if os.path.exists(kwargs["Dark"]):
-            os.remove(kwargs["Dark"])
+        if "Dark" in kwargs.keys():
+            if os.path.exists(kwargs["Dark"]):
+                os.remove(kwargs["Dark"])
         if "DefectMap" in kwargs.keys():
             if os.path.exists(kwargs["DefectMap"]):
                 os.remove(kwargs["DefectMap"])
