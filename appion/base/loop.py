@@ -56,6 +56,7 @@ def loop(pipeline, args: dict, retrieveDoneImages : Callable = lambda : set(), p
         # Not used by motioncor2; used by ctffind4
         reprocess_images=retrieveReprocessImages()
         tasklist=filterImages(all_images, done_images, reprocess_images, rejected_images)
+        unprocessed_image_count=len(tasklist)
         if len(tasklist) > 200:
             reduced_tasklist=list(tasklist)
             reduced_tasklist.sort()
@@ -79,20 +80,20 @@ def loop(pipeline, args: dict, retrieveDoneImages : Callable = lambda : set(), p
             future_complete_counter=0
             throughput_t0=time()
             future_complete_counter=0
+            step=20
             while future_complete_counter != len(futures):
                 future_complete_counter = sum(f.done() for f in futures)
-                if future_complete_counter % 100 == 0:
+                if future_complete_counter > step and future_complete_counter != 0:
                     throughput_t1=time()
-                    done_images=retrieveDoneImages()
-                    images_processed_total=len(done_images) - (len(all_images) - len(tasklist))
-                    throughput=(images_processed_total)/(((throughput_t1-throughput_t0))/60.)
-                    remaining_image_count=len(tasklist)-images_processed_total
-                    logger.info("Progress: %d / %d images processed." % (images_processed_total, len(tasklist)))
+                    throughput=(future_complete_counter)/(((throughput_t1-throughput_t0))/60.)
+                    remaining_image_count=unprocessed_image_count-future_complete_counter
+                    logger.info("Progress: %d / %d images processed." % (future_complete_counter, unprocessed_image_count))
                     logger.info("Throughput: %.2f images/min." % throughput)
                     if throughput > 0.0:
                         logger.info("Estimated remaining time: %.2f min." % (remaining_image_count/throughput))
                     else:
                         logger.info("Estimated remaining time: N/A min.")
+                    step+=20
                 sleep(10)
             pipeline_t1=time()
             logger.info("Finished processing %d images in %d seconds." % (len(tasklist), (pipeline_t1-pipeline_t0)))
