@@ -28,6 +28,7 @@ dependencies = [
   "pyyaml",
   "pytest",
   "parametrize_from_file",
+  "jinja2",
   "submitit"
 ]
 # Need a newer version of Python or we wind up with partial initialization 
