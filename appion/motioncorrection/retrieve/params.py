@@ -118,5 +118,6 @@ def readImageMetadata(imageid: int, has_bad_pixels : bool = False, is_align : bo
         imgmetadata['darkmetadata']['darkimagedata']=None
         imgmetadata['darkmetadata']['sessiondata']=None
         imgmetadata['dark_input']=None
-        imgmetadata['darkmetadata']['cameraemdata']=None
+        imgmetadata['darkmetadata']['cameraemdata']={}
+        imgmetadata['darkmetadata']['cameraemdata']['nframes']=None
     return imgmetadata

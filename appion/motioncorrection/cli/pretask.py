@@ -23,12 +23,7 @@ def preTask(imageid, args):
     if input_path is None:
         raise RuntimeError("Input file for %d does not exist." % imgmetadata["imgdata"]["def_id"])
     kwargs=constructMotionCorKwargs(imgmetadata, args, input_path)
-    try:
-        saveDark(kwargs["Dark"], imgmetadata["ccdcamera"]['name'], imgmetadata['cameraemdata']['eer_frames'], imgmetadata["dark_input"], imgmetadata['darkmetadata']['cameraemdata']["nframes"])
-    except:
-        logger.error("Unable to save dark image for %d." % imageid)
-        if "Dark" in kwargs.keys():
-            del kwargs["Dark"]
+    saveDark(kwargs["Dark"], imgmetadata["ccdcamera"]['name'], imgmetadata['cameraemdata']['eer_frames'], imgmetadata["dark_input"], imgmetadata['darkmetadata']['cameraemdata']["nframes"])
     if "FmIntFile" in kwargs.keys():
         saveFmIntFile(kwargs["FmIntFile"], imgmetadata['cameraemdata']['nframes'], args['rendered_frame_size'], kwargs["FmDose"] / args['rendered_frame_size'])
     if 'DefectMap' in kwargs.keys():

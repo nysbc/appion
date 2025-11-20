@@ -49,6 +49,7 @@ def postTask(imageid, kwargs, imgmetadata, jobmetadata, args, logData, logStdOut
         raise RuntimeError("Session path does not exist at %s." % imgmetadata["sessiondata"]["image_path"])
     abs_path_aligned_image_mrc_image=os.path.join(imgmetadata["sessiondata"]["image_path"],aligned_image_mrc_image)
     if os.path.lexists(abs_path_aligned_image_mrc_image):
+        logger.info("Link exists for %s.  Removing." % abs_path_aligned_image_mrc_image)
         os.unlink(abs_path_aligned_image_mrc_image)
     if os.path.exists(kwargs["OutMrc"]):
         # In the future, we may want to catch any exceptions involving a cross-device link and run shutil.copy.
@@ -58,6 +59,7 @@ def postTask(imageid, kwargs, imgmetadata, jobmetadata, args, logData, logStdOut
         aligned_preset_id = constructAlignedPresets(imgmetadata['presetdata']['def_id'], aligned_camera_id, alignlabel=args['alignlabel'])
         aligned_image_id = constructAlignedImage(imageid, aligned_preset_id, aligned_camera_id, aligned_image_mrc_image, aligned_image_filename)
     else:
+        logger.error("No output file at %s" % kwargs["OutMrc"])
         return
         
     aligned_image_dw_filename = imgmetadata['imgdata']['filename']+"-%s-DW" % args['alignlabel']
@@ -66,6 +68,7 @@ def postTask(imageid, kwargs, imgmetadata, jobmetadata, args, logData, logStdOut
     outmrc_dw=kwargs["OutMrc"].replace(".mrc","_DW.mrc")
     outmrc_dws=kwargs["OutMrc"].replace(".mrc","_DWS.mrc")
     if os.path.lexists(abs_path_aligned_image_dw_mrc_image):
+        logger.info("Link exists for %s.  Removing." % abs_path_aligned_image_dw_mrc_image)
         os.unlink(abs_path_aligned_image_dw_mrc_image)
     if os.path.exists(outmrc_dw):
         # In the future, we may want to catch any exceptions involving a cross-device link and run shutil.copy.
