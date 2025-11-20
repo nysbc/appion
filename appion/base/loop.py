@@ -47,7 +47,7 @@ def loop(pipeline, args: dict, retrieveDoneImages : Callable = lambda : set(), p
     failure_waits=0
 
     executor = submitit.AutoExecutor(folder=os.path.join(args["rundir"], "working"))
-    executor.update_parameters(timeout_min=6, slurm_partition="appion-motioncorrection", slurm_gres="gpu:1", cpus_per_task=2, cpus_per_gpu=2, slurm_array_parallelism=max_workers)
+    executor.update_parameters(timeout_min=6, slurm_partition="appion-motioncorrection", slurm_gres="gpu:1", slurm_cpus_per_task=2, slurm_array_parallelism=max_workers)
     while True:
         t0=time()
         all_images=readImageSet(args["sessionname"], args["preset"])
