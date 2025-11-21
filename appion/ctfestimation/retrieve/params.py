@@ -13,7 +13,7 @@ def readCryoSPARCMetadata(cs_path, imgmetadata):
     if jobtype == "session":
         exposure=readCryoSPARCSessionExposure(cs_path, imgmetadata)
     elif jobtype == "job":
-        exposure=readCryoSPARCJobExposure(cs_path)
+        exposure=readCryoSPARCJobExposure(cs_path, imgmetadata)
     else:
         return csmetadata
     # Fields that need to be populated in ApCtfFind4ParamsData
