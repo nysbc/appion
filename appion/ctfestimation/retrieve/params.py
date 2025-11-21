@@ -4,32 +4,18 @@
 from ...base.calc import calcCryoSPARCDirectoryType
 import json, bson
 import numpy as np
+from glob import glob
 import os
 
 def readCryoSPARCMetadata(cs_path, imgmetadata):
     jobtype=calcCryoSPARCDirectoryType(cs_path)
+    csmetadata={}
     if jobtype == "session":
-        csmetadata=readCryoSPARCSessionMetadata(cs_path, imgmetadata)
+        exposure=readCryoSPARCSessionExposure(cs_path, imgmetadata)
     elif jobtype == "job":
-        csmetadata=readCryoSPARCJobMetadata(cs_path)
+        exposure=readCryoSPARCJobExposure(cs_path)
     else:
-        csmetadata={}
-    return csmetadata
-
-def readCryoSPARCSessionMetadata(cs_path, imgmetadata):
-    csmetadata = {}
-    with open(os.path.join(cs_path,'exposures.bson'), 'rb') as f:
-        data = bson.decode_all(f.read())
-    exposure=None
-    if data and type(data)==list:
-        for e in data[0]["exposures"]:
-            exposure_filename=os.path.basename(e["abs_file_path"])
-            if imgmetadata['imgdata']['filename'] == exposure_filename:
-                exposure=e
-                break
-        if not exposure:
-            raise RuntimeError("Could not find exposure.")
-
+        return csmetadata
     # Fields that need to be populated in ApCtfFind4ParamsData
     csmetadata["bestdb"] = False
     csmetadata["ampcontrast"] = exposure["groups"]["exposure"]["ctf"]["amp_contrast"]
@@ -71,96 +57,77 @@ def readCryoSPARCSessionMetadata(cs_path, imgmetadata):
     csmetadata["extra_phase_shift"] = None
     csmetadata["df_angle_rad"] = exposure["groups"]["exposure"]["ctf"]["df_angle_rad"][0]
     csmetadata["fit_data_path"] = exposure["groups"]["exposure"]["ctf_stats"]["fit_data_path"][0]
-    csmetadata["micrograph_path"] = exposure["groups"]["exposure"]["micrograph_blob"]["path"][0]
+    csmetadata["micrograph_path"] = exposure["groups"]["exposure"]["micrograph_blob"]["path"][0]    
     return csmetadata
 
-def readCryoSPARCJobMetadata(cs_path, imgmetadata):
-    csmetadata = {}
+def readCryoSPARCSessionExposure(cs_path, imgmetadata):
+    with open(os.path.join(cs_path,'exposures.bson'), 'rb') as f:
+        data = bson.decode_all(f.read())
+    exposure=None
+    if data and type(data)==list:
+        for e in data[0]["exposures"]:
+            exposure_filename=os.path.basename(e["abs_file_path"])
+            if imgmetadata['imgdata']['filename'] == exposure_filename:
+                exposure=e
+                break
+        if not exposure:
+            raise RuntimeError("Could not find exposure.")
+    return exposure
+
+def readCryoSPARCJobExposure(cs_path, imgmetadata):
     with open(os.path.join(cs_path,'job.json'), 'rb') as f:
         data = json.load(f)
 
-    # Retrieve the job ID for the import micrographs job
-    input_job=""
-    for slotgroup in data["input_slot_groups"]:
-        if slotgroup["name"] == "exposures":
-            if "connections" in slotgroup.keys():
-                for connection in slotgroup["connections"]:
-                    if "slots" in connection.keys():
-                        for slot in connection["slots"]:
-                            if slot["slot_name"] == "micrograph_blob":
-                                input_job=slot["job_uid"]
+    ctf=None
+    ctf_stats=None
+    micrograph_blob=None
+    for result in data["spec"]["outputs"]["exposures"]["results"]:
+        if result["name"] == "ctf":
+            if len(result["metafiles"]) == 1:
+                with open(os.path.join(cs_path,"..",result["metafiles"][0]), "rb") as f:
+                    ctf=np.load(f)
+        if result["name"] == "ctf_stats":
+            if len(result["metafiles"]) == 1:
+                with open(os.path.join(cs_path,"..", result["metafiles"][0]), "rb") as f:
+                    ctf_stats=np.load(f)
+        if result["name"] == "micrograph_blob":
+            if len(result["metafiles"]) == 1:
+                with open(os.path.join(cs_path,"..",result["metafiles"][0]), "rb") as f:
+                    ctf=np.load(f)
+    if not ctf or not ctf_stats or not micrograph_blob:
+        raise RuntimeError("Could not read metadata for exposure.")
     
-    # Open the import job
-    if input_job:
-        with open(os.path.join(cs_path,"..", input_job, 'job.json'), 'rb') as f:
-            input_data = json.load(f)
-    else:
-        raise RuntimeError
+    idx=0
+    for micrograph in micrograph_blob:
+        abs_file_path=os.readlink(os.path.join(cs_path,"..",str(micrograph["micrograph_blob/path"])))
+        exposure_filename=os.path.basename(abs_file_path)
+        if imgmetadata['imgdata']['filename'] == exposure_filename:
+            break
+        idx+=1
 
-    # What about micrographs that are the output of a CS motion correction job?
-    # Here we're just considering imported micrographs from Appion.
-    input_files=set()
-    imported_micrographs=False
-    for r in input_data["output_results"]:
-        if r["group_name"] == "imported_micrographs" or r["group_name"] == "micrographs":
-            if r["group_name"] == "imported_micrographs":
-                imported_micrographs=True
-            input_files.add([mf for mf in r["metafiles"]])
+    exposure={}
+    exposure["groups"]={}
+    exposure["groups"]["exposure"]={}
+    exposure["groups"]["exposure"]["ctf"]={}
+    exposure["groups"]["exposure"]["ctf"]["amp_contrast"] = float(ctf[idx]["ctf/amp_contrast"])
+    exposure["groups"]["exposure"]["ctf"]["cs_mm"] = float(ctf[idx]["ctf/cs_mm"])
+    try:
+        exposure["groups"]["exposure"]["ctf"]["phase_shift_rad"] = list(ctf[idx]["ctf/phase_shift_rad"])
+    except TypeError:
+        exposure["groups"]["exposure"]["ctf"]["phase_shift_rad"] = [float(ctf[idx]["ctf/phase_shift_rad"])]
+    exposure["groups"]["exposure"]["ctf"]["df1_A"] = [float(ctf[idx]["ctf/df1_A"])]
+    exposure["groups"]["exposure"]["ctf"]["df2_A"] = [float(ctf[idx]["ctf/df2_A"])]
+    exposure["groups"]["exposure"]["ctf"]["df_angle_rad"] = [float(ctf[idx]["ctf/df_angle_rad"])]
 
-    if input_files:
-        for input_file in input_files:
-            with open(os.path.join(cs_path,"..", input_file), 'rb') as f:
-                input_data_cs = np.load(f)
-    else:
-        raise RuntimeError
-    
-    micrograph_paths=[path.decode() for path in input_data_cs["micrograph_blob/path"]]
-    for micrograph_path in micrograph_paths:
-        if os.path.basename(micrograph_path) == imgmetadata["filename"]:
-            pass
+    exposure["micrograph_shape"] = [int(dim) for dim in micrograph_blob[idx]["micrograph_blob/shape"]]
 
+    exposure["attributes"]={}
+    exposure["attributes"]["phase_shift"] = len(exposure["groups"]["exposure"]["ctf"]["phase_shift_rad"]) > 1
 
-    # Fields that need to be populated in ApCtfFind4ParamsData
-    csmetadata["bestdb"] = False
-    csmetadata["ampcontrast"] = float(data["outputs"]["spec"]["amp_contrast"])
-    csmetadata["fieldsize"] = min(exposure["micrograph_shape"])
-    csmetadata["cs"] = float(data["outputs"]["summary"]["ctf/cs_mm"])
-    csmetadata["resmin"] = None
-    csmetadata["defstep"] = None
-    ps_max_default=3.141592653589793
-    csmetadata["shift_phase"] = (int(data["outputs"]["spec"]["phase_shift_min"]) != 0) and (round(float(data["outputs"]["spec"]["phase_shift_max"]) == 3.142))
+    exposure["groups"]["exposure"]["ctf_stats"]={}
+    exposure["groups"]["exposure"]["ctf_stats"]['cross_corr'] = [float(ctf_stats[idx]["ctf_stats/cross_corr"])]
+    exposure["groups"]["exposure"]["ctf_stats"]["fit_data_path"] = [str(ctf_stats[idx]["ctf_stats/fit_data_path"].decode())]
+    exposure["groups"]["exposure"]["micrograph_blob"]={}
+    exposure["groups"]["exposure"]["micrograph_blob"]["path"] = [str(micrograph_blob[idx]["micrograph_blob/path"].decode())]
 
-    if csmetadata["shift_phase"]:
-        csmetadata["min_phase_shift"] = float(data["outputs"]["spec"]["phase_shift_min"])
-        csmetadata["max_phase_shift"] = float(data["outputs"]["spec"]["phase_shift_max"])
-    csmetadata["phase_search_step"] = None
-
-    csmetadata["defocus1"] = exposure["groups"]["exposure"]["ctf"]["df1_A"][0] / 1e10
-    csmetadata["defocus2"] = exposure["groups"]["exposure"]["ctf"]["df2_A"][0] / 1e10
-    csmetadata["defocusinit"] = min(csmetadata["defocus1"], csmetadata["defocus2"])
-    csmetadata["cross_correlation"] = exposure["groups"]["exposure"]["ctf_stats"]['cross_corr'][0]
-    csmetadata["angle_astigmatism"] = None
-    csmetadata["ctffind4_resolution"] = None
-    csmetadata["confidence"] = None
-    csmetadata["confidence_d"] = None
-    csmetadata["confidence_30_10"] = None
-    csmetadata["confidence_5_peak"] = None
-    csmetadata["overfocus_conf_30_10"] = None
-    csmetadata["overfocus_conf_5_peak"] = None
-    csmetadata["resolution_80_percent"] = None
-    csmetadata["resolution_50_percent"] = None
-    csmetadata["graph1"] = None
-    csmetadata["graph2"] = None
-    csmetadata["graph3"] = None
-    csmetadata["graph4"] = None
-    csmetadata["localplot"] = None
-    csmetadata["localCTFstarfile"] = None
-    csmetadata["ctfvalues_file"] = None
-    csmetadata["tilt_angle"] = None
-    csmetadata["tilt_axis_angle"] = None
-    csmetadata["mat_file"] = None
-    csmetadata["extra_phase_shift"] = None
-    csmetadata["df_angle_rad"] = exposure["groups"]["exposure"]["ctf"]["df_angle_rad"][0]
-    csmetadata["fit_data_path"] = exposure["groups"]["exposure"]["ctf_stats"]["fit_data_path"][0]
-    csmetadata["micrograph_path"] = exposure["groups"]["exposure"]["micrograph_blob"]["path"][0]
-    return csmetadata
+    return exposure
