@@ -79,6 +79,7 @@ def readCryoSPARCJobMetadata(cs_path, imgmetadata):
     with open(os.path.join(cs_path,'job.json'), 'rb') as f:
         data = json.load(f)
 
+    # Retrieve the job ID for the import micrographs job
     input_job=""
     for slotgroup in data["input_slot_groups"]:
         if slotgroup["name"] == "exposures":
@@ -89,6 +90,7 @@ def readCryoSPARCJobMetadata(cs_path, imgmetadata):
                             if slot["slot_name"] == "micrograph_blob":
                                 input_job=slot["job_uid"]
     
+    # Open the import job
     if input_job:
         with open(os.path.join(cs_path,"..", input_job, 'job.json'), 'rb') as f:
             input_data = json.load(f)
@@ -120,16 +122,17 @@ def readCryoSPARCJobMetadata(cs_path, imgmetadata):
 
     # Fields that need to be populated in ApCtfFind4ParamsData
     csmetadata["bestdb"] = False
-    csmetadata["ampcontrast"] = exposure["groups"]["exposure"]["ctf"]["amp_contrast"]
+    csmetadata["ampcontrast"] = float(data["outputs"]["spec"]["amp_contrast"])
     csmetadata["fieldsize"] = min(exposure["micrograph_shape"])
-    csmetadata["cs"] = exposure["groups"]["exposure"]["ctf"]["cs_mm"]
+    csmetadata["cs"] = float(data["outputs"]["summary"]["ctf/cs_mm"])
     csmetadata["resmin"] = None
     csmetadata["defstep"] = None
-    csmetadata["shift_phase"] = exposure["attributes"]["phase_shift"]
+    ps_max_default=3.141592653589793
+    csmetadata["shift_phase"] = (int(data["outputs"]["spec"]["phase_shift_min"]) != 0) and (round(float(data["outputs"]["spec"]["phase_shift_max"]) == 3.142))
 
     if csmetadata["shift_phase"]:
-        csmetadata["min_phase_shift"] = exposure["groups"]["exposure"]["ctf"]["phase_shift_rad"][0]
-        csmetadata["max_phase_shift"] = exposure["groups"]["exposure"]["ctf"]["phase_shift_rad"][-1]
+        csmetadata["min_phase_shift"] = float(data["outputs"]["spec"]["phase_shift_min"])
+        csmetadata["max_phase_shift"] = float(data["outputs"]["spec"]["phase_shift_max"])
     csmetadata["phase_search_step"] = None
 
     csmetadata["defocus1"] = exposure["groups"]["exposure"]["ctf"]["df1_A"][0] / 1e10
