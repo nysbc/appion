@@ -82,8 +82,8 @@ def loop(pipeline, args: dict, retrieveDoneImages : Callable = lambda : set(), p
                 taskStartIdx+=batch_size
                 taskEndIdx+=batch_size
             with executor.batch():
-                for imageids in batches:
-                    future = executor.submit(pipeline, imageids, args, jobmetadata)
+                for batchid, imageids in enumerate(batches):
+                    future = executor.submit(pipeline, batchid, imageids, args, jobmetadata)
                     futures.append(future)
             future_complete_counter=0
             throughput_t0=time()

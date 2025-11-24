@@ -104,20 +104,20 @@ def readImageMetadata(imageid: int, has_bad_pixels : bool = False, is_align : bo
         imgmetadata['gain_input']=os.path.join(imgmetadata['gainmetadata']['sessiondata']["image_path"],imgmetadata['gainmetadata']['normimagedata']["mrc_image"])
     else:
         imgmetadata['gainmetadata']={}
-        imgmetadata['gainmetadata']['normimagedata']=None
-        imgmetadata['gainmetadata']['sessiondata']=None
-        imgmetadata['gain_input']=None
+        imgmetadata['gainmetadata']['normimagedata']={}
+        imgmetadata['gainmetadata']['sessiondata']={}
+        imgmetadata['gain_input']=""
     if "ref_darkimagedata_dark" in imgmetadata['imgdata'].keys():
         imgmetadata['darkmetadata']={}
         imgmetadata['darkmetadata']['darkimagedata'] = sb.get("DarkImageData", {"def_id" : imgmetadata['imgdata']['ref_darkimagedata_dark']})
         imgmetadata['darkmetadata']['sessiondata']=sb.get("SessionData", {"def_id" : imgmetadata['darkmetadata']['darkimagedata']["ref_sessiondata_session"]})
-        imgmetadata['dark_input']=os.path.join(imgmetadata['darkmetadata']["image_path"],imgmetadata['darkmetadata']['darkimagedata']["mrc_image"])
+        imgmetadata['dark_input']=os.path.join(imgmetadata['darkmetadata']['sessiondata']["image_path"],imgmetadata['darkmetadata']['darkimagedata']["mrc_image"])
         imgmetadata['darkmetadata']['cameraemdata']=sb.get("CameraEMData", {"camera":imgmetadata['darkmetadata']['darkimagedata']["ref_cameraemdata_camera"]})
     else:
         imgmetadata['darkmetadata']={}
-        imgmetadata['darkmetadata']['darkimagedata']=None
-        imgmetadata['darkmetadata']['sessiondata']=None
-        imgmetadata['dark_input']=None
+        imgmetadata['darkmetadata']['darkimagedata']={}
+        imgmetadata['darkmetadata']['sessiondata']={}
+        imgmetadata['dark_input']=""
         imgmetadata['darkmetadata']['cameraemdata']={}
         imgmetadata['darkmetadata']['cameraemdata']['nframes']=None
     return imgmetadata
