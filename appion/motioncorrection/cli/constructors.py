@@ -1,38 +1,38 @@
-def constructMotionCorKwargs(imgmetadata : dict, cli_args : dict, input_path : str) -> dict:
+def constructMotionCorKwargs(imgmetadata : dict, args : dict, input_path : str) -> dict:
     import os
     from ..calc.internal import calcInputType, calcFmDose, calcPixelSize, calcKV, calcTotalFrames, calcTrunc, calcRotFlipGain, filterFrameList
     # Keyword args for motioncor2 function
     kwargs={}
 
-    if 'eer_sampling' in cli_args.keys():
-        kwargs['EerSampling'] = cli_args['eer_sampling']
-    if 'Patchrows' in cli_args.keys() and 'Patchcols' in cli_args.keys():
-        kwargs["Patch"] = "%s %s" % (str(cli_args["Patchcols"]), str(cli_args["Patchrows"]))
-    if 'Iter' in cli_args.keys():
-        kwargs["Iter"] = cli_args["Iter"]
-    if 'Tol' in cli_args.keys():
-        kwargs["Tol"] = cli_args["Tol"]
-    if 'Bft_global' in cli_args.keys() and 'Bft_local' in cli_args.keys():
-        kwargs["Bft"] = "%d %d" % (cli_args["Bft_global"], cli_args["Bft_local"])
-    if 'bin' in cli_args.keys():
-        if cli_args["bin"] != 1.0:
-            kwargs["FtBin"] = cli_args["bin"]
-    if 'startframe' in cli_args.keys():
-        kwargs["Throw"] = cli_args["startframe"]
-    if 'nrw' in cli_args.keys():
-        kwargs["Group"] = cli_args["nrw"]
+    if 'eer_sampling' in args.keys():
+        kwargs['EerSampling'] = args['eer_sampling']
+    if 'Patchrows' in args.keys() and 'Patchcols' in args.keys():
+        kwargs["Patch"] = "%s %s" % (str(args["Patchcols"]), str(args["Patchrows"]))
+    if 'Iter' in args.keys():
+        kwargs["Iter"] = args["Iter"]
+    if 'Tol' in args.keys():
+        kwargs["Tol"] = args["Tol"]
+    if 'Bft_global' in args.keys() and 'Bft_local' in args.keys():
+        kwargs["Bft"] = "%d %d" % (args["Bft_global"], args["Bft_local"])
+    if 'bin' in args.keys():
+        if args["bin"] != 1.0:
+            kwargs["FtBin"] = args["bin"]
+    if 'startframe' in args.keys():
+        kwargs["Throw"] = args["startframe"]
+    if 'nrw' in args.keys():
+        kwargs["Group"] = args["nrw"]
     # This flag doesn't seem to have been supported in motioncor2 since the 01-30-2017 version.
     #if 'MaskSizecols' in cli_args.keys() and 'MaskSizerows' in cli_args.keys():
     #    kwargs["MaskSize"] = "%d %d" % (cli_args["MaskSizecols"], cli_args["MaskSizerows"])
-    if 'FmRef' in cli_args.keys():
-        if cli_args["FmRef"] != 0:
-            kwargs["FmRef"] = cli_args["FmRef"]
-    if 'gpuids' in cli_args.keys():
-        kwargs["Gpu"] = cli_args["gpuids"]
+    if 'FmRef' in args.keys():
+        if args["FmRef"] != 0:
+            kwargs["FmRef"] = args["FmRef"]
+    if 'gpuids' in args.keys():
+        kwargs["Gpu"] = args["gpuids"]
 # TODO Figure out how user input might interact with Trunc calculation
 #| `-Trunc` | User Input / Calculated | `setAlignedSumFrameList`, `-nframe`, `-startframe`, `driftlimit`, `apix` | |
-    if "totaldose" in cli_args.keys():
-        totaldose = cli_args["totaldose"]
+    if "totaldose" in args.keys():
+        totaldose = args["totaldose"]
     else:
         totaldose = None
 
@@ -43,7 +43,7 @@ def constructMotionCorKwargs(imgmetadata : dict, cli_args : dict, input_path : s
 
     #OutMrc
     #Path to the aligned aligned/summed micrograph.
-    kwargs['OutMrc'] = os.path.join(cli_args['rundir'],imgmetadata['imgdata']['filename']+'_c.mrc')
+    kwargs['OutMrc'] = os.path.join(args['rundir'],imgmetadata['imgdata']['filename']+'_c.mrc')
 
     # Gain
     # Get the reference image
@@ -62,22 +62,46 @@ def constructMotionCorKwargs(imgmetadata : dict, cli_args : dict, input_path : s
     # self.setCameraInfo(1,use_full_raw_area)
         
     # Get the dark image.  Create it if it does not exist.
-    dark_path=os.path.join(cli_args["rundir"], imgmetadata['imgdata']['filename']+"_dark.mrc")
+    ccdcamera_id=0
+    cameraemdata_id=0
+    darkmetadata_darkimagedata_id=0
+    darkmetadata_sessiondata_id=0
+    if imgmetadata["ccdcamera"]:
+        if "def_id" in imgmetadata["ccdcamera"].keys():
+            ccdcamera_id=imgmetadata["ccdcamera"]["def_id"]
+    if imgmetadata["cameraemdata"]:
+        if "def_id" in imgmetadata["cameraemdata"].keys():
+            cameraemdata_id=imgmetadata["cameraemdata"]["def_id"]
+    if imgmetadata['darkmetadata']:
+        if imgmetadata['darkmetadata']['darkimagedata']:
+            if "def_id" in imgmetadata['darkmetadata']['darkimagedata'].keys():
+                darkmetadata_darkimagedata_id=imgmetadata['darkmetadata']['darkimagedata']['def_id']
+        if imgmetadata['darkmetadata']['sessiondata']:
+            if "def_id" in imgmetadata['darkmetadata']['sessiondata'].keys():
+                darkmetadata_sessiondata_id=imgmetadata['darkmetadata']['sessiondata']["def_id"]
+    dark_unique_id="ccd-%d_cameraem-%d_image-%d_session-%d" % (ccdcamera_id, cameraemdata_id, darkmetadata_darkimagedata_id, darkmetadata_sessiondata_id)
+    dark_path=os.path.join(args["rundir"], "dark-%s.mrc" % dark_unique_id)
     kwargs["Dark"]=dark_path
 
     # DefectMap
     if imgmetadata['correctorplandata']['bad_pixels'] or imgmetadata['correctorplandata']['bad_cols'] or imgmetadata['correctorplandata']['bad_rows']:
-        defect_map_path=os.path.join(cli_args["rundir"], "defectmap-correctorplan-%d_camera-%d.mrc" % (imgmetadata['correctorplandata']["def_id"], imgmetadata['cameraemdata']["def_id"]))
+        correctorplan_id=0
+        if imgmetadata["correctorplandata"]:
+            if "def_id" in imgmetadata["correctorplandata"].keys():
+                correctorplan_id=imgmetadata["correctorplandata"]["def_id"]
+        defect_map_unique_id="cameraem-%d_correctorplan-%d" % (cameraemdata_id, correctorplan_id)
+        defect_map_path=os.path.join(args["rundir"], "defectmap-%s.mrc" % defect_map_unique_id)
         kwargs["DefectMap"]=defect_map_path
 
     # FmIntFile
     # FmDose
     if "InEer" in kwargs.keys():
-        kwargs["FmDose"] = calcFmDose(imgmetadata['cameraemdata']['nframes'], imgmetadata['cameraemdata']['exposure_time'], imgmetadata['cameraemdata']['frame_time'], imgmetadata['presetdata']['dose'], cli_args['rendered_frame_size'], totaldose, True)
-        fmintfile_path=os.path.join(cli_args["rundir"], "fmintfile_camera-%d_rfs-%d_dose-%d.txt" % imgmetadata['cameraemdata']["def_id"], cli_args['rendered_frame_size'], kwargs["FmDose"])
+        kwargs["FmDose"] = calcFmDose(imgmetadata['cameraemdata']['nframes'], imgmetadata['cameraemdata']['exposure_time'], imgmetadata['cameraemdata']['frame_time'], imgmetadata['presetdata']['dose'], args['rendered_frame_size'], totaldose, True)
+        fmintfile_unique_id="cameraem-%d_framesize-%d_fmdose-%d" % (cameraemdata_id, args['rendered_frame_size'], kwargs["FmDose"])
+        fmintfile_path=os.path.join(args["rundir"], "fmintfile-%s.txt" % fmintfile_unique_id)
         kwargs["FmIntFile"] = fmintfile_path
     else:
-        kwargs["FmDose"] = calcFmDose(imgmetadata['cameraemdata']['nframes'], imgmetadata['cameraemdata']['exposure_time'], imgmetadata['cameraemdata']['frame_time'], imgmetadata['presetdata']['dose'], cli_args['rendered_frame_size'], totaldose, False)
+        kwargs["FmDose"] = calcFmDose(imgmetadata['cameraemdata']['nframes'], imgmetadata['cameraemdata']['exposure_time'], imgmetadata['cameraemdata']['frame_time'], imgmetadata['presetdata']['dose'], args['rendered_frame_size'], totaldose, False)
 
     # PixSize
 
@@ -99,7 +123,7 @@ def constructMotionCorKwargs(imgmetadata : dict, cli_args : dict, input_path : s
     # FlipGain
     kwargs['RotGain'], kwargs['FlipGain'] = calcRotFlipGain(imgmetadata["cameraemdata"]['frame_rotate'], 
                                                            imgmetadata["cameraemdata"]['frame_flip'], 
-                                                           cli_args['force_cpu_flat'], 
+                                                           args['force_cpu_flat'], 
                                                            imgmetadata['frame_aligner_flat'])
 
 

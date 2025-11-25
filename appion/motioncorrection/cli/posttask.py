@@ -88,12 +88,6 @@ def postTask(imageid, kwargs, imgmetadata, jobmetadata, args, logData, logStdOut
     #saveDDStackParamsData(args['preset'], args['align'], args['bin'], ref_apddstackrundata_unaligned_ddstackrun, method, ref_apstackdata_stack, ref_apdealignerparamsdata_de_aligner)
 
     if args["clean"]:
-        if "Dark" in kwargs.keys():
-            if os.path.exists(kwargs["Dark"]):
-                os.remove(kwargs["Dark"])
-        if "DefectMap" in kwargs.keys():
-            if os.path.exists(kwargs["DefectMap"]):
-                os.remove(kwargs["DefectMap"])
         # Don't remove if symbolic links were used instead of hard links
         if not os.path.islink(abs_path_aligned_image_mrc_image):
             if os.path.exists(kwargs["OutMrc"]):

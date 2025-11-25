@@ -65,21 +65,32 @@ def readShiftsBetweenFrames(logfile : str) -> list:
 # Retrieves metadata from the database that is used to calculate inputs to motioncor2/motioncor3
 def readImageMetadata(imageid: int, has_bad_pixels : bool = False, is_align : bool = False, has_non_zero_dark : bool = False):
     imgmetadata={}
+    # Simplify determining how an image's settings agree with other images by creating a unique ID based off of foreign keys.
+    # Always starts with zero for purely aesthetic reasons / to prevent starting with a hyphen while still allowing us to reorder
+    # the string appends at a later date.
+    ref_uuid="0"
     imgmetadata['imgdata']=sb.get("AcquisitionImageData",{"def_id":imageid})
     if "ref_correctorplandata_corrector_plan" in imgmetadata['imgdata'].keys():
         imgmetadata['correctorplandata']=sb.get("CorrectorPlanData",{"def_id":imgmetadata['imgdata']["ref_correctorplandata_corrector_plan"]})
+        ref_uuid+="-%d" % imgmetadata['imgdata']["ref_correctorplandata_corrector_plan"]
     else:
         imgmetadata['correctorplandata']={}
         imgmetadata['correctorplandata']["def_id"]=None
         imgmetadata['correctorplandata']["bad_pixels"]=None
         imgmetadata['correctorplandata']["bad_rows"]=None
         imgmetadata['correctorplandata']["bad_cols"]=None
+        ref_uuid+="-%d" % 0
 
     imgmetadata['sessiondata']=sb.get("SessionData",{"def_id":imgmetadata['imgdata']["ref_sessiondata_session"]})
     imgmetadata['cameraemdata']=sb.get("CameraEMData",{"def_id":imgmetadata['imgdata']["ref_cameraemdata_camera"]})
     imgmetadata['ccdcamera']=sb.get("InstrumentData",{"def_id" : imgmetadata['cameraemdata']["ref_instrumentdata_ccdcamera"]})
     imgmetadata['presetdata']=sb.get("PresetData",{"def_id":imgmetadata['imgdata']["ref_presetdata_preset"]})
     imgmetadata['scope']=sb.get("ScopeEMData", {"def_id":imgmetadata['imgdata']["ref_scopeemdata_scope"]})
+    ref_uuid+="-%d" % imgmetadata['imgdata']["ref_sessiondata_session"]
+    ref_uuid+="-%d" % imgmetadata['imgdata']["ref_cameraemdata_camera"]
+    ref_uuid+="-%d" % imgmetadata['cameraemdata']["ref_instrumentdata_ccdcamera"]
+    ref_uuid+="-%d" % imgmetadata['imgdata']["ref_presetdata_preset"]
+    ref_uuid+="-%d" % imgmetadata['imgdata']["ref_scopeemdata_scope"]
     if "frame_time" not in imgmetadata['cameraemdata'].keys():
         imgmetadata['cameraemdata']["frame_time"]=None   
     if "dose" not in imgmetadata['presetdata'].keys():
@@ -102,17 +113,20 @@ def readImageMetadata(imageid: int, has_bad_pixels : bool = False, is_align : bo
         imgmetadata['gainmetadata']['normimagedata']=sb.get("NormImageData", {"def_id" : imgmetadata['imgdata']["ref_normimagedata_norm"]})
         imgmetadata['gainmetadata']['sessiondata']=sb.get("SessionData", {"def_id" : imgmetadata['gainmetadata']['normimagedata']["ref_sessiondata_session"]})
         imgmetadata['gain_input']=os.path.join(imgmetadata['gainmetadata']['sessiondata']["image_path"],imgmetadata['gainmetadata']['normimagedata']["mrc_image"])
+        ref_uuid+="-%d" % imgmetadata['imgdata']["ref_normimagedata_norm"]
     else:
         imgmetadata['gainmetadata']={}
         imgmetadata['gainmetadata']['normimagedata']={}
         imgmetadata['gainmetadata']['sessiondata']={}
         imgmetadata['gain_input']=""
+        ref_uuid+="-%d" % 0
     if "ref_darkimagedata_dark" in imgmetadata['imgdata'].keys():
         imgmetadata['darkmetadata']={}
         imgmetadata['darkmetadata']['darkimagedata'] = sb.get("DarkImageData", {"def_id" : imgmetadata['imgdata']['ref_darkimagedata_dark']})
         imgmetadata['darkmetadata']['sessiondata']=sb.get("SessionData", {"def_id" : imgmetadata['darkmetadata']['darkimagedata']["ref_sessiondata_session"]})
         imgmetadata['dark_input']=os.path.join(imgmetadata['darkmetadata']['sessiondata']["image_path"],imgmetadata['darkmetadata']['darkimagedata']["mrc_image"])
         imgmetadata['darkmetadata']['cameraemdata']=sb.get("CameraEMData", {"camera":imgmetadata['darkmetadata']['darkimagedata']["ref_cameraemdata_camera"]})
+        ref_uuid+="-%d" % imgmetadata['imgdata']["ref_darkimagedata_dark"]
     else:
         imgmetadata['darkmetadata']={}
         imgmetadata['darkmetadata']['darkimagedata']={}
@@ -120,4 +134,6 @@ def readImageMetadata(imageid: int, has_bad_pixels : bool = False, is_align : bo
         imgmetadata['dark_input']=""
         imgmetadata['darkmetadata']['cameraemdata']={}
         imgmetadata['darkmetadata']['cameraemdata']['nframes']=None
+        ref_uuid+="-%d" % 0
+    imgmetadata["ref_uuid"]=ref_uuid
     return imgmetadata

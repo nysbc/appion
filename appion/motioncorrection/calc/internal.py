@@ -1,6 +1,7 @@
 import numpy
 import math
 import os
+import multiprocessing
 
 ## Calculations for parameters used in motioncor2 command
 # InMrc, InTiff, InEer functions
@@ -219,3 +220,30 @@ def calcMotionCorrLogPath(framestackpath):
 
 def calcMotionCor2LogPath(framestackpath):
     return os.path.splitext(framestackpath)[0]+"_Log.motioncor2.txt"
+
+def optimized_motioncor(kwlist, processes):
+    from .external import motioncor
+    from multiprocessing import Pool
+    inputs=[]
+    for kwargs in kwlist:
+        if "InMrc" in kwargs.keys():
+            inputs.append(kwargs["InMrc"])
+        elif "InTiff" in kwargs.keys():
+            inputs.append(kwargs["InTiff"])
+        elif "InEer" in kwargs.keys():
+            inputs.append(kwargs["InEer"])
+    outputs=[]
+    with Pool(processes=processes) as pool:
+        # Prefetch all of the inputs for this batch in parallel
+        # in the background.
+        for i in list(inputs):
+            pool.apply_async(prefetch, (i,))
+        for kwargs in kwlist:
+            result=pool.apply_async(motioncor(**kwargs))
+            outputs.append(result.get())
+    
+
+def prefetch(fpath):
+    with open(fpath, 'r') as f:
+        f.readlines()
+    

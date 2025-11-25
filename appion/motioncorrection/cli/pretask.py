@@ -1,6 +1,49 @@
-def preTask(imageid, args):
+import os
+from .constructors import constructMotionCorKwargs
+from ..calc.internal import calcImageDefectMap
+from ..store import saveDefectMrc, saveDark, saveFmIntFile
+
+def preTask(tasklist, args, batch_size, executor):
+    futures=[]
+    with executor.batch():
+        for imageid in tasklist:
+            future = executor.submit(preTaskMap, imageid, args)
+            futures.append(future)
+    map_outputs=[future.result() for future in futures]
+    merged_imgmetadata=preTaskReduce(map_outputs)
+    batches=[]
+    for ref_uuid in merged_imgmetadata.keys():
+        input_count=len(merged_imgmetadata[ref_uuid]["inputs"])
+        imgmetadata=merged_imgmetadata[ref_uuid]["imgmetadata"]
+        for idx in range(0, input_count, batch_size):
+            batch=[]
+            if idx + batch_size >= input_count:
+                input_paths=merged_imgmetadata[ref_uuid]["inputs"][idx:]
+            else:
+                input_paths=batch["inputs"]=merged_imgmetadata[ref_uuid]["inputs"][idx:batch_size]
+            for input_path in input_paths:
+                kwargs=constructMotionCorKwargs(imgmetadata, args, input_path)
+                if not os.path.exists(kwargs["Dark"]):
+                    saveDark(kwargs["Dark"], imgmetadata["ccdcamera"]['name'], imgmetadata['cameraemdata']['eer_frames'], imgmetadata["dark_input"], imgmetadata['darkmetadata']['cameraemdata']["nframes"])
+                if "FmIntFile" in kwargs.keys():
+                    if not os.path.exists(kwargs["FmIntFile"]):
+                        saveFmIntFile(kwargs["FmIntFile"], imgmetadata['cameraemdata']['nframes'], args['rendered_frame_size'], kwargs["FmDose"] / args['rendered_frame_size'])
+                if 'DefectMap' in kwargs.keys():
+                    if not os.path.exists(kwargs['DefectMap']):
+                        defect_map=calcImageDefectMap(imgmetadata["correctorplandata"]['bad_rows'], 
+                                                    imgmetadata["correctorplandata"]['bad_cols'], 
+                                                    imgmetadata["correctorplandata"]['bad_pixels'], 
+                                                    imgmetadata['cameraemdata']["subd_dimension_x"], 
+                                                    imgmetadata['cameraemdata']["subd_dimension_y"], 
+                                                    imgmetadata['cameraemdata']['frame_flip'], 
+                                                    imgmetadata['cameraemdata']['frame_rotate'])
+                        saveDefectMrc(kwargs['DefectMap'], defect_map)
+                batch.append(kwargs)
+            batches.append(batch)
+    return batches
+
+def preTaskMap(imageid, args):
     import logging, sys
-    from .constructors import constructMotionCorKwargs
     from ..retrieve.params import readInputPath, readImageMetadata
     logger=logging.getLogger(__name__)
     logHandler=logging.StreamHandler(sys.stdout)
@@ -20,5 +63,16 @@ def preTask(imageid, args):
     input_path = readInputPath(imgmetadata['sessiondata']['frame_path'],imgmetadata['imgdata']['filename'])
     if input_path is None:
         raise RuntimeError("Input file for %d does not exist." % imgmetadata["imgdata"]["def_id"])
-    kwargs=constructMotionCorKwargs(imgmetadata, args, input_path)
-    return kwargs, imgmetadata
+    return imgmetadata, input_path
+
+def preTaskReduce(map_outputs):
+    merged_imgmetadata={}
+    for imgmetadata, input_path in map_outputs:
+        ref_uuid=merged_imgmetadata[imgmetadata["ref_uuid"]]
+        if ref_uuid not in merged_imgmetadata.keys():
+            merged_imgmetadata[ref_uuid]={}
+            merged_imgmetadata[ref_uuid]["imgmetadata"]=imgmetadata
+            merged_imgmetadata[ref_uuid]["inputs"]=[input_path]
+        else:
+            merged_imgmetadata[ref_uuid]["inputs"].append(input_path)
+    return merged_imgmetadata
