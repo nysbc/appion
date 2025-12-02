@@ -40,3 +40,6 @@ def constructCTFFindParser():
         action="store_true", help="Find additionalphase shift")
     parser.add_argument("--exhaust", "--exhaustive-search", dest="exhaustiveSearch", default=False,
         action="store_true", help="Conduct an exhaustive search of the astigmatism of the CTF")
+    
+    parser.add_argument("-i", "--cs_dir", dest="cryosparc_dir",
+        help="Path to CryoSPARC session or job directory.", required=True)
