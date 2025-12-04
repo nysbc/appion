@@ -12,9 +12,6 @@ def retrieveDoneImages(rundir, session_id):
     runs=set(runs)
     imageIds=set()
     for run in runs:
-        try:
-            runImageIds=sb.filter("ApCtfData", {"ref_apacerundata_acerun" :run})
-            imageIds=imageIds | set([imageid["ref_acquisitionimagedata_source"] for imageid in runImageIds])
-        except:
-            continue
+        runImageIds=sb.filter("ApCtfData", {"ref_apacerundata_acerun" :run})
+        imageIds=imageIds | set([imageid["ref_acquisitionimagedata_image"] for imageid in runImageIds])
     return imageIds
