@@ -106,7 +106,7 @@ def readCryoSPARCJobExposure(cs_path, imgmetadata):
     for micrograph in micrograph_blob:
         abs_file_path=os.readlink(os.path.join(cs_path,"..",str(micrograph["micrograph_blob/path"].decode())))
         exposure_filename=os.path.basename(abs_file_path)
-        if imgmetadata['imgdata']['filename'] == exposure_filename:
+        if imgmetadata['imgdata']['filename'] in exposure_filename:
             break
         idx+=1
     idx-=1
@@ -135,5 +135,4 @@ def readCryoSPARCJobExposure(cs_path, imgmetadata):
     exposure["groups"]["exposure"]["ctf_stats"]["fit_data_path"] = [str(ctf_stats[idx]["ctf_stats/fit_data_path"].decode())]
     exposure["groups"]["exposure"]["micrograph_blob"]={}
     exposure["groups"]["exposure"]["micrograph_blob"]["path"] = [str(micrograph_blob[idx]["micrograph_blob/path"].decode())]
-
     return exposure
