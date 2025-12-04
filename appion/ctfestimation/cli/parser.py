@@ -43,3 +43,4 @@ def constructCTFFindParser():
     
     parser.add_argument("-i", "--cs_dir", dest="cryosparc_dir",
         help="Path to CryoSPARC session or job directory.", required=True)
+    return parser

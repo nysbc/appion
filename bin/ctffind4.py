@@ -7,18 +7,18 @@ import os
 from fcntl import flock, LOCK_EX, LOCK_UN
 from appion.base.cli import constructGlobalParser
 from appion.ctfestimation.cli.parser import constructCTFFindParser
-from appion.ctfestimation.retrieve.images import retrieveDoneImages
 import sinedon.setup
 
 def main():
     parser = argparse.ArgumentParser(parents=[constructGlobalParser(), constructCTFFindParser()])
     args = parser.parse_args()
     sinedon.setup(args.projectid)
-    from appion.ctfestimation.cli.constructors import constructMotionCor2JobMetadata
     from appion.base.retrieve import readSessionData
     from appion.base.store import updateApAppionJobData
     from appion.base.loop import loop
     from appion.ctfestimation.cli.ingest import process_task
+    from appion.ctfestimation.retrieve.images import retrieveDoneImages
+    from appion.ctfestimation.cli.constructors import constructCtfFind4JobMetadata
     if not os.path.exists(args.rundir):
         os.makedirs(args.rundir)
     # Create a lock in the run directory so that only one loop can run at a time.
@@ -33,10 +33,10 @@ def main():
         f.write(str(os.getpid()))
         session_metadata=readSessionData(args.sessionname)
         arg_dict=vars(args)
-        loop(lambda imageid : process_task(imageid, arg_dict, args.cryosparc_import_dir, args.cryosparc_motioncorrection_dir),
+        loop(lambda imageid : process_task(imageid, arg_dict, args.cryosparc_dir),
                 arg_dict,
                 lambda : retrieveDoneImages(args.rundir, session_metadata['session_id']),
-                lambda : constructMotionCor2JobMetadata(arg_dict),
+                lambda : constructCtfFind4JobMetadata(arg_dict),
                 lambda jobmetadata : updateApAppionJobData(jobmetadata['ref_apappionjobdata_job'], dict(status="D")))
         flock(f, LOCK_UN)
  

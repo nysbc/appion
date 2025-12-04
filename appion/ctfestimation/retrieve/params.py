@@ -25,6 +25,8 @@ def readCryoSPARCMetadata(cs_path, imgmetadata):
     csmetadata["defstep"] = None
     csmetadata["shift_phase"] = exposure["attributes"]["phase_shift"]
 
+    csmetadata["min_phase_shift"] = None
+    csmetadata["max_phase_shift"] = None
     if csmetadata["shift_phase"]:
         csmetadata["min_phase_shift"] = exposure["groups"]["exposure"]["ctf"]["phase_shift_rad"][0]
         csmetadata["max_phase_shift"] = exposure["groups"]["exposure"]["ctf"]["phase_shift_rad"][-1]
@@ -56,7 +58,7 @@ def readCryoSPARCMetadata(cs_path, imgmetadata):
     csmetadata["mat_file"] = None
     csmetadata["extra_phase_shift"] = None
     csmetadata["df_angle_rad"] = exposure["groups"]["exposure"]["ctf"]["df_angle_rad"][0]
-    csmetadata["fit_data_path"] = exposure["groups"]["exposure"]["ctf_stats"]["fit_data_path"][0]
+    csmetadata["fit_data_path"] = os.path.basename(exposure["groups"]["exposure"]["ctf_stats"]["fit_data_path"][0])
     csmetadata["micrograph_path"] = exposure["groups"]["exposure"]["micrograph_blob"]["path"][0]    
     return csmetadata
 
@@ -81,29 +83,33 @@ def readCryoSPARCJobExposure(cs_path, imgmetadata):
     ctf=None
     ctf_stats=None
     micrograph_blob=None
-    for result in data["spec"]["outputs"]["exposures"]["results"]:
-        if result["name"] == "ctf":
+    for result in data["output_results"]:
+        if result["name"] == "ctf" and result["group_name"]=="exposures":
             if len(result["metafiles"]) == 1:
-                with open(os.path.join(cs_path,"..",result["metafiles"][0]), "rb") as f:
+                ctf_path=os.path.join(cs_path,"..",result["metafiles"][0])
+                if not os.path.isfile(ctf_path):
+                    continue
+                with open(ctf_path, "rb") as f:
                     ctf=np.load(f)
-        if result["name"] == "ctf_stats":
+        if result["name"] == "ctf_stats" and result["group_name"]=="exposures":
             if len(result["metafiles"]) == 1:
                 with open(os.path.join(cs_path,"..", result["metafiles"][0]), "rb") as f:
                     ctf_stats=np.load(f)
-        if result["name"] == "micrograph_blob":
+        if result["name"] == "micrograph_blob" and result["group_name"]=="exposures":
             if len(result["metafiles"]) == 1:
                 with open(os.path.join(cs_path,"..",result["metafiles"][0]), "rb") as f:
-                    ctf=np.load(f)
-    if not ctf or not ctf_stats or not micrograph_blob:
+                    micrograph_blob=np.load(f)
+    if not list(ctf) or not list(ctf_stats) or not list(micrograph_blob):
         raise RuntimeError("Could not read metadata for exposure.")
     
     idx=0
     for micrograph in micrograph_blob:
-        abs_file_path=os.readlink(os.path.join(cs_path,"..",str(micrograph["micrograph_blob/path"])))
+        abs_file_path=os.readlink(os.path.join(cs_path,"..",str(micrograph["micrograph_blob/path"].decode())))
         exposure_filename=os.path.basename(abs_file_path)
         if imgmetadata['imgdata']['filename'] == exposure_filename:
             break
         idx+=1
+    idx-=1
 
     exposure={}
     exposure["groups"]={}

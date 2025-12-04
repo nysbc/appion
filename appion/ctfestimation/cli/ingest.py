@@ -24,7 +24,7 @@ def process_task(imageid, args, cryosparc_dir):
     logger.info("Saving metadata to ApAceRunData.")
     ref_apacerundata_acerun=saveApAceRunData(args["runname"], args["rundir"],imgmetadata['sessiondata']['def_id'], ref_apctffind4paramsdata_ctffind4_params)
 
-    fit_data_path = os.path.join(cryosparc_dir, csmetadata['fit_data_path'])
+    fit_data_path = os.path.join(cryosparc_dir, "ctfestimated", csmetadata['fit_data_path'])
     if not os.path.exists(fit_data_path):
         raise RuntimeError("Could not find ctfdiag file for exposure.")
     ctfdiag = np.load(fit_data_path)

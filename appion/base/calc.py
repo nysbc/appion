@@ -37,7 +37,7 @@ def calcSlicedImageSet(images, startimgid, endimgid):
 def calcCryoSPARCDirectoryType(cs_path):
     if os.path.exists(os.path.join(cs_path,"exposures.bson")):
         return "session"
-    elif os.path.exists(os.path.join(cs_path),"job.json"):
+    elif os.path.exists(os.path.join(cs_path,"job.json")):
         return "job"
     else:
         return None

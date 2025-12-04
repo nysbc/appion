@@ -4,6 +4,7 @@
 import os
 import sinedon.base as sb
 import matplotlib.pyplot as plt
+import numpy as np
 
 def saveApCtfFind4ParamsData(bestdb, ampcontrast, fieldsize, cs, resmin, defstep, shift_phase, min_phase_shift, max_phase_shift, phase_search_step):
     apctffind4paramsdata = sb.set("ApCtfFind4ParamsData",{"bestdb" : bestdb, 
@@ -92,3 +93,4 @@ def savePowAvRot(figpath, ctfdiag, defocus1 ,defocus2, df_angle_rad):
     plt.grid(which='major')
     plt.grid(which='minor', linestyle=':', color='lightgray')
     plt.savefig(figpath, format="png")
+    plt.close()
