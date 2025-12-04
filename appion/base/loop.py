@@ -25,13 +25,14 @@ def loop(process_task: Callable, args: dict, retrieveDoneImages : Callable = lam
         sys.exit(0)
 
     # Set up logging
-    logger=logging.getLogger(__name__)
+    logger=logging.getLogger()
     logHandler=logging.StreamHandler(sys.stdout)
     logFormatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(funcName)s - %(process)d - %(message)s")
     logHandler.setFormatter(logFormatter)
     logger.setLevel("INFO")
     logHandler.setLevel("INFO")
     logger.addHandler(logHandler)
+    logger=logging.getLogger(__name__)
 
     # Set up the control loop and signal handlers.
     signal(SIGTERM, handler)
