@@ -1,12 +1,15 @@
 import os
-from .constructors import constructMotionCorKwargs
-from ..calc.internal import calcImageDefectMap
-from ..store import saveDefectMrc, saveDark, saveFmIntFile
+import submitit
 
-def preTask(tasklist, args, batch_size, executor):
+def preTask(tasklist, args, batch_size):
+    from ..calc.internal import calcImageDefectMap
+    from ..store import saveDefectMrc, saveDark, saveFmIntFile
+    from .constructors import constructMotionCorKwargs
     futures=[]
+    executor = submitit.AutoExecutor(folder=os.path.join(args["rundir"], "working"))
+    executor.update_parameters(timeout_min=6, slurm_partition="appion-motioncorrection", slurm_cpus_per_task=batch_size*2, slurm_array_parallelism=32)
     with executor.batch():
-        for imageid in tasklist:
+        f]]or imageid in tasklist:
             future = executor.submit(preTaskMap, imageid, args)
             futures.append(future)
     map_outputs=[future.result() for future in futures]
@@ -44,6 +47,8 @@ def preTask(tasklist, args, batch_size, executor):
 
 def preTaskMap(imageid, args):
     import logging, sys
+    import sinedon.setup
+    sinedon.setup(args["projectid"])
     from ..retrieve.params import readInputPath, readImageMetadata
     logger=logging.getLogger(__name__)
     logHandler=logging.StreamHandler(sys.stdout)
@@ -68,7 +73,7 @@ def preTaskMap(imageid, args):
 def preTaskReduce(map_outputs):
     merged_imgmetadata={}
     for imgmetadata, input_path in map_outputs:
-        ref_uuid=merged_imgmetadata[imgmetadata["ref_uuid"]]
+        ref_uuid=imgmetadata["ref_uuid"]
         if ref_uuid not in merged_imgmetadata.keys():
             merged_imgmetadata[ref_uuid]={}
             merged_imgmetadata[ref_uuid]["imgmetadata"]=imgmetadata

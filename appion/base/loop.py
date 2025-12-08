@@ -8,7 +8,7 @@ from typing import Callable
 
 # Parameters passed in using lambdas.
 def loop(args: dict, pipeline:  Callable = lambda tasklist, args : {}, retrieveDoneImages : Callable = lambda : set(), preLoop : Callable = lambda args : {}, 
-         postLoop : Callable = lambda jobmetadata : None, retrieveReprocessImages : Callable = lambda : set()) -> None:
+        postLoop : Callable = lambda jobmetadata : None, retrieveReprocessImages : Callable = lambda : set(), tasklimit: int = 200) -> None:
     jobmetadata={}
     # Signal handler used to ensure that cleanup happens if SIGINT, SIGCONT or SIGTERM is received.
     def handler(signum, frame):
@@ -60,14 +60,17 @@ def loop(args: dict, pipeline:  Callable = lambda tasklist, args : {}, retrieveD
         tasklist=list(taskset)
         tasklist.sort()
         tasklist.reverse() 
+        tasklist=tasklist[0:tasklimit]
         t1=time()
         logger.info("Constructed task list in %d seconds." % (t1-t0))
         logger.info("Image counts: %d total images, %d done images, %d rejected images, and %d images marked for reprocessing." % (len(all_images), len(done_images), len(rejected_images), len(reprocess_images)))
         if tasklist:
             pipeline_t0=time()
-            pipeline(tasklist)
+            futures=pipeline(tasklist)
+            futures_wait(futures, len(tasklist), time(), "Task")
             pipeline_t1=time()
-            logger.info("Finished processing %d images in %d seconds." % (len(prev_taskset), (pipeline_t1-pipeline_t0)))
+            logger.info("Finished processing %d images in %d seconds." % (len(tasklist), (pipeline_t1-pipeline_t0)))
+            prev_taskset=taskset
         else:
             logger.info(f"No new images.  Waiting {waitTime} seconds.")
             sleep(waitTime)

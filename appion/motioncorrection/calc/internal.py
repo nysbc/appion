@@ -239,8 +239,9 @@ def optimized_motioncor(kwlist, processes):
         for i in list(inputs):
             pool.apply_async(prefetch, (i,))
         for kwargs in kwlist:
-            result=pool.apply_async(motioncor(**kwargs))
-            outputs.append(result.get())
+            result=pool.apply(motioncor, kwds=kwargs)
+            outputs.append(result)
+    return outputs
     
 
 def prefetch(fpath):
