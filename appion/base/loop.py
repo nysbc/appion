@@ -66,8 +66,7 @@ def loop(args: dict, pipeline:  Callable = lambda tasklist, args : {}, retrieveD
         logger.info("Image counts: %d total images, %d done images, %d rejected images, and %d images marked for reprocessing." % (len(all_images), len(done_images), len(rejected_images), len(reprocess_images)))
         if tasklist:
             pipeline_t0=time()
-            futures=pipeline(tasklist)
-            futures_wait(futures, len(tasklist), time(), "Task")
+            pipeline(tasklist, jobmetadata)
             pipeline_t1=time()
             logger.info("Finished processing %d images in %d seconds." % (len(tasklist), (pipeline_t1-pipeline_t0)))
             prev_taskset=taskset
@@ -80,20 +79,22 @@ def loop(args: dict, pipeline:  Callable = lambda tasklist, args : {}, retrieveD
                     prev_taskset=set()
                     failure_waits=0
 
-def futures_wait(futures : list, unprocessed_image_count : int, throughput_t0 : int, log_prefix : str = "Generic", step : int = 20):
+def futures_wait(futures : list, log_prefix : str = "Generic", step : int = 20):
+    throughput_t0=time()
     logger=logging.getLogger(__name__)
     future_complete_counter=0
+    total_future_count=len(futures)
     future_progress_counter=0
     while future_complete_counter != len(futures) and len(futures) != 0:
         future_complete_counter = sum(f.done() for f in futures)
         if future_complete_counter > future_progress_counter and future_complete_counter != 0:
             throughput_t1=time()
             throughput=(future_complete_counter)/(((throughput_t1-throughput_t0))/60.)
-            remaining_image_count=unprocessed_image_count-future_complete_counter
-            logger.info("[%s] Progress: %d / %d images processed." % (log_prefix, future_complete_counter, unprocessed_image_count))
-            logger.info("[%s] Throughput: %.2f images/min." % (log_prefix, throughput))
+            remaining_future_count=total_future_count-future_complete_counter
+            logger.info("[%s] Progress: %d / %d futures processed." % (log_prefix, future_complete_counter, total_future_count))
+            logger.info("[%s] Throughput: %.2f futures/min." % (log_prefix, throughput))
             if throughput > 0.0:
-                logger.info("[%s] Estimated remaining time: %.2f min." % (log_prefix, (remaining_image_count/throughput)))
+                logger.info("[%s] Estimated remaining time: %.2f min." % (log_prefix, (remaining_future_count/throughput)))
             else:
                 logger.info("[%s] Estimated remaining time: N/A min." % log_prefix)
             future_progress_counter+=step

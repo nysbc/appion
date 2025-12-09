@@ -1,6 +1,7 @@
 import submitit
 import os
 from .pretask import preTask
+from .posttask import postTask
 
 # def pipeline(batchid: int, imageids: int, args : dict, jobmetadata: dict):
 #     # Sinedon needs to be reimported and setup within the local scope of this function
@@ -27,10 +28,14 @@ from .pretask import preTask
 #     for imageid in image_pretask_results.keys():
 #         postTask(imageid, image_pretask_results[imageid]['kwargs'], image_pretask_results[imageid]['imgmetadata'], jobmetadata, args, logData, logStdOut)
 
-def pipeline(tasklist, args, batch_size : int = 1):
+def pipeline(tasklist, args, jobmetadata, batch_size : int = 1):
+    from ...base.loop import futures_wait
     batches=preTask(tasklist, args, batch_size)
     futures=task(batches, args, batch_size)
-    return futures
+    futures_wait(futures)
+    for idx, batch in enumerate(batches):
+        logData, logStdOut = futures[idx].get()
+        postTask(batch["imgmetadata"]['imgdata']["def_id"], batch["kwargs"], batch["imgmetadata"], jobmetadata, args, logData, logStdOut)
 
 def task(batches, args, batch_size):
     from ..calc.internal import optimized_motioncor
@@ -40,6 +45,6 @@ def task(batches, args, batch_size):
     futures=[]
     with executor.batch():
         for batch in batches:
-            future = executor.submit(optimized_motioncor, batch, cpu_count)
+            future = executor.submit(optimized_motioncor, batch["kwargs"], cpu_count)
             futures.append(future)
     return futures

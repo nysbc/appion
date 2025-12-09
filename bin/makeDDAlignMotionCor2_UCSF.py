@@ -40,7 +40,7 @@ def main():
         if 'gpuid' in arg_dict.keys():
             arg_dict['gpuid']=0
         loop(arg_dict,
-                lambda tasklist : pipeline(tasklist, arg_dict),
+                lambda tasklist, jobmetadata : pipeline(tasklist, arg_dict, jobmetadata),
                 lambda : retrieveDoneImages(args.rundir, session_metadata['session_id']),
                 lambda : constructMotionCor2JobMetadata(arg_dict),
                 lambda jobmetadata : updateApAppionJobData(jobmetadata['ref_apappionjobdata_job'], dict(status="D")))
