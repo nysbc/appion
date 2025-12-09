@@ -74,6 +74,8 @@ def constructMotionCorKwargs(imgmetadata : dict, args : dict, input_path : str) 
     if imgmetadata["cameraemdata"]:
         if "eer_frames" in imgmetadata["cameraemdata"].keys():
             cameraem_eerframes=imgmetadata['cameraemdata']['eer_frames']
+            if not cameraem_eerframes:
+                cameraem_eerframes=0
     if imgmetadata['darkmetadata']:
         if imgmetadata['darkmetadata']['darkimagedata']:
             if "def_id" in imgmetadata['darkmetadata']['darkimagedata'].keys():
@@ -84,7 +86,9 @@ def constructMotionCorKwargs(imgmetadata : dict, args : dict, input_path : str) 
         if imgmetadata['darkmetadata']['cameraemdata']:
             if "nframes" in imgmetadata['darkmetadata']['cameraemdata'].keys():
                 darkmetadata_cameraemdata_nframes=imgmetadata['darkmetadata']['cameraemdata']["nframes"]
-    
+                if not darkmetadata_cameraemdata_nframes:
+                    darkmetadata_cameraemdata_nframes=0
+
     dark_unique_id="ccd-%d_eerframes-%d_nframes-%d_image-%d_session-%d" % (ccdcamera_id, cameraem_eerframes, darkmetadata_cameraemdata_nframes, darkmetadata_darkimagedata_id, darkmetadata_sessiondata_id)
     dark_path=os.path.join(args["rundir"], "dark-%s.mrc" % dark_unique_id)
     kwargs["Dark"]=dark_path
