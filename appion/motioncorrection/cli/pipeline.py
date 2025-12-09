@@ -34,7 +34,7 @@ def pipeline(tasklist, args, jobmetadata, batch_size : int = 1):
     futures=task(batches, args, batch_size)
     futures_wait(futures)
     for idx, batch in enumerate(batches):
-        logData, logStdOut = futures[idx].get()
+        logData, logStdOut = futures[idx].result()
         postTask(batch["imgmetadata"]['imgdata']["def_id"], batch["kwargs"], batch["imgmetadata"], jobmetadata, args, logData, logStdOut)
 
 def task(batches, args, batch_size):
@@ -45,6 +45,6 @@ def task(batches, args, batch_size):
     futures=[]
     with executor.batch():
         for batch in batches:
-            future = executor.submit(optimized_motioncor, batch["kwargs"], cpu_count)
+            future = executor.submit(optimized_motioncor, [img["kwargs"] for img in batch], cpu_count)
             futures.append(future)
     return futures
