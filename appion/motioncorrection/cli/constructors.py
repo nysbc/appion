@@ -63,15 +63,17 @@ def constructMotionCorKwargs(imgmetadata : dict, args : dict, input_path : str) 
         
     # Get the dark image.  Create it if it does not exist.
     ccdcamera_id=0
+    cameraem_eerframes=0
     cameraemdata_id=0
     darkmetadata_darkimagedata_id=0
     darkmetadata_sessiondata_id=0
+    darkmetadata_cameraemdata_nframes=0
     if imgmetadata["ccdcamera"]:
         if "def_id" in imgmetadata["ccdcamera"].keys():
             ccdcamera_id=imgmetadata["ccdcamera"]["def_id"]
     if imgmetadata["cameraemdata"]:
-        if "def_id" in imgmetadata["cameraemdata"].keys():
-            cameraemdata_id=imgmetadata["cameraemdata"]["def_id"]
+        if "eer_frames" in imgmetadata["cameraemdata"].keys():
+            cameraem_eerframes=imgmetadata['cameraemdata']['eer_frames']
     if imgmetadata['darkmetadata']:
         if imgmetadata['darkmetadata']['darkimagedata']:
             if "def_id" in imgmetadata['darkmetadata']['darkimagedata'].keys():
@@ -79,7 +81,11 @@ def constructMotionCorKwargs(imgmetadata : dict, args : dict, input_path : str) 
         if imgmetadata['darkmetadata']['sessiondata']:
             if "def_id" in imgmetadata['darkmetadata']['sessiondata'].keys():
                 darkmetadata_sessiondata_id=imgmetadata['darkmetadata']['sessiondata']["def_id"]
-    dark_unique_id="ccd-%d_cameraem-%d_image-%d_session-%d" % (ccdcamera_id, cameraemdata_id, darkmetadata_darkimagedata_id, darkmetadata_sessiondata_id)
+        if imgmetadata['darkmetadata']['cameraemdata']:
+            if "nframes" in imgmetadata['darkmetadata']['cameraemdata'].keys():
+                darkmetadata_cameraemdata_nframes=imgmetadata['darkmetadata']['cameraemdata']["nframes"]
+    
+    dark_unique_id="ccd-%d_eerframes-%d_nframes-%d_image-%d_session-%d" % (ccdcamera_id, cameraem_eerframes, darkmetadata_cameraemdata_nframes, darkmetadata_darkimagedata_id, darkmetadata_sessiondata_id)
     dark_path=os.path.join(args["rundir"], "dark-%s.mrc" % dark_unique_id)
     kwargs["Dark"]=dark_path
 

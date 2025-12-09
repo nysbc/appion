@@ -9,7 +9,7 @@ def preTask(tasklist, args, batch_size):
     executor = submitit.AutoExecutor(folder=os.path.join(args["rundir"], "working"))
     executor.update_parameters(timeout_min=6, slurm_partition="appion-motioncorrection", slurm_cpus_per_task=batch_size*2, slurm_array_parallelism=32)
     with executor.batch():
-        f]]or imageid in tasklist:
+        for imageid in tasklist:
             future = executor.submit(preTaskMap, imageid, args)
             futures.append(future)
     map_outputs=[future.result() for future in futures]

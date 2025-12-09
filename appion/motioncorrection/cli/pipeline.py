@@ -27,9 +27,7 @@ from .pretask import preTask
 #     for imageid in image_pretask_results.keys():
 #         postTask(imageid, image_pretask_results[imageid]['kwargs'], image_pretask_results[imageid]['imgmetadata'], jobmetadata, args, logData, logStdOut)
 
-def pipeline(tasklist, args, batch_size : int = 1, max_window : int = 200):
-    from ...base.loop import futures_wait
-    from time import time
+def pipeline(tasklist, args, batch_size : int = 1):
     batches=preTask(tasklist, args, batch_size)
     futures=task(batches, args, batch_size)
     return futures
