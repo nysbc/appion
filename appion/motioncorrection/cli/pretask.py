@@ -25,7 +25,7 @@ def preTask(tasklist, args, batch_size):
             else:
                 input_paths=merged_imgmetadata[ref_uuid]["inputs"][idx:batch_size]
             for input_path in input_paths:
-                input_batch={}
+                img_input={}
                 kwargs=constructMotionCorKwargs(imgmetadata, args, input_path)
                 if not os.path.exists(kwargs["Dark"]):
                     saveDark(kwargs["Dark"], imgmetadata["ccdcamera"]['name'], imgmetadata['cameraemdata']['eer_frames'], imgmetadata["dark_input"], imgmetadata['darkmetadata']['cameraemdata']["nframes"])
@@ -42,9 +42,9 @@ def preTask(tasklist, args, batch_size):
                                                     imgmetadata['cameraemdata']['frame_flip'], 
                                                     imgmetadata['cameraemdata']['frame_rotate'])
                         saveDefectMrc(kwargs['DefectMap'], defect_map)
-                input_batch["kwargs"]=kwargs
-                input_batch["imgmetadata"]=imgmetadata
-                batch.append(input_batch)
+                img_input["kwargs"]=kwargs
+                img_input["imgmetadata"]=imgmetadata
+                batch.append(img_input)
             batches.append(batch)
     return batches
 

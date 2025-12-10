@@ -29,16 +29,14 @@ from .posttask import postTask
 #         postTask(imageid, image_pretask_results[imageid]['kwargs'], image_pretask_results[imageid]['imgmetadata'], jobmetadata, args, logData, logStdOut)
 
 def pipeline(tasklist, args, jobmetadata, batch_size : int = 1):
-    from ...base.loop import futures_wait
     batches=preTask(tasklist, args, batch_size)
-    futures=task(batches, args, batch_size)
-    futures_wait(futures)
-    for idx, batch in enumerate(batches):
-        logData, logStdOut = futures[idx].result()
-        postTask(batch["imgmetadata"]['imgdata']["def_id"], batch["kwargs"], batch["imgmetadata"], jobmetadata, args, logData, logStdOut)
+    posttask_kwargs=task(batches, args, batch_size)
+    for kw in posttask_kwargs:    
+        postTask(kw["imageid"], kw["kwargs"], kw["imgmetadata"], jobmetadata, args, kw["logData"], kw["logStdOut"])
 
 def task(batches, args, batch_size):
     from ..calc.internal import optimized_motioncor
+    from ...base.loop import futures_wait
     cpu_count=batch_size+2
     executor = submitit.AutoExecutor(folder=os.path.join(args["rundir"], "working"))
     executor.update_parameters(timeout_min=6, slurm_partition="appion-motioncorrection", slurm_gres="gpu:1", slurm_cpus_per_task=cpu_count, slurm_array_parallelism=32)
@@ -47,4 +45,16 @@ def task(batches, args, batch_size):
         for batch in batches:
             future = executor.submit(optimized_motioncor, [img["kwargs"] for img in batch], cpu_count)
             futures.append(future)
-    return futures
+    futures_wait(futures)
+    posttask_kwargs=[]
+    for batch_idx, batch in enumerate(batches):
+        results=futures[batch_idx].result()
+        for img_input_idx, img_input in enumerate(batch):
+            img_posttask_kwargs={}
+            img_posttask_kwargs["imageid"]=img_input["imgmetadata"]['imgdata']["def_id"]
+            img_posttask_kwargs["kwargs"]=img_input["kwargs"]
+            img_posttask_kwargs["imgmetadata"]=img_input["imgmetadata"]
+            img_posttask_kwargs["logData"]=results[img_input_idx][0]
+            img_posttask_kwargs["logStdOut"]=results[img_input_idx][1]
+            posttask_kwargs.append(img_posttask_kwargs)
+    return posttask_kwargs
