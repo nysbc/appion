@@ -23,7 +23,7 @@ def saveApAceRunData(runname, rundir, ref_sessiondata_session, ref_apctffind4par
     path = sb.get("ApPathData", {"path" : os.path.abspath(rundir)})
     if not path:
         path["def_id"]=None
-    apacerundata = sb.set("ApAceRunData",{"runname" : runname, 
+    apacerundata = sb.set("ApAceRunData",{"name" : runname, 
                                          "ref_apctffind4paramsdata_ctffind4_params" : ref_apctffind4paramsdata_ctffind4_params, 
                                          "ref_sessiondata_session" : ref_sessiondata_session, 
                                          "ref_appathdata_path" : path["def_id"]})
