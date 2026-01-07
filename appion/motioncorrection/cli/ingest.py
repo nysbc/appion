@@ -13,14 +13,19 @@ def process_task(imageid, args, cryosparc_import_dir, cryosparc_motioncorrection
 
     jobmetadata=constructMotionCor2JobMetadata(args)
 
+    logger.info("Reading image metadata for %d" % imageid)
     imgmetadata=readImageMetadata(imageid)
+    logger.info("Determining input path for %d." % imageid)
     input_path = readInputPath(imgmetadata['sessiondata']['frame_path'],imgmetadata['imgdata']['filename'])
+    logger.info("Matching input path to CryoSPARC import path for %d" % imageid)
     import_paths = matchInputImport(input_path, cryosparc_import_dir)
     for import_path in import_paths:
         output_prefix = calcOutputPrefix(import_path)
         framestackpath=os.path.join(args["rundir"],os.path.basename(input_path))
 
         cs_traj_file=os.path.join(cryosparc_motioncorrection_dir, output_prefix+"_rigid_traj.npy")
+        if not os.path.exists(cs_traj_file):
+            cs_traj_file=os.path.join(cryosparc_motioncorrection_dir, output_prefix+"_traj.npy")
         aligned_output_file=os.path.join(cryosparc_motioncorrection_dir, output_prefix+"_patch_aligned.mrc")
         aligned_dw_output_file=os.path.join(cryosparc_motioncorrection_dir, output_prefix+"_patch_aligned_doseweighted.mrc")
         cryosparc_outputs_exist=True
@@ -28,6 +33,8 @@ def process_task(imageid, args, cryosparc_import_dir, cryosparc_motioncorrection
             if not os.path.exists(cryosparc_output):
                 cryosparc_outputs_exist=False
         if not cryosparc_outputs_exist:
+            logger.info("No CryoSPARC outputs exist.")
+            logger.info("%s, %s, %s" % (cs_traj_file, aligned_output_file, aligned_dw_output_file))
             continue
 
         shifts=readShifts(cs_traj_file)
