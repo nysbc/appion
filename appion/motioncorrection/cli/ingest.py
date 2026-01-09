@@ -40,7 +40,7 @@ def process_task(imageid, args, cryosparc_import_dir, cryosparc_motioncorrection
         shifts=readShifts(cs_traj_file)
         motioncorr_log_path=os.path.splitext(framestackpath)[0]+"_Log.txt"
         logger.info("Saving out motioncorr-formatted log for %d to %s." % (imageid, motioncorr_log_path))
-        saveMotionCorrLog(shifts, motioncorr_log_path, 0, calcTotalRenderedFrames(imgmetadata['cameraemdata']['nframes'], args['rendered_frame_size']), 1.0)
+        saveMotionCorrLog(shifts, motioncorr_log_path, 0, calcTotalRenderedFrames(imgmetadata['cameraemdata']['nframes'], 1), 1.0)
 
         framelist=[]
         nframes=0
