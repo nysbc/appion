@@ -40,12 +40,12 @@ def process_task(imageid, args, cryosparc_import_dir, cryosparc_motioncorrection
         shifts=readShifts(cs_traj_file)
         motioncorr_log_path=os.path.splitext(framestackpath)[0]+"_Log.txt"
         logger.info("Saving out motioncorr-formatted log for %d to %s." % (imageid, motioncorr_log_path))
-        saveMotionCorrLog(shifts, motioncorr_log_path, args['startframe'], calcTotalRenderedFrames(imgmetadata['cameraemdata']['nframes'], args['rendered_frame_size']), args['bin'])
+        saveMotionCorrLog(shifts, motioncorr_log_path, 0, calcTotalRenderedFrames(imgmetadata['cameraemdata']['nframes'], args['rendered_frame_size']), 1.0)
 
         framelist=[]
         nframes=0
         trim=0
-        aligned_camera_id = constructAlignedCamera(imgmetadata['cameraemdata']['def_id'], args['square'], args['bin'], trim, framelist, nframes)
+        aligned_camera_id = constructAlignedCamera(imgmetadata['cameraemdata']['def_id'], False, 1.0, trim, framelist, nframes)
 
         aligned_image_filename = imgmetadata['imgdata']['filename']+"-%s" % args['alignlabel']
         aligned_image_mrc_image = aligned_image_filename + ".mrc"
@@ -81,9 +81,8 @@ def process_task(imageid, args, cryosparc_import_dir, cryosparc_motioncorrection
         # Seems mostly unused?  Might have been used with a prior implementation of motion correction?  Fields seem to mostly be filled with nulls in the MEMC database.
         # Not entirely sure that we want to pass args["preset"] in here.  Maybe we're supposed to pass in the aligned preset in addition to or instead?
         # Difficult to know for sure, since it's not obvious what this table even exists for (at least to the author of this comment).
-        saveDDStackParamsData(args['preset'], args['align'], args['bin'], None, None, None, None)
-        #saveDDStackParamsData(args['preset'], args['align'], args['bin'], ref_apddstackrundata_unaligned_ddstackrun, method, ref_apstackdata_stack, ref_apdealignerparamsdata_de_aligner)
-
+        saveDDStackParamsData(args['preset'], True, 1.0, None, None, None, None)
+        
         # These need to happen last because they create records that are used to determine if an image is done or not in retrieveDoneImages.
         # Every other step in this function should be idempotent/capable of being run multiple times, but these two function invocations
         # finalize the image for the specified preset/settings/alignment label.
