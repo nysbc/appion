@@ -3,7 +3,7 @@
 
 import argparse
 
-def constructCTFFindParser():
+def constructCSCTFEstParser():
     parser = argparse.ArgumentParser(add_help=False)
 
     parser.add_argument("-i", "--cs_dir", dest="cryosparc_dir",

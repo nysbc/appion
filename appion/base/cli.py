@@ -29,6 +29,14 @@ def constructGlobalParser():
 
     parser.add_argument("--jobid", dest="jobid", type=int, default=0,
 			help="ApAppionJobId for updating job status")
+    
+
+    parser.add_argument("--expid", "--expId", dest="expid", type=int,
+        help="Session id associated with processing run, e.g. --expid=7159")
+    # jobtype is a dummy option for now so that it is possible to use the same command line that
+    # is fed to runJob.py to direct command line running.  Do not use the resulting param.
+    parser.add_argument("--jobtype", dest="jobtype",
+        help="Job Type of processing run, e.g., partalign", type=str)
     return parser
 
 def constructJobMetadata(args : dict, progname: str):

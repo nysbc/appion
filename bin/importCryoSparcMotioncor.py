@@ -6,11 +6,11 @@ import argparse
 import os
 from fcntl import flock, LOCK_EX, LOCK_UN
 from appion.base.cli import constructGlobalParser
-from appion.motioncorrection.cli.parser import constructMotionCorParser
+from appion.motioncorrection.cli.parser import constructCSMotionCorParser
 import sinedon.setup
 
 def main():
-    parser = argparse.ArgumentParser(parents=[constructGlobalParser(), constructMotionCorParser()])
+    parser = argparse.ArgumentParser(parents=[constructGlobalParser(), constructCSMotionCorParser()])
     args = parser.parse_args()
     sinedon.setup(args.projectid)
     from appion.motioncorrection.retrieve.images import retrieveDoneImages

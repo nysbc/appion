@@ -1,7 +1,7 @@
 import argparse
 
 
-def constructMotionCorParser():
+def constructCSMotionCorParser():
     parser = argparse.ArgumentParser(add_help=False)
 
     # Inputs

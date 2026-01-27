@@ -6,11 +6,11 @@ import argparse
 import os
 from fcntl import flock, LOCK_EX, LOCK_UN
 from appion.base.cli import constructGlobalParser
-from appion.ctfestimation.cli.parser import constructCTFFindParser
+from appion.ctfestimation.cli.parser import constructCSCTFEstParser
 import sinedon.setup
 
 def main():
-    parser = argparse.ArgumentParser(parents=[constructGlobalParser(), constructCTFFindParser()])
+    parser = argparse.ArgumentParser(parents=[constructGlobalParser(), constructCSCTFEstParser()])
     args = parser.parse_args()
     sinedon.setup(args.projectid)
     from appion.base.retrieve import readSessionData
