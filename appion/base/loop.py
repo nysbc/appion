@@ -42,7 +42,7 @@ def loop(process_task: Callable, args: dict, retrieveDoneImages : Callable = lam
 
 
     executor = submitit.AutoExecutor(folder=os.path.join(args["rundir"], "working"))
-    executor.update_parameters(timeout_min=6, slurm_partition="appion-misc", slurm_cpus_per_task=2, slurm_array_parallelism=max_workers)
+    executor.update_parameters(timeout_min=6, slurm_partition="appion-misc", slurm_array_parallelism=max_workers)
     jobmetadata=preLoop()
     waitTime=30
     while True:
