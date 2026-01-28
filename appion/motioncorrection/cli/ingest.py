@@ -1,16 +1,16 @@
 
 import os
 import logging
-from ..calc.internal import calcTotalRenderedFrames, calcPixelSize
-from .constructors import constructMotionCor2JobMetadata
-from ..store import saveFrameTrajectory, constructAlignedCamera, constructAlignedPresets, constructAlignedImage, uploadAlignedImage, saveDDStackParamsData, saveMotionCorrLog
-from ...base.retrieve import readImageMetadata
-from ..retrieve.params import readInputPath
 import numpy as np
 import sinedon.setup
 
 def process_task(imageid, args, cryosparc_import_dir, cryosparc_motioncorrection_dir):
     sinedon.setup(args["projectid"], False)
+    from ..calc.internal import calcTotalRenderedFrames, calcPixelSize
+    from .constructors import constructMotionCor2JobMetadata
+    from ..store import saveFrameTrajectory, constructAlignedCamera, constructAlignedPresets, constructAlignedImage, uploadAlignedImage, saveDDStackParamsData, saveMotionCorrLog
+    from ...base.retrieve import readImageMetadata
+    from ..retrieve.params import readInputPath
     logger=logging.getLogger(__name__)
 
     jobmetadata=constructMotionCor2JobMetadata(args)
