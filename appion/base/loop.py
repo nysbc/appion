@@ -1,13 +1,14 @@
+import submitit
 from time import sleep, time
 import logging
-import sys
+import os, sys
 from signal import signal, SIGINT, SIGTERM, SIGCONT, Signals
 from .retrieve import readImageSet, retrieveRejectedImages
 from .calc import filterImages
 from typing import Callable
 
 # Parameters passed in using lambdas.
-def loop(process_task: Callable, args: dict, retrieveDoneImages : Callable = lambda : set(), preLoop : Callable = lambda args : {}, postLoop : Callable = lambda jobmetadata : None, retrieveReprocessImages : Callable = lambda : set()) -> None:
+def loop(process_task: Callable, args: dict, retrieveDoneImages : Callable = lambda : set(), preLoop : Callable = lambda args : {}, postLoop : Callable = lambda jobmetadata : None, retrieveReprocessImages : Callable = lambda : set(), max_workers : int = 32) -> None:
     jobmetadata={}
     # Signal handler used to ensure that cleanup happens if SIGINT, SIGCONT or SIGTERM is received.
     def handler(signum, frame):
@@ -39,6 +40,9 @@ def loop(process_task: Callable, args: dict, retrieveDoneImages : Callable = lam
     signal(SIGINT, handler)
     signal(SIGCONT, handler)
 
+
+    executor = submitit.AutoExecutor(folder=os.path.join(args["rundir"], "working"))
+    executor.update_parameters(timeout_min=6, slurm_partition="appion-misc", slurm_cpus_per_task=2, slurm_array_parallelism=max_workers)
     jobmetadata=preLoop()
     waitTime=30
     while True:
@@ -54,8 +58,29 @@ def loop(process_task: Callable, args: dict, retrieveDoneImages : Callable = lam
         logger.info("Image counts: %d total images, %d done images, %d rejected images, and %d images marked for reprocessing." % (len(all_images), len(done_images), len(rejected_images), len(reprocess_images)))
         if tasklist:
             pipeline_t0=time()
-            for task in tasklist:
-                process_task(task)
+            unprocessed_image_count=len(tasklist)
+            futures=[]
+            with executor.batch():
+                for task in tasklist:
+                    future = executor.submit(process_task, task)
+                    futures.append(future)
+            throughput_t0=time()
+            future_complete_counter=0
+            step=20
+            while future_complete_counter != len(futures):
+                future_complete_counter = sum(f.done() for f in futures)
+                if future_complete_counter > step and future_complete_counter != 0:
+                    throughput_t1=time()
+                    throughput=(future_complete_counter)/(((throughput_t1-throughput_t0))/60.)
+                    remaining_image_count=unprocessed_image_count-future_complete_counter
+                    logger.info("Progress: %d / %d images processed." % (future_complete_counter, unprocessed_image_count))
+                    logger.info("Throughput: %.2f images/min." % throughput)
+                    if throughput > 0.0:
+                        logger.info("Estimated remaining time: %.2f min." % (remaining_image_count/throughput))
+                    else:
+                        logger.info("Estimated remaining time: N/A min.")
+                    step+=20
+                sleep(10)
             pipeline_t1=time()
             logger.info("Finished processing %d images in %d seconds." % (len(tasklist), (pipeline_t1-pipeline_t0)))
         else:

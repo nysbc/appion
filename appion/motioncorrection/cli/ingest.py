@@ -7,8 +7,10 @@ from ..store import saveFrameTrajectory, constructAlignedCamera, constructAligne
 from ...base.retrieve import readImageMetadata
 from ..retrieve.params import readInputPath
 import numpy as np
+import sinedon.setup
 
 def process_task(imageid, args, cryosparc_import_dir, cryosparc_motioncorrection_dir):
+    sinedon.setup(args["projectid"], False)
     logger=logging.getLogger(__name__)
 
     jobmetadata=constructMotionCor2JobMetadata(args)

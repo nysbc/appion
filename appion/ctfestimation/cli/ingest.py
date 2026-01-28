@@ -7,8 +7,10 @@ import numpy as np
 from ...base.retrieve import readImageMetadata
 from ..retrieve.params import readCryoSPARCMetadata
 from ..store import saveApCtfFind4ParamsData, saveApAceRunData, saveApCtfData, savePowAvRot
+import sinedon.setup
 
 def process_task(imageid, args, cryosparc_dir):
+    sinedon.setup(args["projectid"], False)
     logger=logging.getLogger(__name__)
 
     imgmetadata=readImageMetadata(imageid)
