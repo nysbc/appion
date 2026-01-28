@@ -56,7 +56,7 @@ def process_task(imageid, args, cryosparc_import_dir, cryosparc_motioncorrection
             os.unlink(abs_path_aligned_image_mrc_image)
         if os.path.exists(aligned_output_file):
             # In the future, we may want to catch any exceptions involving a cross-device link and run shutil.copy.
-            os.link(aligned_output_file, abs_path_aligned_image_mrc_image)
+            os.symlink(aligned_output_file, abs_path_aligned_image_mrc_image)
             logger.info("%s linked to %s." % (abs_path_aligned_image_mrc_image, aligned_output_file))
             logger.info("Constructing aligned image record for %d." % imageid)
             aligned_preset_id = constructAlignedPresets(imgmetadata['presetdata']['def_id'], aligned_camera_id, alignlabel=args['alignlabel'])
@@ -69,7 +69,7 @@ def process_task(imageid, args, cryosparc_import_dir, cryosparc_motioncorrection
             os.unlink(abs_path_aligned_image_dw_mrc_image)
         if os.path.exists(aligned_dw_output_file):
             # In the future, we may want to catch any exceptions involving a cross-device link and run shutil.copy.
-            os.link(aligned_dw_output_file, abs_path_aligned_image_dw_mrc_image)
+            os.symlink(aligned_dw_output_file, abs_path_aligned_image_dw_mrc_image)
             logger.info("%s linked to %s." % (abs_path_aligned_image_dw_mrc_image, aligned_output_file.replace(".mrc","_DW.mrc")))
             logger.info("Constructing aligned, dose-weighted image record for %d." % imageid)
             aligned_preset_dw_id = constructAlignedPresets(imgmetadata['presetdata']['def_id'], aligned_camera_id, alignlabel=args['alignlabel']+"-DW")
