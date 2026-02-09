@@ -1,5 +1,6 @@
 def constructMotionCorKwargs(imgmetadata : dict, cli_args : dict, input_path : str) -> dict:
     import os
+    import yaml
     from ..calc.internal import calcInputType, calcFmDose, calcPixelSize, calcKV, calcTotalFrames, calcTrunc, calcRotFlipGain, filterFrameList
     # Keyword args for motioncor2 function
     kwargs={}
@@ -97,8 +98,19 @@ def constructMotionCorKwargs(imgmetadata : dict, cli_args : dict, input_path : s
 
     # RotGain
     # FlipGain
-    kwargs['RotGain'], kwargs['FlipGain'] = calcRotFlipGain(imgmetadata["cameraemdata"]['frame_rotate'], 
-                                                           imgmetadata["cameraemdata"]['frame_flip'], 
+    frame_rotate=imgmetadata["cameraemdata"]['frame_rotate']
+    frame_flip=imgmetadata["cameraemdata"]['frame_flip']
+    # We override the gain orientation for peculiarly calibrated microscopes.
+    orient_override_conf_path="/common/sw/appion/conf/orientation_override.yml"
+    if os.path.isfile(orient_override_conf_path):
+        with open(orient_override_conf_path, "r") as f:
+            orientation_override=yaml.load(f, Loader=yaml.Loader)
+        for camera in orientation_override.keys():
+            if camera == imgmetadata['ccdcamera']["hostname"].strip():
+                frame_rotate=orientation_override[camera]["frame_rotate"]
+                frame_flip=orientation_override[camera]["frame_flip"]
+    kwargs['RotGain'], kwargs['FlipGain'] = calcRotFlipGain(frame_rotate, 
+                                                           frame_flip, 
                                                            cli_args['force_cpu_flat'], 
                                                            imgmetadata['frame_aligner_flat'])
 
