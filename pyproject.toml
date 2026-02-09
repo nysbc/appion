@@ -17,7 +17,8 @@ classifiers = [
     "Operating System :: POSIX :: Linux",
 ]
 dependencies = [
-  "django >= 4.2.22",
+  #"django >= 4.2.22",
+  "django>=4.2.20",
   "numpy",
   "mrcfile",
   "dask",

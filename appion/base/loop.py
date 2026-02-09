@@ -81,6 +81,11 @@ def loop(pipeline, args: dict, cluster : Cluster, retrieveDoneImages : Callable 
                 futures=pipeline(reduced_tasklist, args, jobmetadata, client)
             else:
                 futures=pipeline(tasklist, args, jobmetadata, client)
+            if not futures:
+                logger.info(f"No images were found for processing. Waiting {waitTime} seconds.")
+                sleep(waitTime)
+                prev_tasklist=tasklist
+                continue
             future_complete_counter=0
             throughput_t0=time()
             for _ in as_completed(futures):
