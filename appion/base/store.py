@@ -25,6 +25,10 @@ def saveScriptUsername():
 
 def saveScriptHostName():
     cpu_info = get_cpu_info()
+    if "count" not in cpu_info.keys():
+        cpu_info["count"]=-1
+    if "vendor_id_raw" not in cpu_info.keys():
+        cpu_info["vendor_id_raw"]="N/A"
     hostname = sb.set("ScriptHostName", dict(name = platform.node(),
 							  ip = socket.gethostbyaddr(platform.node())[2][0], # Not really accurate/useful since a host can have multiple IPs and we don't know which one we care about here.
 							  system = os.uname()[0].lower(),

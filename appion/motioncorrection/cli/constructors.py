@@ -109,8 +109,8 @@ def constructMotionCorKwargs(imgmetadata : dict, cli_args : dict, input_path : s
             if camera == imgmetadata['ccdcamera']["hostname"].strip():
                 frame_rotate=orientation_override[camera]["frame_rotate"]
                 frame_flip=orientation_override[camera]["frame_flip"]
-    kwargs['RotGain'], kwargs['FlipGain'] = calcRotFlipGain(frame_rotate, 
-                                                           frame_flip, 
+    kwargs['RotGain'], kwargs['FlipGain'] = calcRotFlipGain(frame_rotate,
+                                                           frame_flip,
                                                            cli_args['force_cpu_flat'], 
                                                            imgmetadata['frame_aligner_flat'])
 
