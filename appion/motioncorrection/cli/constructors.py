@@ -75,7 +75,7 @@ def constructMotionCorKwargs(imgmetadata : dict, cli_args : dict, input_path : s
     # FmDose
     if "InEer" in kwargs.keys():
         kwargs["FmDose"] = calcFmDose(imgmetadata['cameraemdata']['nframes'], imgmetadata['cameraemdata']['exposure_time'], imgmetadata['cameraemdata']['frame_time'], imgmetadata['presetdata']['dose'], cli_args['rendered_frame_size'], totaldose, True)
-        fmintfile_path=os.path.join(cli_args["rundir"], "fmintfile_camera-%d_rfs-%d_dose-%d.txt" % imgmetadata['cameraemdata']["def_id"], cli_args['rendered_frame_size'], kwargs["FmDose"])
+        fmintfile_path=os.path.join(cli_args["rundir"], "fmintfile_camera-%d_rfs-%d_dose-%d.txt" % (imgmetadata['cameraemdata']["def_id"], cli_args['rendered_frame_size'], kwargs["FmDose"]))
         kwargs["FmIntFile"] = fmintfile_path
     else:
         kwargs["FmDose"] = calcFmDose(imgmetadata['cameraemdata']['nframes'], imgmetadata['cameraemdata']['exposure_time'], imgmetadata['cameraemdata']['frame_time'], imgmetadata['presetdata']['dose'], cli_args['rendered_frame_size'], totaldose, False)
