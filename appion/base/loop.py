@@ -79,6 +79,12 @@ def loop(pipeline, args: dict, cluster : Cluster, retrieveDoneImages : Callable 
             pipeline_t0=time()
             if reduced_tasklist:
                 futures=pipeline(reduced_tasklist, args, jobmetadata, client)
+                # If no futures are returned, then rawtransfer is pretty far behind.
+                # It would be better to just process as many of the old images as possible
+                # and hopefully rawtransfer will catch up in the meantime.
+                if not futures:
+                    logger.info("No tasks in the reduced task list.  Using the full task list instead.")
+                    futures=pipeline(tasklist, args, jobmetadata, client)
             else:
                 futures=pipeline(tasklist, args, jobmetadata, client)
             if not futures:
