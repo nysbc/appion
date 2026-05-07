@@ -22,7 +22,9 @@ def parseMotionCorLog(outbuffer: list, shift_start: str) -> dict:
         line=outbuffer.pop(0)
     line=outbuffer.pop(0)
     logData["shifts"] = []
-    while ("Global shifts are corrected" not in line) and outbuffer:
+    #while (("Global shifts are corrected" not in line) or ("Create aligned sum based upon full frame alignment." not in line)) and outbuffer:
+    #while "Global shifts are corrected" not in line and outbuffer:
+    while (("Global shifts are corrected" not in line) and ("Create aligned sum based upon full frame alignment." not in line)) and outbuffer:
         # Remove empty lines
         if not line and outbuffer:
             line=outbuffer.pop(0)
