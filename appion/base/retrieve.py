@@ -59,6 +59,8 @@ def retrieveSkippedTiltAngleImages(session, tilt_angle_type):
     scopes = sb.filter("ScopeEMData", {"ref_sessiondata_session" : session["def_id"]})
     rejected_scopes=[]
     for scope in scopes:
+        if not scope["stage_position_a"]:
+            continue
         if calcSkipTiltAngle(scope["stage_position_a"], tilt_angle_type):
             rejected_scopes.append(scope)
     images = []
