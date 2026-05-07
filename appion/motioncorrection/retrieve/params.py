@@ -130,17 +130,17 @@ def readImageMetadata(imageid: int, has_bad_pixels : bool = False, is_align : bo
     # FlipGain/RotGain inputs
     if "hostname" not in ccdcamera.keys():
         ccdcamera["hostname"]=""
-    if ccdcamera["hostname"].strip() == "semc-g02-k3":
-        imgmetadata['frame_rotate']=2
-        imgmetadata['frame_flip']=0
-    elif ccdcamera["hostname"].strip() == "semc-g02-alpine":
-        imgmetadata['frame_rotate']=0
-        imgmetadata['frame_flip']=1
-    else:
-        imgmetadata['frame_rotate']=cameradata["frame_rotate"]
-        imgmetadata['frame_flip']=cameradata["frame_flip"]
-    #imgmetadata['frame_rotate']=cameradata["frame_rotate"]
-    #imgmetadata['frame_flip']=cameradata["frame_flip"]
+    #if ccdcamera["hostname"].strip() == "semc-g02-k3":
+    #    imgmetadata['frame_rotate']=2
+    #    imgmetadata['frame_flip']=0
+    #elif ccdcamera["hostname"].strip() == "semc-g02-alpine":
+    #    imgmetadata['frame_rotate']=0
+    #    imgmetadata['frame_flip']=1
+    #else:
+    #    imgmetadata['frame_rotate']=cameradata["frame_rotate"]
+    #    imgmetadata['frame_flip']=cameradata["frame_flip"]
+    imgmetadata['frame_rotate']=cameradata["frame_rotate"]
+    imgmetadata['frame_flip']=cameradata["frame_flip"]
 
     imgmetadata['frame_aligner_flat']=not (has_bad_pixels or not is_align or has_non_zero_dark)
     # PixSize inputs
