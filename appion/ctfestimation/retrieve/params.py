@@ -18,9 +18,9 @@ def readCryoSPARCMetadata(cs_path, imgmetadata):
         return csmetadata
     # Fields that need to be populated in ApCtfFind4ParamsData
     csmetadata["bestdb"] = False
-    csmetadata["ampcontrast"] = exposure["groups"]["exposure"]["ctf"]["amp_contrast"]
+    csmetadata["ampcontrast"] = exposure["groups"]["exposure"]["ctf"]["amp_contrast"][0]
     csmetadata["fieldsize"] = min(exposure["micrograph_shape"])
-    csmetadata["cs"] = exposure["groups"]["exposure"]["ctf"]["cs_mm"]
+    csmetadata["cs"] = exposure["groups"]["exposure"]["ctf"]["cs_mm"][0]
     csmetadata["resmin"] = None
     csmetadata["defstep"] = None
     csmetadata["shift_phase"] = exposure["attributes"]["phase_shift"]
@@ -66,10 +66,13 @@ def readCryoSPARCSessionExposure(cs_path, imgmetadata):
     with open(os.path.join(cs_path,'exposures.bson'), 'rb') as f:
         data = bson.decode_all(f.read())
     exposure=None
+    filename=imgmetadata['imgdata']['filename']
+    if "-" in filename:
+        filename=filename.split("-")[0]
     if data and type(data)==list:
         for e in data[0]["exposures"]:
             exposure_filename=os.path.basename(e["abs_file_path"])
-            if imgmetadata['imgdata']['filename'] == exposure_filename:
+            if filename in exposure_filename:
                 exposure=e
                 break
         if not exposure:
@@ -115,8 +118,8 @@ def readCryoSPARCJobExposure(cs_path, imgmetadata):
     exposure["groups"]={}
     exposure["groups"]["exposure"]={}
     exposure["groups"]["exposure"]["ctf"]={}
-    exposure["groups"]["exposure"]["ctf"]["amp_contrast"] = float(ctf[idx]["ctf/amp_contrast"])
-    exposure["groups"]["exposure"]["ctf"]["cs_mm"] = float(ctf[idx]["ctf/cs_mm"])
+    exposure["groups"]["exposure"]["ctf"]["amp_contrast"] = [float(ctf[idx]["ctf/amp_contrast"])]
+    exposure["groups"]["exposure"]["ctf"]["cs_mm"] = [float(ctf[idx]["ctf/cs_mm"])]
     try:
         exposure["groups"]["exposure"]["ctf"]["phase_shift_rad"] = list(ctf[idx]["ctf/phase_shift_rad"])
     except TypeError:

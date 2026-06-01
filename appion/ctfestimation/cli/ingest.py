@@ -11,9 +11,18 @@ def process_task(imageid, args, cryosparc_dir):
     from ...base.retrieve import readImageMetadata
     from ..retrieve.params import readCryoSPARCMetadata
     from ..store import saveApCtfFind4ParamsData, saveApAceRunData, saveApCtfData, savePowAvRot
+    import sys
+
     logger=logging.getLogger(__name__)
+    logHandler=logging.StreamHandler(sys.stdout)
+    logFormatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(funcName)s - %(process)d - %(message)s")
+    logHandler.setFormatter(logFormatter)
+    logger.setLevel("INFO")
+    logHandler.setLevel("INFO")
+    logger.addHandler(logHandler)
 
     imgmetadata=readImageMetadata(imageid)
+    logger.info("%s" % imgmetadata['imgdata']['filename'] )
     csmetadata=readCryoSPARCMetadata(cryosparc_dir, imgmetadata)
     if not csmetadata:
         raise RuntimeError(f"Could not determine if {cryosparc_dir} was a job or a live session.")
@@ -32,7 +41,10 @@ def process_task(imageid, args, cryosparc_dir):
     ctfdiag = np.load(fit_data_path)
     opimages_dir = os.path.join(args["rundir"],"opimages")
     if not os.path.exists(opimages_dir):
-        os.makedirs(opimages_dir)
+        try:
+            os.makedirs(opimages_dir)
+        except FileExistsError:
+            pass
     powAvRotFilename = os.path.basename(csmetadata["micrograph_path"]).replace(".mrc","-pow_avrot.png")
     logger.info("Saving CTF power spectrum plot.")
     powAvRotPath = os.path.join(opimages_dir, powAvRotFilename)
