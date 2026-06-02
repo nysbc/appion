@@ -50,6 +50,7 @@ def process_task(imageid, args, cryosparc_dir):
     powAvRotPath = os.path.join(opimages_dir, powAvRotFilename)
     savePowAvRot(powAvRotPath, ctfdiag, csmetadata["defocus1"], csmetadata["defocus2"], csmetadata["df_angle_rad"])
     logger.info("Saving metadata to ApCtfData.")
+    csmetadata["graph1"]="null"
     saveApCtfData(ref_apacerundata_acerun, imageid, csmetadata["cs"], csmetadata["defocusinit"], csmetadata["ampcontrast"], 
               csmetadata["defocus1"], csmetadata["defocus2"], csmetadata["angle_astigmatism"], csmetadata["ctffind4_resolution"],
               csmetadata["confidence"], csmetadata["confidence_d"], csmetadata["confidence_30_10"], csmetadata["confidence_5_peak"], csmetadata["overfocus_conf_30_10"], 
