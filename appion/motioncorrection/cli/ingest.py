@@ -11,8 +11,6 @@ def process_task(imageid, args, cryosparc_import_dir, cryosparc_motioncorrection
     from ..store import saveFrameTrajectory, constructAlignedCamera, constructAlignedPresets, constructAlignedImage, uploadAlignedImage, saveDDStackParamsData, saveMotionCorrLog
     from ...base.retrieve import readImageMetadata
     from ..retrieve.params import readInputPath
-    import mrcfile
-    import numpy as np
     logger=logging.getLogger(__name__)
 
     jobmetadata=constructMotionCor2JobMetadata(args)
@@ -56,19 +54,12 @@ def process_task(imageid, args, cryosparc_import_dir, cryosparc_motioncorrection
         if not os.path.exists(imgmetadata["sessiondata"]["image_path"]):
             raise RuntimeError("Session path does not exist at %s." % imgmetadata["sessiondata"]["image_path"])
         abs_path_aligned_image_mrc_image=os.path.join(imgmetadata["sessiondata"]["image_path"],aligned_image_mrc_image)
-        #if os.path.lexists(abs_path_aligned_image_mrc_image):
-        #    os.unlink(abs_path_aligned_image_mrc_image)
+        if os.path.lexists(abs_path_aligned_image_mrc_image):
+            os.unlink(abs_path_aligned_image_mrc_image)
         if os.path.exists(aligned_output_file):
             # In the future, we may want to catch any exceptions involving a cross-device link and run shutil.copy.
-            #os.symlink(aligned_output_file, abs_path_aligned_image_mrc_image)
-            #logger.info("%s linked to %s." % (abs_path_aligned_image_mrc_image, aligned_output_file))
-            if not os.path.exists(abs_path_aligned_image_mrc_image):
-                with mrcfile.open(aligned_output_file, "r") as f:
-                    aligned_dw_output_data = f.data
-                aligned_dw_output_data=aligned_dw_output_data.astype(np.float32)
-                with mrcfile.new(abs_path_aligned_image_mrc_image) as f:
-                    f.set_data(aligned_dw_output_data)
-                logger.info("%s copied to %s." % (abs_path_aligned_image_mrc_image, aligned_output_file.replace(".mrc","_DW.mrc")))
+            os.symlink(aligned_output_file, abs_path_aligned_image_mrc_image)
+            logger.info("%s linked to %s." % (abs_path_aligned_image_mrc_image, aligned_output_file))
             logger.info("Constructing aligned image record for %d." % imageid)
             aligned_preset_id = constructAlignedPresets(imgmetadata['presetdata']['def_id'], aligned_camera_id, alignlabel=args['alignlabel'])
             aligned_image_id = constructAlignedImage(imageid, aligned_preset_id, aligned_camera_id, aligned_image_mrc_image, aligned_image_filename)
@@ -76,19 +67,12 @@ def process_task(imageid, args, cryosparc_import_dir, cryosparc_motioncorrection
         aligned_image_dw_filename = imgmetadata['imgdata']['filename']+"-%s-DW" % args['alignlabel']
         aligned_image_dw_mrc_image = aligned_image_dw_filename + ".mrc"
         abs_path_aligned_image_dw_mrc_image = os.path.join(imgmetadata["sessiondata"]["image_path"],aligned_image_dw_mrc_image)
-        #if os.path.lexists(abs_path_aligned_image_dw_mrc_image):
-        #    os.unlink(abs_path_aligned_image_dw_mrc_image)
+        if os.path.lexists(abs_path_aligned_image_dw_mrc_image):
+            os.unlink(abs_path_aligned_image_dw_mrc_image)
         if os.path.exists(aligned_dw_output_file):
             # In the future, we may want to catch any exceptions involving a cross-device link and run shutil.copy.
-            #os.symlink(aligned_dw_output_file, abs_path_aligned_image_dw_mrc_image)
-            #logger.info("%s linked to %s." % (abs_path_aligned_image_dw_mrc_image, aligned_output_file.replace(".mrc","_DW.mrc")))
-            if not os.path.exists(abs_path_aligned_image_dw_mrc_image):
-                with mrcfile.open(aligned_dw_output_file, "r") as f:
-                    aligned_dw_output_data = f.data
-                aligned_dw_output_data=aligned_dw_output_data.astype(np.float32)
-                with mrcfile.new(abs_path_aligned_image_dw_mrc_image) as f:
-                    f.set_data(aligned_dw_output_data)
-                logger.info("%s copied to %s." % (abs_path_aligned_image_dw_mrc_image, aligned_output_file.replace(".mrc","_DW.mrc")))
+            os.symlink(aligned_dw_output_file, abs_path_aligned_image_dw_mrc_image)
+            logger.info("%s linked to %s." % (abs_path_aligned_image_dw_mrc_image, aligned_output_file.replace(".mrc","_DW.mrc")))
             logger.info("Constructing aligned, dose-weighted image record for %d." % imageid)
             aligned_preset_dw_id = constructAlignedPresets(imgmetadata['presetdata']['def_id'], aligned_camera_id, alignlabel=args['alignlabel']+"-DW")
             aligned_image_dw_id = constructAlignedImage(imageid, aligned_preset_dw_id, aligned_camera_id, aligned_image_dw_mrc_image, aligned_image_dw_filename)
@@ -120,8 +104,6 @@ def readShifts(cs_traj_file):
 
 def matchInputImport(input_path, cryosparc_import_dir):
     matches=[]
-    if not input_path or not cryosparc_import_dir:
-        return set()
     input_path=os.path.abspath(input_path.strip())
     for dirpath, _, filenames in os.walk(cryosparc_import_dir):
         for filename in filenames:
