@@ -50,10 +50,10 @@ def process_task(imageid, args, cryosparc_dir):
     powAvRotPath = os.path.join(opimages_dir, powAvRotFilename)
     savePowAvRot(powAvRotPath, ctfdiag, csmetadata["defocus1"], csmetadata["defocus2"], csmetadata["df_angle_rad"])
     logger.info("Saving metadata to ApCtfData.")
-    csmetadata["graph1"]="null"
+    #csmetadata["graph1"]="null"
     saveApCtfData(ref_apacerundata_acerun, imageid, csmetadata["cs"], csmetadata["defocusinit"], csmetadata["ampcontrast"], 
               csmetadata["defocus1"], csmetadata["defocus2"], csmetadata["angle_astigmatism"], csmetadata["ctffind4_resolution"],
               csmetadata["confidence"], csmetadata["confidence_d"], csmetadata["confidence_30_10"], csmetadata["confidence_5_peak"], csmetadata["overfocus_conf_30_10"], 
               csmetadata["overfocus_conf_5_peak"], csmetadata["resolution_80_percent"], csmetadata["resolution_50_percent"],
-              csmetadata["graph1"], csmetadata["graph2"], csmetadata["graph3"], powAvRotFilename, csmetadata["localplot"], csmetadata["localCTFstarfile"], csmetadata["ctfvalues_file"],
+              powAvRotFilename, csmetadata["graph2"], csmetadata["graph3"], powAvRotFilename, csmetadata["localplot"], csmetadata["localCTFstarfile"], csmetadata["ctfvalues_file"],
               csmetadata["cross_correlation"], csmetadata["tilt_angle"], csmetadata["tilt_axis_angle"], csmetadata["mat_file"], csmetadata["extra_phase_shift"])

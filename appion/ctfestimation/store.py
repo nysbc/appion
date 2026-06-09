@@ -67,9 +67,11 @@ def saveApCtfData(ref_apacerundata_acerun, ref_acquisitionimagedata_image, cs, d
     return apctfdata["def_id"]
 
 def savePowAvRot(figpath, ctfdiag, defocus1 ,defocus2, df_angle_rad):
+    #plt.rcParams.update({'font.size': 22})
+    plt.rc('font', size=18)
     # Convert defocus to microns for plot
-    defocus1 = defocus1*1e-06
-    defocus2 = defocus1*1e-06
+    defocus1 = defocus1*1e06
+    defocus2 = defocus2*1e06
     # Preparing the raw data for plotting
     power_spectrum = ctfdiag['EPA_trim'] - ctfdiag['BGINT'] + 0.5
     ctf = ctfdiag['ENVINT'] * (2 * ctfdiag['CTF']**2 - 1) + 0.5
