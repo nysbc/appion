@@ -33,7 +33,12 @@ def main():
         f.write(str(os.getpid()))
         session_metadata=readSessionData(args.sessionname)
         arg_dict=vars(args)
-        loop(lambda imageid : process_task(imageid, arg_dict, args.cryosparc_import_dir, args.cryosparc_motioncorrection_dir),
+        if "FLOAT16_IMAGE" in os.environ.keys():
+            float16_image_path=os.environ["FLOAT16_IMAGE"]
+            p=lambda imageid : process_task(imageid, arg_dict, args.cryosparc_import_dir, args.cryosparc_motioncorrection_dir, float16_image_path)
+        else:
+            p=lambda imageid : process_task(imageid, arg_dict, args.cryosparc_import_dir, args.cryosparc_motioncorrection_dir)
+        loop(p,
                 arg_dict,
                 lambda : retrieveDoneImages(args.rundir, session_metadata['session_id']),
                 lambda : constructMotionCor2JobMetadata(arg_dict),

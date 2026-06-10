@@ -4,13 +4,16 @@ import logging
 import numpy as np
 import sinedon.setup
 
-def process_task(imageid, args, cryosparc_import_dir, cryosparc_motioncorrection_dir):
+def process_task(imageid, args, cryosparc_import_dir, cryosparc_motioncorrection_dir, float16_image_path="/common/sw/appion/cryosparc/float16.mrc"):
     sinedon.setup(args["projectid"], False)
     from ..calc.internal import calcTotalRenderedFrames, calcPixelSize
     from .constructors import constructMotionCor2JobMetadata
     from ..store import saveFrameTrajectory, constructAlignedCamera, constructAlignedPresets, constructAlignedImage, uploadAlignedImage, saveDDStackParamsData, saveMotionCorrLog
     from ...base.retrieve import readImageMetadata
     from ..retrieve.params import readInputPath
+    # Needs to be imported within the scope of the function in order for function to be serializable by submitit /self-contained
+    import numpy as np
+    import mrcfile
     logger=logging.getLogger(__name__)
 
     jobmetadata=constructMotionCor2JobMetadata(args)
@@ -57,6 +60,12 @@ def process_task(imageid, args, cryosparc_import_dir, cryosparc_motioncorrection
         if os.path.lexists(abs_path_aligned_image_mrc_image):
             os.unlink(abs_path_aligned_image_mrc_image)
         if os.path.exists(aligned_output_file):
+            # Symlink to the error message if float16s are found (since redux can't support float16)
+            with mrcfile.open(aligned_output_file, "r") as f:
+                aligned_output_data = f.data
+            if str(aligned_output_data.dtype) == "float16":
+                logger.info("Aligned image is float16.  Linking to error message.")
+                aligned_output_file=float16_image_path
             # In the future, we may want to catch any exceptions involving a cross-device link and run shutil.copy.
             os.symlink(aligned_output_file, abs_path_aligned_image_mrc_image)
             logger.info("%s linked to %s." % (abs_path_aligned_image_mrc_image, aligned_output_file))
@@ -70,6 +79,12 @@ def process_task(imageid, args, cryosparc_import_dir, cryosparc_motioncorrection
         if os.path.lexists(abs_path_aligned_image_dw_mrc_image):
             os.unlink(abs_path_aligned_image_dw_mrc_image)
         if os.path.exists(aligned_dw_output_file):
+            # Symlink to the error message if float16s are found (since redux can't support float16)
+            with mrcfile.open(aligned_dw_output_file, "r") as f:
+                aligned_dw_output_data = f.data
+            if str(aligned_dw_output_data.dtype) == "float16":
+                logger.info("Aligned image is float16.  Linking to error message.")
+                aligned_dw_output_file=float16_image_path
             # In the future, we may want to catch any exceptions involving a cross-device link and run shutil.copy.
             os.symlink(aligned_dw_output_file, abs_path_aligned_image_dw_mrc_image)
             logger.info("%s linked to %s." % (abs_path_aligned_image_dw_mrc_image, aligned_output_file.replace(".mrc","_DW.mrc")))
@@ -104,6 +119,8 @@ def readShifts(cs_traj_file):
 
 def matchInputImport(input_path, cryosparc_import_dir):
     matches=[]
+    if not input_path or not cryosparc_import_dir:
+        return set()
     input_path=os.path.abspath(input_path.strip())
     for dirpath, _, filenames in os.walk(cryosparc_import_dir):
         for filename in filenames:
