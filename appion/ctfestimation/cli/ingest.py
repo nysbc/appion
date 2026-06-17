@@ -22,7 +22,7 @@ def process_task(imageid, args, cryosparc_dir):
     logger.addHandler(logHandler)
 
     imgmetadata=readImageMetadata(imageid)
-    logger.info("%s" % imgmetadata['imgdata']['filename'] )
+    logger.info("Processing: %s" % imgmetadata['imgdata']['filename'] )
     csmetadata=readCryoSPARCMetadata(cryosparc_dir, imgmetadata)
     if not csmetadata:
         raise RuntimeError(f"Could not determine if {cryosparc_dir} was a job or a live session.")

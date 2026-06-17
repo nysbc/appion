@@ -10,10 +10,11 @@ import os
 def readCryoSPARCMetadata(cs_path, imgmetadata):
     jobtype=calcCryoSPARCDirectoryType(cs_path)
     csmetadata={}
+    filename = calcInputPathFromMotionCorrected(imgmetadata)
     if jobtype == "session":
-        exposure=readCryoSPARCSessionExposure(cs_path, imgmetadata)
+        exposure=readCryoSPARCSessionExposure(cs_path, filename)
     elif jobtype == "job":
-        exposure=readCryoSPARCJobExposure(cs_path, imgmetadata)
+        exposure=readCryoSPARCJobExposure(cs_path, filename)
     else:
         return csmetadata
     # Fields that need to be populated in ApCtfFind4ParamsData
@@ -62,13 +63,24 @@ def readCryoSPARCMetadata(cs_path, imgmetadata):
     csmetadata["micrograph_path"] = exposure["groups"]["exposure"]["micrograph_blob"]["path"][0]    
     return csmetadata
 
-def readCryoSPARCSessionExposure(cs_path, imgmetadata):
-    with open(os.path.join(cs_path,'exposures.bson'), 'rb') as f:
-        data = bson.decode_all(f.read())
-    exposure=None
+def calcInputPathFromMotionCorrected(imgmetadata):
+    '''
+    CTF estimation results are associated with a motion-corrected image in the AcquisitionImageData table.
+    However, we only have the input paths from CryoSPARC job/session metadata files (exposures.bson/job.json)
+    to work with.  We use this function to map a path to a processed motion-corrected image back to its raw data / input.
+    '''
+    from ...motioncorrection.retrieve.params import readInputPath
     filename=imgmetadata['imgdata']['filename']
     if "-" in filename:
         filename=filename.split("-")[0]
+    filename = readInputPath(imgmetadata['sessiondata']['frame_path'],filename)
+    filename = os.path.basename(filename)
+    return filename
+    
+def readCryoSPARCSessionExposure(cs_path, filename):
+    with open(os.path.join(cs_path,'exposures.bson'), 'rb') as f:
+        data = bson.decode_all(f.read())
+    exposure=None
     if data and type(data)==list:
         for e in data[0]["exposures"]:
             exposure_filename=os.path.basename(e["abs_file_path"])
@@ -79,7 +91,7 @@ def readCryoSPARCSessionExposure(cs_path, imgmetadata):
             raise RuntimeError("Could not find exposure.")
     return exposure
 
-def readCryoSPARCJobExposure(cs_path, imgmetadata):
+def readCryoSPARCJobExposure(cs_path, filename):
     with open(os.path.join(cs_path,'job.json'), 'rb') as f:
         data = json.load(f)
 
@@ -109,7 +121,7 @@ def readCryoSPARCJobExposure(cs_path, imgmetadata):
     for micrograph in micrograph_blob:
         abs_file_path=os.readlink(os.path.join(cs_path,"..",str(micrograph["micrograph_blob/path"].decode())))
         exposure_filename=os.path.basename(abs_file_path)
-        if imgmetadata['imgdata']['filename'] in exposure_filename:
+        if filename in exposure_filename:
             break
         idx+=1
     idx-=1
