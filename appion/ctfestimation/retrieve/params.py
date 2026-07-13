@@ -76,7 +76,7 @@ def readCryoSPARCSessionExposure(cs_path, imgmetadata):
                 exposure=e
                 break
         if not exposure:
-            raise RuntimeError("Could not find exposure.")
+            raise RuntimeError(f"Could not find exposure for {filename}.")
     return exposure
 
 def readCryoSPARCJobExposure(cs_path, imgmetadata):
