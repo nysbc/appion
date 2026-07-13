@@ -71,7 +71,7 @@ def readCryoSPARCSessionExposure(cs_path, imgmetadata):
         filename=filename.split("-")[0]
     if data and type(data)==list:
         for e in data[0]["exposures"]:
-            exposure_filename=os.path.basename(e["abs_file_path"])
+            exposure_filename=os.path.basename(os.readlink(e["abs_file_path"]))
             if filename in exposure_filename:
                 exposure=e
                 break
