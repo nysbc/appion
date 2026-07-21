@@ -66,17 +66,18 @@ def readCryoSPARCSessionExposure(cs_path, imgmetadata):
     with open(os.path.join(cs_path,'exposures.bson'), 'rb') as f:
         data = bson.decode_all(f.read())
     exposure=None
+    exposure_filename="someonenukedexposures"
     filename=imgmetadata['imgdata']['filename']
     if "-" in filename:
         filename=filename.split("-")[0]
     if data and type(data)==list:
         for e in data[0]["exposures"]:
-            exposure_filename=os.path.basename(os.readlink(e["abs_file_path"]))
+            exposure_filename=os.path.basename(e["abs_file_path"])
             if filename in exposure_filename:
                 exposure=e
                 break
         if not exposure:
-            raise RuntimeError(f"Could not find exposure for {filename}.")
+            raise RuntimeError(f"Could not find exposure for {filename}.\nLast exposure filename: {exposure_filename}")
     return exposure
 
 def readCryoSPARCJobExposure(cs_path, imgmetadata):

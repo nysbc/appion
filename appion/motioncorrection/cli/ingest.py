@@ -1,5 +1,5 @@
 
-import os
+import os, sys
 import logging
 import numpy as np
 import sinedon.setup
@@ -14,7 +14,14 @@ def process_task(imageid, args, cryosparc_import_dir, cryosparc_motioncorrection
     # Needs to be imported within the scope of the function in order for function to be serializable by submitit /self-contained
     import numpy as np
     import mrcfile
+
     logger=logging.getLogger(__name__)
+    logHandler=logging.StreamHandler(sys.stdout)
+    logFormatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(funcName)s - %(process)d - %(message)s")
+    logHandler.setFormatter(logFormatter)
+    logger.setLevel("INFO")
+    logHandler.setLevel("INFO")
+    logger.addHandler(logHandler)
 
     jobmetadata=constructMotionCor2JobMetadata(args)
 
@@ -24,6 +31,8 @@ def process_task(imageid, args, cryosparc_import_dir, cryosparc_motioncorrection
     input_path = readInputPath(imgmetadata['sessiondata']['frame_path'],imgmetadata['imgdata']['filename'])
     logger.info("Matching input path to CryoSPARC import path for %d" % imageid)
     import_paths = matchInputImport(input_path, cryosparc_import_dir)
+    if not import_paths:
+        logger.info(f"No matching path found for {imageid}")
     for import_path in import_paths:
         output_prefix = calcOutputPrefix(import_path)
         framestackpath=os.path.join(args["rundir"],os.path.basename(input_path))
